@@ -73,7 +73,12 @@ function categorizeEvent(eventName) {
   return 'Other';
 }
 
-async function scrapeForexFactory() {
+// Random delay to appear more human
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms + Math.random() * 1000));
+}
+
+async function scrapeForexFactory(retryCount = 0) {
   console.log('Starting Forex Factory scraper...');
 
   const { start, end } = getDateRange();
@@ -89,62 +94,110 @@ async function scrapeForexFactory() {
       '--disable-dev-shm-usage',
       '--disable-accelerated-2d-canvas',
       '--disable-gpu',
-      '--window-size=1920x1080'
+      '--disable-blink-features=AutomationControlled',
+      '--window-size=1920,1080'
     ]
   });
 
   try {
     const page = await browser.newPage();
 
+    // Hide automation indicators
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+    });
+
     // Set a realistic user agent
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
+
+    // Set extra headers
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    });
 
     // Set viewport
     await page.setViewport({ width: 1920, height: 1080 });
 
     // Navigate to the calendar
+    console.log('Navigating to page...');
     await page.goto(url, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
       timeout: 60000
     });
 
-    // Wait for the calendar table to load
-    await page.waitForSelector('.calendar__table', { timeout: 30000 });
+    // Wait a bit for JavaScript to load
+    await delay(5000);
 
-    // Give it a moment for dynamic content
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Try multiple selectors
+    const selectors = ['.calendar__table', '.calendar__row', 'table.calendar', '#calendar'];
+    let foundSelector = null;
+
+    for (const selector of selectors) {
+      try {
+        await page.waitForSelector(selector, { timeout: 10000 });
+        foundSelector = selector;
+        console.log(`Found selector: ${selector}`);
+        break;
+      } catch (e) {
+        console.log(`Selector ${selector} not found, trying next...`);
+      }
+    }
+
+    if (!foundSelector) {
+      // Take a screenshot for debugging
+      const screenshotPath = path.join(__dirname, 'debug-screenshot.png');
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      console.log(`Debug screenshot saved to ${screenshotPath}`);
+
+      // Get page content for debugging
+      const content = await page.content();
+      console.log('Page title:', await page.title());
+      console.log('Page URL:', page.url());
+
+      if (content.includes('Access Denied') || content.includes('blocked') || content.includes('captcha')) {
+        throw new Error('Access blocked by Forex Factory');
+      }
+
+      throw new Error('Could not find calendar table on page');
+    }
+
+    // Give it more time for dynamic content
+    await delay(3000);
 
     // Extract events
     const events = await page.evaluate(() => {
-      const rows = document.querySelectorAll('.calendar__row');
+      const rows = document.querySelectorAll('.calendar__row, tr[data-eventid]');
       const results = [];
       let currentDate = '';
       let eventId = 0;
 
       rows.forEach(row => {
         // Check for date
-        const dateCell = row.querySelector('.calendar__date span');
+        const dateCell = row.querySelector('.calendar__date span, .date');
         if (dateCell && dateCell.textContent.trim()) {
           currentDate = dateCell.textContent.trim();
         }
 
         // Get event data
-        const currency = row.querySelector('.calendar__currency')?.textContent?.trim();
-        const eventName = row.querySelector('.calendar__event span')?.textContent?.trim();
+        const currency = row.querySelector('.calendar__currency, .currency')?.textContent?.trim();
+        const eventName = row.querySelector('.calendar__event span, .event')?.textContent?.trim();
 
         if (!currency || !eventName) return;
 
         // Get time
-        let time = row.querySelector('.calendar__time')?.textContent?.trim() || 'All Day';
+        let time = row.querySelector('.calendar__time, .time')?.textContent?.trim() || 'All Day';
 
         // Get impact
-        const impactSpan = row.querySelector('.calendar__impact span');
+        const impactSpan = row.querySelector('.calendar__impact span, .impact span');
         const impactClass = impactSpan?.className || '';
 
         // Get values
-        const forecast = row.querySelector('.calendar__forecast span')?.textContent?.trim() || null;
-        const previous = row.querySelector('.calendar__previous span')?.textContent?.trim() || null;
-        const actual = row.querySelector('.calendar__actual span')?.textContent?.trim() || null;
+        const forecast = row.querySelector('.calendar__forecast span, .forecast')?.textContent?.trim() || null;
+        const previous = row.querySelector('.calendar__previous span, .previous')?.textContent?.trim() || null;
+        const actual = row.querySelector('.calendar__actual span, .actual')?.textContent?.trim() || null;
 
         results.push({
           id: `event-${eventId++}`,
@@ -163,6 +216,13 @@ async function scrapeForexFactory() {
     });
 
     console.log(`Scraped ${events.length} raw events`);
+
+    if (events.length === 0 && retryCount < 2) {
+      console.log('No events found, retrying...');
+      await browser.close();
+      await delay(5000);
+      return scrapeForexFactory(retryCount + 1);
+    }
 
     // Process events - parse dates and categorize
     const currentYear = new Date().getFullYear();
@@ -247,6 +307,14 @@ async function scrapeForexFactory() {
 
   } catch (error) {
     console.error('Error scraping:', error);
+
+    if (retryCount < 2) {
+      console.log(`Retry ${retryCount + 1}/2...`);
+      await browser.close();
+      await delay(10000);
+      return scrapeForexFactory(retryCount + 1);
+    }
+
     throw error;
   } finally {
     await browser.close();
