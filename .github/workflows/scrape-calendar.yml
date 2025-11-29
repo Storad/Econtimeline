@@ -1,5 +1,6 @@
 name: Scrape Economic Calendar
 
+# Workflow to scrape Forex Factory for economic calendar data
 on:
   # Run daily at 5:00 AM UTC (midnight EST)
   schedule:
