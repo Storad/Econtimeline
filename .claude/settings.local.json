@@ -21,7 +21,18 @@
       "WebFetch(domain:finnhub.io)",
       "WebFetch(domain:rapidapi.com)",
       "Bash(npm run scrape:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: EconTimeline dashboard with Forex Factory scraper\n\n- Next.js app with Clerk authentication\n- Dashboard with Timeline, Economic Calendar, and Market Breakdown pages\n- Puppeteer-based scraper for Forex Factory economic events\n- GitHub Actions workflow for daily automated scraping\n- Real economic calendar data with filtering by currency, impact, category\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git remote add:*)",
+      "Bash(git config:*)",
+      "Bash(git push:*)",
+      "Bash(git ls-tree:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(git commit:*)",
+      "Bash(git pull:*)",
+      "WebFetch(domain:eodhd.com)",
+      "WebFetch(domain:site.financialmodelingprep.com)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
