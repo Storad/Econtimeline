@@ -1,0 +1,13 @@
+{
+  "name": "econtimeline-scraper",
+  "version": "1.0.0",
+  "description": "Forex Factory economic calendar scraper",
+  "main": "scrape.js",
+  "type": "module",
+  "scripts": {
+    "scrape": "node scrape.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.6.1"
+  }
+}
