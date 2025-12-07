@@ -90,112 +90,29 @@ async function loadCalendarData(): Promise<CalendarData | null> {
   }
 }
 
-// Generate mock data as fallback
-function generateMockData(): CalendarData {
-  const events: EconomicEvent[] = [];
-  const currencies = ["USD"];
-
-  const eventTemplates = [
-    { name: "CPI (MoM)", category: "Inflation", impact: "high" as const },
-    { name: "CPI (YoY)", category: "Inflation", impact: "high" as const },
-    { name: "Core CPI (MoM)", category: "Inflation", impact: "high" as const },
-    { name: "Interest Rate Decision", category: "Interest Rates", impact: "high" as const },
-    { name: "GDP (QoQ)", category: "GDP", impact: "high" as const },
-    { name: "Non-Farm Payrolls", category: "Employment", impact: "high" as const },
-    { name: "Unemployment Rate", category: "Employment", impact: "high" as const },
-    { name: "Retail Sales (MoM)", category: "Consumer", impact: "medium" as const },
-    { name: "PMI Manufacturing", category: "Manufacturing", impact: "medium" as const },
-    { name: "PMI Services", category: "Manufacturing", impact: "medium" as const },
-    { name: "Trade Balance", category: "Trade", impact: "medium" as const },
-    { name: "Consumer Confidence", category: "Sentiment", impact: "medium" as const },
-    { name: "Building Permits", category: "Housing", impact: "low" as const },
-    { name: "Industrial Production (MoM)", category: "Manufacturing", impact: "medium" as const },
-    { name: "Central Bank Governor Speaks", category: "Speeches", impact: "medium" as const },
-    { name: "Crude Oil Inventories", category: "Energy", impact: "low" as const },
-    { name: "Initial Jobless Claims", category: "Employment", impact: "medium" as const },
-    { name: "PPI (MoM)", category: "Inflation", impact: "medium" as const },
-    { name: "Existing Home Sales", category: "Housing", impact: "low" as const },
-    { name: "Durable Goods Orders", category: "Manufacturing", impact: "medium" as const },
-  ];
-
-  const times = ["08:30", "09:00", "10:00", "10:30", "11:00", "13:30", "14:00", "15:00", "19:00"];
-
-  let eventId = 0;
-  const now = new Date();
-  const startDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
-  const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const currentDate = new Date(startDate);
-
-  while (currentDate <= endDate) {
-    const dateStr = currentDate.toISOString().split("T")[0];
-    const dayOfWeek = currentDate.getDay();
-
-    const numEvents = dayOfWeek === 0 || dayOfWeek === 6
-      ? Math.floor(Math.random() * 2)
-      : Math.floor(Math.random() * 6) + 2;
-
-    const usedTemplates = new Set<number>();
-
-    for (let i = 0; i < numEvents; i++) {
-      let templateIndex;
-      do {
-        templateIndex = Math.floor(Math.random() * eventTemplates.length);
-      } while (usedTemplates.has(templateIndex) && usedTemplates.size < eventTemplates.length);
-
-      usedTemplates.add(templateIndex);
-      const template = eventTemplates[templateIndex];
-      const currency = currencies[Math.floor(Math.random() * currencies.length)];
-      const time = times[Math.floor(Math.random() * times.length)];
-
-      const isPercent = template.name.includes("Rate") || template.name.includes("MoM") || template.name.includes("YoY") || template.name.includes("QoQ");
-      const baseValue = isPercent ? (Math.random() * 5 - 1).toFixed(1) : (Math.random() * 500).toFixed(1);
-      const unit = isPercent ? "%" : template.name.includes("Claims") ? "K" : template.name.includes("Balance") ? "B" : "";
-
-      const isPast = new Date(dateStr) < new Date();
-
-      events.push({
-        id: `event-${eventId++}`,
-        date: dateStr,
-        time,
-        currency,
-        event: template.name,
-        impact: template.impact,
-        forecast: `${baseValue}${unit}`,
-        previous: `${(parseFloat(baseValue) + (Math.random() - 0.5)).toFixed(1)}${unit}`,
-        actual: isPast ? `${(parseFloat(baseValue) + (Math.random() - 0.5) * 0.5).toFixed(1)}${unit}` : null,
-        category: template.category,
-      });
-    }
-
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  events.sort((a, b) => {
-    const dateCompare = a.date.localeCompare(b.date);
-    if (dateCompare !== 0) return dateCompare;
-    return a.time.localeCompare(b.time);
-  });
-
+// Return empty data when calendar-data.json is not available
+function getEmptyData(): CalendarData {
+  const today = new Date().toISOString().split("T")[0];
   return {
     lastUpdated: new Date().toISOString(),
-    eventCount: events.length,
+    eventCount: 0,
     dateRange: {
-      start: startDate.toISOString().split("T")[0],
-      end: endDate.toISOString().split("T")[0],
+      start: today,
+      end: today,
     },
-    events,
+    events: [],
   };
 }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
-  // Try to load real data, fall back to mock
+  // Load real data from calendar-data.json
   let data = await loadCalendarData();
   const isRealData = data !== null;
 
   if (!data) {
-    data = generateMockData();
+    data = getEmptyData();
   }
 
   // Apply filters
@@ -245,14 +162,14 @@ export async function POST() {
   if (data) {
     return NextResponse.json({
       success: true,
-      message: "Using scraped data from Forex Factory",
+      message: "Using data from FRED API and other US sources",
       eventCount: data.eventCount,
       lastUpdated: data.lastUpdated,
     });
   } else {
     return NextResponse.json({
-      success: true,
-      message: "Using mock data - run the scraper to get real data",
+      success: false,
+      message: "No calendar data available - run the scraper to fetch data",
       eventCount: 0,
     });
   }

@@ -1,94 +1,57 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { ChevronLeft, ChevronRight, RefreshCw, Clock } from "lucide-react";
 
-// Mock economic events data (US only)
-const economicEvents = [
-  {
-    id: 1,
-    time: "08:30",
-    currency: "USD",
-    event: "Core CPI (MoM)",
-    impact: "high",
-    forecast: "0.3%",
-    previous: "0.2%",
-    actual: null,
-  },
-  {
-    id: 2,
-    time: "08:30",
-    currency: "USD",
-    event: "CPI (YoY)",
-    impact: "high",
-    forecast: "2.9%",
-    previous: "2.7%",
-    actual: null,
-  },
-  {
-    id: 3,
-    time: "10:00",
-    currency: "USD",
-    event: "Wholesale Inventories",
-    impact: "low",
-    forecast: "0.2%",
-    previous: "0.1%",
-    actual: "0.2%",
-  },
-  {
-    id: 4,
-    time: "10:30",
-    currency: "USD",
-    event: "EIA Natural Gas Storage",
-    impact: "medium",
-    forecast: "-50B",
-    previous: "-45B",
-    actual: "-52B",
-  },
-  {
-    id: 5,
-    time: "13:30",
-    currency: "USD",
-    event: "Initial Jobless Claims",
-    impact: "medium",
-    forecast: "215K",
-    previous: "211K",
-    actual: null,
-  },
-  {
-    id: 6,
-    time: "15:00",
-    currency: "USD",
-    event: "Crude Oil Inventories",
-    impact: "low",
-    forecast: "-1.2M",
-    previous: "-2.0M",
-    actual: null,
-  },
-  {
-    id: 7,
-    time: "19:00",
-    currency: "USD",
-    event: "FOMC Member Waller Speaks",
-    impact: "medium",
-    forecast: "-",
-    previous: "-",
-    actual: null,
-  },
-];
+interface EconomicEvent {
+  id: string;
+  date: string;
+  time: string;
+  currency: string;
+  event: string;
+  impact: "high" | "medium" | "low" | "holiday";
+  forecast: string | null;
+  previous: string | null;
+  actual: string | null;
+  category: string;
+}
 
 const impactColors = {
   high: "bg-red-500",
   medium: "bg-yellow-500",
   low: "bg-emerald-500",
-};
-
-const currencyFlags: Record<string, string> = {
-  USD: "🇺🇸",
+  holiday: "bg-gray-500",
 };
 
 export default function TimelinePage() {
+  const [events, setEvents] = useState<EconomicEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Fetch events from API
+  useEffect(() => {
+    async function fetchEvents() {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/calendar");
+        const data = await response.json();
+        setEvents(data.events || []);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
+
+  // Filter events for selected date
+  const dayEvents = useMemo(() => {
+    const dateStr = selectedDate.toISOString().split("T")[0];
+    return events
+      .filter((e) => e.date === dateStr)
+      .sort((a, b) => a.time.localeCompare(b.time));
+  }, [events, selectedDate]);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -109,13 +72,16 @@ export default function TimelinePage() {
   const currentHour = new Date().getHours();
   const timelinePosition = Math.min(Math.max((currentHour / 24) * 100, 0), 100);
 
+  // Check if selected date is today
+  const isToday = selectedDate.toDateString() === new Date().toDateString();
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Timeline</h1>
-          <p className="text-muted text-sm mt-1">Real-time view of today's economic events</p>
+          <p className="text-muted text-sm mt-1">Real-time view of economic events</p>
         </div>
 
         {/* Date Navigation */}
@@ -227,79 +193,83 @@ export default function TimelinePage() {
 
       {/* Events Timeline */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <h2 className="text-sm font-medium">Today's Events</h2>
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-medium">
+            {isToday ? "Today's Events" : `Events for ${formatDate(selectedDate)}`}
+          </h2>
+          <span className="text-xs text-muted">{dayEvents.length} events</span>
         </div>
 
-        {/* Timeline view */}
-        <div className="relative">
-          {economicEvents.map((event, index) => {
-            const isPast = event.actual !== null;
-            const isNext = !isPast && index === economicEvents.findIndex((e) => e.actual === null);
+        {/* Loading state */}
+        {loading ? (
+          <div className="p-8 flex items-center justify-center">
+            <RefreshCw className="w-6 h-6 animate-spin text-muted" />
+          </div>
+        ) : dayEvents.length === 0 ? (
+          <div className="p-8 text-center">
+            <Clock className="w-8 h-8 mx-auto mb-3 text-muted" />
+            <p className="text-muted text-sm">No events scheduled for this day</p>
+          </div>
+        ) : (
+          /* Timeline view */
+          <div className="relative">
+            {dayEvents.map((event, index) => {
+              const isPast = event.actual !== null;
+              const isNext = !isPast && index === dayEvents.findIndex((e) => e.actual === null);
 
-            return (
-              <div
-                key={event.id}
-                className={`relative flex gap-4 p-4 border-b border-border last:border-b-0 transition-colors hover:bg-card-hover ${
-                  isNext ? "bg-accent/5" : ""
-                } ${isPast ? "opacity-60" : ""}`}
-              >
-                {/* Time column with line */}
-                <div className="flex flex-col items-center w-16 shrink-0">
-                  <span className="text-sm font-mono font-medium">{event.time}</span>
-                  {index < economicEvents.length - 1 && (
-                    <div className="flex-1 w-px bg-border mt-2" />
-                  )}
-                </div>
-
-                {/* Event dot */}
-                <div className="flex items-start pt-1">
-                  <div
-                    className={`w-3 h-3 rounded-full ${impactColors[event.impact as keyof typeof impactColors]} ${
-                      isNext ? "ring-4 ring-accent/20" : ""
-                    }`}
-                  />
-                </div>
-
-                {/* Event content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-card-hover text-xs font-medium">
-                      <span>{currencyFlags[event.currency] || "🏳️"}</span>
-                      {event.currency}
-                    </span>
-                    {isNext && (
-                      <span className="px-2 py-0.5 rounded bg-accent/20 text-accent-light text-xs font-medium">
-                        Up Next
-                      </span>
+              return (
+                <div
+                  key={event.id}
+                  className={`relative flex gap-4 p-4 border-b border-border last:border-b-0 transition-colors hover:bg-card-hover ${
+                    isNext ? "bg-accent/5" : ""
+                  } ${isPast ? "opacity-60" : ""}`}
+                >
+                  {/* Time column with line */}
+                  <div className="flex flex-col items-center w-16 shrink-0">
+                    <span className="text-sm font-mono font-medium">{event.time}</span>
+                    {index < dayEvents.length - 1 && (
+                      <div className="flex-1 w-px bg-border mt-2" />
                     )}
                   </div>
-                  <p className="font-medium text-foreground">{event.event}</p>
-                  <div className="flex gap-4 mt-2 text-sm text-muted">
-                    <span>Forecast: <span className="text-foreground">{event.forecast}</span></span>
-                    <span>Previous: <span className="text-foreground">{event.previous}</span></span>
-                    {event.actual && (
-                      <span>
-                        Actual:{" "}
-                        <span
-                          className={`font-semibold ${
-                            parseFloat(event.actual) > parseFloat(event.forecast.replace(/[%KM]/g, ""))
-                              ? "text-emerald-400"
-                              : parseFloat(event.actual) < parseFloat(event.forecast.replace(/[%KM]/g, ""))
-                              ? "text-red-400"
-                              : "text-foreground"
-                          }`}
-                        >
-                          {event.actual}
+
+                  {/* Event dot */}
+                  <div className="flex items-start pt-1">
+                    <div
+                      className={`w-3 h-3 rounded-full ${impactColors[event.impact]} ${
+                        isNext ? "ring-4 ring-accent/20" : ""
+                      }`}
+                    />
+                  </div>
+
+                  {/* Event content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      {isNext && (
+                        <span className="px-2 py-0.5 rounded bg-accent/20 text-accent-light text-xs font-medium">
+                          Up Next
                         </span>
-                      </span>
-                    )}
+                      )}
+                    </div>
+                    <p className="font-medium text-foreground">{event.event}</p>
+                    <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted">
+                      {event.previous && (
+                        <span>Previous: <span className="text-foreground">{event.previous}</span></span>
+                      )}
+                      {event.forecast && (
+                        <span>Forecast: <span className="text-foreground">{event.forecast}</span></span>
+                      )}
+                      {event.actual && (
+                        <span>
+                          Actual: <span className="text-foreground font-semibold">{event.actual}</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Legend */}
