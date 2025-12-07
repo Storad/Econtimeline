@@ -151,11 +151,11 @@ export default function Hero() {
                     </div>
                     <div className="absolute bottom-6 left-[45%] flex flex-col items-center group/event cursor-pointer">
                       <div className="w-4 h-4 rounded-full bg-yellow-500 ring-4 ring-yellow-500/20 group-hover/event:ring-8 group-hover/event:scale-125 transition-all duration-300" />
-                      <span className="text-xs mt-1 text-muted group-hover/event:text-yellow-400 transition-colors">EUR Rate</span>
+                      <span className="text-xs mt-1 text-muted group-hover/event:text-yellow-400 transition-colors">ISM PMI</span>
                     </div>
                     <div className="absolute bottom-6 left-[70%] flex flex-col items-center group/event cursor-pointer">
                       <div className="w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20 group-hover/event:ring-8 group-hover/event:scale-125 transition-all duration-300" />
-                      <span className="text-xs mt-1 text-muted group-hover/event:text-emerald-400 transition-colors">GBP PMI</span>
+                      <span className="text-xs mt-1 text-muted group-hover/event:text-emerald-400 transition-colors">Retail Sales</span>
                     </div>
 
                     {/* Session overlay */}

@@ -37,9 +37,9 @@ const features = [
   },
   {
     icon: Filter,
-    title: "Currency Filters",
+    title: "Smart Filters",
     description:
-      "Filter events by USD, EUR, GBP, JPY — focus only on the pairs you trade. No noise, just relevance.",
+      "Filter events by impact level and category — focus only on what matters for your trades. No noise, just relevance.",
   },
   {
     icon: Zap,

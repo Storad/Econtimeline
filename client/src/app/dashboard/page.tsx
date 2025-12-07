@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Mock economic events data
+// Mock economic events data (US only)
 const economicEvents = [
   {
     id: 1,
@@ -28,35 +28,25 @@ const economicEvents = [
   {
     id: 3,
     time: "10:00",
-    currency: "EUR",
-    event: "ECB President Lagarde Speaks",
-    impact: "medium",
-    forecast: "-",
-    previous: "-",
-    actual: null,
+    currency: "USD",
+    event: "Wholesale Inventories",
+    impact: "low",
+    forecast: "0.2%",
+    previous: "0.1%",
+    actual: "0.2%",
   },
   {
     id: 4,
     time: "10:30",
-    currency: "GBP",
-    event: "GDP (MoM)",
-    impact: "high",
-    forecast: "0.2%",
-    previous: "-0.1%",
-    actual: "0.3%",
+    currency: "USD",
+    event: "EIA Natural Gas Storage",
+    impact: "medium",
+    forecast: "-50B",
+    previous: "-45B",
+    actual: "-52B",
   },
   {
     id: 5,
-    time: "11:00",
-    currency: "EUR",
-    event: "Industrial Production (MoM)",
-    impact: "medium",
-    forecast: "0.3%",
-    previous: "-0.1%",
-    actual: "0.2%",
-  },
-  {
-    id: 6,
     time: "13:30",
     currency: "USD",
     event: "Initial Jobless Claims",
@@ -66,7 +56,7 @@ const economicEvents = [
     actual: null,
   },
   {
-    id: 7,
+    id: 6,
     time: "15:00",
     currency: "USD",
     event: "Crude Oil Inventories",
@@ -76,7 +66,7 @@ const economicEvents = [
     actual: null,
   },
   {
-    id: 8,
+    id: 7,
     time: "19:00",
     currency: "USD",
     event: "FOMC Member Waller Speaks",
@@ -95,13 +85,6 @@ const impactColors = {
 
 const currencyFlags: Record<string, string> = {
   USD: "🇺🇸",
-  EUR: "🇪🇺",
-  GBP: "🇬🇧",
-  JPY: "🇯🇵",
-  AUD: "🇦🇺",
-  CAD: "🇨🇦",
-  CHF: "🇨🇭",
-  NZD: "🇳🇿",
 };
 
 export default function TimelinePage() {

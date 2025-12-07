@@ -80,17 +80,7 @@ interface TradeNote {
 
 const currencyFlags: Record<string, string> = {
   USD: "🇺🇸",
-  EUR: "🇪🇺",
-  GBP: "🇬🇧",
-  JPY: "🇯🇵",
-  AUD: "🇦🇺",
-  CAD: "🇨🇦",
-  CHF: "🇨🇭",
-  NZD: "🇳🇿",
-  CNY: "🇨🇳",
 };
-
-const currencies = ["All", "USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "NZD", "CNY"];
 const impactLevels = ["All", "High", "Medium", "Low"];
 const categories = [
   { value: "All", label: "All" },
@@ -128,8 +118,7 @@ export default function EconomicCalendarPage() {
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [deletingAllNotes, setDeletingAllNotes] = useState(false);
 
-  // Filters
-  const [filterCurrency, setFilterCurrency] = useState("All");
+  // Filters (USD-only, no currency filter needed)
   const [filterImpact, setFilterImpact] = useState("All");
   const [filterCategory, setFilterCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
@@ -552,18 +541,16 @@ export default function EconomicCalendarPage() {
     return { weekPnL, weekTrades, weekDays };
   }, [tradeNotes]);
 
-  // Filter events
+  // Filter events (USD-only)
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      const currencyMatch =
-        filterCurrency === "All" || event.currency === filterCurrency;
       const impactMatch =
         filterImpact === "All" || event.impact === filterImpact.toLowerCase();
       const categoryMatch =
         filterCategory === "All" || event.category === filterCategory;
-      return currencyMatch && impactMatch && categoryMatch;
+      return impactMatch && categoryMatch;
     });
-  }, [events, filterCurrency, filterImpact, filterCategory]);
+  }, [events, filterImpact, filterCategory]);
 
   // Group events by date
   const eventsByDate = useMemo(() => {
@@ -822,14 +809,14 @@ export default function EconomicCalendarPage() {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all ${
-                showFilters || filterCurrency !== "All" || filterImpact !== "All" || filterCategory !== "All"
+                showFilters || filterImpact !== "All" || filterCategory !== "All"
                   ? "bg-accent/20 border border-accent/50 text-accent-light"
                   : "bg-background/50 hover:bg-card-hover text-muted hover:text-foreground"
               }`}
             >
               <Filter className="w-4 h-4" />
               <span className="hidden sm:inline">Filter</span>
-              {(filterCurrency !== "All" || filterImpact !== "All" || filterCategory !== "All") && (
+              {(filterImpact !== "All" || filterCategory !== "All") && (
                 <span className="w-2 h-2 rounded-full bg-accent-light" />
               )}
               <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
@@ -838,26 +825,6 @@ export default function EconomicCalendarPage() {
             {/* Dropdown Menu */}
             {showFilters && (
               <div className="absolute top-full left-0 mt-2 z-50 w-72 bg-card rounded-xl border border-border shadow-xl p-4 space-y-4 animate-slide-in">
-                {/* Currency Filter */}
-                <div>
-                  <label className="block text-xs font-medium text-muted mb-2">Currency</label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {currencies.map((currency) => (
-                      <button
-                        key={currency}
-                        onClick={() => setFilterCurrency(currency)}
-                        className={`px-2 py-1 text-xs font-medium rounded-lg border transition-colors ${
-                          filterCurrency === currency
-                            ? "bg-accent/20 border-accent/50 text-accent-light"
-                            : "bg-card-hover border-border text-muted hover:text-foreground"
-                        }`}
-                      >
-                        {currency !== "All" && currencyFlags[currency]} {currency}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Impact Filter */}
                 <div>
                   <label className="block text-xs font-medium text-muted mb-2">Impact</label>
@@ -897,10 +864,9 @@ export default function EconomicCalendarPage() {
 
                 {/* Clear & Close */}
                 <div className="flex items-center justify-between pt-2 border-t border-border">
-                  {(filterCurrency !== "All" || filterImpact !== "All" || filterCategory !== "All") && (
+                  {(filterImpact !== "All" || filterCategory !== "All") && (
                     <button
                       onClick={() => {
-                        setFilterCurrency("All");
                         setFilterImpact("All");
                         setFilterCategory("All");
                       }}
@@ -1534,9 +1500,6 @@ export default function EconomicCalendarPage() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                                 <span className="text-sm font-mono font-bold text-accent-light">{event.time}</span>
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-card-hover text-xs font-medium border border-border/50">
-                                  {currencyFlags[event.currency]} {event.currency}
-                                </span>
                                 {event.historicalVolatility && event.historicalVolatility !== 'Very High' && (
                                   <span className={`text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 ${
                                     event.historicalVolatility === 'High' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :

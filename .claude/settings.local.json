@@ -33,7 +33,10 @@
       "Bash(vercel domains:*)",
       "Bash(nslookup:*)",
       "WebFetch(domain:econtl.com)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd Prisma, API routes, and improved scraper\n\n- Add Prisma setup with trade notes schema\n- Add API routes for cron jobs, live data, and trade notes\n- Add Vercel cron configuration\n- Refactor scraper with modular sources (FRED, central banks, etc.)\n- Update middleware and calendar page\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

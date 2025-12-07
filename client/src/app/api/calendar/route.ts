@@ -93,7 +93,7 @@ async function loadCalendarData(): Promise<CalendarData | null> {
 // Generate mock data as fallback
 function generateMockData(): CalendarData {
   const events: EconomicEvent[] = [];
-  const currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "NZD"];
+  const currencies = ["USD"];
 
   const eventTemplates = [
     { name: "CPI (MoM)", category: "Inflation", impact: "high" as const },
