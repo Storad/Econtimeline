@@ -12,6 +12,7 @@
 
 // Jackson Hole Symposium - always late August (Thursday-Saturday)
 const JACKSON_HOLE = {
+  2024: { start: '2024-08-22', powell: '2024-08-23' },
   2025: { start: '2025-08-21', powell: '2025-08-22' },
   2026: { start: '2026-08-20', powell: '2026-08-21' },
 };
@@ -19,6 +20,12 @@ const JACKSON_HOLE = {
 // Semi-annual Monetary Policy Testimony (Humphrey-Hawkins)
 // Typically February and July
 const CONGRESSIONAL_TESTIMONY = {
+  2024: [
+    { date: '2024-03-06', chamber: 'House' },
+    { date: '2024-03-07', chamber: 'Senate' },
+    { date: '2024-07-09', chamber: 'Senate' },
+    { date: '2024-07-10', chamber: 'House' },
+  ],
   2025: [
     { date: '2025-02-11', chamber: 'Senate' },
     { date: '2025-02-12', chamber: 'House' },
@@ -34,6 +41,17 @@ const CONGRESSIONAL_TESTIMONY = {
 };
 
 // Beige Book - released 8 times per year, 2 weeks before FOMC
+const BEIGE_BOOK_2024 = [
+  '2024-01-17',
+  '2024-03-06',
+  '2024-04-17',
+  '2024-05-29',
+  '2024-07-17',
+  '2024-09-04',
+  '2024-10-23',
+  '2024-12-04',
+];
+
 const BEIGE_BOOK_2025 = [
   '2025-01-15',
   '2025-03-05',
@@ -64,12 +82,16 @@ export async function scrapeFedSpeakers() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // 3 months back to 6 months ahead
+  const threeMonthsAgo = new Date(today);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
   const sixMonthsLater = new Date(today);
   sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
 
   const isInRange = (dateStr) => {
     const date = new Date(dateStr);
-    return date >= today && date <= sixMonthsLater;
+    return date >= threeMonthsAgo && date <= sixMonthsLater;
   };
 
   // Jackson Hole Symposium
@@ -110,7 +132,7 @@ export async function scrapeFedSpeakers() {
   });
 
   // Beige Book
-  [...BEIGE_BOOK_2025, ...BEIGE_BOOK_2026].forEach(date => {
+  [...BEIGE_BOOK_2024, ...BEIGE_BOOK_2025, ...BEIGE_BOOK_2026].forEach(date => {
     if (isInRange(date)) {
       events.push({
         date,

@@ -54,11 +54,13 @@ export async function scrapeTreasury() {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  // Generate for next 3 months
-  for (let monthOffset = 0; monthOffset <= 3; monthOffset++) {
+  // 3 months back to 4 months ahead
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+  // Generate for 3 months back to 4 months ahead
+  for (let monthOffset = -3; monthOffset <= 4; monthOffset++) {
     const targetMonth = (currentMonth + monthOffset) % 12;
     const targetYear = currentYear + Math.floor((currentMonth + monthOffset) / 12);
 
@@ -66,7 +68,7 @@ export async function scrapeTreasury() {
 
     // Weekly Bill Auctions (every Monday)
     for (const monday of mondays) {
-      if (monday < oneWeekAgo) continue;
+      if (monday < threeMonthsAgo) continue;
 
       events.push({
         date: formatDate(monday),
@@ -95,7 +97,7 @@ export async function scrapeTreasury() {
 
     // 2-Year Note Auction - typically late in month
     const twoYearDate = getNextWeekday(new Date(targetYear, targetMonth, 24));
-    if (twoYearDate >= oneWeekAgo) {
+    if (twoYearDate >= threeMonthsAgo) {
       events.push({
         date: formatDate(twoYearDate),
         time: '18:00', // 1:00 PM ET
@@ -111,7 +113,7 @@ export async function scrapeTreasury() {
 
     // 5-Year Note Auction
     const fiveYearDate = getNextWeekday(new Date(targetYear, targetMonth, 25));
-    if (fiveYearDate >= oneWeekAgo) {
+    if (fiveYearDate >= threeMonthsAgo) {
       events.push({
         date: formatDate(fiveYearDate),
         time: '18:00',
@@ -127,7 +129,7 @@ export async function scrapeTreasury() {
 
     // 7-Year Note Auction
     const sevenYearDate = getNextWeekday(new Date(targetYear, targetMonth, 26));
-    if (sevenYearDate >= oneWeekAgo) {
+    if (sevenYearDate >= threeMonthsAgo) {
       events.push({
         date: formatDate(sevenYearDate),
         time: '18:00',
@@ -143,7 +145,7 @@ export async function scrapeTreasury() {
 
     // 10-Year Note Auction - around 8th-12th of month
     const tenYearDate = getNextWeekday(new Date(targetYear, targetMonth, 10));
-    if (tenYearDate >= oneWeekAgo) {
+    if (tenYearDate >= threeMonthsAgo) {
       events.push({
         date: formatDate(tenYearDate),
         time: '18:00',
@@ -159,7 +161,7 @@ export async function scrapeTreasury() {
 
     // 30-Year Bond Auction - around 12th-14th of month
     const thirtyYearDate = getNextWeekday(new Date(targetYear, targetMonth, 13));
-    if (thirtyYearDate >= oneWeekAgo) {
+    if (thirtyYearDate >= threeMonthsAgo) {
       events.push({
         date: formatDate(thirtyYearDate),
         time: '18:00',
@@ -175,7 +177,7 @@ export async function scrapeTreasury() {
 
     // Treasury Budget Statement - around 10th-12th of month, 2:00 PM ET
     const budgetDate = getNextWeekday(new Date(targetYear, targetMonth, 11));
-    if (budgetDate >= oneWeekAgo) {
+    if (budgetDate >= threeMonthsAgo) {
       events.push({
         date: formatDate(budgetDate),
         time: '19:00', // 2:00 PM ET

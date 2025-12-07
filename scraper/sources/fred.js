@@ -85,17 +85,20 @@ export async function scrapeFRED() {
   try {
     console.log('  Fetching FRED release schedules...');
 
-    // Date range: today to 4 months ahead
+    // Date range: 3 months back to 4 months ahead
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    const threeMonthsAgo = new Date(today);
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
     const fourMonthsLater = new Date(today);
     fourMonthsLater.setMonth(fourMonthsLater.getMonth() + 4);
 
-    const todayStr = today.toISOString().split('T')[0];
+    const startStr = threeMonthsAgo.toISOString().split('T')[0];
     const endStr = fourMonthsLater.toISOString().split('T')[0];
 
-    console.log(`    Date range: ${todayStr} to ${endStr}`);
+    console.log(`    Date range: ${startStr} to ${endStr} (including 3 months history)`);
 
     // Fetch each release's schedule
     let totalFetched = 0;
@@ -103,8 +106,8 @@ export async function scrapeFRED() {
     for (const release of FRED_RELEASES) {
       const dates = await fetchReleaseDates(release.id);
 
-      // Filter to future dates only
-      const futureDates = dates.filter(d => d.date >= todayStr && d.date <= endStr);
+      // Filter to date range (3 months back to 4 months ahead)
+      const futureDates = dates.filter(d => d.date >= startStr && d.date <= endStr);
 
       for (const dateInfo of futureDates) {
         events.push({

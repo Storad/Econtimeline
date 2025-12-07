@@ -5,6 +5,18 @@
  * Source: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
  */
 
+// FOMC 2024 Meeting Dates (for historical data)
+const FOMC_2024 = [
+  { date: '2024-01-31', hasPresser: true, hasSEP: false, minutesDate: '2024-02-21' },
+  { date: '2024-03-20', hasPresser: true, hasSEP: true, minutesDate: '2024-04-10' },
+  { date: '2024-05-01', hasPresser: true, hasSEP: false, minutesDate: '2024-05-22' },
+  { date: '2024-06-12', hasPresser: true, hasSEP: true, minutesDate: '2024-07-03' },
+  { date: '2024-07-31', hasPresser: true, hasSEP: false, minutesDate: '2024-08-21' },
+  { date: '2024-09-18', hasPresser: true, hasSEP: true, minutesDate: '2024-10-09' },
+  { date: '2024-11-07', hasPresser: true, hasSEP: false, minutesDate: '2024-11-26' },
+  { date: '2024-12-18', hasPresser: true, hasSEP: true, minutesDate: '2025-01-08' },
+];
+
 // FOMC 2025 Meeting Dates
 // Minutes are released 3 weeks after each meeting
 const FOMC_2025 = [
@@ -38,15 +50,19 @@ export function scrapeCentralBanks() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // 3 months back to 6 months ahead
+  const threeMonthsAgo = new Date(today);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
   const cutoffDate = new Date(today);
-  cutoffDate.setMonth(cutoffDate.getMonth() + 6); // 6 months ahead
+  cutoffDate.setMonth(cutoffDate.getMonth() + 6);
 
   const isInRange = (dateStr) => {
     const date = new Date(dateStr);
-    return date >= today && date <= cutoffDate;
+    return date >= threeMonthsAgo && date <= cutoffDate;
   };
 
-  [...FOMC_2025, ...FOMC_2026].forEach(meeting => {
+  [...FOMC_2024, ...FOMC_2025, ...FOMC_2026].forEach(meeting => {
     // FOMC Rate Decision
     if (isInRange(meeting.date)) {
       events.push({

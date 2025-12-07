@@ -65,17 +65,21 @@ export async function scrapeEIA() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // 3 months back to 6 months ahead
+  const threeMonthsAgo = new Date(today);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
   const sixMonthsLater = new Date(today);
   sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
 
   const isInRange = (dateStr) => {
     const date = new Date(dateStr);
-    return date >= today && date <= sixMonthsLater;
+    return date >= threeMonthsAgo && date <= sixMonthsLater;
   };
 
   // Weekly Petroleum Status Report (Crude Oil Inventories)
   // Released every Wednesday at 10:30 AM ET
-  const weeklyDates = getWeeklyEnergyDates(today, 26); // 6 months of weeks
+  const weeklyDates = getWeeklyEnergyDates(threeMonthsAgo, 40); // ~9 months of weeks
 
   weeklyDates.crude.forEach(date => {
     if (isInRange(date)) {
@@ -113,9 +117,10 @@ export async function scrapeEIA() {
 
   // Short-Term Energy Outlook (STEO) - Monthly
   const currentYear = today.getFullYear();
+  const lastYear = currentYear - 1;
   const nextYear = currentYear + 1;
 
-  [...getSTEODates(currentYear), ...getSTEODates(nextYear)].forEach(date => {
+  [...getSTEODates(lastYear), ...getSTEODates(currentYear), ...getSTEODates(nextYear)].forEach(date => {
     if (isInRange(date)) {
       events.push({
         date,

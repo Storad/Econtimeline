@@ -70,6 +70,35 @@ function getObservedDate(date) {
 }
 
 /**
+ * Generate US market early close days for a given year
+ * Markets close at 1:00 PM ET on these days
+ */
+function getEarlyCloseDays(year) {
+  const earlyClose = [];
+
+  // Day after Thanksgiving - 4th Friday of November
+  const thanksgiving = getNthWeekday(year, 10, 4, 4); // 4th Thursday
+  const dayAfterThanksgiving = addDays(thanksgiving, 1);
+  earlyClose.push({ date: formatDate(dayAfterThanksgiving), title: 'Early Close', time: '13:00' });
+
+  // Christmas Eve - December 24 (skip if weekend)
+  const christmasEve = new Date(year, 11, 24);
+  const christmasEveDay = christmasEve.getDay();
+  if (christmasEveDay !== 0 && christmasEveDay !== 6) {
+    earlyClose.push({ date: formatDate(christmasEve), title: 'Early Close', time: '13:00' });
+  }
+
+  // July 3rd - day before Independence Day (skip if weekend)
+  const july3 = new Date(year, 6, 3);
+  const july3Day = july3.getDay();
+  if (july3Day !== 0 && july3Day !== 6) {
+    earlyClose.push({ date: formatDate(july3), title: 'Early Close', time: '13:00' });
+  }
+
+  return earlyClose.map(d => ({ ...d, country: 'US', currency: 'USD', isEarlyClose: true }));
+}
+
+/**
  * Generate US market holidays for a given year
  */
 function getUSHolidays(year) {
@@ -81,7 +110,7 @@ function getUSHolidays(year) {
 
   // Martin Luther King Jr. Day - 3rd Monday of January
   const mlk = getNthWeekday(year, 0, 1, 3);
-  holidays.push({ date: formatDate(mlk), title: 'Martin Luther King Jr. Day' });
+  holidays.push({ date: formatDate(mlk), title: 'MLK Jr. Day' });
 
   // Presidents' Day - 3rd Monday of February
   const presidents = getNthWeekday(year, 1, 1, 3);
@@ -128,17 +157,20 @@ export async function scrapeHolidays() {
   const years = [currentYear, currentYear + 1];
 
   const allHolidays = [];
+  const allEarlyClose = [];
 
   for (const year of years) {
     allHolidays.push(...getUSHolidays(year));
+    allEarlyClose.push(...getEarlyCloseDays(year));
   }
 
-  // Filter to recent/future holidays only
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  // Include from 3 months ago to future
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-  const events = allHolidays
-    .filter(h => new Date(h.date) >= oneWeekAgo)
+  // Full market closure holidays
+  const holidayEvents = allHolidays
+    .filter(h => new Date(h.date) >= threeMonthsAgo)
     .map(h => ({
       date: h.date,
       time: 'All Day',
@@ -150,6 +182,25 @@ export async function scrapeHolidays() {
       sourceUrl: 'https://www.nyse.com/markets/hours-calendars',
       category: 'holiday',
     }));
+
+  // Early close days (1:00 PM ET)
+  const earlyCloseEvents = allEarlyClose
+    .filter(h => new Date(h.date) >= threeMonthsAgo)
+    .map(h => ({
+      date: h.date,
+      time: h.time, // 13:00 ET
+      title: 'Early Close (1:00 PM ET)',
+      impact: 'early_close',
+      currency: 'USD',
+      country: 'US',
+      source: 'holidays',
+      sourceUrl: 'https://www.nyse.com/markets/hours-calendars',
+      category: 'holiday',
+      isEarlyClose: true,
+      closeTimeET: '13:00',
+    }));
+
+  const events = [...holidayEvents, ...earlyCloseEvents];
 
   // Sort by date
   events.sort((a, b) => a.date.localeCompare(b.date));

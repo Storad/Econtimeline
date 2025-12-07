@@ -8,7 +8,7 @@ export interface EconomicEvent {
   time: string;
   currency: string;
   event: string;
-  impact: "high" | "medium" | "low" | "holiday";
+  impact: "high" | "medium" | "low" | "holiday" | "early_close";
   forecast: string | null;
   previous: string | null;
   actual: string | null;
@@ -28,6 +28,9 @@ export interface EconomicEvent {
   };
   relatedAssets?: string[];
   historicalVolatility?: string;
+  // Early close fields
+  isEarlyClose?: boolean;
+  closeTimeET?: string;
 }
 
 interface CalendarData {
@@ -55,7 +58,7 @@ async function loadCalendarData(): Promise<CalendarData | null> {
       time: e.time as string,
       currency: e.currency as string,
       event: e.title as string, // Map 'title' to 'event'
-      impact: e.impact as "high" | "medium" | "low" | "holiday",
+      impact: e.impact as "high" | "medium" | "low" | "holiday" | "early_close",
       forecast: e.forecast as string | null,
       previous: e.previous as string | null,
       actual: e.actual as string | null,
@@ -70,6 +73,9 @@ async function loadCalendarData(): Promise<CalendarData | null> {
       typicalReaction: e.typicalReaction as EconomicEvent["typicalReaction"],
       relatedAssets: e.relatedAssets as string[],
       historicalVolatility: e.historicalVolatility as string,
+      // Early close fields
+      isEarlyClose: e.isEarlyClose as boolean | undefined,
+      closeTimeET: e.closeTimeET as string | undefined,
     }));
 
     // Calculate date range

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-06T07:00:26.605Z",
+  "lastUpdated": "2025-12-07T09:07:45.875Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -12,6 +12,3189 @@
   ],
   "dataIncluded": true,
   "events": [
+    {
+      "date": "2025-09-08",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-09-08",
+      "time": "15:00",
+      "title": "Consumer Credit m/m",
+      "impact": "low",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/14",
+      "fredReleaseId": 14,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-08",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-08",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-09",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-09",
+      "time": "12:00",
+      "title": "EIA Short-Term Energy Outlook",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/outlooks/steo/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-10",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-10",
+      "time": "18:00",
+      "title": "10-Year Note Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 10-year government notes.",
+      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
+        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
+      },
+      "relatedAssets": [
+        "US 10-year yield",
+        "USD",
+        "Mortgage rates"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-11",
+      "time": "08:30",
+      "title": "CPI m/m",
+      "impact": "high",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/10",
+      "fredReleaseId": 10,
+      "description": "Consumer Price Index measures the monthly change in prices paid by consumers for goods and services.",
+      "whyItMatters": "Primary inflation gauge that central banks target. Higher inflation typically leads to rate hikes, lower inflation to rate cuts.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency bullish (rate hike expectations), bonds bearish, gold mixed",
+        "lowerThanExpected": "Currency bearish (rate cut expectations), bonds bullish"
+      },
+      "relatedAssets": [
+        "Local currency",
+        "Government bonds",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": "+0.3%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "CPIAUCSL"
+    },
+    {
+      "date": "2025-09-11",
+      "time": "08:30",
+      "title": "Current Account",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/52",
+      "fredReleaseId": 52,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-11",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-11",
+      "time": "19:00",
+      "title": "Federal Budget Balance",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://fiscaldata.treasury.gov/",
+      "category": "fiscal",
+      "description": "Monthly US government budget surplus or deficit.",
+      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal direct impact",
+        "lowerThanExpected": "Minimal direct impact"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-15",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-09-15",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-15",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-15",
+      "time": "18:00",
+      "title": "30-Year Bond Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 30-year government bonds.",
+      "whyItMatters": "Long-end of yield curve. Sensitive to inflation expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 30-year yield",
+        "USD",
+        "TLT ETF"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-16",
+      "time": "09:15",
+      "title": "Industrial Production m/m",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/13",
+      "fredReleaseId": 13,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "INDPRO"
+    },
+    {
+      "date": "2025-09-16",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-17",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-17",
+      "time": "14:00",
+      "title": "FOMC Rate Decision",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Federal Reserve's decision on the federal funds target rate.",
+      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
+      "frequency": "8 times per year",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bearish, bonds bearish",
+        "lowerThanExpected": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "US bonds",
+        "Gold",
+        "Global markets"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-17",
+      "time": "14:00",
+      "title": "FOMC Economic Projections",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-17",
+      "time": "14:30",
+      "title": "Fed Chair Press Conference",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-18",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-22",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-09-22",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-22",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-23",
+      "time": "08:30",
+      "title": "Unemployment Claims",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/21",
+      "fredReleaseId": 21,
+      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
+      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bearish, stocks bearish",
+        "lowerThanExpected": "USD bullish, stocks bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "191000K",
+      "previous": "218000K",
+      "actualDate": "2025-11-29",
+      "previousDate": "2025-11-22",
+      "fredSeriesId": "ICSA"
+    },
+    {
+      "date": "2025-09-23",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-24",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-24",
+      "time": "18:00",
+      "title": "2-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 2-year government notes.",
+      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 2-year yield",
+        "Fed funds futures"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-25",
+      "time": "08:30",
+      "title": "GDP q/q",
+      "impact": "high",
+      "category": "growth",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/53",
+      "fredReleaseId": 53,
+      "description": "Quarterly change in Gross Domestic Product - the broadest measure of economic activity.",
+      "whyItMatters": "Shows overall economic health. Two consecutive negative quarters typically defines recession.",
+      "frequency": "Quarterly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency bullish, stocks bullish",
+        "lowerThanExpected": "Currency bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "Local currency",
+        "Local stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": "3.8%",
+      "previous": "-0.6%",
+      "actualDate": "2025-04-01",
+      "previousDate": "2025-01-01",
+      "fredSeriesId": "A191RL1Q225SBEA"
+    },
+    {
+      "date": "2025-09-25",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": "+0.5%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "DGORDER"
+    },
+    {
+      "date": "2025-09-25",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-25",
+      "time": "18:00",
+      "title": "5-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 5-year government notes.",
+      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 5-year yield",
+        "Corporate bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-26",
+      "time": "08:30",
+      "title": "Retail Sales m/m",
+      "impact": "high",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/323",
+      "fredReleaseId": 323,
+      "description": "Monthly change in total value of sales at retail level.",
+      "whyItMatters": "Consumer spending drives 70% of GDP. First look at monthly consumer activity.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, retail stocks bullish",
+        "lowerThanExpected": "USD bearish, retail stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Retail ETFs"
+      ],
+      "historicalVolatility": "High",
+      "actual": "+0.2%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "RSAFS"
+    },
+    {
+      "date": "2025-09-26",
+      "time": "08:30",
+      "title": "Core PCE Price Index m/m",
+      "impact": "high",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/54",
+      "fredReleaseId": 54,
+      "description": "Personal Consumption Expenditures Price Index excluding food and energy. Fed's preferred inflation measure.",
+      "whyItMatters": "THE inflation measure the Fed targets. More important than CPI for Fed policy.",
+      "frequency": "Monthly (last week)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, bonds bearish, stocks mixed",
+        "lowerThanExpected": "USD bearish, bonds bullish, stocks mixed"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds",
+        "US stocks",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": "+0.2%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PCEPILFE"
+    },
+    {
+      "date": "2025-09-26",
+      "time": "18:00",
+      "title": "7-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 7-year government notes.",
+      "whyItMatters": "Part of the belly of the curve.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-29",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-09-29",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-29",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-30",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-30",
+      "time": "10:00",
+      "title": "JOLTS Job Openings",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/192",
+      "fredReleaseId": 192,
+      "description": "Job Openings and Labor Turnover Survey measures the number of job openings, hires, and separations.",
+      "whyItMatters": "Shows labor demand. High openings relative to unemployed workers indicates a tight labor market, which can fuel wage inflation.",
+      "frequency": "Monthly (about 5 weeks lag)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish (tight labor market)",
+        "lowerThanExpected": "USD bearish (loosening labor market)"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "7.2M",
+      "previous": "7.2M",
+      "actualDate": "2025-08-01",
+      "previousDate": "2025-07-01",
+      "fredSeriesId": "JTSJOL"
+    },
+    {
+      "date": "2025-10-01",
+      "time": "09:45",
+      "title": "Chicago PMI",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/113",
+      "fredReleaseId": 113,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-01",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-02",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-06",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-10-06",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-06",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-07",
+      "time": "12:00",
+      "title": "EIA Short-Term Energy Outlook",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/outlooks/steo/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-07",
+      "time": "15:00",
+      "title": "Consumer Credit m/m",
+      "impact": "low",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/14",
+      "fredReleaseId": 14,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-08",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-08",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-08",
+      "time": "14:00",
+      "title": "FOMC Meeting Minutes",
+      "impact": "medium",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-09",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-10",
+      "time": "18:00",
+      "title": "10-Year Note Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 10-year government notes.",
+      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
+        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
+      },
+      "relatedAssets": [
+        "US 10-year yield",
+        "USD",
+        "Mortgage rates"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-13",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-13",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-13",
+      "time": "18:00",
+      "title": "30-Year Bond Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 30-year government bonds.",
+      "whyItMatters": "Long-end of yield curve. Sensitive to inflation expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 30-year yield",
+        "USD",
+        "TLT ETF"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-13",
+      "time": "19:00",
+      "title": "Federal Budget Balance",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://fiscaldata.treasury.gov/",
+      "category": "fiscal",
+      "description": "Monthly US government budget surplus or deficit.",
+      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal direct impact",
+        "lowerThanExpected": "Minimal direct impact"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-14",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-10-14",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-15",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-16",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-20",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-10-20",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-20",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-21",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-22",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-22",
+      "time": "14:00",
+      "title": "Fed Beige Book",
+      "impact": "medium",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-23",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-24",
+      "time": "08:30",
+      "title": "CPI m/m",
+      "impact": "high",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/10",
+      "fredReleaseId": 10,
+      "description": "Consumer Price Index measures the monthly change in prices paid by consumers for goods and services.",
+      "whyItMatters": "Primary inflation gauge that central banks target. Higher inflation typically leads to rate hikes, lower inflation to rate cuts.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency bullish (rate hike expectations), bonds bearish, gold mixed",
+        "lowerThanExpected": "Currency bearish (rate cut expectations), bonds bullish"
+      },
+      "relatedAssets": [
+        "Local currency",
+        "Government bonds",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": "+0.3%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "CPIAUCSL"
+    },
+    {
+      "date": "2025-10-24",
+      "time": "18:00",
+      "title": "2-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 2-year government notes.",
+      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 2-year yield",
+        "Fed funds futures"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-27",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-10-27",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-27",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-27",
+      "time": "18:00",
+      "title": "5-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 5-year government notes.",
+      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 5-year yield",
+        "Corporate bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-27",
+      "time": "18:00",
+      "title": "7-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 7-year government notes.",
+      "whyItMatters": "Part of the belly of the curve.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-28",
+      "time": "08:30",
+      "title": "Unemployment Claims",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/21",
+      "fredReleaseId": 21,
+      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
+      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bearish, stocks bearish",
+        "lowerThanExpected": "USD bullish, stocks bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "191000K",
+      "previous": "218000K",
+      "actualDate": "2025-11-29",
+      "previousDate": "2025-11-22",
+      "fredSeriesId": "ICSA"
+    },
+    {
+      "date": "2025-10-28",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-28",
+      "time": "10:00",
+      "title": "Factory Orders m/m",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/61",
+      "fredReleaseId": 61,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-29",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-30",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-03",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-11-03",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-03",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-04",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-05",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-05",
+      "time": "14:00",
+      "title": "FOMC Rate Decision",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Federal Reserve's decision on the federal funds target rate.",
+      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
+      "frequency": "8 times per year",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bearish, bonds bearish",
+        "lowerThanExpected": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "US bonds",
+        "Gold",
+        "Global markets"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-05",
+      "time": "14:30",
+      "title": "Fed Chair Press Conference",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-06",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-07",
+      "time": "15:00",
+      "title": "Consumer Credit m/m",
+      "impact": "low",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/14",
+      "fredReleaseId": 14,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-10",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-11-10",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-10",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-10",
+      "time": "18:00",
+      "title": "10-Year Note Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 10-year government notes.",
+      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
+        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
+      },
+      "relatedAssets": [
+        "US 10-year yield",
+        "USD",
+        "Mortgage rates"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-11",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-11",
+      "time": "19:00",
+      "title": "Federal Budget Balance",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://fiscaldata.treasury.gov/",
+      "category": "fiscal",
+      "description": "Monthly US government budget surplus or deficit.",
+      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal direct impact",
+        "lowerThanExpected": "Minimal direct impact"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-12",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-12",
+      "time": "12:00",
+      "title": "EIA Short-Term Energy Outlook",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/outlooks/steo/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-13",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-13",
+      "time": "18:00",
+      "title": "30-Year Bond Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 30-year government bonds.",
+      "whyItMatters": "Long-end of yield curve. Sensitive to inflation expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 30-year yield",
+        "USD",
+        "TLT ETF"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-17",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-11-17",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-17",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-18",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": "+0.5%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "DGORDER"
+    },
+    {
+      "date": "2025-11-18",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-19",
+      "time": "08:30",
+      "title": "Trade Balance",
+      "impact": "medium",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/51",
+      "fredReleaseId": 51,
+      "description": "Difference between exports and imports of goods and services.",
+      "whyItMatters": "Large deficits can weaken currency. Trade data affects GDP calculations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "Local currency"
+      ],
+      "historicalVolatility": "Low",
+      "actual": "-59.5B",
+      "previous": "-78.2B",
+      "actualDate": "2025-08-01",
+      "previousDate": "2025-07-01",
+      "fredSeriesId": "BOPGSTB"
+    },
+    {
+      "date": "2025-11-19",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-20",
+      "time": "08:30",
+      "title": "Non-Farm Payrolls",
+      "impact": "high",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/50",
+      "fredReleaseId": 50,
+      "description": "Measures the change in the number of employed people in the US, excluding farm workers, government employees, private household employees, and nonprofit organization employees.",
+      "whyItMatters": "The most important employment indicator. Strong job growth signals economic expansion and can lead to Fed rate hikes. Weak numbers suggest economic slowdown and potential rate cuts.",
+      "frequency": "Monthly (first Friday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks mixed (good economy but higher rates), bonds bearish",
+        "lowerThanExpected": "USD bearish, stocks mixed (weak economy but lower rates), bonds bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "US bonds",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": "+119K",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PAYEMS"
+    },
+    {
+      "date": "2025-11-20",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-24",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2025-11-24",
+      "time": "09:15",
+      "title": "Industrial Production m/m",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/13",
+      "fredReleaseId": 13,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "INDPRO"
+    },
+    {
+      "date": "2025-11-24",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-24",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-24",
+      "time": "18:00",
+      "title": "2-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 2-year government notes.",
+      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 2-year yield",
+        "Fed funds futures"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-25",
+      "time": "08:30",
+      "title": "Unemployment Claims",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/21",
+      "fredReleaseId": 21,
+      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
+      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bearish, stocks bearish",
+        "lowerThanExpected": "USD bullish, stocks bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "191000K",
+      "previous": "218000K",
+      "actualDate": "2025-11-29",
+      "previousDate": "2025-11-22",
+      "fredSeriesId": "ICSA"
+    },
+    {
+      "date": "2025-11-25",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-25",
+      "time": "10:00",
+      "title": "Factory Orders m/m",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/61",
+      "fredReleaseId": 61,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-25",
+      "time": "18:00",
+      "title": "5-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 5-year government notes.",
+      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 5-year yield",
+        "Corporate bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-26",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": "+0.5%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "DGORDER"
+    },
+    {
+      "date": "2025-11-26",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-26",
+      "time": "14:00",
+      "title": "FOMC Meeting Minutes",
+      "impact": "medium",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-26",
+      "time": "18:00",
+      "title": "7-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 7-year government notes.",
+      "whyItMatters": "Part of the belly of the curve.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-27",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-27",
+      "time": "All Day",
+      "title": "Thanksgiving Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-28",
+      "time": "13:00",
+      "title": "Early Close (1:00 PM ET)",
+      "impact": "early_close",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "isEarlyClose": true,
+      "closeTimeET": "13:00",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-01",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
     {
       "date": "2025-12-01",
       "time": "16:30",
@@ -57,6 +3240,155 @@
         "T-bill rates"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-02",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-03",
+      "time": "09:15",
+      "title": "Industrial Production m/m",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/13",
+      "fredReleaseId": 13,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "INDPRO"
+    },
+    {
+      "date": "2025-12-03",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-03",
+      "time": "14:00",
+      "title": "Fed Beige Book",
+      "impact": "medium",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-04",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": "+0.5%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "DGORDER"
+    },
+    {
+      "date": "2025-12-04",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -1070,6 +4402,30 @@
     },
     {
       "date": "2025-12-24",
+      "time": "13:00",
+      "title": "Early Close (1:00 PM ET)",
+      "impact": "early_close",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "isEarlyClose": true,
+      "closeTimeET": "13:00",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-24",
       "time": "18:00",
       "title": "2-Year Note Auction",
       "impact": "medium",
@@ -2036,7 +5392,7 @@
     {
       "date": "2026-01-19",
       "time": "All Day",
-      "title": "Martin Luther King Jr. Day (Market Closed)",
+      "title": "MLK Jr. Day (Market Closed)",
       "impact": "holiday",
       "currency": "USD",
       "country": "US",
@@ -5121,6 +8477,133 @@
       "previous": null
     },
     {
+      "date": "2026-04-06",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/17",
+      "fredReleaseId": 17,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": "+0.1%",
+      "previous": null,
+      "actualDate": "2025-09-01",
+      "previousDate": "2025-08-01",
+      "fredSeriesId": "PPIACO"
+    },
+    {
+      "date": "2026-04-06",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-06",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-07",
+      "time": "10:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "category": "services",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/271",
+      "fredReleaseId": 271,
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-07",
+      "time": "15:00",
+      "title": "Consumer Credit m/m",
+      "impact": "low",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/releases/14",
+      "fredReleaseId": 14,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-04-08",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -5209,6 +8692,130 @@
       "previous": null
     },
     {
+      "date": "2026-04-10",
+      "time": "18:00",
+      "title": "10-Year Note Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 10-year government notes.",
+      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
+        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
+      },
+      "relatedAssets": [
+        "US 10-year yield",
+        "USD",
+        "Mortgage rates"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-13",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-13",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-13",
+      "time": "18:00",
+      "title": "30-Year Bond Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 30-year government bonds.",
+      "whyItMatters": "Long-end of yield curve. Sensitive to inflation expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 30-year yield",
+        "USD",
+        "TLT ETF"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-13",
+      "time": "19:00",
+      "title": "Federal Budget Balance",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://fiscaldata.treasury.gov/",
+      "category": "fiscal",
+      "description": "Monthly US government budget surplus or deficit.",
+      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal direct impact",
+        "lowerThanExpected": "Minimal direct impact"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-04-15",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -5249,6 +8856,54 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-20",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-20",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -5315,6 +8970,128 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-24",
+      "time": "18:00",
+      "title": "2-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 2-year government notes.",
+      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 2-year yield",
+        "Fed funds futures"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-27",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-27",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-27",
+      "time": "18:00",
+      "title": "5-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 5-year government notes.",
+      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 5-year yield",
+        "Corporate bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-27",
+      "time": "18:00",
+      "title": "7-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 7-year government notes.",
+      "whyItMatters": "Part of the belly of the curve.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -5744,6 +9521,30 @@
     },
     {
       "date": "2026-07-03",
+      "time": "13:00",
+      "title": "Early Close (1:00 PM ET)",
+      "impact": "early_close",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "isEarlyClose": true,
+      "closeTimeET": "13:00",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-03",
       "time": "All Day",
       "title": "Independence Day (Market Closed)",
       "impact": "holiday",
@@ -5796,6 +9597,54 @@
       "source": "holidays",
       "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
       "category": "holiday",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-11-27",
+      "time": "13:00",
+      "title": "Early Close (1:00 PM ET)",
+      "impact": "early_close",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "isEarlyClose": true,
+      "closeTimeET": "13:00",
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-24",
+      "time": "13:00",
+      "title": "Early Close (1:00 PM ET)",
+      "impact": "early_close",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "isEarlyClose": true,
+      "closeTimeET": "13:00",
       "description": "Economic indicator release.",
       "whyItMatters": "May affect market sentiment and currency values.",
       "frequency": "Variable",
