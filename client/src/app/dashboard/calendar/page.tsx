@@ -1,13 +1,34 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Filter,
   X,
   Clock,
   RefreshCw,
+  TrendingUp,
+  TrendingDown,
+  Info,
+  ExternalLink,
+  Activity,
+  AlertTriangle,
+  Flame,
+  Calendar,
+  Zap,
+  Timer,
+  Plus,
+  FileText,
+  DollarSign,
+  BarChart3,
+  Trash2,
+  Save,
+  StickyNote,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 interface EconomicEvent {
@@ -21,6 +42,21 @@ interface EconomicEvent {
   previous: string | null;
   actual: string | null;
   category: string;
+  country?: string;
+  source?: string;
+  sourceUrl?: string;
+  // Enriched metadata
+  description?: string;
+  whyItMatters?: string;
+  frequency?: string;
+  typicalReaction?: {
+    higherThanExpected?: string;
+    lowerThanExpected?: string;
+    hawkish?: string;
+    dovish?: string;
+  };
+  relatedAssets?: string[];
+  historicalVolatility?: string;
 }
 
 const impactColors = {
@@ -29,6 +65,18 @@ const impactColors = {
   low: "bg-emerald-500",
   holiday: "bg-gray-500",
 };
+
+// Trade note interface
+interface TradeNote {
+  id: string;
+  userId: string;
+  date: string;
+  trades: number | null;
+  pnl: number | null;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const currencyFlags: Record<string, string> = {
   USD: "🇺🇸",
@@ -45,19 +93,19 @@ const currencyFlags: Record<string, string> = {
 const currencies = ["All", "USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "NZD", "CNY"];
 const impactLevels = ["All", "High", "Medium", "Low"];
 const categories = [
-  "All",
-  "Interest Rates",
-  "Employment",
-  "Inflation",
-  "GDP",
-  "Consumer",
-  "Manufacturing",
-  "Trade",
-  "Housing",
-  "Speeches",
-  "Energy",
-  "Sentiment",
-  "Other",
+  { value: "All", label: "All" },
+  { value: "bonds", label: "Bonds" },
+  { value: "central_bank", label: "Central Bank" },
+  { value: "consumer", label: "Consumer" },
+  { value: "employment", label: "Employment" },
+  { value: "fiscal", label: "Fiscal" },
+  { value: "growth", label: "Growth" },
+  { value: "housing", label: "Housing" },
+  { value: "inflation", label: "Inflation" },
+  { value: "manufacturing", label: "Manufacturing" },
+  { value: "sentiment", label: "Sentiment" },
+  { value: "services", label: "Services" },
+  { value: "trade", label: "Trade" },
 ];
 
 export default function EconomicCalendarPage() {
@@ -67,30 +115,442 @@ export default function EconomicCalendarPage() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [highlightedDay, setHighlightedDay] = useState<string | null>(null);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [hoveredDay, setHoveredDay] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<string>("");
+  const [animatedDay, setAnimatedDay] = useState<string | null>(null);
+  const [slideDirection, setSlideDirection] = useState<"left" | "right" | null>(null);
+  const [isSliding, setIsSliding] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [showEvents, setShowEvents] = useState(true);
+  const [showTenDayWindow, setShowTenDayWindow] = useState(true);
+  const [showNotes, setShowNotes] = useState(true);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [deletingAllNotes, setDeletingAllNotes] = useState(false);
 
   // Filters
   const [filterCurrency, setFilterCurrency] = useState("All");
   const [filterImpact, setFilterImpact] = useState("All");
   const [filterCategory, setFilterCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
+  const filterDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch events
+  // Trade Notes State
+  const [tradeNotes, setTradeNotes] = useState<Record<string, TradeNote>>({});
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [noteFormData, setNoteFormData] = useState({
+    trades: "",
+    pnl: "",
+    note: "",
+  });
+  const [savingNote, setSavingNote] = useState(false);
+
+  // Fetch trade notes
+  const fetchTradeNotes = async () => {
+    try {
+      const response = await fetch("/api/trade-notes");
+      const data = await response.json();
+      if (data.notes) {
+        const notesMap: Record<string, TradeNote> = {};
+        data.notes.forEach((note: TradeNote) => {
+          notesMap[note.date] = note;
+        });
+        setTradeNotes(notesMap);
+      }
+    } catch (error) {
+      console.error("Failed to fetch trade notes:", error);
+    }
+  };
+
+  // Save trade note
+  const saveTradeNote = async () => {
+    if (!selectedDay) return;
+
+    setSavingNote(true);
+    try {
+      const payload = {
+        date: selectedDay,
+        trades: noteFormData.trades ? parseInt(noteFormData.trades) : null,
+        pnl: noteFormData.pnl ? parseFloat(noteFormData.pnl.replace(/[^0-9.-]/g, "")) : null,
+        note: noteFormData.note || null,
+      };
+
+      const response = await fetch("/api/trade-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (data.note) {
+        setTradeNotes((prev) => ({
+          ...prev,
+          [selectedDay]: data.note,
+        }));
+      }
+
+      // Close both modals
+      setShowNoteModal(false);
+      setShowModal(false);
+      setHighlightedDay(null);
+      setNoteFormData({ trades: "", pnl: "", note: "" });
+    } catch (error) {
+      console.error("Failed to save trade note:", error);
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  // Delete trade note
+  const deleteTradeNote = async () => {
+    if (!selectedDay) return;
+
+    setSavingNote(true);
+    try {
+      await fetch(`/api/trade-notes?date=${selectedDay}`, {
+        method: "DELETE",
+      });
+
+      setTradeNotes((prev) => {
+        const newNotes = { ...prev };
+        delete newNotes[selectedDay];
+        return newNotes;
+      });
+
+      setShowNoteModal(false);
+      setShowModal(false);
+      setHighlightedDay(null);
+      setNoteFormData({ trades: "", pnl: "", note: "" });
+    } catch (error) {
+      console.error("Failed to delete trade note:", error);
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  // Delete all trade notes
+  const deleteAllTradeNotes = async () => {
+    setDeletingAllNotes(true);
+    try {
+      // Delete each note one by one
+      const dates = Object.keys(tradeNotes);
+      for (const date of dates) {
+        await fetch(`/api/trade-notes?date=${date}`, {
+          method: "DELETE",
+        });
+      }
+      setTradeNotes({});
+      setShowDeleteAllConfirm(false);
+      setShowFilters(false);
+    } catch (error) {
+      console.error("Failed to delete all trade notes:", error);
+    } finally {
+      setDeletingAllNotes(false);
+    }
+  };
+
+  // Open note modal with existing data
+  const openNoteModal = () => {
+    if (selectedDay && tradeNotes[selectedDay]) {
+      const existingNote = tradeNotes[selectedDay];
+      setNoteFormData({
+        trades: existingNote.trades?.toString() || "",
+        pnl: existingNote.pnl?.toString() || "",
+        note: existingNote.note || "",
+      });
+    } else {
+      setNoteFormData({ trades: "", pnl: "", note: "" });
+    }
+    setShowNoteModal(true);
+  };
+
+  // Fetch events and notes on mount
   useEffect(() => {
     fetchEvents();
+    fetchTradeNotes();
   }, []);
+
+  // Live clock update
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target as Node)) {
+        setShowFilters(false);
+      }
+    };
+
+    if (showFilters) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilters]);
 
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/calendar");
-      const data = await response.json();
-      setEvents(data.events || []);
+      // Fetch calendar events and live data in parallel
+      const [calendarResponse, liveDataResponse] = await Promise.all([
+        fetch("/api/calendar"),
+        fetch("/api/live-data").catch(() => null), // Don't fail if live data unavailable
+      ]);
+
+      const calendarData = await calendarResponse.json();
+      let liveData: Record<string, { actual: string | null; previous: string | null }> = {};
+
+      if (liveDataResponse?.ok) {
+        const liveJson = await liveDataResponse.json();
+        liveData = liveJson.data || {};
+      }
+
+      // Merge live data into events
+      const eventsWithLiveData = (calendarData.events || []).map((event: EconomicEvent) => {
+        const live = liveData[event.event];
+        if (live) {
+          return {
+            ...event,
+            actual: live.actual || event.actual,
+            previous: live.previous || event.previous,
+          };
+        }
+        return event;
+      });
+
+      setEvents(eventsWithLiveData);
     } catch (error) {
       console.error("Failed to fetch events:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Get next high-impact event
+  const nextHighImpactEvent = useMemo(() => {
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+    const futureHighImpact = events
+      .filter((e) => e.impact === "high")
+      .filter((e) => {
+        if (e.date > todayKey) return true;
+        if (e.date === todayKey) {
+          const [hours, mins] = e.time.split(":").map(Number);
+          const eventTime = new Date(now);
+          eventTime.setHours(hours, mins, 0, 0);
+          return eventTime > now;
+        }
+        return false;
+      })
+      .sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.time.localeCompare(b.time);
+      });
+
+    return futureHighImpact[0] || null;
+  }, [events]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!nextHighImpactEvent) {
+      setCountdown("");
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = new Date();
+      const [year, month, day] = nextHighImpactEvent.date.split("-").map(Number);
+      const [hours, mins] = nextHighImpactEvent.time.split(":").map(Number);
+      const eventTime = new Date(year, month - 1, day, hours, mins, 0, 0);
+
+      const diff = eventTime.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setCountdown("Now!");
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hoursLeft = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secsLeft = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (days > 0) {
+        setCountdown(`${days}d ${hoursLeft}h ${minsLeft}m`);
+      } else if (hoursLeft > 0) {
+        setCountdown(`${hoursLeft}h ${minsLeft}m ${secsLeft}s`);
+      } else {
+        setCountdown(`${minsLeft}m ${secsLeft}s`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [nextHighImpactEvent]);
+
+  // Quick stats
+  const quickStats = useMemo(() => {
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+    const todayEvents = events.filter((e) => e.date === todayKey);
+    const todayHigh = todayEvents.filter((e) => e.impact === "high").length;
+    const todayMedium = todayEvents.filter((e) => e.impact === "medium").length;
+
+    // This week events
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const weekEvents = events.filter((e) => {
+      const [y, m, d] = e.date.split("-").map(Number);
+      const eventDate = new Date(y, m - 1, d);
+      return eventDate >= startOfWeek && eventDate <= endOfWeek;
+    });
+    const weekHigh = weekEvents.filter((e) => e.impact === "high").length;
+
+    return { todayTotal: todayEvents.length, todayHigh, todayMedium, weekHigh };
+  }, [events]);
+
+  // Calculate weekly and monthly P&L summaries
+  const pnlSummary = useMemo(() => {
+    const now = new Date();
+
+    // Current week (Sunday to Saturday)
+    const startOfCurrentWeek = new Date(now);
+    startOfCurrentWeek.setDate(now.getDate() - now.getDay());
+    startOfCurrentWeek.setHours(0, 0, 0, 0);
+    const endOfCurrentWeek = new Date(startOfCurrentWeek);
+    endOfCurrentWeek.setDate(startOfCurrentWeek.getDate() + 6);
+
+    // Last week (in case current week has no data)
+    const startOfLastWeek = new Date(startOfCurrentWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const endOfLastWeek = new Date(startOfCurrentWeek);
+    endOfLastWeek.setDate(endOfLastWeek.getDate() - 1);
+
+    // Current month (based on displayed month)
+    const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+
+    let currentWeekPnL = 0;
+    let currentWeekTrades = 0;
+    let currentWeekDays = 0;
+    let lastWeekPnL = 0;
+    let lastWeekTrades = 0;
+    let lastWeekDays = 0;
+    let monthlyPnL = 0;
+    let monthlyTrades = 0;
+    let monthlyDays = 0;
+
+    Object.entries(tradeNotes).forEach(([dateStr, note]) => {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const noteDate = new Date(y, m - 1, d);
+
+      // Check if in current week
+      if (noteDate >= startOfCurrentWeek && noteDate <= endOfCurrentWeek) {
+        if (note.pnl !== null && note.pnl !== undefined) {
+          currentWeekPnL += note.pnl;
+          currentWeekDays++;
+        }
+        if (note.trades !== null && note.trades !== undefined) {
+          currentWeekTrades += note.trades;
+        }
+      }
+
+      // Check if in last week
+      if (noteDate >= startOfLastWeek && noteDate <= endOfLastWeek) {
+        if (note.pnl !== null && note.pnl !== undefined) {
+          lastWeekPnL += note.pnl;
+          lastWeekDays++;
+        }
+        if (note.trades !== null && note.trades !== undefined) {
+          lastWeekTrades += note.trades;
+        }
+      }
+
+      // Check if in currently displayed month
+      if (noteDate >= startOfMonth && noteDate <= endOfMonth) {
+        if (note.pnl !== null && note.pnl !== undefined) {
+          monthlyPnL += note.pnl;
+          monthlyDays++;
+        }
+        if (note.trades !== null && note.trades !== undefined) {
+          monthlyTrades += note.trades;
+        }
+      }
+    });
+
+    // Use current week if it has data, otherwise show last week
+    const hasCurrentWeekData = currentWeekDays > 0 || currentWeekTrades > 0;
+    const weeklyPnL = hasCurrentWeekData ? currentWeekPnL : lastWeekPnL;
+    const weeklyTrades = hasCurrentWeekData ? currentWeekTrades : lastWeekTrades;
+    const weeklyDays = hasCurrentWeekData ? currentWeekDays : lastWeekDays;
+    const weekLabel = hasCurrentWeekData ? "This Week" : "Last Week";
+
+    return {
+      weeklyPnL,
+      weeklyTrades,
+      weeklyDays,
+      weekLabel,
+      monthlyPnL,
+      monthlyTrades,
+      monthlyDays,
+    };
+  }, [tradeNotes, currentMonth]);
+
+  // Calculate weekly totals for a given Saturday date, bounded by the displayed month
+  const getWeekTotals = useCallback((saturdayDate: Date, displayedMonth: Date) => {
+    // Get the Sunday of this week (6 days before Saturday)
+    const startOfWeek = new Date(saturdayDate);
+    startOfWeek.setDate(saturdayDate.getDate() - 6);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(saturdayDate);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Get the boundaries of the displayed month
+    const monthStart = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), 1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthEnd = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 0);
+    monthEnd.setHours(23, 59, 59, 999);
+
+    // Clamp the week boundaries to the displayed month
+    const effectiveStart = startOfWeek < monthStart ? monthStart : startOfWeek;
+    const effectiveEnd = endOfWeek > monthEnd ? monthEnd : endOfWeek;
+
+    let weekPnL = 0;
+    let weekTrades = 0;
+    let weekDays = 0;
+
+    Object.entries(tradeNotes).forEach(([dateStr, note]) => {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const noteDate = new Date(y, m - 1, d);
+
+      // Only count notes within the effective range (week bounded by month)
+      if (noteDate >= effectiveStart && noteDate <= effectiveEnd) {
+        if (note.pnl !== null && note.pnl !== undefined) {
+          weekPnL += note.pnl;
+          weekDays++;
+        }
+        if (note.trades !== null && note.trades !== undefined) {
+          weekTrades += note.trades;
+        }
+      }
+    });
+
+    return { weekPnL, weekTrades, weekDays };
+  }, [tradeNotes]);
 
   // Filter events
   const filteredEvents = useMemo(() => {
@@ -158,12 +618,19 @@ export default function EconomicCalendarPage() {
   };
 
   const formatDateKey = (date: Date) => {
-    return date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   const isToday = (date: Date) => {
     const today = new Date();
-    return formatDateKey(date) === formatDateKey(today);
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
   };
 
   const isPast = (date: Date) => {
@@ -173,9 +640,27 @@ export default function EconomicCalendarPage() {
   };
 
   const navigateMonth = (direction: "prev" | "next") => {
-    const newDate = new Date(currentMonth);
-    newDate.setMonth(newDate.getMonth() + (direction === "next" ? 1 : -1));
-    setCurrentMonth(newDate);
+    // Start slide-out animation
+    setIsSliding(true);
+    setSlideDirection(direction === "next" ? "left" : "right");
+
+    // After slide-out completes, change month and slide-in from opposite direction
+    setTimeout(() => {
+      const newDate = new Date(currentMonth);
+      newDate.setMonth(newDate.getMonth() + (direction === "next" ? 1 : -1));
+      setCurrentMonth(newDate);
+
+      // Slide in from opposite side
+      setSlideDirection(direction === "next" ? "right" : "left");
+
+      // Small delay then remove sliding state to trigger slide-in
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setSlideDirection(null);
+          setIsSliding(false);
+        });
+      });
+    }, 250);
   };
 
   const handleDayClick = (dateKey: string) => {
@@ -184,202 +669,441 @@ export default function EconomicCalendarPage() {
     setShowModal(true);
   };
 
+  // Handle clicking on the next high-impact countdown box
+  const handleCountdownClick = () => {
+    if (!nextHighImpactEvent) return;
+
+    const eventDate = nextHighImpactEvent.date;
+    const [year, month] = eventDate.split("-").map(Number);
+
+    // Check if we need to navigate to a different month
+    const eventMonth = new Date(year, month - 1, 1);
+    const needsNavigation =
+      currentMonth.getFullYear() !== eventMonth.getFullYear() ||
+      currentMonth.getMonth() !== eventMonth.getMonth();
+
+    if (needsNavigation) {
+      // Determine slide direction based on whether going forward or backward
+      const isForward =
+        eventMonth.getFullYear() > currentMonth.getFullYear() ||
+        (eventMonth.getFullYear() === currentMonth.getFullYear() &&
+          eventMonth.getMonth() > currentMonth.getMonth());
+
+      // Start slide-out animation
+      setIsSliding(true);
+      setSlideDirection(isForward ? "left" : "right");
+
+      // After slide-out completes, change month and slide-in from opposite direction
+      setTimeout(() => {
+        setCurrentMonth(eventMonth);
+        // Slide in from opposite side
+        setSlideDirection(isForward ? "right" : "left");
+
+        // Small delay then remove sliding state to trigger slide-in
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setSlideDirection(null);
+            setIsSliding(false);
+
+            // Trigger the border pulse animation after the slide completes
+            setTimeout(() => {
+              setAnimatedDay(eventDate);
+
+              // Clear the animation after it completes
+              setTimeout(() => {
+                setAnimatedDay(null);
+              }, 2000);
+            }, 150);
+          });
+        });
+      }, 250);
+    } else {
+      // Same month, just animate
+      setAnimatedDay(eventDate);
+
+      // Clear the animation after it completes (2s matches CSS duration)
+      setTimeout(() => {
+        setAnimatedDay(null);
+      }, 2000);
+    }
+  };
+
   const { daysInMonth, startingDay } = getDaysInMonth(currentMonth);
 
   // Selected day events for modal
   const selectedDayEvents = selectedDay ? eventsByDate[selectedDay] || [] : [];
 
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="h-full flex flex-col gap-3 overflow-hidden animate-pulse">
+      <div className="flex items-center justify-between flex-shrink-0">
+        <div className="space-y-2">
+          <div className="skeleton h-6 w-48" />
+          <div className="skeleton h-4 w-64" />
+        </div>
+        <div className="flex gap-2">
+          <div className="skeleton h-8 w-24 rounded-lg" />
+          <div className="skeleton h-8 w-24 rounded-lg" />
+        </div>
+      </div>
+      <div className="skeleton h-24 rounded-xl" />
+      <div className="grid grid-cols-10 gap-2">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="skeleton h-20 rounded-lg" />
+        ))}
+      </div>
+      <div className="skeleton flex-1 rounded-xl" />
+    </div>
+  );
+
+  if (loading) {
+    return <LoadingSkeleton />;
+  }
+
   return (
     <div className="h-full flex flex-col gap-3 overflow-hidden">
-      {/* Page Header */}
-      <div className="flex items-center justify-between flex-shrink-0">
-        <div>
-          <h1 className="text-xl font-bold">Economic Calendar</h1>
-          <p className="text-xs text-muted">Upcoming economic events and releases</p>
+      {/* Quick Stats & Countdown Bar */}
+      <div className="glass rounded-xl p-3 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-4">
+          {/* Live Time & Date */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background/50">
+            <Clock className="w-4 h-4 text-accent-light" />
+            <span className="text-sm font-mono font-bold text-foreground">
+              {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+            </span>
+            <span className="text-xs text-muted">|</span>
+            <span className="text-sm text-muted">
+              {currentTime.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </span>
+          </div>
+
+          {/* Toggle Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowEvents(!showEvents)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                showEvents
+                  ? "bg-red-500/20 border border-red-500/50 text-red-400"
+                  : "bg-background/50 border border-border text-muted hover:text-foreground"
+              }`}
+              title={showEvents ? "Hide events" : "Show events"}
+            >
+              {showEvents ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">Events</span>
+            </button>
+            <button
+              onClick={() => setShowTenDayWindow(!showTenDayWindow)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                showTenDayWindow
+                  ? "bg-accent/20 border border-accent/50 text-accent-light"
+                  : "bg-background/50 border border-border text-muted hover:text-foreground"
+              }`}
+              title={showTenDayWindow ? "Hide 10-day window" : "Show 10-day window"}
+            >
+              {showTenDayWindow ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">10-Day</span>
+            </button>
+            <button
+              onClick={() => setShowNotes(!showNotes)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                showNotes
+                  ? "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400"
+                  : "bg-background/50 border border-border text-muted hover:text-foreground"
+              }`}
+              title={showNotes ? "Hide notes" : "Show notes"}
+            >
+              {showNotes ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">Notes</span>
+            </button>
+          </div>
+
+          {/* Filter Dropdown */}
+          <div className="relative" ref={filterDropdownRef}>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all ${
+                showFilters || filterCurrency !== "All" || filterImpact !== "All" || filterCategory !== "All"
+                  ? "bg-accent/20 border border-accent/50 text-accent-light"
+                  : "bg-background/50 hover:bg-card-hover text-muted hover:text-foreground"
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              <span className="hidden sm:inline">Filter</span>
+              {(filterCurrency !== "All" || filterImpact !== "All" || filterCategory !== "All") && (
+                <span className="w-2 h-2 rounded-full bg-accent-light" />
+              )}
+              <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {showFilters && (
+              <div className="absolute top-full left-0 mt-2 z-50 w-72 bg-card rounded-xl border border-border shadow-xl p-4 space-y-4 animate-slide-in">
+                {/* Currency Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-muted mb-2">Currency</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {currencies.map((currency) => (
+                      <button
+                        key={currency}
+                        onClick={() => setFilterCurrency(currency)}
+                        className={`px-2 py-1 text-xs font-medium rounded-lg border transition-colors ${
+                          filterCurrency === currency
+                            ? "bg-accent/20 border-accent/50 text-accent-light"
+                            : "bg-card-hover border-border text-muted hover:text-foreground"
+                        }`}
+                      >
+                        {currency !== "All" && currencyFlags[currency]} {currency}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Impact Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-muted mb-2">Impact</label>
+                  <div className="flex gap-1.5">
+                    {impactLevels.map((impact) => (
+                      <button
+                        key={impact}
+                        onClick={() => setFilterImpact(impact)}
+                        className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors ${
+                          filterImpact === impact
+                            ? "bg-accent/20 border-accent/50 text-accent-light"
+                            : "bg-card-hover border-border text-muted hover:text-foreground"
+                        }`}
+                      >
+                        {impact !== "All" && (
+                          <span className={`inline-block w-2 h-2 rounded-full ${impactColors[impact.toLowerCase() as keyof typeof impactColors]} mr-1.5`} />
+                        )}
+                        {impact}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Category Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-muted mb-2">Category</label>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-card-hover border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  >
+                    {categories.map((category) => (
+                      <option key={category.value} value={category.value}>{category.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Clear & Close */}
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  {(filterCurrency !== "All" || filterImpact !== "All" || filterCategory !== "All") && (
+                    <button
+                      onClick={() => {
+                        setFilterCurrency("All");
+                        setFilterImpact("All");
+                        setFilterCategory("All");
+                      }}
+                      className="text-xs text-red-400 hover:text-red-300"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="text-xs text-accent-light hover:underline ml-auto"
+                  >
+                    Done
+                  </button>
+                </div>
+
+                {/* Delete All Notes */}
+                {Object.keys(tradeNotes).length > 0 && (
+                  <div className="pt-3 mt-3 border-t border-border">
+                    <button
+                      onClick={() => setShowDeleteAllConfirm(true)}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-xs font-medium hover:bg-red-500/20 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete All Notes ({Object.keys(tradeNotes).length})
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Next High-Impact Countdown */}
+        {showTenDayWindow && nextHighImpactEvent && (
           <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-colors ${
-              showFilters
-                ? "bg-accent/20 border-accent/50 text-accent-light"
-                : "bg-card border-border hover:bg-card-hover"
-            }`}
+            onClick={handleCountdownClick}
+            className="flex items-center gap-3 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 hover:border-red-500/50 transition-all cursor-pointer"
           >
-            <Filter className="w-4 h-4" />
-            Filters
-            {(filterCurrency !== "All" ||
-              filterImpact !== "All" ||
-              filterCategory !== "All") && (
-              <span className="w-2 h-2 rounded-full bg-accent-light" />
-            )}
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-red-500 pulse-high-impact" />
+              <Timer className="w-4 h-4 text-red-400" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-xs text-red-400 font-medium">Next High-Impact</span>
+              <span className="text-xs text-muted truncate max-w-[180px]">{nextHighImpactEvent.event}</span>
+            </div>
+            <div className="text-lg font-bold text-red-400 font-mono">
+              {countdown}
+            </div>
           </button>
+        )}
+      </div>
 
-          <button
-            onClick={fetchEvents}
-            disabled={loading}
-            className="flex items-center gap-2 px-3 py-1.5 bg-card border border-border rounded-lg hover:bg-card-hover transition-colors text-sm"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
 
-          {/* Legend */}
-          <div className="hidden md:flex items-center gap-4 ml-2 text-xs text-muted">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+      {/* 10-Day Window */}
+      {showTenDayWindow && (
+      <div className="glass rounded-xl p-3 flex-shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-medium text-muted">10-Day Window</h2>
+          <div className="flex items-center gap-3 text-[10px] text-muted">
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-red-500" />
               High
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-yellow-500" />
               Medium
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
               Low
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Filters Panel */}
-      {showFilters && (
-        <div className="bg-card rounded-xl border border-border p-4 flex-shrink-0">
-          <div className="flex flex-wrap gap-6 items-end">
-            {/* Currency Filter */}
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs font-medium text-muted mb-2">Currency</label>
-              <div className="flex flex-wrap gap-1.5">
-                {currencies.slice(0, 7).map((currency) => (
-                  <button
-                    key={currency}
-                    onClick={() => setFilterCurrency(currency)}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors ${
-                      filterCurrency === currency
-                        ? "bg-accent/20 border-accent/50 text-accent-light"
-                        : "bg-card-hover border-border text-muted hover:text-foreground"
-                    }`}
-                  >
-                    {currency !== "All" && currencyFlags[currency]} {currency}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Impact Filter */}
-            <div>
-              <label className="block text-xs font-medium text-muted mb-2">Impact</label>
-              <div className="flex gap-1.5">
-                {impactLevels.map((impact) => (
-                  <button
-                    key={impact}
-                    onClick={() => setFilterImpact(impact)}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors ${
-                      filterImpact === impact
-                        ? "bg-accent/20 border-accent/50 text-accent-light"
-                        : "bg-card-hover border-border text-muted hover:text-foreground"
-                    }`}
-                  >
-                    {impact !== "All" && (
-                      <span className={`inline-block w-2 h-2 rounded-full ${impactColors[impact.toLowerCase() as keyof typeof impactColors]} mr-1.5`} />
-                    )}
-                    {impact}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Category Filter */}
-            <div>
-              <label className="block text-xs font-medium text-muted mb-2">Category</label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="px-3 py-1 text-xs bg-card-hover border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Clear */}
-            {(filterCurrency !== "All" || filterImpact !== "All" || filterCategory !== "All") && (
-              <button
-                onClick={() => {
-                  setFilterCurrency("All");
-                  setFilterImpact("All");
-                  setFilterCategory("All");
-                }}
-                className="text-xs text-accent-light hover:underline"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 10-Day Window */}
-      <div className="bg-card rounded-xl border border-border p-3 flex-shrink-0">
-        <h2 className="text-xs font-medium text-muted mb-2">10-Day Window</h2>
         <div className="grid grid-cols-10 gap-2">
-          {tenDayWindow.map((date) => {
+          {tenDayWindow.map((date, dayIndex) => {
             const dateKey = formatDateKey(date);
             const dayEvents = eventsByDate[dateKey] || [];
             const highestImpact = getHighestImpact(dateKey);
             const isCurrentDay = isToday(date);
             const isPastDay = isPast(date) && !isCurrentDay;
             const isHighlighted = highlightedDay === dateKey;
+            const isHovered = hoveredDay === dateKey;
+            const isAnimated = animatedDay === dateKey;
+            const highCount = dayEvents.filter((e) => e.impact === "high").length;
+            const medCount = dayEvents.filter((e) => e.impact === "medium").length;
+            const lowCount = dayEvents.filter((e) => e.impact === "low").length;
+
+            // Determine popup alignment based on position
+            // First 2 days: align left, Last 2 days: align right, Others: center
+            const isFirstDays = dayIndex < 2;
+            const isLastDays = dayIndex >= 8;
 
             return (
-              <button
-                key={dateKey}
-                onClick={() => handleDayClick(dateKey)}
-                className={`relative flex flex-col items-center p-2 rounded-lg border transition-all ${
-                  isHighlighted
-                    ? "border-accent bg-accent/10 ring-2 ring-accent/30"
-                    : isCurrentDay
-                    ? "border-accent-light bg-accent-light/10"
-                    : isPastDay
-                    ? "border-border/50 bg-card-hover/30 opacity-50"
-                    : "border-border bg-card-hover hover:bg-card-hover/80 hover:border-border"
-                }`}
-              >
-                {/* Impact indicator */}
-                {highestImpact && (
-                  <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${impactColors[highestImpact]}`} />
+              <div key={dateKey} className="relative">
+                <button
+                  onClick={() => handleDayClick(dateKey)}
+                  onMouseEnter={() => setHoveredDay(dateKey)}
+                  onMouseLeave={() => setHoveredDay(null)}
+                  className={`relative w-full h-24 flex flex-col items-center justify-center p-2 rounded-lg transition-all glass-hover ${
+                    isHighlighted
+                      ? "bg-accent/20 ring-2 ring-accent/50 border border-accent/30"
+                      : isCurrentDay
+                      ? "today-glow bg-accent-light/10 border border-accent-light/50"
+                      : isPastDay
+                      ? "bg-background/30 border border-border/30 opacity-50"
+                      : "bg-card-hover/50 border border-border/50 hover:border-accent/30"
+                  } ${isAnimated ? "animate-border-pulse" : ""}`}
+                >
+                  {/* Impact indicator with pulse for high */}
+                  {highestImpact && (
+                    <div
+                      className={`absolute top-1 right-1 w-2.5 h-2.5 rounded-full ${impactColors[highestImpact]} ${
+                        highestImpact === "high" && !isPastDay ? "pulse-high-impact" : ""
+                      }`}
+                    />
+                  )}
+
+                  {/* Today label at top */}
+                  {isCurrentDay && (
+                    <div className="text-[8px] font-bold text-accent-light tracking-wider absolute top-1.5 left-1.5">TODAY</div>
+                  )}
+
+                  {/* Day of week */}
+                  <div className={`text-[10px] uppercase ${isCurrentDay ? "text-accent-light font-semibold" : "text-muted"}`}>
+                    {date.toLocaleDateString("en-US", { weekday: "short" })}
+                  </div>
+
+                  {/* Date */}
+                  <div className={`text-lg font-bold ${isCurrentDay ? "text-accent-light" : ""}`}>
+                    {date.getDate()}
+                  </div>
+
+                  {/* Event count with impact breakdown */}
+                  <div className="flex items-center gap-0.5 mt-1 h-4">
+                    {highCount > 0 && (
+                      <div className="flex items-center">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <span className="text-[9px] text-red-400 ml-0.5">{highCount}</span>
+                      </div>
+                    )}
+                    {medCount > 0 && (
+                      <div className="flex items-center ml-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                        <span className="text-[9px] text-yellow-400 ml-0.5">{medCount}</span>
+                      </div>
+                    )}
+                    {lowCount > 0 && (
+                      <div className="flex items-center ml-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[9px] text-emerald-400 ml-0.5">{lowCount}</span>
+                      </div>
+                    )}
+                    {dayEvents.length === 0 && <span className="text-[10px] text-muted">—</span>}
+                  </div>
+                </button>
+
+                {/* Hover Preview Tooltip */}
+                {isHovered && dayEvents.length > 0 && !showModal && (
+                  <div className={`absolute top-full mt-2 z-50 w-56 bg-card rounded-lg p-2 shadow-xl border border-border animate-slide-in ${
+                    isFirstDays
+                      ? "left-0"
+                      : isLastDays
+                      ? "right-0"
+                      : "left-1/2 -translate-x-1/2"
+                  }`}>
+                    <div className="text-[10px] text-muted mb-1.5 font-medium">
+                      {date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                    </div>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {dayEvents.slice(0, 4).map((event) => (
+                        <div key={event.id} className="flex items-start gap-2 text-[10px]">
+                          <div className={`w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0 ${impactColors[event.impact]}`} />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-muted">{event.time}</span>
+                            <span className="mx-1 text-border">•</span>
+                            <span className="text-foreground truncate">{event.event}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {dayEvents.length > 4 && (
+                        <div className="text-[10px] text-accent-light">+{dayEvents.length - 4} more</div>
+                      )}
+                    </div>
+                  </div>
                 )}
-
-                {/* Day of week */}
-                <div className="text-[10px] text-muted uppercase">
-                  {date.toLocaleDateString("en-US", { weekday: "short" })}
-                </div>
-
-                {/* Date */}
-                <div className={`text-base font-bold ${isCurrentDay ? "text-accent-light" : ""}`}>
-                  {date.getDate()}
-                </div>
-
-                {/* Event count */}
-                <div className="text-[10px] text-muted">
-                  {dayEvents.length > 0 ? `${dayEvents.length} events` : "—"}
-                </div>
-
-                {/* Today label */}
-                {isCurrentDay && (
-                  <div className="text-[8px] font-bold text-accent-light mt-0.5">TODAY</div>
-                )}
-              </button>
+              </div>
             );
           })}
         </div>
       </div>
+      )}
 
       {/* Month Calendar */}
-      <div className="bg-card rounded-xl border border-border flex-1 flex flex-col overflow-hidden min-h-0">
-        {/* Calendar Header */}
+      <div className={`bg-card rounded-xl border border-border flex-1 flex flex-col overflow-hidden min-h-0 transition-all ease-out ${
+        isSliding ? "duration-250" : "duration-200"
+      } ${
+        slideDirection === "left" ? "translate-x-[-50%] opacity-0" :
+        slideDirection === "right" ? "translate-x-[50%] opacity-0" :
+        "translate-x-0 opacity-100"
+      }`}>
+        {/* Calendar Header with P&L Summary */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-border flex-shrink-0">
           <button
             onClick={() => navigateMonth("prev")}
@@ -387,9 +1111,33 @@ export default function EconomicCalendarPage() {
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <h2 className="text-sm font-semibold">
-            {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-          </h2>
+
+          {/* Center: Month Title + Monthly P&L Summary */}
+          <div className="flex items-center gap-6">
+            <h2 className="text-sm font-semibold">
+              {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+            </h2>
+
+            {/* Monthly P&L */}
+            {showNotes && (pnlSummary.monthlyDays > 0 || pnlSummary.monthlyTrades > 0) && (
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium border ${
+                pnlSummary.monthlyPnL >= 0
+                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                  : "bg-red-500/10 border-red-500/30 text-red-400"
+              }`}>
+                <span className="text-muted text-[10px] uppercase tracking-wider">Month:</span>
+                <span className="font-bold">
+                  {pnlSummary.monthlyPnL >= 0 ? "+" : ""}${pnlSummary.monthlyPnL.toFixed(0)}
+                </span>
+                {pnlSummary.monthlyTrades > 0 && (
+                  <span className="text-muted text-[10px]">
+                    ({pnlSummary.monthlyTrades} trades)
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => navigateMonth("next")}
             className="p-1.5 rounded-lg hover:bg-card-hover transition-colors"
@@ -400,8 +1148,13 @@ export default function EconomicCalendarPage() {
 
         {/* Day Headers */}
         <div className="grid grid-cols-7 border-b border-border flex-shrink-0">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div key={day} className="px-2 py-1.5 text-center text-xs font-medium text-muted">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
+            <div
+              key={day}
+              className={`px-2 py-1.5 text-center text-xs font-medium ${
+                index === 0 || index === 6 ? "text-muted/60 bg-background/30" : "text-muted"
+              }`}
+            >
               {day}
             </div>
           ))}
@@ -423,152 +1176,670 @@ export default function EconomicCalendarPage() {
             const isCurrentDay = isToday(date);
             const isPastDay = isPast(date) && !isCurrentDay;
             const isHighlighted = highlightedDay === dateKey;
+            const isAnimated = animatedDay === dateKey;
+            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
             const highCount = dayEvents.filter((e) => e.impact === "high").length;
             const medCount = dayEvents.filter((e) => e.impact === "medium").length;
             const lowCount = dayEvents.filter((e) => e.impact === "low").length;
 
+            // Trade note data for this day
+            const dayNote = tradeNotes[dateKey];
+            const hasPnL = dayNote?.pnl !== null && dayNote?.pnl !== undefined;
+            const hasTrades = dayNote?.trades !== null && dayNote?.trades !== undefined;
+            const hasOnlyNote = dayNote?.note && !hasPnL && !hasTrades;
+            const isProfit = hasPnL && (dayNote?.pnl || 0) >= 0;
+            const isLoss = hasPnL && (dayNote?.pnl || 0) < 0;
+
+            // Check if this is a Saturday (day 6) - show weekly totals
+            const isSaturday = date.getDay() === 6;
+            const weekTotals = isSaturday ? getWeekTotals(date, currentMonth) : null;
+            const hasWeeklyData = weekTotals && weekTotals.weekDays > 0;
+            const hasSaturdayTrade = hasPnL || hasTrades;
+
+            // Format P&L display
+            const formatPnL = (pnl: number) => {
+              const formatted = Math.abs(pnl).toFixed(0);
+              return pnl >= 0 ? `$${formatted}` : `-$${formatted}`;
+            };
+
+            // Saturday with weekly data gets two-column layout
+            if (isSaturday && showNotes && hasWeeklyData) {
+              return (
+                <button
+                  key={day}
+                  onClick={() => handleDayClick(dateKey)}
+                  className={`p-1 border-b border-r text-left transition-all group relative ${
+                    isHighlighted
+                      ? "bg-accent/10 ring-2 ring-inset ring-accent/30 border-accent/30"
+                      : showNotes && isProfit
+                      ? "bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/20"
+                      : showNotes && isLoss
+                      ? "bg-red-500/15 border-red-500/40 hover:bg-red-500/20"
+                      : isPastDay
+                      ? "bg-background/30 border-border opacity-50"
+                      : "bg-background/20 border-border hover:bg-card-hover/50"
+                  } ${isAnimated ? "animate-border-pulse" : ""}`}
+                >
+                  <div className="flex h-full">
+                    {/* Left Column - Daily Data */}
+                    <div className="flex-1 flex flex-col pr-2 mr-1 border-r-2 border-border/50">
+                      {/* Day Number with Event Indicators */}
+                      <div className={`text-xs font-medium flex items-center gap-1.5 ${isPastDay ? "text-muted" : "text-muted/70"}`}>
+                        {day}
+                        {showNotes && hasOnlyNote && <StickyNote className="w-3 h-3 text-accent-light" />}
+                        {/* Event Indicators - inline with date */}
+                        {showEvents && dayEvents.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {highCount > 0 && (
+                              <div className="flex items-center">
+                                <span className="w-2 h-2 rounded-full bg-red-500" />
+                                <span className="text-[9px] text-red-400 ml-0.5 font-medium">{highCount}</span>
+                              </div>
+                            )}
+                            {medCount > 0 && (
+                              <div className="flex items-center">
+                                <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                                <span className="text-[9px] text-yellow-400 ml-0.5">{medCount}</span>
+                              </div>
+                            )}
+                            {lowCount > 0 && (
+                              <div className="flex items-center">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                <span className="text-[9px] text-emerald-400 ml-0.5">{lowCount}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Trade P&L Display */}
+                      {showNotes && hasPnL && (
+                        <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
+                          {formatPnL(dayNote.pnl!)}
+                        </div>
+                      )}
+
+                      {/* Trades count */}
+                      {showNotes && hasTrades && (
+                        <div className="text-xs text-muted">
+                          {dayNote.trades} Trade{dayNote.trades !== 1 ? "s" : ""}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right Column - Weekly Summary */}
+                    <div className={`w-[45%] flex flex-col items-center justify-center pl-1 rounded-r relative z-10 ${
+                      weekTotals!.weekPnL >= 0
+                        ? "bg-emerald-500/20 bg-gradient-to-br from-emerald-500/25 to-emerald-600/15"
+                        : "bg-red-500/20 bg-gradient-to-br from-red-500/25 to-red-600/15"
+                    }`}>
+                      <div className="text-[8px] text-muted uppercase tracking-wider">Week</div>
+                      <div className={`text-[11px] font-bold ${
+                        weekTotals!.weekPnL >= 0 ? "text-emerald-400" : "text-red-400"
+                      }`}>
+                        {weekTotals!.weekPnL >= 0 ? "+" : ""}${weekTotals!.weekPnL.toFixed(0)}
+                      </div>
+                      {weekTotals!.weekTrades > 0 && (
+                        <div className="text-[8px] text-muted">
+                          {weekTotals!.weekTrades} trades
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            }
+
+            // Regular day cell (non-Saturday or Saturday without weekly data)
             return (
               <button
                 key={day}
                 onClick={() => handleDayClick(dateKey)}
-                className={`p-1.5 border-b border-r border-border text-left transition-colors flex flex-col ${
+                className={`p-1.5 border-b border-r text-left transition-all flex flex-col group relative ${
                   isHighlighted
-                    ? "bg-accent/10 ring-2 ring-inset ring-accent/30"
+                    ? "bg-accent/10 ring-2 ring-inset ring-accent/30 border-accent/30"
+                    : showNotes && isProfit
+                    ? "bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/20"
+                    : showNotes && isLoss
+                    ? "bg-red-500/15 border-red-500/40 hover:bg-red-500/20"
                     : isCurrentDay
-                    ? "bg-accent-light/5"
+                    ? "bg-accent-light/10 border-accent-light/30"
                     : isPastDay
-                    ? "bg-background/30 opacity-50"
-                    : "hover:bg-card-hover"
-                }`}
+                    ? "bg-background/30 border-border opacity-50"
+                    : isWeekend
+                    ? "bg-background/20 border-border hover:bg-card-hover/50"
+                    : "border-border hover:bg-card-hover"
+                } ${isAnimated ? "animate-border-pulse" : ""}`}
               >
-                {/* Day Number */}
-                <div className={`text-xs font-medium ${isCurrentDay ? "text-accent-light" : isPastDay ? "text-muted" : ""}`}>
-                  {day}
-                  {isCurrentDay && <span className="ml-1 text-[9px] text-accent-light">TODAY</span>}
+                {/* Day Number Row with Event Indicators */}
+                <div className={`text-xs font-medium flex items-center justify-between ${
+                  isCurrentDay ? "text-accent-light" : isPastDay ? "text-muted" : isWeekend ? "text-muted/70" : ""
+                }`}>
+                  <div className="flex items-center gap-1.5">
+                    {day}
+                    {isCurrentDay && (
+                      <span className="text-[8px] px-1 py-0.5 rounded bg-accent-light/20 text-accent-light font-bold">
+                        TODAY
+                      </span>
+                    )}
+                    {/* Event Indicators - inline with date */}
+                    {showEvents && dayEvents.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        {highCount > 0 && (
+                          <div className="flex items-center">
+                            <span className={`w-2 h-2 rounded-full bg-red-500 ${!isPastDay && highCount > 0 ? "group-hover:scale-125 transition-transform" : ""}`} />
+                            <span className="text-[9px] text-red-400 ml-0.5 font-medium">{highCount}</span>
+                          </div>
+                        )}
+                        {medCount > 0 && (
+                          <div className="flex items-center">
+                            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                            <span className="text-[9px] text-yellow-400 ml-0.5">{medCount}</span>
+                          </div>
+                        )}
+                        {lowCount > 0 && (
+                          <div className="flex items-center">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span className="text-[9px] text-emerald-400 ml-0.5">{lowCount}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {/* Note-only indicator */}
+                  {showNotes && hasOnlyNote && (
+                    <StickyNote className="w-3 h-3 text-accent-light" />
+                  )}
                 </div>
 
-                {/* Event Indicators */}
-                {dayEvents.length > 0 && (
-                  <div className="flex items-center gap-1 mt-auto flex-wrap">
-                    {highCount > 0 && (
-                      <div className="flex items-center">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />
-                        <span className="text-[9px] text-muted ml-0.5">{highCount}</span>
-                      </div>
-                    )}
-                    {medCount > 0 && (
-                      <div className="flex items-center">
-                        <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                        <span className="text-[9px] text-muted ml-0.5">{medCount}</span>
-                      </div>
-                    )}
-                    {lowCount > 0 && (
-                      <div className="flex items-center">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                        <span className="text-[9px] text-muted ml-0.5">{lowCount}</span>
-                      </div>
-                    )}
+                {/* Trade P&L Display */}
+                {showNotes && hasPnL && (
+                  <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
+                    {formatPnL(dayNote.pnl!)}
+                  </div>
+                )}
+
+                {/* Trades count */}
+                {showNotes && hasTrades && (
+                  <div className="text-xs text-muted">
+                    {dayNote.trades} Trade{dayNote.trades !== 1 ? "s" : ""}
                   </div>
                 )}
               </button>
             );
           })}
 
-          {/* Empty cells after month ends */}
-          {Array.from({ length: (7 - ((startingDay + daysInMonth) % 7)) % 7 }).map((_, i) => (
-            <div key={`empty-end-${i}`} className="border-b border-r border-border bg-background/30" />
-          ))}
+          {/* Empty cells after month ends - with phantom Saturday weekly summaries */}
+          {Array.from({ length: (7 - ((startingDay + daysInMonth) % 7)) % 7 }).map((_, i) => {
+            // Calculate the day of week for this empty cell
+            // startingDay is the day of week of the 1st, daysInMonth is how many days
+            // So the last day of month is at position (startingDay + daysInMonth - 1)
+            // This empty cell is at position (startingDay + daysInMonth + i)
+            const cellDayOfWeek = (startingDay + daysInMonth + i) % 7;
+
+            // If this is a Saturday (day 6), check for partial week data
+            if (cellDayOfWeek === 6 && showNotes) {
+              // Calculate the phantom Saturday date (next month)
+              const lastDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+              const daysUntilSaturday = i + 1; // i is 0-indexed, so add 1
+              const phantomSaturdayDate = new Date(lastDayOfMonth);
+              phantomSaturdayDate.setDate(lastDayOfMonth.getDate() + daysUntilSaturday);
+
+              // Get week totals bounded by current month
+              const weekTotals = getWeekTotals(phantomSaturdayDate, currentMonth);
+              const hasWeeklyData = weekTotals && weekTotals.weekDays > 0;
+
+              if (hasWeeklyData) {
+                return (
+                  <div
+                    key={`empty-end-${i}`}
+                    className="border-b border-r border-border bg-background/30 p-1"
+                  >
+                    <div className="flex h-full">
+                      {/* Left Column - Empty (no daily data for phantom day) */}
+                      <div className="flex-1 flex flex-col pr-2 mr-1 border-r-2 border-border/50" />
+
+                      {/* Right Column - Weekly Summary */}
+                      <div className={`w-[45%] flex flex-col items-center justify-center pl-1 rounded-r relative z-10 ${
+                        weekTotals.weekPnL >= 0
+                          ? "bg-emerald-500/20 bg-gradient-to-br from-emerald-500/25 to-emerald-600/15"
+                          : "bg-red-500/20 bg-gradient-to-br from-red-500/25 to-red-600/15"
+                      }`}>
+                        <div className="text-[8px] text-muted uppercase tracking-wider">Week</div>
+                        <div className={`text-[11px] font-bold ${
+                          weekTotals.weekPnL >= 0 ? "text-emerald-400" : "text-red-400"
+                        }`}>
+                          {weekTotals.weekPnL >= 0 ? "+" : ""}${weekTotals.weekPnL.toFixed(0)}
+                        </div>
+                        {weekTotals.weekTrades > 0 && (
+                          <div className="text-[8px] text-muted">
+                            {weekTotals.weekTrades} trades
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            }
+
+            // Regular empty cell
+            return (
+              <div key={`empty-end-${i}`} className="border-b border-r border-border bg-background/30" />
+            );
+          })}
         </div>
       </div>
 
       {/* Day Detail Modal */}
       {showModal && selectedDay && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => {
             setShowModal(false);
             setHighlightedDay(null);
+            setExpandedEventId(null);
           }}
         >
           <div
-            className="bg-card rounded-xl border border-border max-w-lg w-full max-h-[70vh] overflow-hidden shadow-xl"
+            className="w-full max-w-lg max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <h3 className="font-semibold">
-                {new Date(selectedDay).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setHighlightedDay(null);
-                }}
-                className="p-1.5 rounded-lg hover:bg-card-hover transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Panel Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
+              <div>
+                <h3 className="font-bold text-lg">
+                  {(() => {
+                    const [year, month, day] = selectedDay.split('-').map(Number);
+                    const date = new Date(year, month - 1, day);
+                    return date.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                    });
+                  })()}
+                </h3>
+                <p className="text-xs text-muted mt-0.5">
+                  {selectedDayEvents.length} event{selectedDayEvents.length !== 1 ? "s" : ""} scheduled
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Add/Edit Note Button */}
+                <button
+                  onClick={openNoteModal}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                    tradeNotes[selectedDay]
+                      ? "bg-accent/20 text-accent-light border border-accent/30 hover:bg-accent/30"
+                      : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
+                  }`}
+                >
+                  {tradeNotes[selectedDay] ? (
+                    <>
+                      <FileText className="w-4 h-4" />
+                      View Note
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      Add Note
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setHighlightedDay(null);
+                    setShowNoteModal(false);
+                  }}
+                  className="p-2 rounded-lg hover:bg-card-hover transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Content */}
-            <div className="overflow-y-auto max-h-[50vh]">
+            <div className="overflow-y-auto flex-1">
               {selectedDayEvents.length === 0 ? (
-                <div className="p-8 text-center">
-                  <Clock className="w-10 h-10 text-muted mx-auto mb-3" />
-                  <p className="text-sm text-muted">No events scheduled for this day</p>
+                <div className="p-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-card-hover/50 flex items-center justify-center mx-auto mb-4">
+                    <Clock className="w-8 h-8 text-muted" />
+                  </div>
+                  <p className="text-muted">No events scheduled for this day</p>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
-                  {selectedDayEvents.map((event) => (
-                    <div key={event.id} className="px-4 py-3 hover:bg-card-hover transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${impactColors[event.impact]}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-mono text-muted">{event.time}</span>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-card-hover text-xs font-medium">
-                              {currencyFlags[event.currency]} {event.currency}
-                            </span>
-                            <span className="text-[10px] text-muted px-1.5 py-0.5 rounded bg-background">
-                              {event.category}
-                            </span>
+                <div className="p-4 space-y-3">
+                  {selectedDayEvents.map((event, index) => {
+                    const isExpanded = expandedEventId === event.id;
+
+                    return (
+                      <div
+                        key={event.id}
+                        className={`rounded-lg overflow-hidden border border-border/50 animate-slide-in impact-border-${event.impact}`}
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        {/* Event Header - Clickable */}
+                        <button
+                          onClick={() => setExpandedEventId(isExpanded ? null : event.id)}
+                          className="w-full px-4 py-3 hover:bg-card-hover/50 transition-colors text-left bg-card/50"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col items-center">
+                              <div className={`w-3 h-3 rounded-full ${impactColors[event.impact]} ${
+                                event.impact === "high" ? "pulse-high-impact" : ""
+                              }`} />
+                              <div className="w-0.5 h-full bg-border/30 mt-1" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span className="text-sm font-mono font-bold text-accent-light">{event.time}</span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-card-hover text-xs font-medium border border-border/50">
+                                  {currencyFlags[event.currency]} {event.currency}
+                                </span>
+                                {event.historicalVolatility && event.historicalVolatility !== 'Very High' && (
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                                    event.historicalVolatility === 'High' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                                    event.historicalVolatility === 'Medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                                    'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                  }`}>
+                                    <Activity className="w-3 h-3" />
+                                    {event.historicalVolatility}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-foreground">{event.event}</p>
+                                <div className={`p-1 rounded transition-transform ${isExpanded ? "rotate-180" : ""}`}>
+                                  <ChevronDown className="w-4 h-4 text-muted" />
+                                </div>
+                              </div>
+                              <span className="text-[10px] text-muted capitalize mt-1 inline-block">
+                                {event.category?.replace(/_/g, ' ')}
+                              </span>
+                            </div>
                           </div>
-                          <p className="text-sm font-medium text-foreground">{event.event}</p>
-                          <div className="flex gap-4 mt-1.5 text-xs">
-                            {event.forecast && (
-                              <span className="text-muted">
-                                Forecast: <span className="text-foreground">{event.forecast}</span>
-                              </span>
-                            )}
-                            {event.previous && (
-                              <span className="text-muted">
-                                Previous: <span className="text-foreground">{event.previous}</span>
-                              </span>
-                            )}
-                            {event.actual && (
-                              <span className="text-muted">
-                                Actual: <span className="font-semibold text-accent-light">{event.actual}</span>
-                              </span>
-                            )}
+                        </button>
+
+                        {/* Expanded Content */}
+                        {isExpanded && (
+                          <div className="px-4 pb-4 bg-background/30 border-t border-border/30">
+                            <div className="pl-6 pt-3 space-y-4">
+                              {/* Description */}
+                              {event.description && (
+                                <div>
+                                  <h4 className="text-xs font-semibold text-accent-light uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                                    <Info className="w-3.5 h-3.5" />
+                                    What it is
+                                  </h4>
+                                  <p className="text-sm text-foreground/90 leading-relaxed">{event.description}</p>
+                                </div>
+                              )}
+
+                              {/* Why It Matters */}
+                              {event.whyItMatters && (
+                                <div>
+                                  <h4 className="text-xs font-semibold text-accent-light uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                                    <AlertTriangle className="w-3.5 h-3.5" />
+                                    Why it matters
+                                  </h4>
+                                  <p className="text-sm text-foreground/90 leading-relaxed">{event.whyItMatters}</p>
+                                </div>
+                              )}
+
+                              {/* Typical Market Reaction */}
+                              {event.typicalReaction && (
+                                <div>
+                                  <h4 className="text-xs font-semibold text-accent-light uppercase tracking-wide mb-2">
+                                    Typical Market Reaction
+                                  </h4>
+                                  <div className="grid gap-2">
+                                    {(event.typicalReaction.higherThanExpected || event.typicalReaction.hawkish) && (
+                                      <div className="flex items-start gap-2 text-sm p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                        <TrendingUp className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                          <span className="text-emerald-400 font-medium">
+                                            {event.typicalReaction.hawkish ? 'Hawkish:' : 'Higher than expected:'}
+                                          </span>
+                                          <span className="text-foreground/80 ml-1">
+                                            {event.typicalReaction.higherThanExpected || event.typicalReaction.hawkish}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    )}
+                                    {(event.typicalReaction.lowerThanExpected || event.typicalReaction.dovish) && (
+                                      <div className="flex items-start gap-2 text-sm p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                                        <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                          <span className="text-red-400 font-medium">
+                                            {event.typicalReaction.dovish ? 'Dovish:' : 'Lower than expected:'}
+                                          </span>
+                                          <span className="text-foreground/80 ml-1">
+                                            {event.typicalReaction.lowerThanExpected || event.typicalReaction.dovish}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Related Assets */}
+                              {event.relatedAssets && event.relatedAssets.length > 0 && (
+                                <div>
+                                  <h4 className="text-xs font-semibold text-accent-light uppercase tracking-wide mb-2">
+                                    Related Assets
+                                  </h4>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {event.relatedAssets.map((asset) => (
+                                      <span
+                                        key={asset}
+                                        className="px-2.5 py-1 bg-accent/20 text-accent-light text-xs rounded-full border border-accent/30"
+                                      >
+                                        {asset}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Frequency & Source */}
+                              <div className="flex items-center justify-between pt-3 border-t border-border/30">
+                                {event.frequency && (
+                                  <span className="text-xs text-muted flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {event.frequency}
+                                  </span>
+                                )}
+                                {event.sourceUrl && (
+                                  <a
+                                    href={event.sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-accent-light hover:underline flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-accent/10 transition-colors"
+                                  >
+                                    View Source
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="px-4 py-2 border-t border-border bg-card-hover/30">
+            <div className="px-5 py-3 border-t border-border/50 bg-card/50 flex-shrink-0">
               <div className="flex items-center justify-between text-xs text-muted">
-                <span>{selectedDayEvents.length} event{selectedDayEvents.length !== 1 ? "s" : ""}</span>
-                <span>Times shown in local time</span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  Times shown in local time
+                </span>
+                <span className="text-accent-light">Click event to expand</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Note Entry Modal - appears to the right */}
+          {showNoteModal && (
+            <div
+              className="w-full max-w-sm max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in ml-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Note Modal Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-accent-light" />
+                  <h3 className="font-bold text-lg">
+                    {tradeNotes[selectedDay] ? "Edit Note" : "Add Note"}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowNoteModal(false)}
+                  className="p-2 rounded-lg hover:bg-card-hover transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Note Modal Content */}
+              <div className="p-5 space-y-4 overflow-y-auto flex-1">
+                {/* Trades Input */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                    <BarChart3 className="w-4 h-4" />
+                    Number of Trades
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={noteFormData.trades}
+                    onChange={(e) => setNoteFormData((prev) => ({ ...prev, trades: e.target.value }))}
+                    placeholder="e.g., 3"
+                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
+                  />
+                </div>
+
+                {/* P&L Input */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                    <DollarSign className="w-4 h-4" />
+                    Profit / Loss
+                  </label>
+                  <input
+                    type="text"
+                    value={noteFormData.pnl}
+                    onChange={(e) => setNoteFormData((prev) => ({ ...prev, pnl: e.target.value }))}
+                    placeholder="e.g., 150 or -75"
+                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
+                  />
+                  <p className="text-[10px] text-muted mt-1">Use negative for losses (e.g., -75)</p>
+                </div>
+
+                {/* Notes Input */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                    <StickyNote className="w-4 h-4" />
+                    Notes
+                  </label>
+                  <textarea
+                    value={noteFormData.note}
+                    onChange={(e) => setNoteFormData((prev) => ({ ...prev, note: e.target.value }))}
+                    placeholder="Trade notes, observations, lessons learned..."
+                    rows={4}
+                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none"
+                  />
+                </div>
+
+                {/* Existing Note Preview */}
+                {tradeNotes[selectedDay]?.note && (
+                  <div className="p-3 bg-card/50 rounded-lg border border-border/50">
+                    <p className="text-xs text-muted mb-1">Current Note:</p>
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap">{tradeNotes[selectedDay].note}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Note Modal Footer */}
+              <div className="px-5 py-4 border-t border-border/50 bg-card/50 flex items-center justify-between">
+                {tradeNotes[selectedDay] && (
+                  <button
+                    onClick={deleteTradeNote}
+                    disabled={savingNote}
+                    className="flex items-center gap-2 px-3 py-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors text-sm"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                )}
+                <div className={`flex items-center gap-2 ${!tradeNotes[selectedDay] ? "ml-auto" : ""}`}>
+                  <button
+                    onClick={() => setShowNoteModal(false)}
+                    className="px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveTradeNote}
+                    disabled={savingNote}
+                    className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors text-sm font-medium disabled:opacity-50"
+                  >
+                    {savingNote ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Delete All Notes Confirmation Modal */}
+      {showDeleteAllConfirm && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowDeleteAllConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden animate-slide-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold mb-2">Delete All Notes?</h3>
+              <p className="text-sm text-muted mb-6">
+                This will permanently delete all {Object.keys(tradeNotes).length} trade notes. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteAllConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-card-hover border border-border rounded-lg text-sm font-medium hover:bg-card transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={deleteAllTradeNotes}
+                  disabled={deletingAllNotes}
+                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {deletingAllNotes ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  Delete All
+                </button>
               </div>
             </div>
           </div>

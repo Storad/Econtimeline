@@ -1,13 +1,21 @@
 {
   "name": "econtimeline-scraper",
-  "version": "1.0.0",
-  "description": "Forex Factory economic calendar scraper",
-  "main": "scrape.js",
+  "version": "2.0.0",
+  "description": "Economic calendar data aggregator - API-based architecture with FRED, central banks, and government sources",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "scrape": "node scrape.js"
+    "scrape": "node index.js",
+    "scrape:fred": "node index.js --source=fred",
+    "scrape:central-banks": "node index.js --source=central-banks",
+    "scrape:china": "node index.js --source=china",
+    "scrape:treasury": "node index.js --source=treasury",
+    "scrape:holidays": "node index.js --source=holidays",
+    "test:fred": "node -e \"import('./lib/api-client.js').then(m => m.fredGetReleaseDates().then(console.log))\""
   },
   "dependencies": {
-    "puppeteer": "^21.6.1"
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.2",
+    "ical.js": "^2.0.1"
   }
 }

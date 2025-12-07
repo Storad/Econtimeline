@@ -1,0 +1,94 @@
+name: Update Economic Calendar
+
+on:
+  schedule:
+    # Full scrape: Daily at 6 AM ET (11:00 UTC)
+    - cron: '0 11 * * *'
+
+    # Data refresh: Every 5 min during US market hours (8 AM - 5 PM ET)
+    # 8 AM ET = 13:00 UTC, 5 PM ET = 22:00 UTC
+    # This is the fastest GitHub Actions allows
+    - cron: '*/5 13-21 * * 1-5'
+
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Scrape mode'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - data-only
+
+jobs:
+  update-calendar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Install dependencies
+        working-directory: scraper
+        run: npm ci
+
+      - name: Determine scrape mode
+        id: mode
+        run: |
+          # Manual trigger uses input, scheduled uses time-based logic
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          else
+            # Check if this is the 6 AM full scrape (11:00 UTC)
+            HOUR=$(date -u +%H)
+            MINUTE=$(date -u +%M)
+            if [ "$HOUR" = "11" ] && [ "$MINUTE" -lt "30" ]; then
+              echo "mode=full" >> $GITHUB_OUTPUT
+            else
+              echo "mode=data-only" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Run full scrape
+        if: steps.mode.outputs.mode == 'full'
+        working-directory: scraper
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: node index.js
+
+      - name: Run data refresh
+        if: steps.mode.outputs.mode == 'data-only'
+        working-directory: scraper
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: node index.js --data-only
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet client/public/calendar-data.json || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add scraper/calendar-data.json client/public/calendar-data.json
+
+          if [ "${{ steps.mode.outputs.mode }}" = "full" ]; then
+            git commit -m "📅 Daily calendar update $(date -u +%Y-%m-%d)"
+          else
+            git commit -m "📊 Data refresh $(date -u +%Y-%m-%d\ %H:%M) UTC"
+          fi
+
+          git push
