@@ -18,8 +18,8 @@
     "next": "^16.0.7",
     "node-cache": "^5.1.2",
     "prisma": "^6.19.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
