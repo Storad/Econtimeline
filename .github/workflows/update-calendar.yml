@@ -21,6 +21,9 @@ on:
           - full
           - data-only
 
+permissions:
+  contents: write
+
 jobs:
   update-calendar:
     runs-on: ubuntu-latest
