@@ -1,11 +1,12 @@
 /**
- * Unified API Client for Economic Data Sources
+ * Unified API Client for US Economic Data Sources
  *
  * Handles API calls to:
  * - FRED (Federal Reserve Economic Data)
- * - ECB (European Central Bank)
- * - Bank of England
- * - Bank of Canada
+ * - EIA (Energy Information Administration)
+ * - BEA (Bureau of Economic Analysis)
+ * - BLS (Bureau of Labor Statistics)
+ * - Census Bureau
  */
 
 // API Configuration
@@ -14,17 +15,21 @@ export const API_CONFIG = {
     baseUrl: 'https://api.stlouisfed.org/fred',
     apiKey: process.env.FRED_API_KEY || 'a6185d8f246caa3adb79602b6779b754',
   },
-  ecb: {
-    baseUrl: 'https://data-api.ecb.europa.eu/service',
-    // No API key needed
+  eia: {
+    baseUrl: 'https://api.eia.gov/v2',
+    apiKey: process.env.EIA_API_KEY || 'L6gsDu88jaMGHsvfFmL5Pe6PRC2lpfP8lSAnaaiu',
   },
-  boe: {
-    baseUrl: 'https://www.bankofengland.co.uk/boeapps/database',
-    // No API key needed
+  bea: {
+    baseUrl: 'https://apps.bea.gov/api/data',
+    apiKey: process.env.BEA_API_KEY || 'A29D3A0B-6D39-425C-A2CC-E83CD7447D1D',
   },
-  boc: {
-    baseUrl: 'https://www.bankofcanada.ca/valet',
-    // No API key needed
+  bls: {
+    baseUrl: 'https://api.bls.gov/publicAPI/v2',
+    apiKey: process.env.BLS_API_KEY || '5e43db21aa1348f082d3eefac8590897',
+  },
+  census: {
+    baseUrl: 'https://api.census.gov/data',
+    apiKey: process.env.CENSUS_API_KEY || '25632bd6befdd8ab537011bfdc65149d6e9535d6',
   },
 };
 
@@ -119,93 +124,49 @@ export async function fredGetSeries(seriesId, options = {}) {
 }
 
 // ============================================
-// ECB API (SDMX)
+// EIA API (Energy Information Administration)
 // ============================================
 
 /**
- * Get ECB exchange rates
- * @param {string} currency - Currency code (e.g., 'USD', 'GBP')
+ * Get weekly crude oil inventory data
+ * Series: PET.WCESTUS1.W (Weekly U.S. Ending Stocks excluding SPR of Crude Oil)
  */
-export async function ecbGetExchangeRates(currency = 'USD') {
-  const url = `${API_CONFIG.ecb.baseUrl}/data/EXR/D.${currency}.EUR.SP00.A`;
-  const response = await fetchWithRetry(url, {
-    headers: { 'Accept': 'application/json' },
+export async function eiaGetCrudeOilInventories() {
+  const params = new URLSearchParams({
+    api_key: API_CONFIG.eia.apiKey,
+    frequency: 'weekly',
+    'data[0]': 'value',
+    'facets[product][]': 'EPC0',  // Crude Oil
+    'facets[duoarea][]': 'NUS',   // US Total
+    'sort[0][column]': 'period',
+    'sort[0][direction]': 'desc',
+    length: '3',
   });
-  return response.json();
+  const url = `${API_CONFIG.eia.baseUrl}/petroleum/stoc/wstk/data/?${params}`;
+  const response = await fetchWithRetry(url);
+  const data = await response.json();
+  return data.response?.data || [];
 }
 
 /**
- * Get ECB interest rate data
+ * Get weekly natural gas storage data
+ * Series: NG.NW2_EPG0_SWO_R48_BCF.W (Weekly Lower 48 States Natural Gas Working Storage)
  */
-export async function ecbGetInterestRates() {
-  const url = `${API_CONFIG.ecb.baseUrl}/data/FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA`;
-  const response = await fetchWithRetry(url, {
-    headers: { 'Accept': 'application/json' },
+export async function eiaGetNaturalGasStorage() {
+  // Use series filter for Lower 48 total working gas
+  const params = new URLSearchParams({
+    api_key: API_CONFIG.eia.apiKey,
+    frequency: 'weekly',
+    'data[0]': 'value',
+    'facets[series][]': 'NW2_EPG0_SWO_R48_BCF',  // Lower 48 total
+    'sort[0][column]': 'period',
+    'sort[0][direction]': 'desc',
+    length: '3',
   });
-  return response.json();
-}
-
-// ============================================
-// Bank of England API
-// ============================================
-
-/**
- * Get BoE Bank Rate (Official Interest Rate)
- */
-export async function boeGetBankRate() {
-  const url = `${API_CONFIG.boe.baseUrl}/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2020&Dateto=now&SeriesCodes=IUDBEDR&CSVF=TN&UsingCodes=Y`;
+  const url = `${API_CONFIG.eia.baseUrl}/natural-gas/stor/wkly/data/?${params}`;
   const response = await fetchWithRetry(url);
-  const text = await response.text();
-  return parseBoeCsv(text);
-}
-
-/**
- * Parse BoE CSV response
- */
-function parseBoeCsv(csvText) {
-  const lines = csvText.trim().split('\n');
-  const data = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const [date, value] = lines[i].split(',');
-    if (date && value) {
-      data.push({ date: date.trim(), value: parseFloat(value.trim()) });
-    }
-  }
-
-  return data;
-}
-
-// ============================================
-// Bank of Canada API (Valet)
-// ============================================
-
-/**
- * Get BoC policy rate
- */
-export async function bocGetPolicyRate() {
-  const url = `${API_CONFIG.boc.baseUrl}/observations/V39079/json?recent=20`;
-  const response = await fetchWithRetry(url);
-  return response.json();
-}
-
-/**
- * Get BoC exchange rates
- * @param {string} currency - Currency pair (e.g., 'FXUSDCAD')
- */
-export async function bocGetExchangeRate(currency = 'FXUSDCAD') {
-  const url = `${API_CONFIG.boc.baseUrl}/observations/${currency}/json?recent=30`;
-  const response = await fetchWithRetry(url);
-  return response.json();
-}
-
-/**
- * List all available BoC series
- */
-export async function bocListSeries() {
-  const url = `${API_CONFIG.boc.baseUrl}/lists/series/json`;
-  const response = await fetchWithRetry(url);
-  return response.json();
+  const data = await response.json();
+  return data.response?.data || [];
 }
 
 export default {
@@ -215,16 +176,8 @@ export default {
     getReleaseSchedule: fredGetReleaseSchedule,
     getSeries: fredGetSeries,
   },
-  ecb: {
-    getExchangeRates: ecbGetExchangeRates,
-    getInterestRates: ecbGetInterestRates,
-  },
-  boe: {
-    getBankRate: boeGetBankRate,
-  },
-  boc: {
-    getPolicyRate: bocGetPolicyRate,
-    getExchangeRate: bocGetExchangeRate,
-    listSeries: bocListSeries,
+  eia: {
+    getCrudeOilInventories: eiaGetCrudeOilInventories,
+    getNaturalGasStorage: eiaGetNaturalGasStorage,
   },
 };

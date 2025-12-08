@@ -119,7 +119,7 @@ export async function scrapeFRED() {
           currency: 'USD',
           country: 'US',
           source: 'fred',
-          sourceUrl: `https://fred.stlouisfed.org/releases/${release.id}`,
+          sourceUrl: `https://fred.stlouisfed.org/release?rid=${release.id}`,
           fredReleaseId: release.id,
         });
       }

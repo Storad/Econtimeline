@@ -75,6 +75,12 @@ export function scrapeCentralBanks() {
         country: 'US',
         source: 'fed',
         sourceUrl: 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm',
+        description: 'Federal Reserve\'s decision on the federal funds target rate.',
+        typicalReaction: {
+          hawkish: 'USD bullish, stocks bearish, bonds bearish',
+          dovish: 'USD bearish, stocks bullish, bonds bullish'
+        },
+        frequency: '8 times per year',
       });
 
       // Fed Chair Press Conference
@@ -89,6 +95,12 @@ export function scrapeCentralBanks() {
           country: 'US',
           source: 'fed',
           sourceUrl: 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm',
+          description: 'Fed Chair\'s press conference following the rate decision, providing context and forward guidance.',
+          typicalReaction: {
+            hawkish: 'USD bullish, stocks bearish',
+            dovish: 'USD bearish, stocks bullish'
+          },
+          frequency: '8 times per year',
         });
       }
 
@@ -104,6 +116,12 @@ export function scrapeCentralBanks() {
           country: 'US',
           source: 'fed',
           sourceUrl: 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm',
+          description: 'Summary of Economic Projections (SEP) including the "dot plot" showing Fed officials\' rate forecasts.',
+          typicalReaction: {
+            hawkish: 'USD bullish, stocks bearish (higher rate path)',
+            dovish: 'USD bearish, stocks bullish (lower rate path)'
+          },
+          frequency: 'Quarterly (Mar, Jun, Sep, Dec)',
         });
       }
     }
@@ -120,6 +138,12 @@ export function scrapeCentralBanks() {
         country: 'US',
         source: 'fed',
         sourceUrl: 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm',
+        description: 'Detailed record of the FOMC policy meeting, released 3 weeks after each meeting.',
+        typicalReaction: {
+          hawkish: 'USD bullish, stocks bearish, bonds bearish',
+          dovish: 'USD bearish, stocks bullish, bonds bullish'
+        },
+        frequency: '8 times per year (3 weeks after FOMC)',
       });
     }
   });

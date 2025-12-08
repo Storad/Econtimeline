@@ -300,6 +300,42 @@ export default function EconomicCalendarPage() {
     };
   }, [showFilters]);
 
+  // Helper to check if an event's release time has passed (in ET)
+  const isEventReleased = (eventDate: string, eventTime: string): boolean => {
+    // Get current time in US Eastern
+    const now = new Date();
+    const etFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    const parts = etFormatter.formatToParts(now);
+    const nowET = {
+      year: parts.find(p => p.type === 'year')?.value || '',
+      month: parts.find(p => p.type === 'month')?.value || '',
+      day: parts.find(p => p.type === 'day')?.value || '',
+      hour: parts.find(p => p.type === 'hour')?.value || '00',
+      minute: parts.find(p => p.type === 'minute')?.value || '00',
+    };
+
+    const currentDateET = `${nowET.year}-${nowET.month}-${nowET.day}`;
+    const currentTimeET = `${nowET.hour}:${nowET.minute}`;
+
+    // Compare dates first
+    if (eventDate < currentDateET) return true;
+    if (eventDate > currentDateET) return false;
+
+    // Same day - compare times (event times are in ET)
+    if (eventTime === 'All Day' || eventTime === 'TBD') return true;
+
+    return eventTime <= currentTimeET;
+  };
+
   const fetchEvents = async () => {
     setLoading(true);
     try {
@@ -317,16 +353,20 @@ export default function EconomicCalendarPage() {
         liveData = liveJson.data || {};
       }
 
-      // Merge live data into events
+      // Merge live data into events - ONLY for past events where release time has passed
       const eventsWithLiveData = (calendarData.events || []).map((event: EconomicEvent) => {
         const live = liveData[event.event];
-        if (live) {
+        const hasReleased = isEventReleased(event.date, event.time);
+
+        if (live && hasReleased) {
+          // Event has been released - use live data
           return {
             ...event,
             actual: live.actual || event.actual,
             previous: live.previous || event.previous,
           };
         }
+        // Future event or no live data - keep calendar API values (actual will be null for future)
         return event;
       });
 
@@ -1761,28 +1801,62 @@ export default function EconomicCalendarPage() {
                               <div className="w-0.5 h-full bg-border/30 mt-1" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                <span className="text-sm font-mono font-bold text-accent-light">{event.time}</span>
-                                {event.historicalVolatility && event.historicalVolatility !== 'Very High' && (
-                                  <span className={`text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                                    event.historicalVolatility === 'High' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                                    event.historicalVolatility === 'Medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                                    'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                  }`}>
-                                    <Activity className="w-3 h-3" />
-                                    {event.historicalVolatility}
+                              {/* Time and Event Name Row */}
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-mono font-bold text-accent-light">{event.time}</span>
+                                  <span className="text-[10px] text-muted capitalize px-1.5 py-0.5 bg-background/50 rounded">
+                                    {event.category?.replace(/_/g, ' ')}
                                   </span>
-                                )}
-                              </div>
-                              <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-semibold text-foreground">{event.event}</p>
+                                </div>
                                 <div className={`p-1 rounded transition-transform ${isExpanded ? "rotate-180" : ""}`}>
                                   <ChevronDown className="w-4 h-4 text-muted" />
                                 </div>
                               </div>
-                              <span className="text-[10px] text-muted capitalize mt-1 inline-block">
-                                {event.category?.replace(/_/g, ' ')}
-                              </span>
+                              <p className="text-sm font-semibold text-foreground mb-2">{event.event}</p>
+
+                              {/* Actual / Previous Row - Only show for events with data */}
+                              {(event.actual || event.previous) && (
+                                <div className="flex items-center gap-4 text-xs">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-muted">Actual:</span>
+                                    <span className={`font-semibold ${(() => {
+                                      if (!event.actual) return "text-muted";
+                                      if (!event.previous) return "text-foreground";
+
+                                      // Parse numeric values, handling formats like "+0.1%", "-0.1%", "5.2M", etc.
+                                      const actualNum = parseFloat(event.actual.replace(/[^0-9.-]/g, ''));
+                                      const prevNum = parseFloat(event.previous.replace(/[^0-9.-]/g, ''));
+
+                                      // Check if parsing was successful
+                                      if (isNaN(actualNum) || isNaN(prevNum)) return "text-foreground";
+
+                                      // Indicators where LOWER is better (red when higher, green when lower)
+                                      const lowerIsBetter = [
+                                        'Unemployment Rate',
+                                        'Unemployment Claims',
+                                      ].includes(event.event);
+
+                                      if (lowerIsBetter) {
+                                        // For unemployment-type indicators: lower = green, higher = red
+                                        if (actualNum < prevNum) return "text-emerald-400";
+                                        if (actualNum > prevNum) return "text-red-400";
+                                      } else {
+                                        // Default: higher = green, lower = red (most economic indicators)
+                                        if (actualNum > prevNum) return "text-emerald-400";
+                                        if (actualNum < prevNum) return "text-red-400";
+                                      }
+                                      return "text-foreground";
+                                    })()}`}>
+                                      {event.actual || "—"}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-muted">Previous:</span>
+                                    <span className="text-foreground">{event.previous || "—"}</span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </button>
@@ -1790,7 +1864,7 @@ export default function EconomicCalendarPage() {
                         {/* Expanded Content */}
                         {isExpanded && (
                           <div className="px-4 pb-4 bg-background/30 border-t border-border/30">
-                            <div className="pl-6 pt-3 space-y-4">
+                            <div className="pl-6 pt-3 space-y-3">
                               {/* Description */}
                               {event.description && (
                                 <div>
@@ -1802,75 +1876,38 @@ export default function EconomicCalendarPage() {
                                 </div>
                               )}
 
-                              {/* Why It Matters */}
-                              {event.whyItMatters && (
-                                <div>
-                                  <h4 className="text-xs font-semibold text-accent-light uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
-                                    <AlertTriangle className="w-3.5 h-3.5" />
-                                    Why it matters
-                                  </h4>
-                                  <p className="text-sm text-foreground/90 leading-relaxed">{event.whyItMatters}</p>
-                                </div>
-                              )}
-
-                              {/* Typical Market Reaction */}
+                              {/* Typical Market Reaction - Condensed */}
                               {event.typicalReaction && (
-                                <div>
-                                  <h4 className="text-xs font-semibold text-accent-light uppercase tracking-wide mb-2">
-                                    Typical Market Reaction
-                                  </h4>
-                                  <div className="grid gap-2">
-                                    {(event.typicalReaction.higherThanExpected || event.typicalReaction.hawkish) && (
-                                      <div className="flex items-start gap-2 text-sm p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                                        <TrendingUp className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                                        <div>
-                                          <span className="text-emerald-400 font-medium">
-                                            {event.typicalReaction.hawkish ? 'Hawkish:' : 'Higher than expected:'}
-                                          </span>
-                                          <span className="text-foreground/80 ml-1">
-                                            {event.typicalReaction.higherThanExpected || event.typicalReaction.hawkish}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
-                                    {(event.typicalReaction.lowerThanExpected || event.typicalReaction.dovish) && (
-                                      <div className="flex items-start gap-2 text-sm p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-                                        <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                                        <div>
-                                          <span className="text-red-400 font-medium">
-                                            {event.typicalReaction.dovish ? 'Dovish:' : 'Lower than expected:'}
-                                          </span>
-                                          <span className="text-foreground/80 ml-1">
-                                            {event.typicalReaction.lowerThanExpected || event.typicalReaction.dovish}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Related Assets */}
-                              {event.relatedAssets && event.relatedAssets.length > 0 && (
-                                <div>
-                                  <h4 className="text-xs font-semibold text-accent-light uppercase tracking-wide mb-2">
-                                    Related Assets
-                                  </h4>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {event.relatedAssets.map((asset) => (
-                                      <span
-                                        key={asset}
-                                        className="px-2.5 py-1 bg-accent/20 text-accent-light text-xs rounded-full border border-accent/30"
-                                      >
-                                        {asset}
+                                <div className="flex items-center gap-3 text-xs py-2 px-3 bg-card/50 rounded-lg border border-border/30">
+                                  {(event.typicalReaction.higherThanExpected || event.typicalReaction.hawkish) && (
+                                    <div className="flex items-center gap-1.5">
+                                      <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                                      <span className="text-emerald-400 font-semibold">
+                                        {event.typicalReaction.hawkish ? 'Hawkish' : 'Higher'}
                                       </span>
-                                    ))}
-                                  </div>
+                                      <span className="text-muted">=</span>
+                                      <span className="text-foreground">Bullish USD</span>
+                                    </div>
+                                  )}
+                                  {(event.typicalReaction.higherThanExpected || event.typicalReaction.hawkish) &&
+                                   (event.typicalReaction.lowerThanExpected || event.typicalReaction.dovish) && (
+                                    <span className="text-border">|</span>
+                                  )}
+                                  {(event.typicalReaction.lowerThanExpected || event.typicalReaction.dovish) && (
+                                    <div className="flex items-center gap-1.5">
+                                      <TrendingDown className="w-3.5 h-3.5 text-red-400" />
+                                      <span className="text-red-400 font-semibold">
+                                        {event.typicalReaction.dovish ? 'Dovish' : 'Lower'}
+                                      </span>
+                                      <span className="text-muted">=</span>
+                                      <span className="text-foreground">Bearish USD</span>
+                                    </div>
+                                  )}
                                 </div>
                               )}
 
                               {/* Frequency & Source */}
-                              <div className="flex items-center justify-between pt-3 border-t border-border/30">
+                              <div className="flex items-center justify-between pt-2 border-t border-border/30">
                                 {event.frequency && (
                                   <span className="text-xs text-muted flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />

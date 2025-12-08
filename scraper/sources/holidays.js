@@ -181,6 +181,8 @@ export async function scrapeHolidays() {
       source: 'holidays',
       sourceUrl: 'https://www.nyse.com/markets/hours-calendars',
       category: 'holiday',
+      description: `US stock markets (NYSE, NASDAQ) are closed for ${h.title}.`,
+      frequency: 'Annual',
     }));
 
   // Early close days (1:00 PM ET)
@@ -198,6 +200,8 @@ export async function scrapeHolidays() {
       category: 'holiday',
       isEarlyClose: true,
       closeTimeET: '13:00',
+      description: 'US stock markets close early at 1:00 PM ET. Bond markets may also have reduced hours.',
+      frequency: 'Annual',
     }));
 
   const events = [...holidayEvents, ...earlyCloseEvents];

@@ -1,11 +1,12 @@
 /**
- * FRED Data Value Fetcher
+ * US Economic Data Value Fetcher
  *
- * Fetches actual/previous values for economic indicators from FRED.
- * Maps calendar events to their corresponding FRED series IDs.
+ * Fetches actual/previous values for economic indicators from:
+ * - FRED (Federal Reserve Economic Data)
+ * - EIA (Energy Information Administration)
  */
 
-import { API_CONFIG } from './api-client.js';
+import { API_CONFIG, eiaGetCrudeOilInventories, eiaGetNaturalGasStorage } from './api-client.js';
 
 // Map event titles to FRED series IDs
 // Using month-over-month percent change series where applicable
@@ -46,11 +47,12 @@ const EVENT_TO_SERIES = {
 };
 
 /**
- * Fetch latest observation for a FRED series
+ * Fetch latest observations for a FRED series
+ * We fetch 3 to calculate both current and previous period changes
  */
 async function fetchSeriesData(seriesId) {
   try {
-    const url = `${API_CONFIG.fred.baseUrl}/series/observations?series_id=${seriesId}&api_key=${API_CONFIG.fred.apiKey}&file_type=json&sort_order=desc&limit=2`;
+    const url = `${API_CONFIG.fred.baseUrl}/series/observations?series_id=${seriesId}&api_key=${API_CONFIG.fred.apiKey}&file_type=json&sort_order=desc&limit=3`;
 
     const response = await fetch(url, {
       headers: { 'User-Agent': 'EconTimeline/2.0' }
@@ -63,12 +65,23 @@ async function fetchSeriesData(seriesId) {
     const data = await response.json();
     const observations = data.observations || [];
 
-    if (observations.length >= 2) {
+    if (observations.length >= 3) {
       return {
         actual: observations[0].value,
         actualDate: observations[0].date,
         previous: observations[1].value,
         previousDate: observations[1].date,
+        twoPrior: observations[2].value,  // For calculating previous period's change
+        twoPriorDate: observations[2].date,
+      };
+    } else if (observations.length >= 2) {
+      return {
+        actual: observations[0].value,
+        actualDate: observations[0].date,
+        previous: observations[1].value,
+        previousDate: observations[1].date,
+        twoPrior: null,
+        twoPriorDate: null,
       };
     } else if (observations.length === 1) {
       return {
@@ -76,6 +89,8 @@ async function fetchSeriesData(seriesId) {
         actualDate: observations[0].date,
         previous: null,
         previousDate: null,
+        twoPrior: null,
+        twoPriorDate: null,
       };
     }
 
@@ -145,61 +160,167 @@ function formatValue(value, previousValue, config) {
 }
 
 /**
- * Enrich calendar events with actual data values from FRED
+ * Fetch EIA data for energy indicators
+ */
+async function fetchEIAData() {
+  const eiaData = {};
+
+  try {
+    // Fetch Crude Oil Inventories
+    const crudeData = await eiaGetCrudeOilInventories();
+    if (crudeData && crudeData.length >= 2) {
+      // EIA returns weekly change in thousands of barrels
+      const current = parseFloat(crudeData[0]?.value);
+      const previous = parseFloat(crudeData[1]?.value);
+      const twoPrior = crudeData[2] ? parseFloat(crudeData[2]?.value) : null;
+
+      if (!isNaN(current) && !isNaN(previous)) {
+        // Calculate week-over-week change in millions of barrels
+        const change = (current - previous) / 1000;
+        const prevChange = twoPrior ? (previous - twoPrior) / 1000 : null;
+
+        eiaData['Crude Oil Inventories'] = {
+          actual: `${change >= 0 ? '+' : ''}${change.toFixed(1)}M`,
+          previous: prevChange !== null ? `${prevChange >= 0 ? '+' : ''}${prevChange.toFixed(1)}M` : null,
+          actualDate: crudeData[0]?.period,
+          previousDate: crudeData[1]?.period,
+        };
+      }
+    }
+  } catch (error) {
+    console.error('  Failed to fetch EIA crude oil data:', error.message);
+  }
+
+  try {
+    // Fetch Natural Gas Storage
+    const gasData = await eiaGetNaturalGasStorage();
+    if (gasData && gasData.length >= 2) {
+      // EIA returns storage level in Bcf
+      const current = parseFloat(gasData[0]?.value);
+      const previous = parseFloat(gasData[1]?.value);
+      const twoPrior = gasData[2] ? parseFloat(gasData[2]?.value) : null;
+
+      if (!isNaN(current) && !isNaN(previous)) {
+        // Calculate week-over-week change in Bcf
+        const change = current - previous;
+        const prevChange = twoPrior ? previous - twoPrior : null;
+
+        eiaData['Natural Gas Storage'] = {
+          actual: `${change >= 0 ? '+' : ''}${change.toFixed(0)} Bcf`,
+          previous: prevChange !== null ? `${prevChange >= 0 ? '+' : ''}${prevChange.toFixed(0)} Bcf` : null,
+          actualDate: gasData[0]?.period,
+          previousDate: gasData[1]?.period,
+        };
+      }
+    }
+  } catch (error) {
+    console.error('  Failed to fetch EIA natural gas data:', error.message);
+  }
+
+  return eiaData;
+}
+
+/**
+ * Enrich calendar events with actual data values from FRED and EIA
+ *
+ * Logic:
+ * - We fetch the LATEST actual value and the one before it (previous)
+ * - For PAST events: Show both Actual and Previous (the values that were current at release time)
+ * - For FUTURE events: Show "—" for Actual, show the latest value as Previous
+ * - Only events with data sources (FRED/EIA mappings) get values
  */
 export async function enrichEventsWithData(events) {
-  console.log('  Fetching actual values from FRED...');
+  console.log('  Fetching actual values from FRED and EIA...');
 
-  const enrichedEvents = [];
   const seriesCache = new Map();
+  const dataCache = new Map(); // Store formatted data by event title
   let fetchCount = 0;
 
-  for (const event of events) {
-    const config = EVENT_TO_SERIES[event.title];
+  // Get today's date for comparison
+  const today = new Date().toISOString().split('T')[0];
 
-    if (config) {
-      // Check cache first
-      let data = seriesCache.get(config.seriesId);
+  // Fetch EIA data first
+  console.log('  Fetching actual values from EIA...');
+  const eiaData = await fetchEIAData();
+  console.log(`    Fetched EIA data for ${Object.keys(eiaData).length} series`);
 
-      if (!data) {
-        data = await fetchSeriesData(config.seriesId);
-        seriesCache.set(config.seriesId, data);
-        fetchCount++;
+  // Store EIA data in cache
+  for (const [title, data] of Object.entries(eiaData)) {
+    dataCache.set(title, data);
+  }
 
-        // Rate limiting - small delay between requests
-        if (fetchCount % 10 === 0) {
-          await new Promise(r => setTimeout(r, 500));
-        }
-      }
+  // Fetch FRED data for all unique event types
+  const uniqueTitles = [...new Set(events.map(e => e.title))];
+  for (const title of uniqueTitles) {
+    if (dataCache.has(title)) continue; // Already have EIA data
 
-      if (data) {
-        // For percent change series, we need 3 observations to show current and previous change
-        const formattedActual = formatValue(data.actual, data.previous, config);
-        const formattedPrevious = config.unit === 'level'
-          ? formatValue(data.previous, null, config)
-          : null;  // For change series, previous is implicit in calculation
+    const config = EVENT_TO_SERIES[title];
+    if (!config) continue;
 
-        enrichedEvents.push({
-          ...event,
-          actual: formattedActual,
-          previous: formattedPrevious,
-          actualDate: data.actualDate,
-          previousDate: data.previousDate,
-          fredSeriesId: config.seriesId,
-        });
-        continue;
+    let data = seriesCache.get(config.seriesId);
+    if (!data) {
+      data = await fetchSeriesData(config.seriesId);
+      seriesCache.set(config.seriesId, data);
+      fetchCount++;
+
+      if (fetchCount % 10 === 0) {
+        await new Promise(r => setTimeout(r, 500));
       }
     }
 
-    // No data available, keep event as-is
-    enrichedEvents.push({
-      ...event,
-      actual: null,
-      previous: null,
-    });
+    if (data) {
+      // "Latest" = most recent release (this becomes "Actual" for past events, "Previous" for future)
+      const formattedLatest = formatValue(data.actual, data.previous, config);
+      // "Prior" = the one before latest (this becomes "Previous" for past events)
+      let formattedPrior = null;
+      if (config.unit === 'level') {
+        formattedPrior = formatValue(data.previous, null, config);
+      } else if (config.unit === 'pct_change' && data.twoPrior) {
+        formattedPrior = formatValue(data.previous, data.twoPrior, config);
+      } else if (config.unit === 'change' && data.twoPrior) {
+        formattedPrior = formatValue(data.previous, data.twoPrior, config);
+      }
+
+      dataCache.set(title, {
+        latest: formattedLatest,      // Most recent release
+        prior: formattedPrior,        // The one before that
+        latestDate: data.actualDate,
+        priorDate: data.previousDate,
+        fredSeriesId: config.seriesId,
+      });
+    }
   }
 
-  console.log(`    Fetched data for ${seriesCache.size} unique series`);
+  console.log(`    Fetched FRED data for ${seriesCache.size} unique series`);
+
+  // Enrich each event with the latest data values
+  // We store BOTH values and let the client determine what to display
+  // based on whether the event date/time has passed
+  const enrichedEvents = events.map(event => {
+    const data = dataCache.get(event.title);
+
+    if (!data) {
+      return { ...event, actual: null, previous: null };
+    }
+
+    // Store both the latest value and prior value
+    // The client will decide what to show based on event date/time:
+    // - Past events: actual = latestValue, previous = priorValue
+    // - Future events: actual = null (show "—"), previous = latestValue
+    return {
+      ...event,
+      // Store the raw data - client will interpret based on event date
+      latestValue: data.latest,      // Most recent released value
+      priorValue: data.prior,        // Value before that
+      latestDate: data.latestDate,
+      priorDate: data.priorDate,
+      fredSeriesId: data.fredSeriesId || null,
+      // Keep actual/previous null - let client compute
+      actual: null,
+      previous: null,
+    };
+  });
+
   return enrichedEvents;
 }
 

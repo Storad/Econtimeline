@@ -1430,6 +1430,266 @@ export const INDICATORS = {
   },
 
   // ============================================
+  // EIA ENERGY DATA
+  // ============================================
+  'Crude Oil Inventories': {
+    category: 'energy',
+    description: 'Weekly change in the number of barrels of crude oil held in inventory by commercial firms.',
+    whyItMatters: 'Inventory builds suggest weak demand or oversupply, pushing oil prices lower. Draws indicate strong demand, pushing prices higher.',
+    frequency: 'Weekly (Wednesday)',
+    typicalReaction: {
+      higherThanExpected: 'Oil prices bearish (more supply)',
+      lowerThanExpected: 'Oil prices bullish (less supply)'
+    },
+    relatedAssets: ['Crude Oil', 'Energy stocks', 'CAD'],
+    historicalVolatility: 'High',
+    releaseTime: '10:30 ET',
+  },
+
+  'Natural Gas Storage': {
+    category: 'energy',
+    description: 'Weekly change in the number of cubic feet of natural gas held in underground storage.',
+    whyItMatters: 'Storage levels relative to seasonal norms affect natural gas prices significantly.',
+    frequency: 'Weekly (Thursday)',
+    typicalReaction: {
+      higherThanExpected: 'Natural gas prices bearish',
+      lowerThanExpected: 'Natural gas prices bullish'
+    },
+    relatedAssets: ['Natural Gas', 'Utility stocks'],
+    historicalVolatility: 'High',
+    releaseTime: '10:30 ET',
+  },
+
+  'EIA Short-Term Energy Outlook': {
+    category: 'energy',
+    description: 'Monthly report with forecasts for oil, natural gas, and electricity prices and supply/demand.',
+    whyItMatters: 'Provides official government outlook on energy markets. Can shift price expectations.',
+    frequency: 'Monthly',
+    typicalReaction: {
+      higherThanExpected: 'Varies based on specific forecasts',
+      lowerThanExpected: 'Varies based on specific forecasts'
+    },
+    relatedAssets: ['Crude Oil', 'Natural Gas', 'Energy stocks'],
+    historicalVolatility: 'Medium',
+  },
+
+  // ============================================
+  // FED EVENTS
+  // ============================================
+  'FOMC Minutes': {
+    category: 'central_bank',
+    description: 'Detailed record of the Federal Reserve\'s most recent policy meeting, released 3 weeks after the meeting.',
+    whyItMatters: 'Reveals the Fed\'s thinking on economy, inflation, and future rate path. Can shift market expectations.',
+    frequency: '8 times per year (3 weeks after FOMC)',
+    typicalReaction: {
+      hawkish: 'USD bullish, stocks bearish, bonds bearish',
+      dovish: 'USD bearish, stocks bullish, bonds bullish'
+    },
+    relatedAssets: ['USD', 'US stocks', 'US bonds'],
+    historicalVolatility: 'High',
+    releaseTime: '14:00 ET',
+  },
+
+  'Beige Book': {
+    category: 'central_bank',
+    description: 'Summary of current economic conditions across the 12 Federal Reserve districts, based on anecdotal reports.',
+    whyItMatters: 'Provides qualitative insights into regional economic trends. Released 2 weeks before FOMC meetings.',
+    frequency: '8 times per year',
+    typicalReaction: {
+      hawkish: 'USD mildly bullish',
+      dovish: 'USD mildly bearish'
+    },
+    relatedAssets: ['USD'],
+    historicalVolatility: 'Low',
+    releaseTime: '14:00 ET',
+  },
+
+  // ============================================
+  // ADDITIONAL FRED INDICATORS
+  // ============================================
+  'Consumer Credit m/m': {
+    category: 'consumer',
+    description: 'Monthly change in total outstanding credit extended to individuals, excluding mortgages.',
+    whyItMatters: 'Shows consumer borrowing behavior. Rising credit can indicate confidence but also debt risks.',
+    frequency: 'Monthly (about 5 weeks lag)',
+    typicalReaction: {
+      higherThanExpected: 'USD mildly bullish (stronger consumer)',
+      lowerThanExpected: 'USD mildly bearish'
+    },
+    relatedAssets: ['USD', 'Consumer stocks', 'Bank stocks'],
+    historicalVolatility: 'Low',
+    releaseTime: '15:00 ET',
+  },
+
+  'Current Account': {
+    category: 'trade',
+    description: 'Quarterly measure of trade balance plus net income and transfers with the rest of the world.',
+    whyItMatters: 'Broadest measure of US international transactions. Large deficits can pressure USD.',
+    frequency: 'Quarterly',
+    typicalReaction: {
+      higherThanExpected: 'USD mildly bullish',
+      lowerThanExpected: 'USD mildly bearish'
+    },
+    relatedAssets: ['USD'],
+    historicalVolatility: 'Low',
+    releaseTime: '08:30 ET',
+  },
+
+  'Industrial Production m/m': {
+    category: 'manufacturing',
+    description: 'Monthly change in total output of US factories, mines, and utilities.',
+    whyItMatters: 'Direct measure of manufacturing sector health. Highly correlated with GDP.',
+    frequency: 'Monthly (around 15th)',
+    typicalReaction: {
+      higherThanExpected: 'USD bullish, industrial stocks bullish',
+      lowerThanExpected: 'USD bearish, industrial stocks bearish'
+    },
+    relatedAssets: ['USD', 'Industrial stocks', 'Commodities'],
+    historicalVolatility: 'Medium',
+    releaseTime: '09:15 ET',
+  },
+
+  'Factory Orders m/m': {
+    category: 'manufacturing',
+    description: 'Monthly change in the total value of new orders placed with manufacturers.',
+    whyItMatters: 'Leading indicator of manufacturing activity. Includes durable and non-durable goods.',
+    frequency: 'Monthly',
+    typicalReaction: {
+      higherThanExpected: 'USD mildly bullish, industrial stocks bullish',
+      lowerThanExpected: 'USD mildly bearish, industrial stocks bearish'
+    },
+    relatedAssets: ['USD', 'Industrial stocks'],
+    historicalVolatility: 'Medium',
+    releaseTime: '10:00 ET',
+  },
+
+  'Existing Home Sales': {
+    category: 'housing',
+    description: 'Monthly count of closed sales of previously owned homes.',
+    whyItMatters: 'Largest segment of housing market. Shows housing demand and consumer confidence.',
+    frequency: 'Monthly (around 20th)',
+    typicalReaction: {
+      higherThanExpected: 'USD mildly bullish, homebuilders bullish',
+      lowerThanExpected: 'USD mildly bearish, homebuilders bearish'
+    },
+    relatedAssets: ['USD', 'Homebuilder stocks', 'REITs'],
+    historicalVolatility: 'Medium',
+    releaseTime: '10:00 ET',
+  },
+
+  'Nonfarm Productivity q/q': {
+    category: 'employment',
+    description: 'Quarterly change in labor efficiency - output per hour worked in the non-farm business sector.',
+    whyItMatters: 'Higher productivity allows wages to rise without fueling inflation. Key for Fed policy.',
+    frequency: 'Quarterly (preliminary and revised)',
+    typicalReaction: {
+      higherThanExpected: 'USD bullish (growth without inflation)',
+      lowerThanExpected: 'USD bearish'
+    },
+    relatedAssets: ['USD', 'US bonds'],
+    historicalVolatility: 'Medium',
+    releaseTime: '08:30 ET',
+  },
+
+  'Unit Labor Costs q/q': {
+    category: 'employment',
+    description: 'Quarterly change in labor cost per unit of output. Measures wage pressures relative to productivity.',
+    whyItMatters: 'Rising unit labor costs signal inflationary pressure. Fed watches this closely.',
+    frequency: 'Quarterly (with productivity)',
+    typicalReaction: {
+      higherThanExpected: 'USD bullish (inflation concerns), bonds bearish',
+      lowerThanExpected: 'USD bearish, bonds bullish'
+    },
+    relatedAssets: ['USD', 'US bonds'],
+    historicalVolatility: 'Medium',
+    releaseTime: '08:30 ET',
+  },
+
+  'Employment Cost Index q/q': {
+    category: 'employment',
+    description: 'Quarterly change in total compensation costs (wages + benefits) for civilian workers.',
+    whyItMatters: 'Broadest measure of labor costs. Fed\'s preferred wage inflation gauge.',
+    frequency: 'Quarterly (end of month after quarter)',
+    typicalReaction: {
+      higherThanExpected: 'USD bullish (wage inflation), bonds bearish',
+      lowerThanExpected: 'USD bearish, bonds bullish'
+    },
+    relatedAssets: ['USD', 'US bonds'],
+    historicalVolatility: 'High',
+    releaseTime: '08:30 ET',
+  },
+
+  'Chicago PMI': {
+    category: 'manufacturing',
+    description: 'Business barometer measuring Chicago-area manufacturing activity. Above 50 = expansion.',
+    whyItMatters: 'Released day before ISM Manufacturing, often used as a preview. Highly correlated with ISM.',
+    frequency: 'Monthly (last business day)',
+    typicalReaction: {
+      higherThanExpected: 'USD bullish, stocks bullish',
+      lowerThanExpected: 'USD bearish, stocks bearish'
+    },
+    relatedAssets: ['USD', 'Industrial stocks'],
+    historicalVolatility: 'Medium',
+    releaseTime: '09:45 ET',
+  },
+
+  'Empire State Manufacturing Index': {
+    category: 'manufacturing',
+    description: 'Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.',
+    whyItMatters: 'First regional manufacturing survey of the month. Early read on manufacturing trends.',
+    frequency: 'Monthly (around 15th)',
+    typicalReaction: {
+      higherThanExpected: 'USD mildly bullish',
+      lowerThanExpected: 'USD mildly bearish'
+    },
+    relatedAssets: ['USD', 'Industrial stocks'],
+    historicalVolatility: 'Medium',
+    releaseTime: '08:30 ET',
+  },
+
+  'Philly Fed Manufacturing Index': {
+    category: 'manufacturing',
+    description: 'Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.',
+    whyItMatters: 'Key regional indicator. Often previews national manufacturing trends.',
+    frequency: 'Monthly (third Thursday)',
+    typicalReaction: {
+      higherThanExpected: 'USD mildly bullish',
+      lowerThanExpected: 'USD mildly bearish'
+    },
+    relatedAssets: ['USD', 'Industrial stocks'],
+    historicalVolatility: 'Medium',
+    releaseTime: '08:30 ET',
+  },
+
+  'Import Price Index m/m': {
+    category: 'inflation',
+    description: 'Monthly change in the price of imported goods and services.',
+    whyItMatters: 'Shows imported inflation pressures. Affected by USD strength and commodity prices.',
+    frequency: 'Monthly',
+    typicalReaction: {
+      higherThanExpected: 'USD mildly bullish (inflation)',
+      lowerThanExpected: 'USD mildly bearish'
+    },
+    relatedAssets: ['USD'],
+    historicalVolatility: 'Low',
+    releaseTime: '08:30 ET',
+  },
+
+  'UoM Consumer Sentiment': {
+    category: 'sentiment',
+    description: 'University of Michigan survey measuring consumer attitudes about the economy and personal finances.',
+    whyItMatters: 'Consumer confidence affects spending. Includes closely-watched inflation expectations.',
+    frequency: 'Monthly (preliminary mid-month, final end of month)',
+    typicalReaction: {
+      higherThanExpected: 'USD bullish, consumer stocks bullish',
+      lowerThanExpected: 'USD bearish, consumer stocks bearish'
+    },
+    relatedAssets: ['USD', 'Consumer stocks', 'Retail stocks'],
+    historicalVolatility: 'Medium',
+    releaseTime: '10:00 ET',
+  },
+
+  // ============================================
   // FED SPEAKERS
   // ============================================
   'Jackson Hole Symposium': {

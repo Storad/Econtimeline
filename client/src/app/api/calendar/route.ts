@@ -43,6 +43,46 @@ interface CalendarData {
   events: EconomicEvent[];
 }
 
+/**
+ * Determine if an event has already occurred based on date and time
+ * Uses US Eastern Time since most economic releases are in ET
+ */
+function isEventPast(eventDate: string, eventTime: string): boolean {
+  // Get current time in US Eastern
+  const now = new Date();
+  const etFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  const parts = etFormatter.formatToParts(now);
+  const nowET = {
+    year: parts.find(p => p.type === 'year')?.value || '',
+    month: parts.find(p => p.type === 'month')?.value || '',
+    day: parts.find(p => p.type === 'day')?.value || '',
+    hour: parts.find(p => p.type === 'hour')?.value || '00',
+    minute: parts.find(p => p.type === 'minute')?.value || '00',
+  };
+
+  const currentDateET = `${nowET.year}-${nowET.month}-${nowET.day}`;
+  const currentTimeET = `${nowET.hour}:${nowET.minute}`;
+
+  // Compare dates first
+  if (eventDate < currentDateET) return true;
+  if (eventDate > currentDateET) return false;
+
+  // Same day - compare times
+  // Handle "All Day" events as past if date has passed
+  if (eventTime === 'All Day' || eventTime === 'TBD') return true;
+
+  return eventTime <= currentTimeET;
+}
+
 // Try to load data from the public JSON file
 async function loadCalendarData(): Promise<CalendarData | null> {
   try {
@@ -52,31 +92,46 @@ async function loadCalendarData(): Promise<CalendarData | null> {
     const rawData = JSON.parse(fileContent);
 
     // Transform the new scraper format to the expected format
-    const events: EconomicEvent[] = (rawData.events || []).map((e: Record<string, unknown>, i: number) => ({
-      id: `event-${i}`,
-      date: e.date as string,
-      time: e.time as string,
-      currency: e.currency as string,
-      event: e.title as string, // Map 'title' to 'event'
-      impact: e.impact as "high" | "medium" | "low" | "holiday" | "early_close",
-      forecast: e.forecast as string | null,
-      previous: e.previous as string | null,
-      actual: e.actual as string | null,
-      category: e.category as string,
-      country: e.country as string,
-      source: e.source as string,
-      sourceUrl: e.sourceUrl as string,
-      // Enriched metadata
-      description: e.description as string,
-      whyItMatters: e.whyItMatters as string,
-      frequency: e.frequency as string,
-      typicalReaction: e.typicalReaction as EconomicEvent["typicalReaction"],
-      relatedAssets: e.relatedAssets as string[],
-      historicalVolatility: e.historicalVolatility as string,
-      // Early close fields
-      isEarlyClose: e.isEarlyClose as boolean | undefined,
-      closeTimeET: e.closeTimeET as string | undefined,
-    }));
+    const events: EconomicEvent[] = (rawData.events || []).map((e: Record<string, unknown>, i: number) => {
+      const eventDate = e.date as string;
+      const eventTime = e.time as string;
+      const latestValue = e.latestValue as string | null;
+      const priorValue = e.priorValue as string | null;
+
+      // Determine actual/previous based on whether event has occurred
+      const isPast = isEventPast(eventDate, eventTime);
+
+      // Past events: show latestValue as Actual, priorValue as Previous
+      // Future events: show null as Actual (displays "—"), latestValue as Previous
+      const actual = isPast ? latestValue : null;
+      const previous = isPast ? priorValue : latestValue;
+
+      return {
+        id: `event-${i}`,
+        date: eventDate,
+        time: eventTime,
+        currency: e.currency as string,
+        event: e.title as string, // Map 'title' to 'event'
+        impact: e.impact as "high" | "medium" | "low" | "holiday" | "early_close",
+        forecast: e.forecast as string | null,
+        previous,
+        actual,
+        category: e.category as string,
+        country: e.country as string,
+        source: e.source as string,
+        sourceUrl: e.sourceUrl as string,
+        // Enriched metadata
+        description: e.description as string,
+        whyItMatters: e.whyItMatters as string,
+        frequency: e.frequency as string,
+        typicalReaction: e.typicalReaction as EconomicEvent["typicalReaction"],
+        relatedAssets: e.relatedAssets as string[],
+        historicalVolatility: e.historicalVolatility as string,
+        // Early close fields
+        isEarlyClose: e.isEarlyClose as boolean | undefined,
+        closeTimeET: e.closeTimeET as string | undefined,
+      };
+    });
 
     // Calculate date range
     const dates = events.map(e => e.date).sort();

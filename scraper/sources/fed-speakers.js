@@ -103,6 +103,8 @@ export async function scrapeFedSpeakers() {
         title: 'Jackson Hole Symposium Begins',
         impact: 'medium',
         category: 'central_bank',
+        description: 'Annual Federal Reserve economic policy symposium in Jackson Hole, Wyoming.',
+        frequency: 'Annual (late August)',
       });
     }
     if (isInRange(dates.powell)) {
@@ -112,6 +114,12 @@ export async function scrapeFedSpeakers() {
         title: 'Fed Chair Powell Speaks at Jackson Hole',
         impact: 'high',
         category: 'central_bank',
+        description: 'Fed Chair\'s keynote speech at Jackson Hole. Historically used to signal major policy shifts.',
+        typicalReaction: {
+          hawkish: 'USD bullish, stocks bearish, bonds bearish',
+          dovish: 'USD bearish, stocks bullish, bonds bullish'
+        },
+        frequency: 'Annual (late August)',
       });
     }
   });
@@ -126,6 +134,12 @@ export async function scrapeFedSpeakers() {
           title: `Fed Chair Powell Testifies (${t.chamber})`,
           impact: 'high',
           category: 'central_bank',
+          description: `Semi-annual monetary policy testimony to the ${t.chamber}. Two days of Q&A on Fed policy.`,
+          typicalReaction: {
+            hawkish: 'USD bullish, stocks bearish',
+            dovish: 'USD bearish, stocks bullish'
+          },
+          frequency: 'Semi-annual (Feb and Jul)',
         });
       }
     });
@@ -140,6 +154,12 @@ export async function scrapeFedSpeakers() {
         title: 'Fed Beige Book',
         impact: 'medium',
         category: 'central_bank',
+        description: 'Summary of economic conditions across the 12 Federal Reserve districts based on anecdotal reports.',
+        typicalReaction: {
+          hawkish: 'USD mildly bullish',
+          dovish: 'USD mildly bearish'
+        },
+        frequency: '8 times per year (2 weeks before FOMC)',
       });
     }
   });
