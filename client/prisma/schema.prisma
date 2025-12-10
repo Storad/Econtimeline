@@ -14,13 +14,66 @@ model TradeNote {
   id        String   @id @default(cuid())
   userId    String   // Clerk user ID
   date      String   // Format: YYYY-MM-DD
-  trades    Int?     // Number of trades taken
-  pnl       Float?   // Profit/Loss amount
-  note      String?  // User's note text
+  trades    Int?     // Number of trades taken (deprecated - use Trade model)
+  pnl       Float?   // Profit/Loss amount (deprecated - calculated from trades)
+  note      String?  // Daily notes/recap
+  preMarket String?  // Pre-market plan/notes
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([userId, date]) // One note per user per day
   @@index([userId])
   @@index([date])
+}
+
+model Trade {
+  id         String   @id @default(cuid())
+  userId     String   // Clerk user ID
+  date       String   // Format: YYYY-MM-DD
+  time       String?  // Format: HH:MM (when trade was taken)
+  ticker     String   // Symbol (ES, NQ, SPY, AAPL, etc.)
+  direction  String   // LONG or SHORT
+  entryPrice Float?   // Entry price
+  exitPrice  Float?   // Exit price
+  size       Float?   // Number of contracts/shares
+  pnl        Float    // Profit/Loss for this trade
+  notes      String?  // Trade-specific notes
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Many-to-many relation with tags
+  tags       TradeTag[]
+
+  @@index([userId])
+  @@index([date])
+  @@index([userId, date])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String?  // null = system tag, userId = custom user tag
+  name      String   // Tag name (e.g., "Breakout", "FOMO")
+  type      String   // SETUP, EMOTION, or CUSTOM
+  color     String   // Hex color for UI display
+  createdAt DateTime @default(now())
+
+  // Many-to-many relation with trades
+  trades    TradeTag[]
+
+  @@unique([userId, name]) // Unique tag names per user (null userId = system)
+  @@index([userId])
+  @@index([type])
+}
+
+model TradeTag {
+  id      String @id @default(cuid())
+  tradeId String
+  tagId   String
+
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([tradeId, tagId])
+  @@index([tradeId])
+  @@index([tagId])
 }

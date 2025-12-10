@@ -29,7 +29,12 @@ import {
   StickyNote,
   Eye,
   EyeOff,
+  Edit2,
+  Hash,
+  Tag as TagIcon,
 } from "lucide-react";
+import { useTradeJournal } from "@/hooks/useTradeJournal";
+import { Trade, Tag, TradeFormData, DEFAULT_TRADE_FORM } from "@/components/TradeJournal/types";
 
 interface EconomicEvent {
   id: string;
@@ -131,6 +136,26 @@ export default function EconomicCalendarPage() {
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [deletingAllNotes, setDeletingAllNotes] = useState(false);
   const [showMonthSummary, setShowMonthSummary] = useState(false);
+  const [showDeleteAllTradesConfirm, setShowDeleteAllTradesConfirm] = useState(false);
+  const [deletingAllTrades, setDeletingAllTrades] = useState(false);
+  const [showWeekSummary, setShowWeekSummary] = useState<{ show: boolean; saturdayDate: Date | null }>({ show: false, saturdayDate: null });
+  const [hoveredTrade, setHoveredTrade] = useState<{ index: number; x: number; y: number; trade: any } | null>(null);
+  const [showProfitFactorTooltip, setShowProfitFactorTooltip] = useState<'weekly' | 'monthly' | null>(null);
+  const [showBreakevenTooltip, setShowBreakevenTooltip] = useState<'weekly' | 'monthly' | null>(null);
+  const [showRiskRewardTooltip, setShowRiskRewardTooltip] = useState<'weekly' | 'monthly' | null>(null);
+  const [showExpectancyTooltip, setShowExpectancyTooltip] = useState<'weekly' | 'monthly' | null>(null);
+  const [showAvgTradeTooltip, setShowAvgTradeTooltip] = useState<'weekly' | 'monthly' | null>(null);
+  const [showAvgDayTooltip, setShowAvgDayTooltip] = useState<'weekly' | 'monthly' | null>(null);
+
+  // Generic confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => Promise<void> | void;
+    confirmText?: string;
+    isLoading?: boolean;
+  }>({ show: false, title: "", message: "", onConfirm: () => {} });
 
   // Filters (USD-only, no currency filter needed)
   const [filterImpacts, setFilterImpacts] = useState<Set<string>>(new Set(["high", "medium", "low"]));
@@ -140,7 +165,7 @@ export default function EconomicCalendarPage() {
   const [showFilters, setShowFilters] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Trade Notes State
+  // Trade Notes State (legacy - for daily notes)
   const [tradeNotes, setTradeNotes] = useState<Record<string, TradeNote>>({});
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [noteFormData, setNoteFormData] = useState({
@@ -149,6 +174,34 @@ export default function EconomicCalendarPage() {
     note: "",
   });
   const [savingNote, setSavingNote] = useState(false);
+
+  // Trade Journal State (new - individual trades)
+  const {
+    trades,
+    tags,
+    stats,
+    loading: tradesLoading,
+    statsLoading,
+    statsPeriod,
+    createTrade,
+    updateTrade,
+    deleteTrade,
+    createTag,
+    deleteTag,
+    changeStatsPeriod,
+    getTradesByDate,
+    getDailyPnL,
+    getTradeCount,
+  } = useTradeJournal();
+
+  const [showTradeForm, setShowTradeForm] = useState(false);
+  const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+  const [tradeFormData, setTradeFormData] = useState<TradeFormData>(DEFAULT_TRADE_FORM);
+  const [savingTrade, setSavingTrade] = useState(false);
+  const [showNewTagInput, setShowNewTagInput] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [newTagColor, setNewTagColor] = useState("#6b7280");
+  const [modalTab, setModalTab] = useState<"events" | "trades">("events");
 
   // Fetch trade notes
   const fetchTradeNotes = async () => {
@@ -268,6 +321,87 @@ export default function EconomicCalendarPage() {
     }
     setShowNoteModal(true);
   };
+
+  // Trade Journal Functions
+  const openTradeForm = (trade?: Trade) => {
+    if (trade) {
+      setEditingTrade(trade);
+      setTradeFormData({
+        ticker: trade.ticker,
+        direction: trade.direction,
+        time: trade.time || "",
+        entryPrice: trade.entryPrice?.toString() || "",
+        exitPrice: trade.exitPrice?.toString() || "",
+        size: trade.size?.toString() || "",
+        pnl: trade.pnl.toString(),
+        notes: trade.notes || "",
+        tagIds: trade.tags.map((t) => t.id),
+      });
+    } else {
+      setEditingTrade(null);
+      setTradeFormData(DEFAULT_TRADE_FORM);
+    }
+    setShowTradeForm(true);
+  };
+
+  const handleSaveTrade = async () => {
+    if (!selectedDay || !tradeFormData.ticker || !tradeFormData.pnl) return;
+
+    setSavingTrade(true);
+    try {
+      if (editingTrade) {
+        await updateTrade(editingTrade.id, tradeFormData);
+      } else {
+        await createTrade(selectedDay, tradeFormData);
+      }
+      setShowTradeForm(false);
+      setEditingTrade(null);
+      setTradeFormData(DEFAULT_TRADE_FORM);
+    } catch (error) {
+      console.error("Failed to save trade:", error);
+    } finally {
+      setSavingTrade(false);
+    }
+  };
+
+  const handleDeleteTrade = (tradeId: string, ticker: string) => {
+    setConfirmModal({
+      show: true,
+      title: "Delete Trade?",
+      message: `Are you sure you want to delete this ${ticker} trade? This action cannot be undone.`,
+      confirmText: "Delete",
+      onConfirm: async () => {
+        await deleteTrade(tradeId);
+        setConfirmModal((prev) => ({ ...prev, show: false }));
+      },
+    });
+  };
+
+  const handleCreateTag = async () => {
+    if (!newTagName.trim()) return;
+    const tag = await createTag(newTagName.trim(), newTagColor);
+    if (tag) {
+      setTradeFormData((prev) => ({
+        ...prev,
+        tagIds: [...prev.tagIds, tag.id],
+      }));
+      setNewTagName("");
+      setShowNewTagInput(false);
+    }
+  };
+
+  const toggleTag = (tagId: string) => {
+    setTradeFormData((prev) => ({
+      ...prev,
+      tagIds: prev.tagIds.includes(tagId)
+        ? prev.tagIds.filter((id) => id !== tagId)
+        : [...prev.tagIds, tagId],
+    }));
+  };
+
+  // Get trades for selected day
+  const selectedDayTrades = selectedDay ? getTradesByDate(selectedDay) : [];
+  const selectedDayPnL = selectedDay ? getDailyPnL(selectedDay) : 0;
 
   // Fetch events and notes on mount
   useEffect(() => {
@@ -505,57 +639,47 @@ export default function EconomicCalendarPage() {
 
     let currentWeekPnL = 0;
     let currentWeekTrades = 0;
-    let currentWeekDays = 0;
     let lastWeekPnL = 0;
     let lastWeekTrades = 0;
-    let lastWeekDays = 0;
     let monthlyPnL = 0;
     let monthlyTrades = 0;
-    let monthlyDays = 0;
 
-    Object.entries(tradeNotes).forEach(([dateStr, note]) => {
-      const [y, m, d] = dateStr.split("-").map(Number);
-      const noteDate = new Date(y, m - 1, d);
+    const currentWeekDays = new Set<string>();
+    const lastWeekDays = new Set<string>();
+    const monthlyDaysSet = new Set<string>();
+
+    // Use the new trade journal data
+    trades.forEach((trade) => {
+      const [y, m, d] = trade.date.split("-").map(Number);
+      const tradeDate = new Date(y, m - 1, d);
 
       // Check if in current week
-      if (noteDate >= startOfCurrentWeek && noteDate <= endOfCurrentWeek) {
-        if (note.pnl !== null && note.pnl !== undefined) {
-          currentWeekPnL += note.pnl;
-          currentWeekDays++;
-        }
-        if (note.trades !== null && note.trades !== undefined) {
-          currentWeekTrades += note.trades;
-        }
+      if (tradeDate >= startOfCurrentWeek && tradeDate <= endOfCurrentWeek) {
+        currentWeekPnL += trade.pnl;
+        currentWeekTrades++;
+        currentWeekDays.add(trade.date);
       }
 
       // Check if in last week
-      if (noteDate >= startOfLastWeek && noteDate <= endOfLastWeek) {
-        if (note.pnl !== null && note.pnl !== undefined) {
-          lastWeekPnL += note.pnl;
-          lastWeekDays++;
-        }
-        if (note.trades !== null && note.trades !== undefined) {
-          lastWeekTrades += note.trades;
-        }
+      if (tradeDate >= startOfLastWeek && tradeDate <= endOfLastWeek) {
+        lastWeekPnL += trade.pnl;
+        lastWeekTrades++;
+        lastWeekDays.add(trade.date);
       }
 
       // Check if in currently displayed month
-      if (noteDate >= startOfMonth && noteDate <= endOfMonth) {
-        if (note.pnl !== null && note.pnl !== undefined) {
-          monthlyPnL += note.pnl;
-          monthlyDays++;
-        }
-        if (note.trades !== null && note.trades !== undefined) {
-          monthlyTrades += note.trades;
-        }
+      if (tradeDate >= startOfMonth && tradeDate <= endOfMonth) {
+        monthlyPnL += trade.pnl;
+        monthlyTrades++;
+        monthlyDaysSet.add(trade.date);
       }
     });
 
     // Use current week if it has data, otherwise show last week
-    const hasCurrentWeekData = currentWeekDays > 0 || currentWeekTrades > 0;
+    const hasCurrentWeekData = currentWeekDays.size > 0 || currentWeekTrades > 0;
     const weeklyPnL = hasCurrentWeekData ? currentWeekPnL : lastWeekPnL;
     const weeklyTrades = hasCurrentWeekData ? currentWeekTrades : lastWeekTrades;
-    const weeklyDays = hasCurrentWeekData ? currentWeekDays : lastWeekDays;
+    const weeklyDays = hasCurrentWeekData ? currentWeekDays.size : lastWeekDays.size;
     const weekLabel = hasCurrentWeekData ? "This Week" : "Last Week";
 
     return {
@@ -565,39 +689,57 @@ export default function EconomicCalendarPage() {
       weekLabel,
       monthlyPnL,
       monthlyTrades,
-      monthlyDays,
+      monthlyDays: monthlyDaysSet.size,
     };
-  }, [tradeNotes, currentMonth]);
+  }, [trades, currentMonth]);
 
   // Detailed monthly breakdown for charts
   const monthlyBreakdown = useMemo(() => {
     const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+
+    // Get individual trades in this month, sorted by date and time
+    const periodTrades = trades
+      .filter((trade) => {
+        const [y, m] = trade.date.split("-").map(Number);
+        return y === currentMonth.getFullYear() && m === currentMonth.getMonth() + 1;
+      })
+      .sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        if (a.time && b.time) return a.time.localeCompare(b.time);
+        return 0;
+      });
+
+    // Group trades by date for daily stats
+    const tradesByDate: Record<string, { pnl: number; trades: number }> = {};
+    periodTrades.forEach((trade) => {
+      if (!tradesByDate[trade.date]) {
+        tradesByDate[trade.date] = { pnl: 0, trades: 0 };
+      }
+      tradesByDate[trade.date].pnl += trade.pnl;
+      tradesByDate[trade.date].trades++;
+    });
 
     const dailyData: { date: string; day: number; pnl: number; trades: number; dayName: string }[] = [];
     let winDays = 0;
     let lossDays = 0;
     let bestDay = { pnl: 0, date: "" };
     let worstDay = { pnl: 0, date: "" };
-    let totalPnL = 0;
-    let totalTrades = 0;
-    let cumulativePnL = 0;
-    const cumulativeData: { day: number; cumulative: number }[] = [];
 
     // Iterate through all days in the month
     for (let d = 1; d <= endOfMonth.getDate(); d++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), d);
       const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-      const note = tradeNotes[dateKey];
+      const dayData = tradesByDate[dateKey];
 
-      if (note && (note.pnl !== null || note.trades !== null)) {
-        const pnl = note.pnl ?? 0;
-        const trades = note.trades ?? 0;
+      if (dayData && dayData.trades > 0) {
+        const pnl = dayData.pnl;
+        const tradeCount = dayData.trades;
 
         dailyData.push({
           date: dateKey,
           day: d,
           pnl,
-          trades,
+          trades: tradeCount,
           dayName: date.toLocaleDateString("en-US", { weekday: "short" }),
         });
 
@@ -606,21 +748,53 @@ export default function EconomicCalendarPage() {
 
         if (pnl > bestDay.pnl) bestDay = { pnl, date: dateKey };
         if (pnl < worstDay.pnl) worstDay = { pnl, date: dateKey };
-
-        totalPnL += pnl;
-        totalTrades += trades;
-        cumulativePnL += pnl;
-        cumulativeData.push({ day: d, cumulative: cumulativePnL });
       }
     }
 
+    // Calculate trade-level statistics
+    const winningTrades = periodTrades.filter(t => t.pnl > 0);
+    const losingTradesArr = periodTrades.filter(t => t.pnl < 0);
+    const totalPnL = periodTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const totalTrades = periodTrades.length;
+
+    const grossProfit = winningTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const grossLoss = Math.abs(losingTradesArr.reduce((sum, t) => sum + t.pnl, 0));
+
+    const tradeWinRate = totalTrades > 0 ? (winningTrades.length / totalTrades) * 100 : 0;
+    const dayWinRate = (winDays + lossDays) > 0 ? (winDays / (winDays + lossDays)) * 100 : 0;
+    const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : 0;
+    const avgWin = winningTrades.length > 0 ? grossProfit / winningTrades.length : 0;
+    const avgLoss = losingTradesArr.length > 0 ? grossLoss / losingTradesArr.length : 0;
+
+    const largestWin = winningTrades.length > 0
+      ? winningTrades.reduce((max, t) => t.pnl > max.pnl ? t : max, winningTrades[0])
+      : null;
+    const largestLoss = losingTradesArr.length > 0
+      ? losingTradesArr.reduce((min, t) => t.pnl < min.pnl ? t : min, losingTradesArr[0])
+      : null;
+
+    // Calculate cumulative P&L data using individual trades
+    let cumulative = 0;
+    const tradeByTradeData = periodTrades.map((trade, index) => {
+      cumulative += trade.pnl;
+      return {
+        index,
+        ticker: trade.ticker,
+        pnl: trade.pnl,
+        cumulative,
+        date: trade.date,
+        time: trade.time,
+        direction: trade.direction,
+      };
+    });
+
     const avgPnLPerDay = dailyData.length > 0 ? totalPnL / dailyData.length : 0;
     const avgTradesPerDay = dailyData.length > 0 ? totalTrades / dailyData.length : 0;
-    const winRate = (winDays + lossDays) > 0 ? (winDays / (winDays + lossDays)) * 100 : 0;
 
     return {
       dailyData,
-      cumulativeData,
+      tradeByTradeData,
+      periodTrades,
       winDays,
       lossDays,
       bestDay,
@@ -629,10 +803,18 @@ export default function EconomicCalendarPage() {
       totalTrades,
       avgPnLPerDay,
       avgTradesPerDay,
-      winRate,
+      dayWinRate,
+      tradeWinRate,
+      profitFactor,
+      avgWin,
+      avgLoss,
+      largestWin,
+      largestLoss,
+      winningTrades: winningTrades.length,
+      losingTrades: losingTradesArr.length,
       tradingDays: dailyData.length,
     };
-  }, [tradeNotes, currentMonth]);
+  }, [trades, currentMonth]);
 
   // Calculate weekly totals for a given Saturday date, bounded by the displayed month
   const getWeekTotals = useCallback((saturdayDate: Date, displayedMonth: Date) => {
@@ -658,24 +840,169 @@ export default function EconomicCalendarPage() {
     let weekTrades = 0;
     let weekDays = 0;
 
-    Object.entries(tradeNotes).forEach(([dateStr, note]) => {
-      const [y, m, d] = dateStr.split("-").map(Number);
-      const noteDate = new Date(y, m - 1, d);
+    // Use the new trade journal data
+    trades.forEach((trade) => {
+      const [y, m, d] = trade.date.split("-").map(Number);
+      const tradeDate = new Date(y, m - 1, d);
 
-      // Only count notes within the effective range (week bounded by month)
-      if (noteDate >= effectiveStart && noteDate <= effectiveEnd) {
-        if (note.pnl !== null && note.pnl !== undefined) {
-          weekPnL += note.pnl;
-          weekDays++;
-        }
-        if (note.trades !== null && note.trades !== undefined) {
-          weekTrades += note.trades;
-        }
+      // Only count trades within the effective range (week bounded by month)
+      if (tradeDate >= effectiveStart && tradeDate <= effectiveEnd) {
+        weekPnL += trade.pnl;
+        weekTrades++;
       }
     });
 
+    // Count unique days with trades
+    const daysWithTrades = new Set<string>();
+    trades.forEach((trade) => {
+      const [y, m, d] = trade.date.split("-").map(Number);
+      const tradeDate = new Date(y, m - 1, d);
+      if (tradeDate >= effectiveStart && tradeDate <= effectiveEnd) {
+        daysWithTrades.add(trade.date);
+      }
+    });
+    weekDays = daysWithTrades.size;
+
     return { weekPnL, weekTrades, weekDays };
-  }, [tradeNotes]);
+  }, [trades]);
+
+  // Get detailed weekly breakdown for the week summary popup, bounded by displayed month
+  const getWeeklyBreakdown = useCallback((saturdayDate: Date, displayedMonth: Date) => {
+    const startOfWeek = new Date(saturdayDate);
+    startOfWeek.setDate(saturdayDate.getDate() - 6);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(saturdayDate);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Get the boundaries of the displayed month
+    const monthStart = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), 1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthEnd = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 0);
+    monthEnd.setHours(23, 59, 59, 999);
+
+    // Clamp the week boundaries to the displayed month
+    const effectiveStart = startOfWeek < monthStart ? monthStart : startOfWeek;
+    const effectiveEnd = endOfWeek > monthEnd ? monthEnd : endOfWeek;
+
+    // Get individual trades in this period, sorted by date and time
+    const periodTrades = trades
+      .filter((trade) => {
+        const [y, m, d] = trade.date.split("-").map(Number);
+        const tradeDate = new Date(y, m - 1, d);
+        return tradeDate >= effectiveStart && tradeDate <= effectiveEnd;
+      })
+      .sort((a, b) => {
+        // Sort by date first, then by time if available
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        if (a.time && b.time) return a.time.localeCompare(b.time);
+        return 0;
+      });
+
+    // Group trades by date for daily stats
+    const tradesByDate: Record<string, { pnl: number; trades: number }> = {};
+    periodTrades.forEach((trade) => {
+      if (!tradesByDate[trade.date]) {
+        tradesByDate[trade.date] = { pnl: 0, trades: 0 };
+      }
+      tradesByDate[trade.date].pnl += trade.pnl;
+      tradesByDate[trade.date].trades++;
+    });
+
+    const dailyData: { date: string; day: number; pnl: number; trades: number; dayName: string }[] = [];
+    let winDays = 0;
+    let lossDays = 0;
+    let bestDay = { pnl: 0, date: "" };
+    let worstDay = { pnl: 0, date: "" };
+
+    // Iterate through each day in the effective range (bounded by month)
+    const currentDate = new Date(effectiveStart);
+    while (currentDate <= effectiveEnd) {
+      const dateKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
+      const dayData = tradesByDate[dateKey];
+
+      if (dayData && dayData.trades > 0) {
+        const pnl = dayData.pnl;
+        const tradeCount = dayData.trades;
+
+        dailyData.push({
+          date: dateKey,
+          day: currentDate.getDate(),
+          pnl,
+          trades: tradeCount,
+          dayName: currentDate.toLocaleDateString("en-US", { weekday: "short" }),
+        });
+
+        if (pnl > 0) winDays++;
+        else if (pnl < 0) lossDays++;
+
+        if (pnl > bestDay.pnl) bestDay = { pnl, date: dateKey };
+        if (pnl < worstDay.pnl) worstDay = { pnl, date: dateKey };
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Calculate trade-level statistics
+    const winningTrades = periodTrades.filter(t => t.pnl > 0);
+    const losingTrades = periodTrades.filter(t => t.pnl < 0);
+    const totalPnL = periodTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const totalTrades = periodTrades.length;
+
+    const grossProfit = winningTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const grossLoss = Math.abs(losingTrades.reduce((sum, t) => sum + t.pnl, 0));
+
+    const tradeWinRate = totalTrades > 0 ? (winningTrades.length / totalTrades) * 100 : 0;
+    const dayWinRate = (winDays + lossDays) > 0 ? (winDays / (winDays + lossDays)) * 100 : 0;
+    const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : 0;
+    const avgWin = winningTrades.length > 0 ? grossProfit / winningTrades.length : 0;
+    const avgLoss = losingTrades.length > 0 ? grossLoss / losingTrades.length : 0;
+
+    const largestWin = winningTrades.length > 0
+      ? winningTrades.reduce((max, t) => t.pnl > max.pnl ? t : max, winningTrades[0])
+      : null;
+    const largestLoss = losingTrades.length > 0
+      ? losingTrades.reduce((min, t) => t.pnl < min.pnl ? t : min, losingTrades[0])
+      : null;
+
+    // Calculate cumulative P&L data using individual trades for the line chart
+    let cumulative = 0;
+    const tradeByTradeData = periodTrades.map((trade, index) => {
+      cumulative += trade.pnl;
+      return {
+        index,
+        ticker: trade.ticker,
+        pnl: trade.pnl,
+        cumulative,
+        date: trade.date,
+        time: trade.time,
+        direction: trade.direction,
+      };
+    });
+
+    return {
+      dailyData,
+      tradeByTradeData,
+      periodTrades,
+      winDays,
+      lossDays,
+      bestDay,
+      worstDay,
+      totalPnL,
+      totalTrades,
+      dayWinRate,
+      tradeWinRate,
+      profitFactor,
+      avgWin,
+      avgLoss,
+      largestWin,
+      largestLoss,
+      winningTrades: winningTrades.length,
+      losingTrades: losingTrades.length,
+      tradingDays: dailyData.length,
+      effectiveStart,
+      effectiveEnd,
+    };
+  }, [trades]);
 
   // Filter events (USD-only)
   const filteredEvents = useMemo(() => {
@@ -1153,15 +1480,18 @@ export default function EconomicCalendarPage() {
                   </div>
                 )}
 
-                {/* Delete All Notes */}
-                {Object.keys(tradeNotes).length > 0 && (
+                {/* Delete All Trades */}
+                {trades.length > 0 && (
                   <div className="pt-3 mt-3 border-t border-border">
                     <button
-                      onClick={() => setShowDeleteAllConfirm(true)}
+                      onClick={() => {
+                        setShowDeleteAllTradesConfirm(true);
+                        setShowFilters(false);
+                      }}
                       className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-xs font-medium hover:bg-red-500/20 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      Delete All Notes ({Object.keys(tradeNotes).length})
+                      Delete All Trades ({trades.length})
                     </button>
                   </div>
                 )}
@@ -1414,13 +1744,13 @@ export default function EconomicCalendarPage() {
             const isMarketClosed = holidayName !== null;
             const isEarlyClose = earlyCloseInfo !== null;
 
-            // Trade note data for this day
-            const dayNote = tradeNotes[dateKey];
-            const hasPnL = dayNote?.pnl !== null && dayNote?.pnl !== undefined;
-            const hasTrades = dayNote?.trades !== null && dayNote?.trades !== undefined;
-            const hasOnlyNote = dayNote?.note && !hasPnL && !hasTrades;
-            const isProfit = hasPnL && (dayNote?.pnl || 0) >= 0;
-            const isLoss = hasPnL && (dayNote?.pnl || 0) < 0;
+            // Trade journal data for this day
+            const dayPnL = getDailyPnL(dateKey);
+            const dayTradeCount = getTradeCount(dateKey);
+            const hasPnL = dayTradeCount > 0;
+            const hasTrades = dayTradeCount > 0;
+            const isProfit = hasPnL && dayPnL >= 0;
+            const isLoss = hasPnL && dayPnL < 0;
 
             // Check if this is a Saturday (day 6) - show weekly totals
             const isSaturday = date.getDay() === 6;
@@ -1437,28 +1767,29 @@ export default function EconomicCalendarPage() {
             // Saturday with weekly data gets two-column layout
             if (isSaturday && showNotes && hasWeeklyData) {
               return (
-                <button
+                <div
                   key={day}
-                  onClick={() => handleDayClick(dateKey)}
                   className={`p-1 border-b border-r text-left transition-all group relative ${
                     isHighlighted
                       ? "bg-accent/10 ring-2 ring-inset ring-accent/30 border-accent/30"
                       : showNotes && isProfit
-                      ? "bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/20"
+                      ? "bg-emerald-500/15 border-emerald-500/40"
                       : showNotes && isLoss
-                      ? "bg-red-500/15 border-red-500/40 hover:bg-red-500/20"
+                      ? "bg-red-500/15 border-red-500/40"
                       : (isMarketClosed || isEarlyClose) && showHolidays
-                      ? "bg-gray-500/20 border-gray-500/40 hover:bg-gray-500/25"
-                      : "border-border hover:bg-card-hover/30"
+                      ? "bg-gray-500/20 border-gray-500/40"
+                      : "border-border"
                   } ${isAnimated ? "animate-border-pulse" : ""}`}
                 >
                   <div className="flex h-full">
-                    {/* Left Column - Daily Data */}
-                    <div className={`flex-1 flex flex-col pr-2 mr-1 border-r-2 border-border/50 ${isPastDay && !isProfit && !isLoss ? "opacity-60" : ""}`}>
+                    {/* Left Column - Daily Data (Clickable) */}
+                    <button
+                      onClick={() => handleDayClick(dateKey)}
+                      className={`flex-1 flex flex-col pr-2 mr-1 border-r-2 border-border/50 text-left hover:bg-white/5 transition-colors rounded-l ${isPastDay && !isProfit && !isLoss ? "opacity-60" : ""}`}
+                    >
                       {/* Day Number with Event Indicators */}
                       <div className={`text-xs font-medium flex items-center gap-1.5 ${isPastDay ? "text-muted" : "text-muted/70"}`}>
                         {day}
-                        {showNotes && hasOnlyNote && <StickyNote className="w-3 h-3 text-accent-light" />}
                         {/* Event Indicators - inline with date */}
                         {showEvents && dayEvents.length > 0 && (
                           <div className="flex items-center gap-1">
@@ -1487,17 +1818,17 @@ export default function EconomicCalendarPage() {
                       {/* Trade P&L Display */}
                       {showNotes && hasPnL && (
                         <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
-                          {formatPnL(dayNote.pnl!)}
+                          {formatPnL(dayPnL)}
                         </div>
                       )}
 
                       {/* Trades count */}
                       {showNotes && hasTrades && (
                         <div className="text-xs text-muted">
-                          {dayNote.trades} Trade{dayNote.trades !== 1 ? "s" : ""}
+                          {dayTradeCount} Trade{dayTradeCount !== 1 ? "s" : ""}
                         </div>
                       )}
-                    </div>
+                    </button>
 
                     {/* Holiday Tag - Outside opacity div */}
                     {holidayName && showHolidays && (
@@ -1517,12 +1848,15 @@ export default function EconomicCalendarPage() {
                       </div>
                     )}
 
-                    {/* Right Column - Weekly Summary */}
-                    <div className={`w-[45%] flex flex-col items-center justify-center pl-1 rounded-r relative z-10 border-l-2 ${
-                      weekTotals!.weekPnL >= 0
-                        ? "bg-emerald-500/40 border-emerald-400/60"
-                        : "bg-red-500/40 border-red-400/60"
-                    }`}>
+                    {/* Right Column - Weekly Summary (Clickable) */}
+                    <button
+                      onClick={() => setShowWeekSummary({ show: true, saturdayDate: date })}
+                      className={`w-[45%] flex flex-col items-center justify-center pl-1 rounded-r relative z-10 border-l-2 hover:brightness-110 transition-all ${
+                        weekTotals!.weekPnL >= 0
+                          ? "bg-emerald-500/40 border-emerald-400/60"
+                          : "bg-red-500/40 border-red-400/60"
+                      }`}
+                    >
                       <div className="text-[8px] text-white/80 uppercase tracking-wider font-semibold">Week</div>
                       <div className={`text-[13px] font-bold ${
                         weekTotals!.weekPnL >= 0 ? "text-emerald-400" : "text-red-400"
@@ -1534,9 +1868,9 @@ export default function EconomicCalendarPage() {
                           {weekTotals!.weekTrades} trades
                         </div>
                       )}
-                    </div>
+                    </button>
                   </div>
-                </button>
+                </div>
               );
             }
 
@@ -1598,23 +1932,19 @@ export default function EconomicCalendarPage() {
                       </div>
                     )}
                   </div>
-                  {/* Note-only indicator */}
-                  {showNotes && hasOnlyNote && (
-                    <StickyNote className="w-3 h-3 text-accent-light" />
-                  )}
                 </div>
 
                 {/* Trade P&L Display */}
                 {showNotes && hasPnL && (
                   <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
-                    {formatPnL(dayNote.pnl!)}
+                    {formatPnL(dayPnL)}
                   </div>
                 )}
 
                 {/* Trades count */}
                 {showNotes && hasTrades && (
                   <div className="text-xs text-muted">
-                    {dayNote.trades} Trade{dayNote.trades !== 1 ? "s" : ""}
+                    {dayTradeCount} Trade{dayTradeCount !== 1 ? "s" : ""}
                   </div>
                 )}
 
@@ -1669,12 +1999,15 @@ export default function EconomicCalendarPage() {
                       {/* Left Column - Empty (no daily data for phantom day) */}
                       <div className="flex-1 flex flex-col pr-2 mr-1 border-r-2 border-border/50" />
 
-                      {/* Right Column - Weekly Summary */}
-                      <div className={`w-[45%] flex flex-col items-center justify-center pl-1 rounded-r relative z-10 border-l-2 ${
-                        weekTotals.weekPnL >= 0
-                          ? "bg-emerald-500/40 border-emerald-400/60"
-                          : "bg-red-500/40 border-red-400/60"
-                      }`}>
+                      {/* Right Column - Weekly Summary (Clickable) */}
+                      <button
+                        onClick={() => setShowWeekSummary({ show: true, saturdayDate: phantomSaturdayDate })}
+                        className={`w-[45%] flex flex-col items-center justify-center pl-1 rounded-r relative z-10 border-l-2 hover:brightness-110 transition-all ${
+                          weekTotals.weekPnL >= 0
+                            ? "bg-emerald-500/40 border-emerald-400/60"
+                            : "bg-red-500/40 border-red-400/60"
+                        }`}
+                      >
                         <div className="text-[8px] text-white/80 uppercase tracking-wider font-semibold">Week</div>
                         <div className={`text-[13px] font-bold ${
                           weekTotals.weekPnL >= 0 ? "text-emerald-400" : "text-red-400"
@@ -1686,7 +2019,7 @@ export default function EconomicCalendarPage() {
                             {weekTotals.weekTrades} trades
                           </div>
                         )}
-                      </div>
+                      </button>
                     </div>
                   </div>
                 );
@@ -1729,63 +2062,86 @@ export default function EconomicCalendarPage() {
                     });
                   })()}
                 </h3>
-                <p className="text-xs text-muted mt-0.5">
-                  {selectedDayEvents.length} event{selectedDayEvents.length !== 1 ? "s" : ""} scheduled
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Add/Edit Note Button */}
-                <button
-                  onClick={openNoteModal}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
-                    tradeNotes[selectedDay]
-                      ? "bg-accent/20 text-accent-light border border-accent/30 hover:bg-accent/30"
-                      : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
-                  }`}
-                >
-                  {tradeNotes[selectedDay] ? (
-                    <>
-                      <FileText className="w-4 h-4" />
-                      View Note
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      Add Note
-                    </>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="text-xs text-muted">
+                    {selectedDayEvents.length} event{selectedDayEvents.length !== 1 ? "s" : ""}
+                  </p>
+                  {selectedDayTrades.length > 0 && (
+                    <p className={`text-xs font-semibold ${selectedDayPnL >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      {selectedDayTrades.length} trade{selectedDayTrades.length !== 1 ? "s" : ""} • {selectedDayPnL >= 0 ? "+" : ""}${selectedDayPnL.toFixed(2)}
+                    </p>
                   )}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    setHighlightedDay(null);
-                    setShowNoteModal(false);
-                  }}
-                  className="p-2 rounded-lg hover:bg-card-hover transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                </div>
               </div>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setHighlightedDay(null);
+                  setShowNoteModal(false);
+                  setShowTradeForm(false);
+                  setModalTab("events");
+                }}
+                className="p-2 rounded-lg hover:bg-card-hover transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="flex items-center gap-1 px-4 pt-3 pb-2 border-b border-border/50">
+              <button
+                onClick={() => setModalTab("events")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  modalTab === "events"
+                    ? "bg-accent/20 text-accent-light"
+                    : "text-muted hover:text-foreground hover:bg-card-hover"
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                Events
+                {selectedDayEvents.length > 0 && (
+                  <span className="px-1.5 py-0.5 text-[10px] bg-accent/30 rounded-full">{selectedDayEvents.length}</span>
+                )}
+              </button>
+              <button
+                onClick={() => setModalTab("trades")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  modalTab === "trades"
+                    ? "bg-accent/20 text-accent-light"
+                    : "text-muted hover:text-foreground hover:bg-card-hover"
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                Trades
+                {selectedDayTrades.length > 0 && (
+                  <span className={`px-1.5 py-0.5 text-[10px] rounded-full ${selectedDayPnL >= 0 ? "bg-emerald-500/30" : "bg-red-500/30"}`}>
+                    {selectedDayTrades.length}
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Modal Content */}
             <div className="overflow-y-auto flex-1">
-              {selectedDayEvents.length === 0 ? (
-                <div className="p-12 text-center">
-                  <div className="w-16 h-16 rounded-full bg-card-hover/50 flex items-center justify-center mx-auto mb-4">
-                    <Clock className="w-8 h-8 text-muted" />
-                  </div>
-                  <p className="text-muted">No events scheduled for this day</p>
-                </div>
-              ) : (
-                <div className="p-4 space-y-3">
-                  {selectedDayEvents.map((event, index) => {
-                    const isExpanded = expandedEventId === event.id;
+              {/* Events Tab */}
+              {modalTab === "events" && (
+                <>
+                  {selectedDayEvents.length === 0 ? (
+                    <div className="p-12 text-center">
+                      <div className="w-16 h-16 rounded-full bg-card-hover/50 flex items-center justify-center mx-auto mb-4">
+                        <Clock className="w-8 h-8 text-muted" />
+                      </div>
+                      <p className="text-muted">No events scheduled for this day</p>
+                    </div>
+                  ) : (
+                    <div className="p-4 space-y-3">
+                      {selectedDayEvents.map((event, index) => {
+                        const isExpanded = expandedEventId === event.id;
 
-                    return (
-                      <div
-                        key={event.id}
-                        className={`rounded-lg overflow-hidden border border-border/50 animate-slide-in impact-border-${event.impact}`}
+                        return (
+                          <div
+                            key={event.id}
+                            className={`rounded-lg overflow-hidden border border-border/50 animate-slide-in impact-border-${event.impact}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         {/* Event Header - Clickable */}
@@ -1932,21 +2288,447 @@ export default function EconomicCalendarPage() {
                       </div>
                     );
                   })}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Trades Tab */}
+              {modalTab === "trades" && (
+                <div className="p-4">
+                  {/* Add Trade Button */}
+                  <button
+                    onClick={() => openTradeForm()}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-accent/20 text-accent-light border border-accent/30 rounded-lg hover:bg-accent/30 transition-colors text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Log Trade
+                  </button>
+
+                  {/* Trade List */}
+                  {selectedDayTrades.length === 0 ? (
+                    <div className="text-center py-8 text-muted">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm">No trades logged for this day</p>
+                      <p className="text-xs mt-1">Click "Log Trade" to add your first trade</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {/* Summary */}
+                      <div className="flex items-center justify-between px-3 py-2 bg-card/50 rounded-lg border border-border/50 mb-3">
+                        <span className="text-sm text-muted">
+                          {selectedDayTrades.length} trade{selectedDayTrades.length !== 1 ? "s" : ""}
+                        </span>
+                        <span className={`text-sm font-bold ${selectedDayPnL >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {selectedDayPnL >= 0 ? "+" : ""}${selectedDayPnL.toFixed(2)}
+                        </span>
+                      </div>
+
+                      {/* Individual Trades */}
+                      {selectedDayTrades.map((trade) => (
+                        <div
+                          key={trade.id}
+                          className={`p-3 rounded-lg border transition-all ${
+                            trade.pnl >= 0
+                              ? "bg-emerald-500/5 border-emerald-500/20"
+                              : "bg-red-500/5 border-red-500/20"
+                          }`}
+                        >
+                          {/* Top Row */}
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-foreground">{trade.ticker}</span>
+                              <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                                trade.direction === "LONG"
+                                  ? "bg-emerald-500/20 text-emerald-400"
+                                  : "bg-red-500/20 text-red-400"
+                              }`}>
+                                {trade.direction === "LONG" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                {trade.direction}
+                              </span>
+                            </div>
+                            <span className={`font-bold ${trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                              {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
+                            </span>
+                          </div>
+
+                          {/* Details Row */}
+                          <div className="flex items-center gap-3 text-xs text-muted mb-2">
+                            {trade.time && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {trade.time}
+                              </span>
+                            )}
+                            {trade.entryPrice && trade.exitPrice && (
+                              <span>{trade.entryPrice.toFixed(2)} → {trade.exitPrice.toFixed(2)}</span>
+                            )}
+                            {trade.size && <span>{trade.size} qty</span>}
+                          </div>
+
+                          {/* Tags */}
+                          {trade.tags.length > 0 && (
+                            <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                              {trade.tags.map((tag) => (
+                                <span
+                                  key={tag.id}
+                                  className="px-2 py-0.5 text-[10px] rounded-full"
+                                  style={{ backgroundColor: tag.color + "20", color: tag.color }}
+                                >
+                                  {tag.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Notes */}
+                          {trade.notes && (
+                            <p className="text-xs text-muted/80 italic mb-2 line-clamp-2">{trade.notes}</p>
+                          )}
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-end gap-1 pt-1 border-t border-border/30">
+                            <button
+                              onClick={() => openTradeForm(trade)}
+                              className="flex items-center gap-1 px-2 py-1 text-xs text-muted hover:text-accent transition-colors"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTrade(trade.id, trade.ticker)}
+                              className="flex items-center gap-1 px-2 py-1 text-xs text-muted hover:text-red-400 transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Modal Footer */}
-            <div className="px-5 py-3 border-t border-border/50 bg-card/50 flex-shrink-0">
-              <div className="flex items-center justify-between text-xs text-muted">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  Times shown in local time
-                </span>
-                <span className="text-accent-light">Click event to expand</span>
+            {/* Modal Footer - only show for events tab */}
+            {modalTab === "events" && (
+              <div className="px-5 py-3 border-t border-border/50 bg-card/50 flex-shrink-0">
+                <div className="flex items-center justify-between text-xs text-muted">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    Times shown in local time
+                  </span>
+                  <span className="text-accent-light">Click event to expand</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Trade Entry Form - appears to the right */}
+          {showTradeForm && (
+            <div
+              className="w-full max-w-md max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in ml-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Form Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
+                <div>
+                  <h3 className="font-bold text-lg">{editingTrade ? "Edit Trade" : "Log Trade"}</h3>
+                  <p className="text-xs text-muted">{selectedDay}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowTradeForm(false);
+                    setEditingTrade(null);
+                    setTradeFormData(DEFAULT_TRADE_FORM);
+                  }}
+                  className="p-2 rounded-lg hover:bg-card-hover transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <div className="p-5 space-y-4 overflow-y-auto flex-1">
+                {/* Ticker & Direction */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                      <Hash className="w-4 h-4" />
+                      Ticker
+                    </label>
+                    <input
+                      type="text"
+                      value={tradeFormData.ticker}
+                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, ticker: e.target.value.toUpperCase() }))}
+                      placeholder="ES, NQ, SPY..."
+                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted mb-2 block">Direction</label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setTradeFormData((prev) => ({ ...prev, direction: "LONG" }))}
+                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg border transition-all text-sm ${
+                          tradeFormData.direction === "LONG"
+                            ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                            : "bg-card border-border text-muted hover:border-emerald-500/50"
+                        }`}
+                      >
+                        <TrendingUp className="w-4 h-4" />
+                        Long
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTradeFormData((prev) => ({ ...prev, direction: "SHORT" }))}
+                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg border transition-all text-sm ${
+                          tradeFormData.direction === "SHORT"
+                            ? "bg-red-500/20 border-red-500 text-red-400"
+                            : "bg-card border-border text-muted hover:border-red-500/50"
+                        }`}
+                      >
+                        <TrendingDown className="w-4 h-4" />
+                        Short
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Entry & Exit */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-muted mb-2 block">Entry Price</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tradeFormData.entryPrice}
+                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, entryPrice: e.target.value }))}
+                      placeholder="0.00"
+                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted mb-2 block">Exit Price</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tradeFormData.exitPrice}
+                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, exitPrice: e.target.value }))}
+                      placeholder="0.00"
+                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    />
+                  </div>
+                </div>
+
+                {/* Size, Duration, P&L */}
+                <div className="grid grid-cols-3 gap-3 items-end">
+                  <div>
+                    <label className="text-sm font-medium text-muted mb-2 block">Size</label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={tradeFormData.size}
+                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, size: e.target.value }))}
+                      placeholder="Qty"
+                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted mb-2 block">Duration</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={(() => {
+                          const [h, m] = (tradeFormData.time || "00:00").split(":").map(Number);
+                          const total = h * 60 + m;
+                          return total > 0 ? String(total) : "";
+                        })()}
+                        onChange={(e) => {
+                          const mins = parseInt(e.target.value.replace(/\D/g, "")) || 0;
+                          const hours = Math.floor(mins / 60);
+                          const minutes = mins % 60;
+                          setTradeFormData((prev) => ({
+                            ...prev,
+                            time: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+                          }));
+                        }}
+                        placeholder="mins"
+                        className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 pr-16"
+                      />
+                      {(() => {
+                        const [h, m] = (tradeFormData.time || "00:00").split(":").map(Number);
+                        const total = h * 60 + m;
+                        if (total >= 60) {
+                          return (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
+                              {h}h{m > 0 ? ` ${m}m` : ""}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted mb-2 block">P&L</label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={tradeFormData.pnl}
+                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, pnl: e.target.value }))}
+                      placeholder="+/-"
+                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    />
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                    <TagIcon className="w-4 h-4" />
+                    Tags
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {tags.map((tag) => (
+                      <div key={tag.id} className="relative group">
+                        <button
+                          type="button"
+                          onClick={() => toggleTag(tag.id)}
+                          className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
+                            tradeFormData.tagIds.includes(tag.id)
+                              ? "border-transparent"
+                              : "border-border bg-card hover:border-border/80"
+                          } ${tag.type === "CUSTOM" ? "pr-5" : ""}`}
+                          style={
+                            tradeFormData.tagIds.includes(tag.id)
+                              ? { backgroundColor: tag.color + "30", color: tag.color, borderColor: tag.color }
+                              : {}
+                          }
+                        >
+                          {tag.name}
+                        </button>
+                        {tag.type === "CUSTOM" && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmModal({
+                                show: true,
+                                title: "Delete Tag?",
+                                message: `Are you sure you want to delete the "${tag.name}" tag? This will remove it from all trades.`,
+                                confirmText: "Delete",
+                                onConfirm: async () => {
+                                  await deleteTag(tag.id);
+                                  setTradeFormData((prev) => ({
+                                    ...prev,
+                                    tagIds: prev.tagIds.filter((id) => id !== tag.id),
+                                  }));
+                                  setConfirmModal((prev) => ({ ...prev, show: false }));
+                                },
+                              });
+                            }}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 w-3.5 h-3.5 flex items-center justify-center rounded-full bg-red-500/20 text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/40 transition-all"
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {/* Add Custom Tag */}
+                  {showNewTagInput ? (
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center gap-2">
+                        {/* Color options */}
+                        {[
+                          "#ef4444", // red
+                          "#f97316", // orange
+                          "#eab308", // yellow
+                          "#22c55e", // green
+                          "#3b82f6", // blue
+                          "#6366f1", // indigo
+                          "#a855f7", // violet
+                          "#ffffff", // white
+                        ].map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setNewTagColor(color)}
+                            className={`w-6 h-6 rounded-full border-2 transition-all ${
+                              newTagColor === color ? "border-accent scale-110" : "border-border hover:border-muted"
+                            }`}
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newTagName}
+                          onChange={(e) => setNewTagName(e.target.value)}
+                          placeholder="Tag name"
+                          className="flex-1 px-3 py-1.5 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
+                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCreateTag(); } }}
+                        />
+                        <button onClick={handleCreateTag} className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent/90">Add</button>
+                        <button onClick={() => setShowNewTagInput(false)} className="p-1.5 text-muted hover:text-foreground"><X className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowNewTagInput(true)}
+                      className="flex items-center gap-1.5 mt-2 text-xs text-accent hover:text-accent-light transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add custom tag
+                    </button>
+                  )}
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                    <FileText className="w-4 h-4" />
+                    Notes
+                  </label>
+                  <textarea
+                    value={tradeFormData.notes}
+                    onChange={(e) => setTradeFormData((prev) => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Trade reasoning, lessons..."
+                    rows={2}
+                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Form Footer */}
+              <div className="px-5 py-4 border-t border-border/50 bg-card/50 flex items-center justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setShowTradeForm(false);
+                    setEditingTrade(null);
+                    setTradeFormData(DEFAULT_TRADE_FORM);
+                  }}
+                  className="px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveTrade}
+                  disabled={savingTrade || !tradeFormData.ticker || !tradeFormData.pnl}
+                  className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors text-sm font-medium disabled:opacity-50"
+                >
+                  {savingTrade ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {editingTrade ? "Update" : "Save Trade"}
+                </button>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Note Entry Modal - appears to the right */}
           {showNoteModal && (
@@ -2093,166 +2875,502 @@ export default function EconomicCalendarPage() {
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
               {monthlyBreakdown.tradingDays === 0 ? (
                 <div className="text-center py-8 text-muted">
                   <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
                   <p>No trading data for this month</p>
-                  <p className="text-xs mt-1">Add trade notes to see your breakdown</p>
+                  <p className="text-xs mt-1">Add trades to see your breakdown</p>
                 </div>
               ) : (
                 <>
-                  {/* Key Stats Row */}
-                  <div className="grid grid-cols-4 gap-3">
-                    <div className={`p-3 rounded-xl border ${monthlyBreakdown.totalPnL >= 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-red-500/10 border-red-500/30"}`}>
-                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Total P&L</div>
-                      <div className={`text-xl font-bold ${monthlyBreakdown.totalPnL >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {monthlyBreakdown.totalPnL >= 0 ? "+" : ""}${monthlyBreakdown.totalPnL.toFixed(0)}
+                  {/* Hero Stats */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Total P&L - Large */}
+                    <div className={`p-4 rounded-xl border-2 ${monthlyBreakdown.totalPnL >= 0 ? "bg-emerald-500/10 border-emerald-500/40" : "bg-red-500/10 border-red-500/40"}`}>
+                      <div className="text-xs text-muted uppercase tracking-wider mb-1">Total P&L</div>
+                      <div className={`text-3xl font-bold ${monthlyBreakdown.totalPnL >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {monthlyBreakdown.totalPnL >= 0 ? "+" : ""}${monthlyBreakdown.totalPnL.toFixed(2)}
                       </div>
+                      <div className="text-xs text-muted mt-1">{monthlyBreakdown.totalTrades} trades over {monthlyBreakdown.tradingDays} days</div>
                     </div>
-                    <div className="p-3 rounded-xl bg-card-hover border border-border">
-                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Total Trades</div>
-                      <div className="text-xl font-bold text-foreground">{monthlyBreakdown.totalTrades}</div>
-                    </div>
-                    <div className="p-3 rounded-xl bg-card-hover border border-border">
-                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Trading Days</div>
-                      <div className="text-xl font-bold text-foreground">{monthlyBreakdown.tradingDays}</div>
-                    </div>
-                    <div className={`p-3 rounded-xl border ${monthlyBreakdown.winRate >= 50 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-red-500/10 border-red-500/30"}`}>
-                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Win Rate</div>
-                      <div className={`text-xl font-bold ${monthlyBreakdown.winRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
-                        {monthlyBreakdown.winRate.toFixed(0)}%
+
+                    {/* Win Rate with breakdown */}
+                    <div className={`p-4 rounded-xl border ${monthlyBreakdown.tradeWinRate >= 50 ? "bg-emerald-500/5 border-emerald-500/30" : "bg-red-500/5 border-red-500/30"}`}>
+                      <div className="text-xs text-muted uppercase tracking-wider mb-1">Win Rate</div>
+                      <div className={`text-3xl font-bold ${monthlyBreakdown.tradeWinRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
+                        {monthlyBreakdown.tradeWinRate.toFixed(0)}%
+                      </div>
+                      <div className="text-xs mt-1">
+                        <span className="text-emerald-400">{monthlyBreakdown.winningTrades}W</span>
+                        <span className="text-muted mx-1">/</span>
+                        <span className="text-red-400">{monthlyBreakdown.losingTrades}L</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Win/Loss Stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Winning Days</div>
-                          <div className="text-lg font-bold text-emerald-400">{monthlyBreakdown.winDays}</div>
+                  {/* Secondary Stats */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div
+                      className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                      onMouseEnter={() => setShowProfitFactorTooltip('monthly')}
+                      onMouseLeave={() => setShowProfitFactorTooltip(null)}
+                    >
+                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                        Profit Factor
+                        <Info className="w-3 h-3 text-muted/50" />
+                      </div>
+                      <div className={`text-xl font-bold ${monthlyBreakdown.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>
+                        {monthlyBreakdown.profitFactor === Infinity ? "∞" : monthlyBreakdown.profitFactor.toFixed(2)}
+                      </div>
+                      {/* Custom Tooltip */}
+                      {showProfitFactorTooltip === 'monthly' && (
+                        <div className="absolute top-full left-0 mt-2 z-50 pointer-events-none">
+                          <div className="absolute left-4 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                          <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                            <div className="text-sm font-semibold text-foreground mb-1 text-left">Profit Factor</div>
+                            <div className="text-[11px] text-muted mb-3 text-left">Gross Profit ÷ Gross Loss</div>
+                            <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                              <span className="text-emerald-400 font-medium">${(monthlyBreakdown.avgWin * monthlyBreakdown.winningTrades).toFixed(0)}</span>
+                              <span className="text-muted/70">÷</span>
+                              <span className="text-red-400 font-medium">${(monthlyBreakdown.avgLoss * monthlyBreakdown.losingTrades).toFixed(0)}</span>
+                              <span className="text-muted/70">=</span>
+                              <span className={`font-bold text-lg ${monthlyBreakdown.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>
+                                {monthlyBreakdown.profitFactor === Infinity ? "∞" : monthlyBreakdown.profitFactor.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${monthlyBreakdown.profitFactor >= 1.5 ? "text-emerald-400/80" : monthlyBreakdown.profitFactor >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                              {monthlyBreakdown.profitFactor >= 2 ? "✓ Excellent! Above 2 is very strong" :
+                               monthlyBreakdown.profitFactor >= 1.5 ? "✓ Good! Above 1.5 is solid" :
+                               monthlyBreakdown.profitFactor >= 1 ? "○ Profitable, room to improve" :
+                               "✗ Losing money - review strategy"}
+                            </div>
+                          </div>
                         </div>
-                        {monthlyBreakdown.bestDay.date && (
-                          <div className="text-right">
-                            <div className="text-[10px] text-muted">Best Day</div>
-                            <div className="text-sm font-medium text-emerald-400">+${monthlyBreakdown.bestDay.pnl.toFixed(0)}</div>
-                          </div>
-                        )}
-                      </div>
+                      )}
                     </div>
-                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Losing Days</div>
-                          <div className="text-lg font-bold text-red-400">{monthlyBreakdown.lossDays}</div>
+                    <div
+                      className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                      onMouseEnter={() => setShowAvgTradeTooltip('monthly')}
+                      onMouseLeave={() => setShowAvgTradeTooltip(null)}
+                    >
+                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                        Avg / Trade
+                        <Info className="w-3 h-3 text-muted/50" />
+                      </div>
+                      <div className={`text-xl font-bold ${(monthlyBreakdown.totalPnL / monthlyBreakdown.totalTrades) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {(monthlyBreakdown.totalPnL / monthlyBreakdown.totalTrades) >= 0 ? "+" : ""}${(monthlyBreakdown.totalPnL / monthlyBreakdown.totalTrades).toFixed(0)}
+                      </div>
+                      {/* Avg/Trade Tooltip */}
+                      {showAvgTradeTooltip === 'monthly' && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 pointer-events-none">
+                          <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                          <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                            <div className="text-sm font-semibold text-foreground mb-1">Average Per Trade</div>
+                            <div className="text-[11px] text-muted mb-3">Your average profit or loss on each trade.</div>
+                            <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                              <span className={`font-medium ${monthlyBreakdown.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${monthlyBreakdown.totalPnL.toFixed(0)}</span>
+                              <span className="text-muted/70">÷</span>
+                              <span className="text-muted font-medium">{monthlyBreakdown.totalTrades} trades</span>
+                              <span className="text-muted/70">=</span>
+                              <span className={`font-bold text-lg ${(monthlyBreakdown.totalPnL / monthlyBreakdown.totalTrades) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                ${(monthlyBreakdown.totalPnL / monthlyBreakdown.totalTrades).toFixed(0)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        {monthlyBreakdown.worstDay.date && (
-                          <div className="text-right">
-                            <div className="text-[10px] text-muted">Worst Day</div>
-                            <div className="text-sm font-medium text-red-400">${monthlyBreakdown.worstDay.pnl.toFixed(0)}</div>
-                          </div>
-                        )}
+                      )}
+                    </div>
+                    <div
+                      className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                      onMouseEnter={() => setShowAvgDayTooltip('monthly')}
+                      onMouseLeave={() => setShowAvgDayTooltip(null)}
+                    >
+                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                        Avg / Day
+                        <Info className="w-3 h-3 text-muted/50" />
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Daily P&L Bar Chart */}
-                  <div className="p-4 rounded-xl bg-card-hover border border-border">
-                    <div className="text-xs font-medium text-muted mb-3">Daily P&L</div>
-                    <div className="h-32 flex items-end gap-1">
-                      {monthlyBreakdown.dailyData.map((day, i) => {
-                        const maxAbs = Math.max(
-                          ...monthlyBreakdown.dailyData.map(d => Math.abs(d.pnl)),
-                          1
-                        );
-                        const heightPercent = Math.abs(day.pnl) / maxAbs * 100;
-                        const isPositive = day.pnl >= 0;
-                        return (
-                          <div key={i} className="flex-1 flex flex-col items-center justify-end h-full min-w-0">
-                            <div
-                              className={`w-full rounded-t transition-all hover:opacity-80 ${isPositive ? "bg-emerald-500" : "bg-red-500"}`}
-                              style={{ height: `${Math.max(heightPercent, 2)}%` }}
-                              title={`${day.dayName} ${day.day}: ${day.pnl >= 0 ? "+" : ""}$${day.pnl.toFixed(0)}`}
-                            />
-                            <span className="text-[8px] text-muted mt-1">{day.day}</span>
+                      <div className={`text-xl font-bold ${monthlyBreakdown.avgPnLPerDay >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {monthlyBreakdown.avgPnLPerDay >= 0 ? "+" : ""}${monthlyBreakdown.avgPnLPerDay.toFixed(0)}
+                      </div>
+                      {/* Avg/Day Tooltip */}
+                      {showAvgDayTooltip === 'monthly' && (
+                        <div className="absolute top-full right-0 mt-2 z-50 pointer-events-none">
+                          <div className="absolute right-4 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                          <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                            <div className="text-sm font-semibold text-foreground mb-1 text-left">Average Per Day</div>
+                            <div className="text-[11px] text-muted mb-3 text-left">Your average daily P&L on days you traded.</div>
+                            <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                              <span className={`font-medium ${monthlyBreakdown.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${monthlyBreakdown.totalPnL.toFixed(0)}</span>
+                              <span className="text-muted/70">÷</span>
+                              <span className="text-muted font-medium">{monthlyBreakdown.tradingDays} days</span>
+                              <span className="text-muted/70">=</span>
+                              <span className={`font-bold text-lg ${monthlyBreakdown.avgPnLPerDay >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                ${monthlyBreakdown.avgPnLPerDay.toFixed(0)}
+                              </span>
+                            </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Cumulative P&L Line Chart */}
-                  <div className="p-4 rounded-xl bg-card-hover border border-border">
-                    <div className="text-xs font-medium text-muted mb-3">Cumulative P&L</div>
-                    <div className="h-24 relative">
-                      {monthlyBreakdown.cumulativeData.length > 1 && (() => {
-                        const values = monthlyBreakdown.cumulativeData.map(d => d.cumulative);
-                        const min = Math.min(...values, 0);
-                        const max = Math.max(...values, 0);
+                  {/* Equity Curve */}
+                  <div className="p-4 rounded-xl bg-card border border-border">
+                    <div className="text-xs font-medium text-muted mb-3">Equity Curve</div>
+                    <div className="h-36 relative pr-16" onMouseLeave={() => setHoveredTrade(null)}>
+                      {monthlyBreakdown.tradeByTradeData.length > 0 && (() => {
+                        const dataWithStart = [{ cumulative: 0, pnl: 0 }, ...monthlyBreakdown.tradeByTradeData];
+                        const values = dataWithStart.map(d => d.cumulative);
+                        const min = Math.min(...values);
+                        const max = Math.max(...values);
                         const range = max - min || 1;
                         const zeroY = ((max - 0) / range) * 100;
 
+                        // Calculate nice grid lines (only top, middle, bottom)
+                        const gridLines = [
+                          { value: max, y: 0 },
+                          { value: (max + min) / 2, y: 50 },
+                          { value: min, y: 100 }
+                        ];
+
                         return (
-                          <svg className="w-full h-full" preserveAspectRatio="none">
-                            {/* Zero line */}
-                            <line
-                              x1="0"
-                              y1={`${zeroY}%`}
-                              x2="100%"
-                              y2={`${zeroY}%`}
-                              stroke="currentColor"
-                              strokeOpacity="0.2"
-                              strokeDasharray="4"
-                            />
-                            {/* Line */}
-                            <polyline
-                              fill="none"
-                              stroke={monthlyBreakdown.totalPnL >= 0 ? "#34d399" : "#f87171"}
-                              strokeWidth="2"
-                              points={monthlyBreakdown.cumulativeData.map((d, i) => {
-                                const x = (i / (monthlyBreakdown.cumulativeData.length - 1)) * 100;
-                                const y = ((max - d.cumulative) / range) * 100;
-                                return `${x}%,${y}%`;
-                              }).join(" ")}
-                            />
-                            {/* End dot */}
-                            {(() => {
-                              const last = monthlyBreakdown.cumulativeData[monthlyBreakdown.cumulativeData.length - 1];
-                              const x = 100;
-                              const y = ((max - last.cumulative) / range) * 100;
-                              return (
-                                <circle
-                                  cx={`${x}%`}
-                                  cy={`${y}%`}
-                                  r="4"
-                                  fill={monthlyBreakdown.totalPnL >= 0 ? "#34d399" : "#f87171"}
+                          <>
+                            <svg className="w-full h-full" style={{ overflow: 'visible' }}>
+                              {/* Horizontal grid lines with labels inside */}
+                              {gridLines.map((line, i) => (
+                                <g key={`grid-${i}`}>
+                                  <line
+                                    x1="0"
+                                    y1={`${line.y}%`}
+                                    x2="100%"
+                                    y2={`${line.y}%`}
+                                    stroke="currentColor"
+                                    strokeOpacity={Math.abs(line.value) < 0.01 ? "0.25" : "0.08"}
+                                    strokeDasharray="3"
+                                  />
+                                  <text
+                                    x="100%"
+                                    y={`${line.y}%`}
+                                    dx="8"
+                                    dy={i === 0 ? "10" : i === 2 ? "-4" : "4"}
+                                    className="text-[10px] fill-muted/70"
+                                  >
+                                    {line.value >= 0 ? '+' : ''}{Math.abs(line.value) >= 1000
+                                      ? `$${(line.value / 1000).toFixed(1)}k`
+                                      : `$${line.value.toFixed(0)}`}
+                                  </text>
+                                </g>
+                              ))}
+
+                              {/* Zero line if it's within range */}
+                              {min < 0 && max > 0 && (
+                                <line
+                                  x1="0"
+                                  y1={`${zeroY}%`}
+                                  x2="100%"
+                                  y2={`${zeroY}%`}
+                                  stroke="currentColor"
+                                  strokeOpacity="0.3"
+                                  strokeDasharray="4"
                                 />
-                              );
-                            })()}
-                          </svg>
+                              )}
+
+                              {/* Colored line segments - green for win, red for loss */}
+                              {monthlyBreakdown.tradeByTradeData.map((trade, i) => {
+                                const prevData = i === 0 ? { cumulative: 0 } : monthlyBreakdown.tradeByTradeData[i - 1];
+                                const x1 = (i / monthlyBreakdown.tradeByTradeData.length) * 100;
+                                const y1 = ((max - prevData.cumulative) / range) * 100;
+                                const x2 = ((i + 1) / monthlyBreakdown.tradeByTradeData.length) * 100;
+                                const y2 = ((max - trade.cumulative) / range) * 100;
+                                const isWin = trade.pnl > 0;
+
+                                return (
+                                  <line
+                                    key={`line-${i}`}
+                                    x1={`${x1}%`}
+                                    y1={`${y1}%`}
+                                    x2={`${x2}%`}
+                                    y2={`${y2}%`}
+                                    stroke={isWin ? "#34d399" : "#f87171"}
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                  />
+                                );
+                              })}
+
+                              {/* Trade dots - only show if not too many trades */}
+                              {monthlyBreakdown.tradeByTradeData.length <= 50 && monthlyBreakdown.tradeByTradeData.map((trade, i) => {
+                                const x = ((i + 1) / monthlyBreakdown.tradeByTradeData.length) * 100;
+                                const y = ((max - trade.cumulative) / range) * 100;
+                                const isWin = trade.pnl > 0;
+                                const isHovered = hoveredTrade?.index === i + 1000; // offset to differentiate from weekly
+
+                                return (
+                                  <g key={`dot-${i}`} className="cursor-pointer">
+                                    <circle
+                                      cx={`${x}%`}
+                                      cy={`${y}%`}
+                                      r={isHovered ? 7 : 5}
+                                      fill={isWin ? "#34d399" : "#f87171"}
+                                      stroke="#1a1a2e"
+                                      strokeWidth="2"
+                                      onMouseEnter={(e) => {
+                                        const rect = e.currentTarget.ownerSVGElement?.getBoundingClientRect();
+                                        if (rect) {
+                                          setHoveredTrade({
+                                            index: i + 1000, // offset to differentiate from weekly
+                                            x: (x / 100) * rect.width,
+                                            y: (y / 100) * rect.height,
+                                            trade
+                                          });
+                                        }
+                                      }}
+                                      className="transition-all duration-150"
+                                    />
+                                  </g>
+                                );
+                              })}
+
+                              {/* Start dot */}
+                              <circle cx="0%" cy={`${zeroY}%`} r="4" fill="#6b7280" stroke="#1a1a2e" strokeWidth="2" />
+                            </svg>
+
+                            {/* Custom Trade Tooltip */}
+                            {hoveredTrade && hoveredTrade.index >= 1000 && (
+                              <div
+                                className="absolute z-50 pointer-events-none"
+                                style={{
+                                  left: `${hoveredTrade.x}px`,
+                                  top: `${hoveredTrade.y}px`,
+                                  transform: 'translate(-50%, -100%) translateY(-12px)'
+                                }}
+                              >
+                                <div className={`rounded-lg shadow-xl border-2 overflow-hidden ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-950 border-emerald-500/50' : 'bg-red-950 border-red-500/50'}`}>
+                                  <div className={`px-3 py-1.5 flex items-center justify-between gap-3 ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                                    <div className="text-sm font-bold text-foreground">Trade #{hoveredTrade.index - 999}</div>
+                                    <div className="text-[11px] text-muted">
+                                      {new Date(hoveredTrade.trade.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    </div>
+                                  </div>
+                                  <div className="px-3 py-2 space-y-1">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span className="text-[11px] text-muted">P&L</span>
+                                      <span className={`text-sm font-bold ${hoveredTrade.trade.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        {hoveredTrade.trade.pnl >= 0 ? '+' : ''}${hoveredTrade.trade.pnl.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4 pt-1 border-t border-white/10">
+                                      <span className="text-[11px] text-muted">Running</span>
+                                      <span className={`text-sm font-medium ${hoveredTrade.trade.cumulative >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        {hoveredTrade.trade.cumulative >= 0 ? '+' : ''}${hoveredTrade.trade.cumulative.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className={`absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-950 border-r-2 border-b-2 border-emerald-500/50' : 'bg-red-950 border-r-2 border-b-2 border-red-500/50'}`}></div>
+                              </div>
+                            )}
+                          </>
                         );
                       })()}
-                      <div className="absolute bottom-0 right-0 text-xs">
-                        <span className={monthlyBreakdown.totalPnL >= 0 ? "text-emerald-400" : "text-red-400"}>
-                          {monthlyBreakdown.totalPnL >= 0 ? "+" : ""}${monthlyBreakdown.totalPnL.toFixed(0)}
-                        </span>
-                      </div>
+                      {monthlyBreakdown.tradeByTradeData.length === 0 && (
+                        <div className="flex items-center justify-center h-full">
+                          <span className="text-muted text-sm">No trades</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Averages */}
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="p-3 rounded-xl bg-card-hover border border-border flex items-center justify-between">
-                      <span className="text-muted">Avg P&L / Day</span>
-                      <span className={`font-medium ${monthlyBreakdown.avgPnLPerDay >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {monthlyBreakdown.avgPnLPerDay >= 0 ? "+" : ""}${monthlyBreakdown.avgPnLPerDay.toFixed(0)}
-                      </span>
+                  {/* Performance Metrics */}
+                  <div className="space-y-3">
+                    {/* Top Row - Winners & Losers */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted">Avg Win</span>
+                          <span className="text-sm font-bold text-emerald-400">+${monthlyBreakdown.avgWin.toFixed(0)}</span>
+                        </div>
+                        {monthlyBreakdown.largestWin && (
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-emerald-500/10">
+                            <span className="text-xs text-muted">Best Trade</span>
+                            <span className="text-sm font-medium text-emerald-400">+${monthlyBreakdown.largestWin.pnl.toFixed(0)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted">Avg Loss</span>
+                          <span className="text-sm font-bold text-red-400">-${monthlyBreakdown.avgLoss.toFixed(0)}</span>
+                        </div>
+                        {monthlyBreakdown.largestLoss && (
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-red-500/10">
+                            <span className="text-xs text-muted">Worst Trade</span>
+                            <span className="text-sm font-medium text-red-400">${monthlyBreakdown.largestLoss.pnl.toFixed(0)}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-card-hover border border-border flex items-center justify-between">
-                      <span className="text-muted">Avg Trades / Day</span>
-                      <span className="font-medium text-foreground">{monthlyBreakdown.avgTradesPerDay.toFixed(1)}</span>
+
+                    {/* Bottom Row - Key Ratios */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                        onMouseEnter={() => setShowRiskRewardTooltip('monthly')}
+                        onMouseLeave={() => setShowRiskRewardTooltip(null)}
+                      >
+                        <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                          Risk/Reward
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        <div className={`text-lg font-bold ${monthlyBreakdown.avgLoss > 0 ? (monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss >= 1 ? 'text-emerald-400' : 'text-red-400') : 'text-muted'}`}>
+                          {monthlyBreakdown.avgLoss > 0 ? `1:${(monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss).toFixed(2)}` : 'N/A'}
+                        </div>
+                        <div className="text-[10px] text-muted mt-1">Avg Win ÷ Avg Loss</div>
+                        {/* Risk/Reward Tooltip */}
+                        {showRiskRewardTooltip === 'monthly' && (
+                          <div className="absolute bottom-full left-0 mb-2 z-50 pointer-events-none">
+                            <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[240px]">
+                              <div className="text-sm font-semibold text-foreground mb-1 text-left">Risk/Reward Ratio</div>
+                              <div className="text-[11px] text-muted mb-3 text-left">How much you win on average compared to how much you lose. Higher is better.</div>
+                              <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 mb-3">
+                                <span className="text-emerald-400 font-medium">${monthlyBreakdown.avgWin.toFixed(0)}</span>
+                                <span className="text-muted/70">÷</span>
+                                <span className="text-red-400 font-medium">${monthlyBreakdown.avgLoss.toFixed(0)}</span>
+                                <span className="text-muted/70">=</span>
+                                <span className={`font-bold text-lg ${monthlyBreakdown.avgLoss > 0 ? (monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss >= 1 ? 'text-emerald-400' : 'text-red-400') : 'text-muted'}`}>
+                                  {monthlyBreakdown.avgLoss > 0 ? (monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss).toFixed(2) : 'N/A'}
+                                </span>
+                              </div>
+                              <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${monthlyBreakdown.avgLoss > 0 && monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss >= 2 ? "text-emerald-400/80" : monthlyBreakdown.avgLoss > 0 && monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                {monthlyBreakdown.avgLoss > 0 && monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss >= 2 ? "✓ Excellent! Wins are 2x+ your losses" :
+                                 monthlyBreakdown.avgLoss > 0 && monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss >= 1.5 ? "✓ Good ratio, wins exceed losses" :
+                                 monthlyBreakdown.avgLoss > 0 && monthlyBreakdown.avgWin / monthlyBreakdown.avgLoss >= 1 ? "○ Balanced, but aim higher" :
+                                 "✗ Losses exceed wins - tighten stops"}
+                              </div>
+                            </div>
+                            <div className="absolute left-4 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                        onMouseEnter={() => setShowExpectancyTooltip('monthly')}
+                        onMouseLeave={() => setShowExpectancyTooltip(null)}
+                      >
+                        <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                          Expectancy
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        {(() => {
+                          const winRate = monthlyBreakdown.tradeWinRate / 100;
+                          const expectancy = (winRate * monthlyBreakdown.avgWin) - ((1 - winRate) * monthlyBreakdown.avgLoss);
+                          return (
+                            <>
+                              <div className={`text-lg font-bold ${expectancy >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {expectancy >= 0 ? '+' : ''}${expectancy.toFixed(0)}
+                              </div>
+                              <div className="text-[10px] text-muted mt-1">Expected $ per trade</div>
+                              {/* Expectancy Tooltip */}
+                              {showExpectancyTooltip === 'monthly' && (
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
+                                  <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[280px]">
+                                    <div className="text-sm font-semibold text-foreground mb-1 text-left">Expectancy</div>
+                                    <div className="text-[11px] text-muted mb-3 text-left">The average amount you can expect to win (or lose) per trade over time.</div>
+                                    <div className="text-[11px] bg-slate-800/50 rounded-lg px-3 py-2 mb-3 text-left">
+                                      <div className="text-muted mb-1">Formula:</div>
+                                      <div className="font-mono text-xs">
+                                        (<span className="text-emerald-400">{monthlyBreakdown.tradeWinRate.toFixed(0)}%</span> × <span className="text-emerald-400">${monthlyBreakdown.avgWin.toFixed(0)}</span>) − (<span className="text-red-400">{(100 - monthlyBreakdown.tradeWinRate).toFixed(0)}%</span> × <span className="text-red-400">${monthlyBreakdown.avgLoss.toFixed(0)}</span>)
+                                      </div>
+                                      <div className="mt-2 pt-2 border-t border-white/10">
+                                        <span className="text-muted">=</span> <span className={`font-bold ${expectancy >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{expectancy >= 0 ? '+' : ''}${expectancy.toFixed(2)}</span> <span className="text-muted">per trade</span>
+                                      </div>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${expectancy >= 50 ? "text-emerald-400/80" : expectancy >= 0 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {expectancy >= 50 ? "✓ Strong edge! Keep trading this strategy" :
+                                       expectancy >= 20 ? "✓ Positive expectancy, stay consistent" :
+                                       expectancy >= 0 ? "○ Slightly profitable, room to improve" :
+                                       "✗ Negative expectancy - review your strategy"}
+                                    </div>
+                                  </div>
+                                  <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border relative cursor-help text-center"
+                        onMouseEnter={() => setShowBreakevenTooltip('monthly')}
+                        onMouseLeave={() => setShowBreakevenTooltip(null)}
+                      >
+                        <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                          Breakeven Rate
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        <div className="text-lg font-bold text-foreground">
+                          {monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss > 0
+                            ? `${((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                            : 'N/A'}
+                        </div>
+                        <div className="text-[10px] text-muted mt-1">Min win rate to profit</div>
+                        {/* Breakeven Rate Tooltip */}
+                        {showBreakevenTooltip === 'monthly' && (
+                          <div className="absolute bottom-full right-0 mb-2 z-50 pointer-events-none">
+                            <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[260px]">
+                              <div className="text-sm font-semibold text-foreground mb-1 text-left">Breakeven Win Rate</div>
+                              <div className="text-[11px] text-muted mb-3 text-left">The minimum win rate needed to break even given your average win and loss sizes.</div>
+                              <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 mb-3">
+                                <span className="text-red-400 font-medium">${monthlyBreakdown.avgLoss.toFixed(0)}</span>
+                                <span className="text-muted/70">÷</span>
+                                <span className="text-muted font-medium">(${monthlyBreakdown.avgWin.toFixed(0)} + ${monthlyBreakdown.avgLoss.toFixed(0)})</span>
+                                <span className="text-muted/70">=</span>
+                                <span className="font-bold text-lg text-foreground">
+                                  {monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss > 0
+                                    ? `${((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                                    : 'N/A'}
+                                </span>
+                              </div>
+                              {/* Visual comparison bar */}
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="text-muted">Your Win Rate</span>
+                                  <span className={monthlyBreakdown.tradeWinRate >= ((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100) ? 'text-emerald-400' : 'text-red-400'}>
+                                    {monthlyBreakdown.tradeWinRate.toFixed(0)}%
+                                  </span>
+                                </div>
+                                <div className="h-2 bg-slate-800 rounded-full overflow-hidden relative">
+                                  {/* Breakeven marker */}
+                                  <div
+                                    className="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10"
+                                    style={{ left: `${Math.min((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100, 100)}%` }}
+                                  />
+                                  {/* Win rate fill */}
+                                  <div
+                                    className={`h-full rounded-full ${monthlyBreakdown.tradeWinRate >= ((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100) ? 'bg-emerald-500' : 'bg-red-500'}`}
+                                    style={{ width: `${Math.min(monthlyBreakdown.tradeWinRate, 100)}%` }}
+                                  />
+                                </div>
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="text-muted">Breakeven</span>
+                                  <span className="text-yellow-400">
+                                    {monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss > 0
+                                      ? `${((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                                      : 'N/A'}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${monthlyBreakdown.tradeWinRate >= ((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100) ? "text-emerald-400/80" : "text-red-400/80"}`}>
+                                {monthlyBreakdown.tradeWinRate >= ((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100)
+                                  ? `✓ Above breakeven by ${(monthlyBreakdown.tradeWinRate - ((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100)).toFixed(0)}%`
+                                  : `✗ Below breakeven by ${(((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100) - monthlyBreakdown.tradeWinRate).toFixed(0)}%`}
+                              </div>
+                            </div>
+                            <div className="absolute right-4 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </>
@@ -2261,6 +3379,544 @@ export default function EconomicCalendarPage() {
           </div>
         </div>
       )}
+
+      {/* Week Summary Modal */}
+      {showWeekSummary.show && showWeekSummary.saturdayDate && (() => {
+        const weeklyBreakdown = getWeeklyBreakdown(showWeekSummary.saturdayDate, currentMonth);
+        return (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowWeekSummary({ show: false, saturdayDate: null })}
+          >
+            <div
+              className="w-full max-w-2xl glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden animate-slide-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-accent-light" />
+                  <h3 className="text-lg font-bold">
+                    {weeklyBreakdown.effectiveStart.getTime() === weeklyBreakdown.effectiveEnd.getTime()
+                      ? weeklyBreakdown.effectiveStart.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                      : `${weeklyBreakdown.effectiveStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weeklyBreakdown.effectiveEnd.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+                    }
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowWeekSummary({ show: false, saturdayDate: null })}
+                  className="p-1.5 rounded-lg hover:bg-card-hover transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
+                {weeklyBreakdown.tradingDays === 0 ? (
+                  <div className="text-center py-8 text-muted">
+                    <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>No trading data for this week</p>
+                    <p className="text-xs mt-1">Add trades to see your weekly breakdown</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Hero Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Total P&L - Large */}
+                      <div className={`p-4 rounded-xl border-2 ${weeklyBreakdown.totalPnL >= 0 ? "bg-emerald-500/10 border-emerald-500/40" : "bg-red-500/10 border-red-500/40"}`}>
+                        <div className="text-xs text-muted uppercase tracking-wider mb-1">Total P&L</div>
+                        <div className={`text-3xl font-bold ${weeklyBreakdown.totalPnL >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {weeklyBreakdown.totalPnL >= 0 ? "+" : ""}${weeklyBreakdown.totalPnL.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-muted mt-1">{weeklyBreakdown.totalTrades} trades over {weeklyBreakdown.tradingDays} days</div>
+                      </div>
+
+                      {/* Win Rate with breakdown */}
+                      <div className={`p-4 rounded-xl border ${weeklyBreakdown.tradeWinRate >= 50 ? "bg-emerald-500/5 border-emerald-500/30" : "bg-red-500/5 border-red-500/30"}`}>
+                        <div className="text-xs text-muted uppercase tracking-wider mb-1">Win Rate</div>
+                        <div className={`text-3xl font-bold ${weeklyBreakdown.tradeWinRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
+                          {weeklyBreakdown.tradeWinRate.toFixed(0)}%
+                        </div>
+                        <div className="text-xs mt-1">
+                          <span className="text-emerald-400">{weeklyBreakdown.winningTrades}W</span>
+                          <span className="text-muted mx-1">/</span>
+                          <span className="text-red-400">{weeklyBreakdown.losingTrades}L</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Secondary Stats */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                        onMouseEnter={() => setShowProfitFactorTooltip('weekly')}
+                        onMouseLeave={() => setShowProfitFactorTooltip(null)}
+                      >
+                        <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                          Profit Factor
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        <div className={`text-xl font-bold ${weeklyBreakdown.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>
+                          {weeklyBreakdown.profitFactor === Infinity ? "∞" : weeklyBreakdown.profitFactor.toFixed(2)}
+                        </div>
+                        {/* Custom Tooltip */}
+                        {showProfitFactorTooltip === 'weekly' && (
+                          <div className="absolute top-full left-0 mt-2 z-50 pointer-events-none">
+                            <div className="absolute left-4 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                            <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                              <div className="text-sm font-semibold text-foreground mb-1 text-left">Profit Factor</div>
+                              <div className="text-[11px] text-muted mb-3 text-left">Gross Profit ÷ Gross Loss</div>
+                              <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                <span className="text-emerald-400 font-medium">${(weeklyBreakdown.avgWin * weeklyBreakdown.winningTrades).toFixed(0)}</span>
+                                <span className="text-muted/70">÷</span>
+                                <span className="text-red-400 font-medium">${(weeklyBreakdown.avgLoss * weeklyBreakdown.losingTrades).toFixed(0)}</span>
+                                <span className="text-muted/70">=</span>
+                                <span className={`font-bold text-lg ${weeklyBreakdown.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>
+                                  {weeklyBreakdown.profitFactor === Infinity ? "∞" : weeklyBreakdown.profitFactor.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${weeklyBreakdown.profitFactor >= 1.5 ? "text-emerald-400/80" : weeklyBreakdown.profitFactor >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                {weeklyBreakdown.profitFactor >= 2 ? "✓ Excellent! Above 2 is very strong" :
+                                 weeklyBreakdown.profitFactor >= 1.5 ? "✓ Good! Above 1.5 is solid" :
+                                 weeklyBreakdown.profitFactor >= 1 ? "○ Profitable, room to improve" :
+                                 "✗ Losing money - review strategy"}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                        onMouseEnter={() => setShowAvgTradeTooltip('weekly')}
+                        onMouseLeave={() => setShowAvgTradeTooltip(null)}
+                      >
+                        <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                          Avg / Trade
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        <div className={`text-xl font-bold ${(weeklyBreakdown.totalPnL / weeklyBreakdown.totalTrades) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {(weeklyBreakdown.totalPnL / weeklyBreakdown.totalTrades) >= 0 ? "+" : ""}${(weeklyBreakdown.totalPnL / weeklyBreakdown.totalTrades).toFixed(0)}
+                        </div>
+                        {/* Avg/Trade Tooltip */}
+                        {showAvgTradeTooltip === 'weekly' && (
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 pointer-events-none">
+                            <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                            <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                              <div className="text-sm font-semibold text-foreground mb-1">Average Per Trade</div>
+                              <div className="text-[11px] text-muted mb-3">Your average profit or loss on each trade.</div>
+                              <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                <span className={`font-medium ${weeklyBreakdown.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${weeklyBreakdown.totalPnL.toFixed(0)}</span>
+                                <span className="text-muted/70">÷</span>
+                                <span className="text-muted font-medium">{weeklyBreakdown.totalTrades} trades</span>
+                                <span className="text-muted/70">=</span>
+                                <span className={`font-bold text-lg ${(weeklyBreakdown.totalPnL / weeklyBreakdown.totalTrades) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  ${(weeklyBreakdown.totalPnL / weeklyBreakdown.totalTrades).toFixed(0)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                        onMouseEnter={() => setShowAvgDayTooltip('weekly')}
+                        onMouseLeave={() => setShowAvgDayTooltip(null)}
+                      >
+                        <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                          Avg / Day
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        <div className={`text-xl font-bold ${(weeklyBreakdown.totalPnL / weeklyBreakdown.tradingDays) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {(weeklyBreakdown.totalPnL / weeklyBreakdown.tradingDays) >= 0 ? "+" : ""}${(weeklyBreakdown.totalPnL / weeklyBreakdown.tradingDays).toFixed(0)}
+                        </div>
+                        {/* Avg/Day Tooltip */}
+                        {showAvgDayTooltip === 'weekly' && (
+                          <div className="absolute top-full right-0 mt-2 z-50 pointer-events-none">
+                            <div className="absolute right-4 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                            <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                              <div className="text-sm font-semibold text-foreground mb-1 text-left">Average Per Day</div>
+                              <div className="text-[11px] text-muted mb-3 text-left">Your average daily P&L on days you traded.</div>
+                              <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                <span className={`font-medium ${weeklyBreakdown.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${weeklyBreakdown.totalPnL.toFixed(0)}</span>
+                                <span className="text-muted/70">÷</span>
+                                <span className="text-muted font-medium">{weeklyBreakdown.tradingDays} days</span>
+                                <span className="text-muted/70">=</span>
+                                <span className={`font-bold text-lg ${(weeklyBreakdown.totalPnL / weeklyBreakdown.tradingDays) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  ${(weeklyBreakdown.totalPnL / weeklyBreakdown.tradingDays).toFixed(0)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Equity Curve */}
+                    <div className="p-4 rounded-xl bg-card border border-border">
+                      <div className="text-xs font-medium text-muted mb-3">Equity Curve</div>
+                      <div className="h-36 relative pr-16" onMouseLeave={() => setHoveredTrade(null)}>
+                        {weeklyBreakdown.tradeByTradeData.length > 0 && (() => {
+                          const dataWithStart = [{ cumulative: 0, pnl: 0 }, ...weeklyBreakdown.tradeByTradeData];
+                          const values = dataWithStart.map(d => d.cumulative);
+                          const min = Math.min(...values);
+                          const max = Math.max(...values);
+                          const range = max - min || 1;
+                          const zeroY = ((max - 0) / range) * 100;
+
+                          // Calculate nice grid lines (only top, middle, bottom)
+                          const gridLines = [
+                            { value: max, y: 0 },
+                            { value: (max + min) / 2, y: 50 },
+                            { value: min, y: 100 }
+                          ];
+
+                          return (
+                            <>
+                              <svg className="w-full h-full" style={{ overflow: 'visible' }}>
+                                {/* Horizontal grid lines with labels inside */}
+                                {gridLines.map((line, i) => (
+                                  <g key={`grid-${i}`}>
+                                    <line
+                                      x1="0"
+                                      y1={`${line.y}%`}
+                                      x2="100%"
+                                      y2={`${line.y}%`}
+                                      stroke="currentColor"
+                                      strokeOpacity={Math.abs(line.value) < 0.01 ? "0.25" : "0.08"}
+                                      strokeDasharray="3"
+                                    />
+                                    <text
+                                      x="100%"
+                                      y={`${line.y}%`}
+                                      dx="8"
+                                      dy={i === 0 ? "10" : i === 2 ? "-4" : "4"}
+                                      className="text-[10px] fill-muted/70"
+                                    >
+                                      {line.value >= 0 ? '+' : ''}{Math.abs(line.value) >= 1000
+                                        ? `$${(line.value / 1000).toFixed(1)}k`
+                                        : `$${line.value.toFixed(0)}`}
+                                    </text>
+                                  </g>
+                                ))}
+
+                                {/* Zero line if it's within range */}
+                                {min < 0 && max > 0 && (
+                                  <line
+                                    x1="0"
+                                    y1={`${zeroY}%`}
+                                    x2="100%"
+                                    y2={`${zeroY}%`}
+                                    stroke="currentColor"
+                                    strokeOpacity="0.3"
+                                    strokeDasharray="4"
+                                  />
+                                )}
+
+                                {/* Colored line segments - green for win, red for loss */}
+                                {weeklyBreakdown.tradeByTradeData.map((trade, i) => {
+                                  const prevData = i === 0 ? { cumulative: 0 } : weeklyBreakdown.tradeByTradeData[i - 1];
+                                  const x1 = (i / weeklyBreakdown.tradeByTradeData.length) * 100;
+                                  const y1 = ((max - prevData.cumulative) / range) * 100;
+                                  const x2 = ((i + 1) / weeklyBreakdown.tradeByTradeData.length) * 100;
+                                  const y2 = ((max - trade.cumulative) / range) * 100;
+                                  const isWin = trade.pnl > 0;
+
+                                  return (
+                                    <line
+                                      key={`line-${i}`}
+                                      x1={`${x1}%`}
+                                      y1={`${y1}%`}
+                                      x2={`${x2}%`}
+                                      y2={`${y2}%`}
+                                      stroke={isWin ? "#34d399" : "#f87171"}
+                                      strokeWidth="2.5"
+                                      strokeLinecap="round"
+                                    />
+                                  );
+                                })}
+
+                                {/* Trade dots */}
+                                {weeklyBreakdown.tradeByTradeData.map((trade, i) => {
+                                  const x = ((i + 1) / weeklyBreakdown.tradeByTradeData.length) * 100;
+                                  const y = ((max - trade.cumulative) / range) * 100;
+                                  const isWin = trade.pnl > 0;
+                                  const isHovered = hoveredTrade?.index === i;
+
+                                  return (
+                                    <g key={`dot-${i}`} className="cursor-pointer">
+                                      <circle
+                                        cx={`${x}%`}
+                                        cy={`${y}%`}
+                                        r={isHovered ? 7 : 5}
+                                        fill={isWin ? "#34d399" : "#f87171"}
+                                        stroke="#1a1a2e"
+                                        strokeWidth="2"
+                                        onMouseEnter={(e) => {
+                                          const rect = e.currentTarget.ownerSVGElement?.getBoundingClientRect();
+                                          if (rect) {
+                                            setHoveredTrade({
+                                              index: i,
+                                              x: (x / 100) * rect.width,
+                                              y: (y / 100) * rect.height,
+                                              trade
+                                            });
+                                          }
+                                        }}
+                                        className="transition-all duration-150"
+                                      />
+                                    </g>
+                                  );
+                                })}
+
+                                {/* Start dot */}
+                                <circle cx="0%" cy={`${zeroY}%`} r="4" fill="#6b7280" stroke="#1a1a2e" strokeWidth="2" />
+                              </svg>
+
+                              {/* Custom Trade Tooltip */}
+                              {hoveredTrade && (
+                                <div
+                                  className="absolute z-50 pointer-events-none"
+                                  style={{
+                                    left: `${hoveredTrade.x}px`,
+                                    top: `${hoveredTrade.y}px`,
+                                    transform: 'translate(-50%, -100%) translateY(-12px)'
+                                  }}
+                                >
+                                  <div className={`rounded-lg shadow-xl border-2 overflow-hidden ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-950 border-emerald-500/50' : 'bg-red-950 border-red-500/50'}`}>
+                                    <div className={`px-3 py-1.5 flex items-center justify-between gap-3 ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                                      <div className="text-sm font-bold text-foreground">Trade #{hoveredTrade.index + 1}</div>
+                                      <div className="text-[11px] text-muted">
+                                        {new Date(hoveredTrade.trade.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                      </div>
+                                    </div>
+                                    <div className="px-3 py-2 space-y-1">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-[11px] text-muted">P&L</span>
+                                        <span className={`text-sm font-bold ${hoveredTrade.trade.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                          {hoveredTrade.trade.pnl >= 0 ? '+' : ''}${hoveredTrade.trade.pnl.toFixed(2)}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between gap-4 pt-1 border-t border-white/10">
+                                        <span className="text-[11px] text-muted">Running</span>
+                                        <span className={`text-sm font-medium ${hoveredTrade.trade.cumulative >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                          {hoveredTrade.trade.cumulative >= 0 ? '+' : ''}${hoveredTrade.trade.cumulative.toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className={`absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-950 border-r-2 border-b-2 border-emerald-500/50' : 'bg-red-950 border-r-2 border-b-2 border-red-500/50'}`}></div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                        {weeklyBreakdown.tradeByTradeData.length === 0 && (
+                          <div className="flex items-center justify-center h-full">
+                            <span className="text-muted text-sm">No trades</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Performance Metrics */}
+                    <div className="space-y-3">
+                      {/* Top Row - Winners & Losers */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted">Avg Win</span>
+                            <span className="text-sm font-bold text-emerald-400">+${weeklyBreakdown.avgWin.toFixed(0)}</span>
+                          </div>
+                          {weeklyBreakdown.largestWin && (
+                            <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-emerald-500/10">
+                              <span className="text-xs text-muted">Best Trade</span>
+                              <span className="text-sm font-medium text-emerald-400">+${weeklyBreakdown.largestWin.pnl.toFixed(0)}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted">Avg Loss</span>
+                            <span className="text-sm font-bold text-red-400">-${weeklyBreakdown.avgLoss.toFixed(0)}</span>
+                          </div>
+                          {weeklyBreakdown.largestLoss && (
+                            <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-red-500/10">
+                              <span className="text-xs text-muted">Worst Trade</span>
+                              <span className="text-sm font-medium text-red-400">${weeklyBreakdown.largestLoss.pnl.toFixed(0)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Bottom Row - Key Ratios */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div
+                          className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                          onMouseEnter={() => setShowRiskRewardTooltip('weekly')}
+                          onMouseLeave={() => setShowRiskRewardTooltip(null)}
+                        >
+                          <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                            Risk/Reward
+                            <Info className="w-3 h-3 text-muted/50" />
+                          </div>
+                          <div className={`text-lg font-bold ${weeklyBreakdown.avgLoss > 0 ? (weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss >= 1 ? 'text-emerald-400' : 'text-red-400') : 'text-muted'}`}>
+                            {weeklyBreakdown.avgLoss > 0 ? `1:${(weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss).toFixed(2)}` : 'N/A'}
+                          </div>
+                          <div className="text-[10px] text-muted mt-1">Avg Win ÷ Avg Loss</div>
+                          {/* Risk/Reward Tooltip */}
+                          {showRiskRewardTooltip === 'weekly' && (
+                            <div className="absolute bottom-full left-0 mb-2 z-50 pointer-events-none">
+                              <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[240px]">
+                                <div className="text-sm font-semibold text-foreground mb-1 text-left">Risk/Reward Ratio</div>
+                                <div className="text-[11px] text-muted mb-3 text-left">How much you win on average compared to how much you lose. Higher is better.</div>
+                                <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 mb-3">
+                                  <span className="text-emerald-400 font-medium">${weeklyBreakdown.avgWin.toFixed(0)}</span>
+                                  <span className="text-muted/70">÷</span>
+                                  <span className="text-red-400 font-medium">${weeklyBreakdown.avgLoss.toFixed(0)}</span>
+                                  <span className="text-muted/70">=</span>
+                                  <span className={`font-bold text-lg ${weeklyBreakdown.avgLoss > 0 ? (weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss >= 1 ? 'text-emerald-400' : 'text-red-400') : 'text-muted'}`}>
+                                    {weeklyBreakdown.avgLoss > 0 ? (weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss).toFixed(2) : 'N/A'}
+                                  </span>
+                                </div>
+                                <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${weeklyBreakdown.avgLoss > 0 && weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss >= 2 ? "text-emerald-400/80" : weeklyBreakdown.avgLoss > 0 && weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                  {weeklyBreakdown.avgLoss > 0 && weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss >= 2 ? "✓ Excellent! Wins are 2x+ your losses" :
+                                   weeklyBreakdown.avgLoss > 0 && weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss >= 1.5 ? "✓ Good ratio, wins exceed losses" :
+                                   weeklyBreakdown.avgLoss > 0 && weeklyBreakdown.avgWin / weeklyBreakdown.avgLoss >= 1 ? "○ Balanced, but aim higher" :
+                                   "✗ Losses exceed wins - tighten stops"}
+                                </div>
+                              </div>
+                              <div className="absolute left-4 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                          onMouseEnter={() => setShowExpectancyTooltip('weekly')}
+                          onMouseLeave={() => setShowExpectancyTooltip(null)}
+                        >
+                          <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                            Expectancy
+                            <Info className="w-3 h-3 text-muted/50" />
+                          </div>
+                          {(() => {
+                            const winRate = weeklyBreakdown.tradeWinRate / 100;
+                            const expectancy = (winRate * weeklyBreakdown.avgWin) - ((1 - winRate) * weeklyBreakdown.avgLoss);
+                            return (
+                              <>
+                                <div className={`text-lg font-bold ${expectancy >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {expectancy >= 0 ? '+' : ''}${expectancy.toFixed(0)}
+                                </div>
+                                <div className="text-[10px] text-muted mt-1">Expected $ per trade</div>
+                                {/* Expectancy Tooltip */}
+                                {showExpectancyTooltip === 'weekly' && (
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
+                                    <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[280px]">
+                                      <div className="text-sm font-semibold text-foreground mb-1 text-left">Expectancy</div>
+                                      <div className="text-[11px] text-muted mb-3 text-left">The average amount you can expect to win (or lose) per trade over time.</div>
+                                      <div className="text-[11px] bg-slate-800/50 rounded-lg px-3 py-2 mb-3 text-left">
+                                        <div className="text-muted mb-1">Formula:</div>
+                                        <div className="font-mono text-xs">
+                                          (<span className="text-emerald-400">{weeklyBreakdown.tradeWinRate.toFixed(0)}%</span> × <span className="text-emerald-400">${weeklyBreakdown.avgWin.toFixed(0)}</span>) − (<span className="text-red-400">{(100 - weeklyBreakdown.tradeWinRate).toFixed(0)}%</span> × <span className="text-red-400">${weeklyBreakdown.avgLoss.toFixed(0)}</span>)
+                                        </div>
+                                        <div className="mt-2 pt-2 border-t border-white/10">
+                                          <span className="text-muted">=</span> <span className={`font-bold ${expectancy >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{expectancy >= 0 ? '+' : ''}${expectancy.toFixed(2)}</span> <span className="text-muted">per trade</span>
+                                        </div>
+                                      </div>
+                                      <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${expectancy >= 50 ? "text-emerald-400/80" : expectancy >= 0 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                        {expectancy >= 50 ? "✓ Strong edge! Keep trading this strategy" :
+                                         expectancy >= 20 ? "✓ Positive expectancy, stay consistent" :
+                                         expectancy >= 0 ? "○ Slightly profitable, room to improve" :
+                                         "✗ Negative expectancy - review your strategy"}
+                                      </div>
+                                    </div>
+                                    <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                        <div
+                          className="p-3 rounded-xl bg-card border border-border relative cursor-help text-center"
+                          onMouseEnter={() => setShowBreakevenTooltip('weekly')}
+                          onMouseLeave={() => setShowBreakevenTooltip(null)}
+                        >
+                          <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                            Breakeven Rate
+                            <Info className="w-3 h-3 text-muted/50" />
+                          </div>
+                          <div className="text-lg font-bold text-foreground">
+                            {weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss > 0
+                              ? `${((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                              : 'N/A'}
+                          </div>
+                          <div className="text-[10px] text-muted mt-1">Min win rate to profit</div>
+                          {/* Breakeven Rate Tooltip */}
+                          {showBreakevenTooltip === 'weekly' && (
+                            <div className="absolute bottom-full right-0 mb-2 z-50 pointer-events-none">
+                              <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[260px]">
+                                <div className="text-sm font-semibold text-foreground mb-1 text-left">Breakeven Win Rate</div>
+                                <div className="text-[11px] text-muted mb-3 text-left">The minimum win rate needed to break even given your average win and loss sizes.</div>
+                                <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 mb-3">
+                                  <span className="text-red-400 font-medium">${weeklyBreakdown.avgLoss.toFixed(0)}</span>
+                                  <span className="text-muted/70">÷</span>
+                                  <span className="text-muted font-medium">(${weeklyBreakdown.avgWin.toFixed(0)} + ${weeklyBreakdown.avgLoss.toFixed(0)})</span>
+                                  <span className="text-muted/70">=</span>
+                                  <span className="font-bold text-lg text-foreground">
+                                    {weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss > 0
+                                      ? `${((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                                      : 'N/A'}
+                                  </span>
+                                </div>
+                                {/* Visual comparison bar */}
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-muted">Your Win Rate</span>
+                                    <span className={weeklyBreakdown.tradeWinRate >= ((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100) ? 'text-emerald-400' : 'text-red-400'}>
+                                      {weeklyBreakdown.tradeWinRate.toFixed(0)}%
+                                    </span>
+                                  </div>
+                                  <div className="h-2 bg-slate-800 rounded-full overflow-hidden relative">
+                                    {/* Breakeven marker */}
+                                    <div
+                                      className="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10"
+                                      style={{ left: `${Math.min((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100, 100)}%` }}
+                                    />
+                                    {/* Win rate fill */}
+                                    <div
+                                      className={`h-full rounded-full ${weeklyBreakdown.tradeWinRate >= ((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100) ? 'bg-emerald-500' : 'bg-red-500'}`}
+                                      style={{ width: `${Math.min(weeklyBreakdown.tradeWinRate, 100)}%` }}
+                                    />
+                                  </div>
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-muted">Breakeven</span>
+                                    <span className="text-yellow-400">
+                                      {weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss > 0
+                                        ? `${((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                                        : 'N/A'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${weeklyBreakdown.tradeWinRate >= ((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100) ? "text-emerald-400/80" : "text-red-400/80"}`}>
+                                  {weeklyBreakdown.tradeWinRate >= ((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100)
+                                    ? `✓ Above breakeven by ${(weeklyBreakdown.tradeWinRate - ((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100)).toFixed(0)}%`
+                                    : `✗ Below breakeven by ${(((weeklyBreakdown.avgLoss / (weeklyBreakdown.avgWin + weeklyBreakdown.avgLoss)) * 100) - weeklyBreakdown.tradeWinRate).toFixed(0)}%`}
+                                </div>
+                              </div>
+                              <div className="absolute right-4 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Delete All Notes Confirmation Modal */}
       {showDeleteAllConfirm && (
@@ -2298,6 +3954,101 @@ export default function EconomicCalendarPage() {
                     <Trash2 className="w-4 h-4" />
                   )}
                   Delete All
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete All Trades Confirmation Modal */}
+      {showDeleteAllTradesConfirm && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowDeleteAllTradesConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden animate-slide-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold mb-2">Delete All Trades?</h3>
+              <p className="text-sm text-muted mb-6">
+                This will permanently delete all {trades.length} trades from your journal. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteAllTradesConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-card-hover border border-border rounded-lg text-sm font-medium hover:bg-card transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setDeletingAllTrades(true);
+                    for (const trade of trades) {
+                      await deleteTrade(trade.id);
+                    }
+                    setDeletingAllTrades(false);
+                    setShowDeleteAllTradesConfirm(false);
+                  }}
+                  disabled={deletingAllTrades}
+                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {deletingAllTrades ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  Delete All
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generic Confirmation Modal */}
+      {confirmModal.show && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+          onClick={() => setConfirmModal((prev) => ({ ...prev, show: false }))}
+        >
+          <div
+            className="w-full max-w-sm glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden animate-slide-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold mb-2">{confirmModal.title}</h3>
+              <p className="text-sm text-muted mb-6">{confirmModal.message}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmModal((prev) => ({ ...prev, show: false }))}
+                  className="flex-1 px-4 py-2.5 bg-card-hover border border-border rounded-lg text-sm font-medium hover:bg-card transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+                    await confirmModal.onConfirm();
+                    setConfirmModal((prev) => ({ ...prev, isLoading: false }));
+                  }}
+                  disabled={confirmModal.isLoading}
+                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {confirmModal.isLoading ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  {confirmModal.confirmText || "Confirm"}
                 </button>
               </div>
             </div>
