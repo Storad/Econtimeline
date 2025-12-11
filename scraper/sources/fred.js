@@ -16,44 +16,41 @@
 import { API_CONFIG } from '../lib/api-client.js';
 
 // Key FRED releases with their metadata
+// VERIFIED release IDs - https://fred.stlouisfed.org/releases
+// NOTE: Due to 2025 government shutdown, some releases (NFP, CPI) have revised dates
+// NOTE: Some indicators (CB Consumer Confidence, Chicago PMI, NAHB HMI) are proprietary and NOT in FRED
 const FRED_RELEASES = [
-  // HIGH IMPACT
-  { id: 50, title: 'Non-Farm Payrolls', impact: 'high', category: 'employment', time: '08:30' },
-  { id: 10, title: 'CPI m/m', impact: 'high', category: 'inflation', time: '08:30' },
-  { id: 53, title: 'GDP q/q', impact: 'high', category: 'growth', time: '08:30' },
-  { id: 323, title: 'Retail Sales m/m', impact: 'high', category: 'consumer', time: '08:30' },
-  { id: 54, title: 'Core PCE Price Index m/m', impact: 'high', category: 'inflation', time: '08:30' },
-  { id: 95, title: 'Durable Goods Orders m/m', impact: 'high', category: 'manufacturing', time: '08:30' },
-  { id: 270, title: 'ISM Manufacturing PMI', impact: 'high', category: 'manufacturing', time: '10:00' },
-  { id: 271, title: 'ISM Services PMI', impact: 'high', category: 'services', time: '10:00' },
+  // HIGH IMPACT - All verified
+  { id: 50, title: 'Non-Farm Payrolls', impact: 'high', category: 'employment', time: '08:30' },  // Employment Situation ✓
+  { id: 10, title: 'CPI m/m', impact: 'high', category: 'inflation', time: '08:30' },  // Consumer Price Index ✓
+  { id: 53, title: 'GDP q/q', impact: 'high', category: 'growth', time: '08:30' },  // Gross Domestic Product ✓
+  { id: 9, title: 'Retail Sales m/m', impact: 'high', category: 'consumer', time: '08:30' },  // Advance Monthly Sales ✓
+  { id: 54, title: 'Core PCE Price Index m/m', impact: 'high', category: 'inflation', time: '08:30' },  // Personal Income and Outlays ✓
+  { id: 95, title: 'Durable Goods Orders m/m', impact: 'high', category: 'manufacturing', time: '08:30' },  // M3 Survey ✓
+  // NOTE: ISM Manufacturing/Services PMI are NOT in FRED (proprietary) - handled in ism.js
 
-  // MEDIUM IMPACT
-  { id: 17, title: 'PPI m/m', impact: 'medium', category: 'inflation', time: '08:30' },
-  { id: 13, title: 'Industrial Production m/m', impact: 'medium', category: 'manufacturing', time: '09:15' },
-  { id: 222, title: 'Housing Starts', impact: 'medium', category: 'housing', time: '08:30' },
-  { id: 58, title: 'New Home Sales', impact: 'medium', category: 'housing', time: '10:00' },
-  { id: 11, title: 'Existing Home Sales', impact: 'medium', category: 'housing', time: '10:00' },
-  { id: 51, title: 'Trade Balance', impact: 'medium', category: 'trade', time: '08:30' },
-  { id: 192, title: 'JOLTS Job Openings', impact: 'medium', category: 'employment', time: '10:00' },
-  { id: 55, title: 'CB Consumer Confidence', impact: 'medium', category: 'sentiment', time: '10:00' },
-  { id: 56, title: 'UoM Consumer Sentiment', impact: 'medium', category: 'sentiment', time: '10:00' },
-  { id: 351, title: 'Philly Fed Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },
-  { id: 321, title: 'Empire State Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },
-  { id: 136, title: 'Building Permits', impact: 'medium', category: 'housing', time: '08:30' },
-  { id: 61, title: 'Factory Orders m/m', impact: 'medium', category: 'manufacturing', time: '10:00' },
-  { id: 40, title: 'Nonfarm Productivity q/q', impact: 'medium', category: 'employment', time: '08:30' },
-  { id: 39, title: 'Employment Cost Index q/q', impact: 'medium', category: 'employment', time: '08:30' },
-  { id: 113, title: 'Chicago PMI', impact: 'medium', category: 'manufacturing', time: '09:45' },
-  { id: 180, title: 'Unemployment Claims', impact: 'medium', category: 'employment', time: '08:30' },
-  { id: 309, title: 'NAHB Housing Market Index', impact: 'medium', category: 'housing', time: '10:00' },
-  { id: 46, title: 'Business Inventories m/m', impact: 'low', category: 'trade', time: '10:00' },
+  // MEDIUM IMPACT - All verified
+  { id: 46, title: 'PPI m/m', impact: 'medium', category: 'inflation', time: '08:30' },  // Producer Price Index ✓
+  { id: 13, title: 'Industrial Production m/m', impact: 'medium', category: 'manufacturing', time: '09:15' },  // G.17 Industrial Production ✓
+  { id: 27, title: 'Housing Starts', impact: 'medium', category: 'housing', time: '08:30' },  // New Residential Construction ✓
+  { id: 27, title: 'Building Permits', impact: 'medium', category: 'housing', time: '08:30' },  // Also in New Residential Construction ✓
+  { id: 97, title: 'New Home Sales', impact: 'medium', category: 'housing', time: '10:00' },  // New Residential Sales ✓
+  // NOTE: Existing Home Sales (NAR) - release 291 has no scheduled dates in FRED, handled separately
+  { id: 51, title: 'Trade Balance', impact: 'medium', category: 'trade', time: '08:30' },  // U.S. International Trade ✓
+  { id: 192, title: 'JOLTS Job Openings', impact: 'medium', category: 'employment', time: '10:00' },  // JOLTS ✓
+  { id: 91, title: 'UoM Consumer Sentiment', impact: 'medium', category: 'sentiment', time: '10:00' },  // Surveys of Consumers ✓
+  { id: 351, title: 'Philly Fed Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },  // Manufacturing Business Outlook ✓
+  { id: 321, title: 'Empire State Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },  // Empire State Manufacturing ✓
+  { id: 47, title: 'Nonfarm Productivity q/q', impact: 'medium', category: 'employment', time: '08:30' },  // Productivity and Costs ✓
+  { id: 11, title: 'Employment Cost Index q/q', impact: 'medium', category: 'employment', time: '08:30' },  // Employment Cost Index ✓
+  { id: 180, title: 'Unemployment Claims', impact: 'medium', category: 'employment', time: '08:30' },  // Unemployment Insurance Weekly Claims ✓
+  { id: 25, title: 'Business Inventories m/m', impact: 'low', category: 'trade', time: '10:00' },  // Manufacturing and Trade Inventories ✓
+  // NOTE: CB Consumer Confidence, Chicago PMI, NAHB HMI are NOT in FRED (proprietary)
 
-  // LOW IMPACT (optional - keeping just a few important ones)
-  { id: 14, title: 'Consumer Credit m/m', impact: 'low', category: 'consumer', time: '15:00' },
-  { id: 57, title: 'CB Leading Index m/m', impact: 'low', category: 'growth', time: '10:00' },
-  { id: 156, title: 'Import Price Index m/m', impact: 'low', category: 'inflation', time: '08:30' },
-  { id: 52, title: 'Current Account', impact: 'low', category: 'trade', time: '08:30' },
-  { id: 25, title: 'Wholesale Inventories m/m', impact: 'low', category: 'trade', time: '10:00' },
+  // LOW IMPACT - All verified
+  { id: 14, title: 'Consumer Credit m/m', impact: 'low', category: 'consumer', time: '15:00' },  // G.19 Consumer Credit ✓
+  { id: 188, title: 'Import Price Index m/m', impact: 'low', category: 'inflation', time: '08:30' },  // Import and Export Price Indexes ✓
+  { id: 49, title: 'Current Account', impact: 'low', category: 'trade', time: '08:30' },  // U.S. International Transactions ✓
 ];
 
 /**

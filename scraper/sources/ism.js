@@ -38,12 +38,17 @@ function formatDate(date) {
 export async function scrapeISM() {
   const events = [];
   const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
-  // Generate for next 4 months
-  for (let monthOffset = 0; monthOffset <= 4; monthOffset++) {
-    const targetMonth = (currentMonth + monthOffset) % 12;
+  // 3 months back to 6 months ahead
+  const threeMonthsAgo = new Date(currentDate);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+  // Generate for 3 months back to 6 months ahead
+  for (let monthOffset = -3; monthOffset <= 6; monthOffset++) {
+    const targetMonth = (currentMonth + monthOffset + 12) % 12;
     const targetYear = currentYear + Math.floor((currentMonth + monthOffset) / 12);
 
     // ISM Manufacturing PMI - 1st business day of month, 10:00 AM ET
@@ -136,8 +141,15 @@ export async function scrapeISM() {
     });
   }
 
-  // Filter to only future and recent past events
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  return events.filter(e => new Date(e.date) >= oneWeekAgo);
+  // Filter to date range (3 months back to 6 months ahead)
+  const sixMonthsLater = new Date(currentDate);
+  sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+
+  const filtered = events.filter(e => {
+    const date = new Date(e.date);
+    return date >= threeMonthsAgo && date <= sixMonthsLater;
+  });
+
+  console.log(`  Generated ${filtered.length} ISM events`);
+  return filtered;
 }

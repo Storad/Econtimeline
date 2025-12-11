@@ -201,7 +201,7 @@ export async function scrapeTreasury() {
     if (thirtyYearDate >= threeMonthsAgo) {
       events.push({
         date: THIRTY_YEAR_AUCTIONS[thirtyYearKey] || formatDate(thirtyYearDate),
-        time: '13:00', // 1:00 PM ET
+        time: '12:00', // Noon ET (varies, typically 12:00-13:00)
         title: '30-Year Bond Auction',
         impact: 'high',
         currency: 'USD',

@@ -14,8 +14,9 @@
     "test:fred": "node -e \"import('./lib/api-client.js').then(m => m.fredGetReleaseDates().then(console.log))\""
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "node-fetch": "^3.3.2",
-    "ical.js": "^2.0.1"
+    "cheerio": "^1.1.2",
+    "ical.js": "^2.0.1",
+    "investing-economic-calendar": "^0.0.5",
+    "node-fetch": "^3.3.2"
   }
 }

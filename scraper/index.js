@@ -24,6 +24,9 @@ import { scrapeCentralBanks } from './sources/central-banks.js';
 import { scrapeTreasury } from './sources/treasury.js';
 import { scrapeFedSpeakers } from './sources/fed-speakers.js';
 import { scrapeEIA } from './sources/eia.js';
+import { scrapeISM } from './sources/ism.js';
+import { scrapeNAR } from './sources/nar.js';
+import { scrapeProprietary } from './sources/proprietary.js';
 import { scrapeHolidays } from './sources/holidays.js';
 
 // Data value fetcher
@@ -62,6 +65,18 @@ const dataSources = {
   eia: {
     name: 'EIA Energy Data (Crude Oil, Natural Gas)',
     scraper: scrapeEIA,
+  },
+  ism: {
+    name: 'ISM Manufacturing & Services PMI',
+    scraper: scrapeISM,
+  },
+  nar: {
+    name: 'NAR Existing Home Sales',
+    scraper: scrapeNAR,
+  },
+  proprietary: {
+    name: 'Proprietary Indicators (CB Confidence, Case-Shiller, etc.)',
+    scraper: scrapeProprietary,
   },
   holidays: {
     name: 'US Market Holidays',

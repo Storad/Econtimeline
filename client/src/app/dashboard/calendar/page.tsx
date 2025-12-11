@@ -1330,10 +1330,10 @@ export default function EconomicCalendarPage() {
                   ? "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400"
                   : "bg-background/50 border border-border text-muted hover:text-foreground"
               }`}
-              title={showNotes ? "Hide notes" : "Show notes"}
+              title={showNotes ? "Hide trades" : "Show trades"}
             >
               {showNotes ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">Notes</span>
+              <span className="hidden sm:inline">Trades</span>
             </button>
           </div>
         </div>
@@ -1373,7 +1373,7 @@ export default function EconomicCalendarPage() {
 
             {/* Dropdown Menu */}
             {showFilters && (
-              <div className="absolute top-full left-0 mt-2 z-50 w-80 bg-card rounded-xl border border-border shadow-xl p-4 space-y-4 animate-slide-in">
+              <div className="absolute top-full right-0 mt-2 z-50 w-80 bg-card rounded-xl border border-border shadow-xl p-4 space-y-4 animate-slide-in">
                 {/* Impact Filter - Multi-select */}
                 <div>
                   <label className="block text-xs font-medium text-muted mb-2">Impact Level (select multiple)</label>
@@ -1500,7 +1500,7 @@ export default function EconomicCalendarPage() {
           </div>
 
           {/* Next High-Impact Countdown */}
-          {showTenDayWindow && nextHighImpactEvent && (
+          {showEvents && nextHighImpactEvent && (
             <button
               onClick={handleCountdownClick}
               className="flex items-center gap-3 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 hover:border-red-500/50 transition-all cursor-pointer"
@@ -1576,7 +1576,7 @@ export default function EconomicCalendarPage() {
                   )}
 
                   {/* Day of week */}
-                  <div className={`text-[10px] uppercase ${isCurrentDay ? "text-accent-light font-semibold" : "text-muted"}`}>
+                  <div className={`text-[10px] uppercase ${isCurrentDay ? "text-accent-light font-semibold" : "text-muted/70"}`}>
                     {date.toLocaleDateString("en-US", { weekday: "short" })}
                   </div>
 
@@ -1704,12 +1704,12 @@ export default function EconomicCalendarPage() {
         </div>
 
         {/* Day Headers */}
-        <div className="grid grid-cols-7 border-b border-border flex-shrink-0">
+        <div className="grid grid-cols-7 mb-2 flex-shrink-0">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
             <div
               key={day}
-              className={`px-2 py-1.5 text-center text-xs font-medium ${
-                index === 0 || index === 6 ? "text-muted/60 bg-background/30" : "text-muted"
+              className={`px-2 py-2 text-center text-xs font-semibold uppercase tracking-wider ${
+                index === 0 || index === 6 ? "text-muted/50" : "text-muted/70"
               }`}
             >
               {day}
@@ -1718,10 +1718,10 @@ export default function EconomicCalendarPage() {
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 flex-1 min-h-0 auto-rows-fr">
+        <div className="grid grid-cols-7 gap-1.5 flex-1 min-h-0 auto-rows-fr p-1">
           {/* Empty cells for days before month starts */}
           {Array.from({ length: startingDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="border-b border-r border-border bg-background/30" />
+            <div key={`empty-${i}`} className="rounded-lg bg-background/20" />
           ))}
 
           {/* Days of the month */}
@@ -1769,23 +1769,23 @@ export default function EconomicCalendarPage() {
               return (
                 <div
                   key={day}
-                  className={`p-1 border-b border-r text-left transition-all group relative ${
+                  className={`p-1.5 rounded-lg text-left transition-all duration-200 group relative hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10 hover:shadow-md ${
                     isHighlighted
-                      ? "bg-accent/10 ring-2 ring-inset ring-accent/30 border-accent/30"
+                      ? "bg-accent/15 ring-2 ring-accent/40 shadow-lg shadow-accent/20"
                       : showNotes && isProfit
-                      ? "bg-emerald-500/15 border-emerald-500/40"
+                      ? "bg-emerald-500/20 ring-1 ring-emerald-500/30 shadow-md shadow-emerald-500/10"
                       : showNotes && isLoss
-                      ? "bg-red-500/15 border-red-500/40"
+                      ? "bg-red-500/20 ring-1 ring-red-500/30 shadow-md shadow-red-500/10"
                       : (isMarketClosed || isEarlyClose) && showHolidays
-                      ? "bg-gray-500/20 border-gray-500/40"
-                      : "border-border"
+                      ? "bg-gray-500/15 ring-1 ring-gray-500/30 shadow-sm hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
+                      : "bg-card/50 ring-1 ring-border/50"
                   } ${isAnimated ? "animate-border-pulse" : ""}`}
                 >
                   <div className="flex h-full">
                     {/* Left Column - Daily Data (Clickable) */}
                     <button
                       onClick={() => handleDayClick(dateKey)}
-                      className={`flex-1 flex flex-col pr-2 mr-1 border-r-2 border-border/50 text-left hover:bg-white/5 transition-colors rounded-l ${isPastDay && !isProfit && !isLoss ? "opacity-60" : ""}`}
+                      className={`flex-1 flex flex-col pr-2 mr-1 border-r-2 border-border/50 text-left transition-colors rounded-l ${isPastDay && !isProfit && !isLoss ? "opacity-60" : ""}`}
                     >
                       {/* Day Number with Event Indicators */}
                       <div className={`text-xs font-medium flex items-center gap-1.5 ${isPastDay ? "text-muted" : "text-muted/70"}`}>
@@ -1879,22 +1879,22 @@ export default function EconomicCalendarPage() {
               <button
                 key={day}
                 onClick={() => handleDayClick(dateKey)}
-                className={`p-1.5 border-b border-r text-left transition-all flex flex-col group relative ${
+                className={`p-2 rounded-lg text-left transition-all duration-200 flex flex-col group relative ${
                   isHighlighted
-                    ? "bg-accent/10 ring-2 ring-inset ring-accent/30 border-accent/30"
+                    ? "bg-accent/15 ring-2 ring-accent/40 shadow-lg shadow-accent/20"
                     : showNotes && isProfit
-                    ? "bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/20"
+                    ? "bg-emerald-500/20 ring-1 ring-emerald-500/30 shadow-md shadow-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : showNotes && isLoss
-                    ? "bg-red-500/15 border-red-500/40 hover:bg-red-500/20"
+                    ? "bg-red-500/20 ring-1 ring-red-500/30 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : (isMarketClosed || isEarlyClose) && showHolidays
-                    ? "bg-gray-500/20 border-gray-500/40 hover:bg-gray-500/25"
+                    ? "bg-gray-500/15 ring-1 ring-gray-500/30 shadow-sm hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : isCurrentDay
-                    ? "bg-accent-light/10 border-accent-light/30"
+                    ? "bg-accent-light/15 ring-2 ring-accent-light/40 shadow-lg shadow-accent-light/20 hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : isPastDay
-                    ? "bg-background/30 border-border opacity-50"
+                    ? "bg-card/30 ring-1 ring-border/50 opacity-60"
                     : isWeekend
-                    ? "bg-background/20 border-border hover:bg-card-hover/50"
-                    : "border-border hover:bg-card-hover"
+                    ? "bg-card/40 ring-1 ring-border/50 hover:bg-card/60 hover:shadow-md hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
+                    : "bg-card/50 ring-1 ring-border/50 hover:bg-card/80 hover:shadow-md hover:ring-border hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                 } ${isAnimated ? "animate-border-pulse" : ""}`}
               >
                 {/* Day Number Row with Event Indicators */}
@@ -1993,7 +1993,7 @@ export default function EconomicCalendarPage() {
                 return (
                   <div
                     key={`empty-end-${i}`}
-                    className="border-b border-r border-border bg-background/30 p-1"
+                    className="rounded-lg bg-background/20 p-1"
                   >
                     <div className="flex h-full">
                       {/* Left Column - Empty (no daily data for phantom day) */}
@@ -2028,7 +2028,7 @@ export default function EconomicCalendarPage() {
 
             // Regular empty cell
             return (
-              <div key={`empty-end-${i}`} className="border-b border-r border-border bg-background/30" />
+              <div key={`empty-end-${i}`} className="rounded-lg bg-background/20" />
             );
           })}
         </div>
