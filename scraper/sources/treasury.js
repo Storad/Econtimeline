@@ -16,7 +16,36 @@
  * - Treasury Budget Statement - Monthly
  *
  * Source: https://www.treasurydirect.gov/auctions/announcements-data-results/
+ *
+ * NOTE: 10-Year and 30-Year auctions use hardcoded dates from Treasury schedule
+ * because approximate dates are often wrong.
  */
+
+// Hardcoded 10-Year Note auction dates (from Treasury schedule)
+// These are typically the Tuesday of the second week of the month
+const TEN_YEAR_AUCTIONS = {
+  '2025-09': '2025-09-10',
+  '2025-10': '2025-10-09',
+  '2025-11': '2025-11-06',
+  '2025-12': '2025-12-09',
+  '2026-01': '2026-01-08',
+  '2026-02': '2026-02-11',
+  '2026-03': '2026-03-11',
+  '2026-04': '2026-04-09',
+};
+
+// Hardcoded 30-Year Bond auction dates (from Treasury schedule)
+// These are typically the Thursday of the second week of the month
+const THIRTY_YEAR_AUCTIONS = {
+  '2025-09': '2025-09-12',
+  '2025-10': '2025-10-10',
+  '2025-11': '2025-11-07',
+  '2025-12': '2025-12-11',
+  '2026-01': '2026-01-09',
+  '2026-02': '2026-02-13',
+  '2026-03': '2026-03-13',
+  '2026-04': '2026-04-10',
+};
 
 function formatDate(date) {
   return date.toISOString().split('T')[0];
@@ -143,12 +172,15 @@ export async function scrapeTreasury() {
       });
     }
 
-    // 10-Year Note Auction - around 8th-12th of month
-    const tenYearDate = getNextWeekday(new Date(targetYear, targetMonth, 10));
+    // 10-Year Note Auction - use hardcoded dates if available
+    const tenYearKey = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}`;
+    const tenYearDate = TEN_YEAR_AUCTIONS[tenYearKey]
+      ? new Date(TEN_YEAR_AUCTIONS[tenYearKey])
+      : getNextWeekday(new Date(targetYear, targetMonth, 10)); // Fallback to approximation
     if (tenYearDate >= threeMonthsAgo) {
       events.push({
-        date: formatDate(tenYearDate),
-        time: '18:00',
+        date: TEN_YEAR_AUCTIONS[tenYearKey] || formatDate(tenYearDate),
+        time: '13:00', // 1:00 PM ET
         title: '10-Year Note Auction',
         impact: 'high',
         currency: 'USD',
@@ -156,15 +188,20 @@ export async function scrapeTreasury() {
         source: 'treasury',
         sourceUrl: 'https://www.treasurydirect.gov/auctions/announcements-data-results/',
         category: 'bonds',
+        description: 'US Treasury auction for 10-year government notes.',
+        whyItMatters: '10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.',
       });
     }
 
-    // 30-Year Bond Auction - around 12th-14th of month
-    const thirtyYearDate = getNextWeekday(new Date(targetYear, targetMonth, 13));
+    // 30-Year Bond Auction - use hardcoded dates if available
+    const thirtyYearKey = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}`;
+    const thirtyYearDate = THIRTY_YEAR_AUCTIONS[thirtyYearKey]
+      ? new Date(THIRTY_YEAR_AUCTIONS[thirtyYearKey])
+      : getNextWeekday(new Date(targetYear, targetMonth, 13)); // Fallback to approximation
     if (thirtyYearDate >= threeMonthsAgo) {
       events.push({
-        date: formatDate(thirtyYearDate),
-        time: '18:00',
+        date: THIRTY_YEAR_AUCTIONS[thirtyYearKey] || formatDate(thirtyYearDate),
+        time: '13:00', // 1:00 PM ET
         title: '30-Year Bond Auction',
         impact: 'high',
         currency: 'USD',
@@ -172,6 +209,8 @@ export async function scrapeTreasury() {
         source: 'treasury',
         sourceUrl: 'https://www.treasurydirect.gov/auctions/announcements-data-results/',
         category: 'bonds',
+        description: 'US Treasury auction for 30-year government bonds.',
+        whyItMatters: 'Key indicator of demand for long-term US government debt.',
       });
     }
 

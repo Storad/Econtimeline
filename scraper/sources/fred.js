@@ -44,7 +44,7 @@ const FRED_RELEASES = [
   { id: 40, title: 'Nonfarm Productivity q/q', impact: 'medium', category: 'employment', time: '08:30' },
   { id: 39, title: 'Employment Cost Index q/q', impact: 'medium', category: 'employment', time: '08:30' },
   { id: 113, title: 'Chicago PMI', impact: 'medium', category: 'manufacturing', time: '09:45' },
-  { id: 21, title: 'Unemployment Claims', impact: 'medium', category: 'employment', time: '08:30' },
+  { id: 180, title: 'Unemployment Claims', impact: 'medium', category: 'employment', time: '08:30' },
 
   // LOW IMPACT (optional - keeping just a few important ones)
   { id: 14, title: 'Consumer Credit m/m', impact: 'low', category: 'consumer', time: '15:00' },
