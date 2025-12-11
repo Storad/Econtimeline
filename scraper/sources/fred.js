@@ -37,14 +37,16 @@ const FRED_RELEASES = [
   { id: 192, title: 'JOLTS Job Openings', impact: 'medium', category: 'employment', time: '10:00' },
   { id: 55, title: 'CB Consumer Confidence', impact: 'medium', category: 'sentiment', time: '10:00' },
   { id: 56, title: 'UoM Consumer Sentiment', impact: 'medium', category: 'sentiment', time: '10:00' },
-  { id: 178, title: 'Philly Fed Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },
-  { id: 177, title: 'Empire State Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },
+  { id: 351, title: 'Philly Fed Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },
+  { id: 321, title: 'Empire State Manufacturing Index', impact: 'medium', category: 'manufacturing', time: '08:30' },
   { id: 136, title: 'Building Permits', impact: 'medium', category: 'housing', time: '08:30' },
   { id: 61, title: 'Factory Orders m/m', impact: 'medium', category: 'manufacturing', time: '10:00' },
   { id: 40, title: 'Nonfarm Productivity q/q', impact: 'medium', category: 'employment', time: '08:30' },
   { id: 39, title: 'Employment Cost Index q/q', impact: 'medium', category: 'employment', time: '08:30' },
   { id: 113, title: 'Chicago PMI', impact: 'medium', category: 'manufacturing', time: '09:45' },
   { id: 180, title: 'Unemployment Claims', impact: 'medium', category: 'employment', time: '08:30' },
+  { id: 309, title: 'NAHB Housing Market Index', impact: 'medium', category: 'housing', time: '10:00' },
+  { id: 46, title: 'Business Inventories m/m', impact: 'low', category: 'trade', time: '10:00' },
 
   // LOW IMPACT (optional - keeping just a few important ones)
   { id: 14, title: 'Consumer Credit m/m', impact: 'low', category: 'consumer', time: '15:00' },

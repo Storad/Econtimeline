@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-11T06:21:31.116Z",
+  "lastUpdated": "2025-12-11T06:42:19.170Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -12,6 +12,29 @@
   ],
   "dataIncluded": true,
   "events": [
+    {
+      "date": "2025-09-10",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
     {
       "date": "2025-09-11",
       "time": "08:30",
@@ -204,6 +227,37 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-15",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
       "actual": null,
       "previous": null
     },
@@ -457,6 +511,32 @@
       "whyItMatters": "May affect market sentiment and currency values.",
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-18",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -1631,6 +1711,37 @@
     },
     {
       "date": "2025-10-15",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-15",
       "time": "10:30",
       "title": "Crude Oil Inventories",
       "impact": "medium",
@@ -1653,6 +1764,32 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-16",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -2774,6 +2911,37 @@
     },
     {
       "date": "2025-11-17",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-17",
       "time": "16:30",
       "title": "4-Week Bill Auction",
       "impact": "low",
@@ -3010,6 +3178,32 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PAYEMS",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-20",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -3256,6 +3450,29 @@
         "Industrial stocks"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-25",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -4334,6 +4551,29 @@
     },
     {
       "date": "2025-12-11",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-11",
       "time": "10:30",
       "title": "Natural Gas Storage",
       "impact": "low",
@@ -4436,6 +4676,37 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-15",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
       "actual": null,
       "previous": null
     },
@@ -4676,6 +4947,32 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-18",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -5704,6 +6001,32 @@
     {
       "date": "2026-01-08",
       "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-08",
+      "time": "08:30",
       "title": "Unemployment Claims",
       "impact": "medium",
       "category": "employment",
@@ -6056,6 +6379,29 @@
     },
     {
       "date": "2026-01-14",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-14",
       "time": "10:30",
       "title": "Crude Oil Inventories",
       "impact": "medium",
@@ -6128,6 +6474,63 @@
         "USD"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-15",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-15",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
       "actual": null,
       "previous": null
     },
@@ -7678,6 +8081,29 @@
     },
     {
       "date": "2026-02-12",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-02-12",
       "time": "10:30",
       "title": "Natural Gas Storage",
       "impact": "low",
@@ -7826,6 +8252,37 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-02-17",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
       "actual": null,
       "previous": null
     },
@@ -7981,6 +8438,32 @@
       "whyItMatters": "May affect market sentiment and currency values.",
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-02-19",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -9109,6 +9592,29 @@
     },
     {
       "date": "2026-03-12",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-12",
       "time": "10:30",
       "title": "Natural Gas Storage",
       "impact": "low",
@@ -9187,6 +9693,37 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-16",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
       "actual": null,
       "previous": null
     },
@@ -9440,6 +9977,32 @@
       "whyItMatters": "May affect market sentiment and currency values.",
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-19",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
