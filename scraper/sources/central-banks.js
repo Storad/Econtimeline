@@ -17,29 +17,30 @@ const FOMC_2024 = [
   { date: '2024-12-18', hasPresser: true, hasSEP: true, minutesDate: '2025-01-08' },
 ];
 
-// FOMC 2025 Meeting Dates
+// FOMC 2025 Meeting Dates (official schedule from federalreserve.gov)
+// Meetings are 2 days, decision released on day 2 at 2:00 PM ET
 // Minutes are released 3 weeks after each meeting
 const FOMC_2025 = [
-  { date: '2025-01-29', hasPresser: true, hasSEP: false, minutesDate: '2025-02-19' },
-  { date: '2025-03-19', hasPresser: true, hasSEP: true, minutesDate: '2025-04-09' },
-  { date: '2025-05-07', hasPresser: true, hasSEP: false, minutesDate: '2025-05-28' },
-  { date: '2025-06-18', hasPresser: true, hasSEP: true, minutesDate: '2025-07-09' },
-  { date: '2025-07-30', hasPresser: true, hasSEP: false, minutesDate: '2025-08-20' },
-  { date: '2025-09-17', hasPresser: true, hasSEP: true, minutesDate: '2025-10-08' },
-  { date: '2025-11-05', hasPresser: true, hasSEP: false, minutesDate: '2025-11-26' },
-  { date: '2025-12-17', hasPresser: true, hasSEP: true, minutesDate: '2026-01-07' },
+  { date: '2025-01-29', hasPresser: true, hasSEP: false, minutesDate: '2025-02-19' },  // Jan 28-29
+  { date: '2025-03-19', hasPresser: true, hasSEP: true, minutesDate: '2025-04-09' },   // Mar 18-19
+  { date: '2025-05-07', hasPresser: true, hasSEP: false, minutesDate: '2025-05-28' },  // May 6-7
+  { date: '2025-06-18', hasPresser: true, hasSEP: true, minutesDate: '2025-07-09' },   // Jun 17-18
+  { date: '2025-07-30', hasPresser: true, hasSEP: false, minutesDate: '2025-08-20' },  // Jul 29-30
+  { date: '2025-09-17', hasPresser: true, hasSEP: true, minutesDate: '2025-10-08' },   // Sep 16-17
+  { date: '2025-10-29', hasPresser: true, hasSEP: false, minutesDate: '2025-11-19' },  // Oct 28-29
+  { date: '2025-12-10', hasPresser: true, hasSEP: true, minutesDate: '2025-12-31' },   // Dec 9-10
 ];
 
-// FOMC 2026 Meeting Dates
+// FOMC 2026 Meeting Dates (official schedule from federalreserve.gov)
 const FOMC_2026 = [
-  { date: '2026-01-28', hasPresser: true, hasSEP: false, minutesDate: '2026-02-18' },
-  { date: '2026-03-18', hasPresser: true, hasSEP: true, minutesDate: '2026-04-08' },
-  { date: '2026-05-06', hasPresser: true, hasSEP: false, minutesDate: '2026-05-27' },
-  { date: '2026-06-17', hasPresser: true, hasSEP: true, minutesDate: '2026-07-08' },
-  { date: '2026-07-29', hasPresser: true, hasSEP: false, minutesDate: '2026-08-19' },
-  { date: '2026-09-16', hasPresser: true, hasSEP: true, minutesDate: '2026-10-07' },
-  { date: '2026-11-04', hasPresser: true, hasSEP: false, minutesDate: '2026-11-25' },
-  { date: '2026-12-16', hasPresser: true, hasSEP: true, minutesDate: '2027-01-06' },
+  { date: '2026-01-28', hasPresser: true, hasSEP: false, minutesDate: '2026-02-18' },  // Jan 27-28
+  { date: '2026-03-18', hasPresser: true, hasSEP: true, minutesDate: '2026-04-08' },   // Mar 17-18
+  { date: '2026-04-29', hasPresser: true, hasSEP: false, minutesDate: '2026-05-20' },  // Apr 28-29
+  { date: '2026-06-17', hasPresser: true, hasSEP: true, minutesDate: '2026-07-08' },   // Jun 16-17
+  { date: '2026-07-29', hasPresser: true, hasSEP: false, minutesDate: '2026-08-19' },  // Jul 28-29
+  { date: '2026-09-16', hasPresser: true, hasSEP: true, minutesDate: '2026-10-07' },   // Sep 15-16
+  { date: '2026-10-28', hasPresser: true, hasSEP: false, minutesDate: '2026-11-18' },  // Oct 27-28
+  { date: '2026-12-09', hasPresser: true, hasSEP: true, minutesDate: '2026-12-30' },   // Dec 8-9
 ];
 
 /**

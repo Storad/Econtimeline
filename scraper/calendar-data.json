@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-10T21:58:58.087Z",
+  "lastUpdated": "2025-12-11T05:24:15.923Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -12,33 +12,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-09-10",
-      "time": "10:30",
-      "title": "Crude Oil Inventories",
-      "impact": "medium",
-      "category": "energy",
-      "currency": "USD",
-      "country": "US",
-      "source": "eia",
-      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
-      "description": "Weekly change in the number of barrels of crude oil held in inventory by commercial firms.",
-      "whyItMatters": "Inventory builds suggest weak demand or oversupply, pushing oil prices lower. Draws indicate strong demand, pushing prices higher.",
-      "frequency": "Weekly (Wednesday)",
-      "typicalReaction": {
-        "higherThanExpected": "Oil prices bearish (more supply)",
-        "lowerThanExpected": "Oil prices bullish (less supply)"
-      },
-      "relatedAssets": [
-        "Crude Oil",
-        "Energy stocks",
-        "CAD"
-      ],
-      "historicalVolatility": "High",
-      "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-09-11",
       "time": "08:30",
@@ -68,11 +41,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:54.955Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-11",
@@ -177,11 +147,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-15",
@@ -286,11 +253,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.602Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-16",
@@ -472,11 +436,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-22",
@@ -554,11 +515,8 @@
       "latestDate": "2025-11-29",
       "priorDate": "2025-11-22",
       "fredSeriesId": "ICSA",
-      "actual": "191000K",
-      "previous": "218000K",
-      "actualDate": "2025-11-29",
-      "previousDate": "2025-11-22",
-      "dataUpdatedAt": "2025-12-10T21:58:53.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-23",
@@ -667,11 +625,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.781Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-25",
@@ -702,11 +657,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-25",
@@ -788,11 +740,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.984Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-26",
@@ -824,11 +773,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.563Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-26",
@@ -882,11 +828,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-29",
@@ -991,11 +934,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "7.7M",
-      "previous": "7.7M",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-10T21:58:53.919Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-01",
@@ -1104,11 +1044,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-06",
@@ -1465,11 +1402,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-14",
@@ -1579,11 +1513,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-20",
@@ -1766,11 +1697,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:54.955Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-24",
@@ -1825,11 +1753,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-27",
@@ -1956,11 +1881,8 @@
       "latestDate": "2025-11-29",
       "priorDate": "2025-11-22",
       "fredSeriesId": "ICSA",
-      "actual": "191000K",
-      "previous": "218000K",
-      "actualDate": "2025-11-29",
-      "previousDate": "2025-11-22",
-      "dataUpdatedAt": "2025-12-10T21:58:53.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-28",
@@ -2043,6 +1965,56 @@
       "previous": null
     },
     {
+      "date": "2025-10-29",
+      "time": "14:00",
+      "title": "FOMC Rate Decision",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Federal Reserve's decision on the federal funds target rate.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish, bonds bearish",
+        "dovish": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "frequency": "8 times per year",
+      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "US bonds",
+        "Gold",
+        "Global markets"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-29",
+      "time": "14:30",
+      "title": "Fed Chair Press Conference",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Fed Chair's press conference following the rate decision, providing context and forward guidance.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish",
+        "dovish": "USD bearish, stocks bullish"
+      },
+      "frequency": "8 times per year",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-10-30",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -2096,11 +2068,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-03",
@@ -2205,56 +2174,6 @@
       "previous": null
     },
     {
-      "date": "2025-11-05",
-      "time": "14:00",
-      "title": "FOMC Rate Decision",
-      "impact": "high",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Federal Reserve's decision on the federal funds target rate.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish, bonds bearish",
-        "dovish": "USD bearish, stocks bullish, bonds bullish"
-      },
-      "frequency": "8 times per year",
-      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "US bonds",
-        "Gold",
-        "Global markets"
-      ],
-      "historicalVolatility": "Very High",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-05",
-      "time": "14:30",
-      "title": "Fed Chair Press Conference",
-      "impact": "high",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Fed Chair's press conference following the rate decision, providing context and forward guidance.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish",
-        "dovish": "USD bearish, stocks bullish"
-      },
-      "frequency": "8 times per year",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-11-06",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -2335,11 +2254,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-10",
@@ -2599,11 +2515,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-17",
@@ -2682,11 +2595,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-18",
@@ -2742,11 +2652,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-59.5B",
-      "previous": "-78.2B",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-10T21:58:57.987Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-19",
@@ -2772,6 +2679,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-19",
+      "time": "14:00",
+      "title": "FOMC Meeting Minutes",
+      "impact": "medium",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Detailed record of the FOMC policy meeting, released 3 weeks after each meeting.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish, bonds bearish",
+        "dovish": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "frequency": "8 times per year (3 weeks after FOMC)",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -2805,11 +2734,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+119K",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:52.460Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-20",
@@ -2865,11 +2791,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-24",
@@ -2900,11 +2823,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.602Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-24",
@@ -3007,11 +2927,8 @@
       "latestDate": "2025-11-29",
       "priorDate": "2025-11-22",
       "fredSeriesId": "ICSA",
-      "actual": "191000K",
-      "previous": "218000K",
-      "actualDate": "2025-11-29",
-      "previousDate": "2025-11-22",
-      "dataUpdatedAt": "2025-12-10T21:58:53.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-25",
@@ -3120,11 +3037,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-26",
@@ -3150,28 +3064,6 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-26",
-      "time": "14:00",
-      "title": "FOMC Meeting Minutes",
-      "impact": "medium",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Detailed record of the FOMC policy meeting, released 3 weeks after each meeting.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish, bonds bearish",
-        "dovish": "USD bearish, stocks bullish, bonds bullish"
-      },
-      "frequency": "8 times per year (3 weeks after FOMC)",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -3299,11 +3191,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-01",
@@ -3409,11 +3298,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.602Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-03",
@@ -3495,11 +3381,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-04",
@@ -3556,11 +3439,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.984Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-05",
@@ -3592,11 +3472,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.563Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-05",
@@ -3653,11 +3530,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-08",
@@ -3762,11 +3636,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "7.7M",
-      "previous": "7.7M",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-10T21:58:53.919Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-09",
@@ -3850,6 +3721,78 @@
     },
     {
       "date": "2025-12-10",
+      "time": "14:00",
+      "title": "FOMC Rate Decision",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Federal Reserve's decision on the federal funds target rate.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish, bonds bearish",
+        "dovish": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "frequency": "8 times per year",
+      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "US bonds",
+        "Gold",
+        "Global markets"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-10",
+      "time": "14:00",
+      "title": "FOMC Economic Projections",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Summary of Economic Projections (SEP) including the \"dot plot\" showing Fed officials' rate forecasts.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish (higher rate path)",
+        "dovish": "USD bearish, stocks bullish (lower rate path)"
+      },
+      "frequency": "Quarterly (Mar, Jun, Sep, Dec)",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-10",
+      "time": "14:30",
+      "title": "Fed Chair Press Conference",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Fed Chair's press conference following the rate decision, providing context and forward guidance.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish",
+        "dovish": "USD bearish, stocks bullish"
+      },
+      "frequency": "8 times per year",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-10",
       "time": "18:00",
       "title": "10-Year Note Auction",
       "impact": "high",
@@ -3901,11 +3844,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-59.5B",
-      "previous": "-78.2B",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-10T21:58:57.987Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-11",
@@ -4010,11 +3950,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-15",
@@ -4120,11 +4057,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+119K",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:52.460Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -4207,78 +4141,6 @@
       "previous": null
     },
     {
-      "date": "2025-12-17",
-      "time": "14:00",
-      "title": "FOMC Rate Decision",
-      "impact": "high",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Federal Reserve's decision on the federal funds target rate.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish, bonds bearish",
-        "dovish": "USD bearish, stocks bullish, bonds bullish"
-      },
-      "frequency": "8 times per year",
-      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "US bonds",
-        "Gold",
-        "Global markets"
-      ],
-      "historicalVolatility": "Very High",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-17",
-      "time": "14:00",
-      "title": "FOMC Economic Projections",
-      "impact": "high",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Summary of Economic Projections (SEP) including the \"dot plot\" showing Fed officials' rate forecasts.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish (higher rate path)",
-        "dovish": "USD bearish, stocks bullish (lower rate path)"
-      },
-      "frequency": "Quarterly (Mar, Jun, Sep, Dec)",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-17",
-      "time": "14:30",
-      "title": "Fed Chair Press Conference",
-      "impact": "high",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Fed Chair's press conference following the rate decision, providing context and forward guidance.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish",
-        "dovish": "USD bearish, stocks bullish"
-      },
-      "frequency": "8 times per year",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-12-18",
       "time": "08:30",
       "title": "CPI m/m",
@@ -4307,11 +4169,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:54.955Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-18",
@@ -4368,11 +4227,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.984Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-19",
@@ -4404,11 +4260,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.563Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-22",
@@ -4438,11 +4291,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-22",
@@ -4520,11 +4370,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.781Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4555,11 +4402,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4589,11 +4433,8 @@
       "latestDate": "2025-11-29",
       "priorDate": "2025-11-22",
       "fredSeriesId": "ICSA",
-      "actual": "191000K",
-      "previous": "218000K",
-      "actualDate": "2025-11-29",
-      "previousDate": "2025-11-22",
-      "dataUpdatedAt": "2025-12-10T21:58:53.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4624,11 +4465,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.602Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4858,11 +4696,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-29",
@@ -4941,32 +4776,6 @@
     },
     {
       "date": "2025-12-31",
-      "time": "09:45",
-      "title": "Chicago PMI",
-      "impact": "medium",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=113",
-      "fredReleaseId": 113,
-      "description": "Business barometer measuring Chicago-area manufacturing activity. Above 50 = expansion.",
-      "whyItMatters": "Released day before ISM Manufacturing, often used as a preview. Highly correlated with ISM.",
-      "frequency": "Monthly (last business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, stocks bullish",
-        "lowerThanExpected": "USD bearish, stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-31",
       "time": "10:30",
       "title": "Crude Oil Inventories",
       "impact": "medium",
@@ -4989,6 +4798,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-31",
+      "time": "14:00",
+      "title": "FOMC Meeting Minutes",
+      "impact": "medium",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Detailed record of the FOMC policy meeting, released 3 weeks after each meeting.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish, bonds bearish",
+        "dovish": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "frequency": "8 times per year (3 weeks after FOMC)",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -5068,11 +4899,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-05",
@@ -5151,11 +4979,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -5212,28 +5037,6 @@
       "previous": null
     },
     {
-      "date": "2026-01-07",
-      "time": "14:00",
-      "title": "FOMC Meeting Minutes",
-      "impact": "medium",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Detailed record of the FOMC policy meeting, released 3 weeks after each meeting.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish, bonds bearish",
-        "dovish": "USD bearish, stocks bullish, bonds bullish"
-      },
-      "frequency": "8 times per year (3 weeks after FOMC)",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2026-01-08",
       "time": "08:30",
       "title": "Trade Balance",
@@ -5260,11 +5063,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-59.5B",
-      "previous": "-78.2B",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-10T21:58:57.987Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -5349,11 +5149,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+119K",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:52.460Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-12",
@@ -5383,11 +5180,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-12",
@@ -5516,11 +5310,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:54.955Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -5707,11 +5498,34 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.602Z"
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-16",
+      "time": "09:45",
+      "title": "Chicago PMI",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=113",
+      "fredReleaseId": 113,
+      "description": "Business barometer measuring Chicago-area manufacturing activity. Above 50 = expansion.",
+      "whyItMatters": "Released day before ISM Manufacturing, often used as a preview. Highly correlated with ISM.",
+      "frequency": "Monthly (last business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-19",
@@ -5811,11 +5625,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-20",
@@ -5925,11 +5736,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-26",
@@ -6081,11 +5889,8 @@
       "latestDate": "2025-11-29",
       "priorDate": "2025-11-22",
       "fredSeriesId": "ICSA",
-      "actual": "191000K",
-      "previous": "218000K",
-      "actualDate": "2025-11-29",
-      "previousDate": "2025-11-22",
-      "dataUpdatedAt": "2025-12-10T21:58:53.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -6143,11 +5948,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-28",
@@ -6254,11 +6056,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.781Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -6289,11 +6088,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.984Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -6325,11 +6121,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.563Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -6385,11 +6178,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-02",
@@ -6495,11 +6285,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-04",
@@ -6555,11 +6342,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-59.5B",
-      "previous": "-78.2B",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-10T21:58:57.987Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -6617,11 +6401,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+119K",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:52.460Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-06",
@@ -6678,11 +6459,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-09",
@@ -6867,11 +6645,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:54.955Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-11",
@@ -7126,11 +6901,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-17",
@@ -7188,11 +6960,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.602Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -7297,11 +7066,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-23",
@@ -7379,11 +7145,8 @@
       "latestDate": "2025-11-29",
       "priorDate": "2025-11-22",
       "fredSeriesId": "ICSA",
-      "actual": "191000K",
-      "previous": "218000K",
-      "actualDate": "2025-11-29",
-      "previousDate": "2025-11-22",
-      "dataUpdatedAt": "2025-12-10T21:58:53.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-24",
@@ -7517,11 +7280,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.781Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -7552,11 +7312,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.984Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -7588,11 +7345,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.563Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -7623,11 +7377,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -7707,11 +7458,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-02",
@@ -7868,11 +7616,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -7901,11 +7646,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-59.5B",
-      "previous": "-78.2B",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-10T21:58:57.987Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -7963,11 +7705,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+119K",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:52.460Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-06",
@@ -8024,11 +7763,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-09",
@@ -8160,11 +7896,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:54.955Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-11",
@@ -8323,11 +8056,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -8358,11 +8088,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.602Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -8592,11 +8319,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-23",
@@ -8674,11 +8398,8 @@
       "latestDate": "2025-11-29",
       "priorDate": "2025-11-22",
       "fredSeriesId": "ICSA",
-      "actual": "191000K",
-      "previous": "218000K",
-      "actualDate": "2025-11-29",
-      "previousDate": "2025-11-22",
-      "dataUpdatedAt": "2025-12-10T21:58:53.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -8761,11 +8482,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-25",
@@ -8897,11 +8615,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.781Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-27",
@@ -8932,11 +8647,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.984Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-27",
@@ -8968,11 +8680,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.563Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-30",
@@ -9002,11 +8711,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-30",
@@ -9139,11 +8845,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:56.854Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -9172,11 +8875,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-59.5B",
-      "previous": "-78.2B",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-10T21:58:57.987Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -9234,11 +8934,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+119K",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:52.460Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-03",
@@ -9290,11 +8987,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:55.359Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-06",
@@ -9528,11 +9222,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-10T21:58:54.955Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-10",
@@ -9986,6 +9677,56 @@
       "previous": null
     },
     {
+      "date": "2026-04-29",
+      "time": "14:00",
+      "title": "FOMC Rate Decision",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Federal Reserve's decision on the federal funds target rate.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish, bonds bearish",
+        "dovish": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "frequency": "8 times per year",
+      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "US bonds",
+        "Gold",
+        "Global markets"
+      ],
+      "historicalVolatility": "Very High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-29",
+      "time": "14:30",
+      "title": "Fed Chair Press Conference",
+      "impact": "high",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Fed Chair's press conference following the rate decision, providing context and forward guidance.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish",
+        "dovish": "USD bearish, stocks bullish"
+      },
+      "frequency": "8 times per year",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-04-30",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -10061,56 +9802,6 @@
         "Energy stocks"
       ],
       "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2026-05-06",
-      "time": "14:00",
-      "title": "FOMC Rate Decision",
-      "impact": "high",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Federal Reserve's decision on the federal funds target rate.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish, bonds bearish",
-        "dovish": "USD bearish, stocks bullish, bonds bullish"
-      },
-      "frequency": "8 times per year",
-      "whyItMatters": "The most important monetary policy decision globally. Rate changes affect borrowing costs, currency values, and asset prices worldwide.",
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "US bonds",
-        "Gold",
-        "Global markets"
-      ],
-      "historicalVolatility": "Very High",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2026-05-06",
-      "time": "14:30",
-      "title": "Fed Chair Press Conference",
-      "impact": "high",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Fed Chair's press conference following the rate decision, providing context and forward guidance.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish",
-        "dovish": "USD bearish, stocks bullish"
-      },
-      "frequency": "8 times per year",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -10221,6 +9912,28 @@
       "previous": null
     },
     {
+      "date": "2026-05-20",
+      "time": "14:00",
+      "title": "FOMC Meeting Minutes",
+      "impact": "medium",
+      "category": "central_bank",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "description": "Detailed record of the FOMC policy meeting, released 3 weeks after each meeting.",
+      "typicalReaction": {
+        "hawkish": "USD bullish, stocks bearish, bonds bearish",
+        "dovish": "USD bearish, stocks bullish, bonds bullish"
+      },
+      "frequency": "8 times per year (3 weeks after FOMC)",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-05-21",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -10292,28 +10005,6 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2026-05-27",
-      "time": "14:00",
-      "title": "FOMC Meeting Minutes",
-      "impact": "medium",
-      "category": "central_bank",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-      "description": "Detailed record of the FOMC policy meeting, released 3 weeks after each meeting.",
-      "typicalReaction": {
-        "hawkish": "USD bullish, stocks bearish, bonds bearish",
-        "dovish": "USD bearish, stocks bullish, bonds bullish"
-      },
-      "frequency": "8 times per year (3 weeks after FOMC)",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -10655,6 +10346,5 @@
       "actual": null,
       "previous": null
     }
-  ],
-  "dataRefreshedAt": "2025-12-10T21:58:58.087Z"
+  ]
 }
