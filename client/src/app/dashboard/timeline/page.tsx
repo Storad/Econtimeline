@@ -1165,7 +1165,7 @@ export default function TimelinePage() {
                         }`}
                         style={{
                           backgroundColor: color.value,
-                          ringColor: color.value,
+                          boxShadow: formColor === color.value ? `0 0 0 2px var(--card), 0 0 0 4px ${color.value}` : undefined,
                         }}
                         title={color.name}
                       />
