@@ -224,7 +224,8 @@ const DAY_OPTIONS = [
 
 export default function TimelinePage() {
   // State
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isMounted, setIsMounted] = useState(false);
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showFullscreenX, setShowFullscreenX] = useState(false);
   const [scrollOffset, setScrollOffset] = useState(0); // Pixels offset from live
@@ -253,7 +254,14 @@ export default function TimelinePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>(0);
-  const lastTimeRef = useRef<number>(Date.now());
+  const lastTimeRef = useRef<number>(0);
+
+  // Initialize on client only to avoid hydration mismatch
+  useEffect(() => {
+    setCurrentTime(new Date());
+    lastTimeRef.current = Date.now();
+    setIsMounted(true);
+  }, []);
 
   // Load calendar events
   useEffect(() => {
@@ -303,15 +311,13 @@ export default function TimelinePage() {
 
   // Real-time clock update (1 second = 1 second)
   useEffect(() => {
+    if (!isMounted) return;
+
     const updateTime = () => {
       const now = Date.now();
-      const elapsed = now - lastTimeRef.current;
       lastTimeRef.current = now;
 
       setCurrentTime(new Date(now));
-
-      // If not dragging and has offset, keep offset stable
-      // (timeline scrolls, offset stays the same)
 
       animationRef.current = requestAnimationFrame(updateTime);
     };
@@ -323,7 +329,7 @@ export default function TimelinePage() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, []);
+  }, [isMounted]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -501,6 +507,37 @@ export default function TimelinePage() {
     setShowFullscreenX(nearTopRight);
   }, [isFullscreen]);
 
+  // Check if timeline is live (no offset)
+  const isLive = scrollOffset === 0;
+
+  // Loading state - render placeholder until client-side hydration
+  if (!isMounted || !currentTime) {
+    return (
+      <div className="h-full flex flex-col select-none">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+          <div className="flex items-center gap-4">
+            <h1 className="text-lg font-semibold">Timeline</h1>
+            <span className="px-2 py-0.5 text-xs font-medium rounded bg-muted/20 text-muted border border-muted/30">
+              Loading...
+            </span>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="text-2xl font-mono font-bold tracking-wider text-muted">
+              --:--:-- --
+            </div>
+            <div className="text-xs text-muted">
+              Loading...
+            </div>
+          </div>
+          <div className="w-24" />
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-muted">Initializing timeline...</div>
+        </div>
+      </div>
+    );
+  }
+
   // Calculate visible time range
   const containerWidth = containerRef.current?.clientWidth || 1200;
   const visibleStartTime = new Date(currentTime.getTime() - HOURS_IN_PAST * 60 * 60 * 1000);
@@ -514,9 +551,6 @@ export default function TimelinePage() {
     const eventDateTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
     return eventDateTime >= visibleStartTime && eventDateTime <= visibleEndTime;
   });
-
-  // Check if timeline is live (no offset)
-  const isLive = scrollOffset === 0;
 
   // ============================================
   // RENDER
