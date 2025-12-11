@@ -51,6 +51,7 @@ const FRED_RELEASES = [
   { id: 57, title: 'CB Leading Index m/m', impact: 'low', category: 'growth', time: '10:00' },
   { id: 156, title: 'Import Price Index m/m', impact: 'low', category: 'inflation', time: '08:30' },
   { id: 52, title: 'Current Account', impact: 'low', category: 'trade', time: '08:30' },
+  { id: 25, title: 'Wholesale Inventories m/m', impact: 'low', category: 'trade', time: '10:00' },
 ];
 
 /**

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-11T05:24:15.923Z",
+  "lastUpdated": "2025-12-11T06:04:34.312Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -284,6 +284,53 @@
       "previous": null
     },
     {
+      "date": "2025-09-16",
+      "time": "10:00",
+      "title": "Wholesale Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Monthly change in value of goods held by wholesalers.",
+      "whyItMatters": "Rising inventories can signal slowing demand or building for future sales.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Mixed (depends on context)",
+        "lowerThanExpected": "Mixed (depends on context)"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-16",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-09-17",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -542,6 +589,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-09-23",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -938,6 +1007,28 @@
       "previous": null
     },
     {
+      "date": "2025-09-30",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-10-01",
       "time": "09:45",
       "title": "Chicago PMI",
@@ -1145,6 +1236,28 @@
         "Bank stocks"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-07",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -1433,6 +1546,28 @@
       "previous": null
     },
     {
+      "date": "2025-10-14",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-10-15",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -1588,6 +1723,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-10-21",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -1938,6 +2095,28 @@
       "previous": null
     },
     {
+      "date": "2025-10-28",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-10-29",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -2143,6 +2322,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-04",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -2355,6 +2556,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-11",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -2622,6 +2845,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-18",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -2985,6 +3230,53 @@
     },
     {
       "date": "2025-11-25",
+      "time": "10:00",
+      "title": "Wholesale Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Monthly change in value of goods held by wholesalers.",
+      "whyItMatters": "Rising inventories can signal slowing demand or building for future sales.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Mixed (depends on context)",
+        "lowerThanExpected": "Mixed (depends on context)"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-25",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-11-25",
       "time": "18:00",
       "title": "5-Year Note Auction",
       "impact": "medium",
@@ -3266,6 +3558,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-02",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -3662,6 +3976,28 @@
         "Energy stocks"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-09",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -4088,6 +4424,53 @@
       "previous": null
     },
     {
+      "date": "2025-12-16",
+      "time": "10:00",
+      "title": "Wholesale Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Monthly change in value of goods held by wholesalers.",
+      "whyItMatters": "Rising inventories can signal slowing demand or building for future sales.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Mixed (depends on context)",
+        "lowerThanExpected": "Mixed (depends on context)"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-16",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-12-17",
       "time": "09:45",
       "title": "Chicago PMI",
@@ -4496,6 +4879,28 @@
       "previous": null
     },
     {
+      "date": "2025-12-23",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-12-24",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -4775,6 +5180,28 @@
       "previous": null
     },
     {
+      "date": "2025-12-30",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2025-12-31",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -4947,6 +5374,28 @@
         "T-bill rates"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-06",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -5342,6 +5791,28 @@
     },
     {
       "date": "2026-01-13",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-13",
       "time": "18:00",
       "title": "30-Year Bond Auction",
       "impact": "high",
@@ -5436,6 +5907,31 @@
       "source": "fed",
       "sourceUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
       "whyItMatters": "Provides qualitative insights into regional economic trends. Released 2 weeks before FOMC meetings.",
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-15",
+      "time": "10:00",
+      "title": "Wholesale Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Monthly change in value of goods held by wholesalers.",
+      "whyItMatters": "Rising inventories can signal slowing demand or building for future sales.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Mixed (depends on context)",
+        "lowerThanExpected": "Mixed (depends on context)"
+      },
       "relatedAssets": [
         "USD"
       ],
@@ -5652,6 +6148,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-20",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -5916,6 +6434,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-01-27",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -6257,6 +6797,28 @@
       "previous": null
     },
     {
+      "date": "2026-02-03",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-02-04",
       "time": "08:30",
       "title": "Durable Goods Orders m/m",
@@ -6587,6 +7149,28 @@
         "US bonds"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-02-10",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -6932,6 +7516,53 @@
       "previous": null
     },
     {
+      "date": "2026-02-17",
+      "time": "10:00",
+      "title": "Wholesale Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Monthly change in value of goods held by wholesalers.",
+      "whyItMatters": "Rising inventories can signal slowing demand or building for future sales.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Mixed (depends on context)",
+        "lowerThanExpected": "Mixed (depends on context)"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-02-17",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-02-18",
       "time": "09:15",
       "title": "Industrial Production m/m",
@@ -7172,6 +7803,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-02-24",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -7537,6 +8190,28 @@
       "previous": null
     },
     {
+      "date": "2026-03-03",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-03-04",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -7843,6 +8518,28 @@
     },
     {
       "date": "2026-03-10",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-10",
       "time": "18:00",
       "title": "10-Year Note Auction",
       "impact": "high",
@@ -8093,6 +8790,31 @@
     },
     {
       "date": "2026-03-16",
+      "time": "10:00",
+      "title": "Wholesale Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Monthly change in value of goods held by wholesalers.",
+      "whyItMatters": "Rising inventories can signal slowing demand or building for future sales.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Mixed (depends on context)",
+        "lowerThanExpected": "Mixed (depends on context)"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-16",
       "time": "16:30",
       "title": "4-Week Bill Auction",
       "impact": "low",
@@ -8163,6 +8885,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-17",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -8425,6 +9169,28 @@
         "Service stocks"
       ],
       "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-24",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -8763,6 +9529,28 @@
       "previous": null
     },
     {
+      "date": "2026-03-31",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-04-01",
       "time": "10:00",
       "title": "ISM Services PMI",
@@ -9093,6 +9881,28 @@
       "previous": null
     },
     {
+      "date": "2026-04-07",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-04-08",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -9350,6 +10160,28 @@
       "previous": null
     },
     {
+      "date": "2026-04-14",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-04-15",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -9447,6 +10279,28 @@
         "T-bill rates"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-21",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -9650,6 +10504,28 @@
       "previous": null
     },
     {
+      "date": "2026-04-28",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-04-29",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -9753,6 +10629,28 @@
       "previous": null
     },
     {
+      "date": "2026-05-05",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-05-06",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -9832,6 +10730,28 @@
       "previous": null
     },
     {
+      "date": "2026-05-12",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-05-13",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -9881,6 +10801,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-19",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -9982,6 +10924,28 @@
       "previous": null
     },
     {
+      "date": "2026-05-26",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-05-27",
       "time": "10:30",
       "title": "Crude Oil Inventories",
@@ -10031,6 +10995,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-02",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -10108,6 +11094,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-09",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },

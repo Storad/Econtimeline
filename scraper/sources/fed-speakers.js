@@ -5,10 +5,12 @@
  * - Jackson Hole Symposium
  * - Congressional Testimony (Semi-annual)
  * - Beige Book releases
- * - Major Fed speeches
+ * - FOMC Member speeches (scraped from Fed calendar)
  *
  * Source: https://www.federalreserve.gov/newsevents/calendar.htm
  */
+
+import * as cheerio from 'cheerio';
 
 // Jackson Hole Symposium - always late August (Thursday-Saturday)
 const JACKSON_HOLE = {
@@ -173,7 +175,112 @@ export async function scrapeFedSpeakers() {
     sourceUrl: 'https://www.federalreserve.gov/newsevents/calendar.htm',
   }));
 
+  // Scrape upcoming Fed speeches from the Fed calendar
+  const scrapedSpeeches = await scrapeFedCalendar();
+  enrichedEvents.push(...scrapedSpeeches);
+
   return enrichedEvents;
+}
+
+/**
+ * Scrape FOMC member speeches from Fed calendar
+ */
+async function scrapeFedCalendar() {
+  const events = [];
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+
+  // Scrape current and next 2 months
+  const monthsToScrape = [];
+  for (let i = 0; i <= 2; i++) {
+    const targetDate = new Date(currentYear, currentMonth + i, 1);
+    const year = targetDate.getFullYear();
+    const month = targetDate.toLocaleString('en-US', { month: 'long' }).toLowerCase();
+    monthsToScrape.push({ year, month });
+  }
+
+  for (const { year, month } of monthsToScrape) {
+    try {
+      const url = `https://www.federalreserve.gov/newsevents/${year}-${month}.htm`;
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'EconTimeline/2.0' }
+      });
+
+      if (!response.ok) continue;
+
+      const html = await response.text();
+      const $ = cheerio.load(html);
+
+      // Parse speech entries
+      $('.panel, .row, .eventlist__event, .calendar__event').each((i, elem) => {
+        const text = $(elem).text();
+
+        // Look for FOMC member names
+        const fomcMembers = [
+          'Powell', 'Bowman', 'Waller', 'Jefferson', 'Cook', 'Kugler', 'Barr',
+          'Williams', 'Goolsbee', 'Harker', 'Bostic', 'Daly', 'Musalem',
+          'Hammack', 'Kashkari', 'Collins', 'Barkin', 'Logan', 'Schmid'
+        ];
+
+        for (const member of fomcMembers) {
+          if (text.includes(member) && (text.toLowerCase().includes('speak') || text.toLowerCase().includes('remarks') || text.toLowerCase().includes('speech'))) {
+            // Try to extract date from nearby elements or text
+            const dateMatch = text.match(/([A-Z][a-z]+)\s+(\d{1,2})/);
+            if (dateMatch) {
+              const monthNames = ['january', 'february', 'march', 'april', 'may', 'june',
+                'july', 'august', 'september', 'october', 'november', 'december'];
+              const monthIndex = monthNames.indexOf(dateMatch[1].toLowerCase());
+              if (monthIndex !== -1) {
+                const eventDate = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(dateMatch[2]).padStart(2, '0')}`;
+
+                // Extract time if available
+                const timeMatch = text.match(/(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?)/i);
+                let time = '10:00'; // Default
+                if (timeMatch) {
+                  let hours = parseInt(timeMatch[1]);
+                  if (timeMatch[3].toLowerCase().includes('p') && hours !== 12) hours += 12;
+                  if (timeMatch[3].toLowerCase().includes('a') && hours === 12) hours = 0;
+                  time = `${String(hours).padStart(2, '0')}:${timeMatch[2]}`;
+                }
+
+                events.push({
+                  date: eventDate,
+                  time,
+                  title: `FOMC Member ${member} Speaks`,
+                  impact: member === 'Powell' ? 'high' : 'medium',
+                  category: 'central_bank',
+                  currency: 'USD',
+                  country: 'US',
+                  source: 'fed',
+                  sourceUrl: url,
+                  description: `Federal Reserve official ${member} speaking engagement.`,
+                  typicalReaction: {
+                    hawkish: 'USD bullish, stocks bearish',
+                    dovish: 'USD bearish, stocks bullish'
+                  },
+                });
+              }
+            }
+          }
+        }
+      });
+
+      // Small delay between requests
+      await new Promise(r => setTimeout(r, 200));
+    } catch (error) {
+      console.error(`  Error scraping Fed calendar for ${month} ${year}: ${error.message}`);
+    }
+  }
+
+  // Deduplicate
+  const seen = new Set();
+  return events.filter(e => {
+    const key = `${e.date}-${e.title}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export default scrapeFedSpeakers;

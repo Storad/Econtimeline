@@ -10,10 +10,10 @@
  */
 
 /**
- * Get the next N Wednesdays (Crude Oil) and Thursdays (Natural Gas)
+ * Get the next N Tuesdays (API), Wednesdays (Crude Oil) and Thursdays (Natural Gas)
  */
 function getWeeklyEnergyDates(startDate, weeks) {
-  const dates = { crude: [], natgas: [] };
+  const dates = { api: [], crude: [], natgas: [] };
   const current = new Date(startDate);
 
   // Find next Wednesday
@@ -25,6 +25,11 @@ function getWeeklyEnergyDates(startDate, weeks) {
     const wednesday = new Date(current);
     wednesday.setDate(current.getDate() + i * 7);
     dates.crude.push(wednesday.toISOString().split('T')[0]);
+
+    // Tuesday is day before Wednesday (API report)
+    const tuesday = new Date(wednesday);
+    tuesday.setDate(tuesday.getDate() - 1);
+    dates.api.push(tuesday.toISOString().split('T')[0]);
 
     // Thursday is day after Wednesday
     const thursday = new Date(wednesday);
@@ -80,6 +85,26 @@ export async function scrapeEIA() {
   // Weekly Petroleum Status Report (Crude Oil Inventories)
   // Released every Wednesday at 10:30 AM ET
   const weeklyDates = getWeeklyEnergyDates(threeMonthsAgo, 40); // ~9 months of weeks
+
+  // API Weekly Statistical Bulletin (crude inventory estimate)
+  // Released every Tuesday at 4:30 PM ET (preview of EIA data)
+  weeklyDates.api.forEach(date => {
+    if (isInRange(date)) {
+      events.push({
+        date,
+        time: '16:30',
+        title: 'API Weekly Crude Stock',
+        impact: 'medium',
+        category: 'energy',
+        currency: 'USD',
+        country: 'US',
+        source: 'eia',
+        sourceUrl: 'https://www.api.org/',
+        description: 'American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.',
+        whyItMatters: 'Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.',
+      });
+    }
+  });
 
   weeklyDates.crude.forEach(date => {
     if (isInRange(date)) {
