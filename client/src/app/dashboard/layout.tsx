@@ -46,7 +46,7 @@ const LogoIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
 );
 
 const navItems = [
-  { name: "Timeline", href: "/dashboard", icon: Clock },
+  { name: "Timeline", href: "/dashboard/timeline", icon: Clock },
   { name: "Economic Calendar", href: "/dashboard/calendar", icon: Calendar },
   { name: "Market Breakdown", href: "/dashboard/market", icon: BarChart3 },
 ];
