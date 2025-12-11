@@ -252,7 +252,7 @@ export default function TimelinePage() {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(Date.now());
 
   // Load calendar events
