@@ -46,7 +46,7 @@ const LogoIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
 );
 
 const navItems = [
-  { name: "Timeline", href: "/dashboard/timeline", icon: Clock },
+  { name: "Timeline", href: "/dashboard", icon: Clock },
   { name: "Economic Calendar", href: "/dashboard/calendar", icon: Calendar },
   { name: "Market Breakdown", href: "/dashboard/market", icon: BarChart3 },
 ];
@@ -76,8 +76,9 @@ export default function DashboardLayout({
             {/* Main Navigation */}
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
-                const isActive = pathname === item.href ||
-                  (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                const isActive = item.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname.startsWith(item.href);
                 const Icon = item.icon;
 
                 return (
@@ -122,8 +123,9 @@ export default function DashboardLayout({
           {/* Mobile Navigation */}
           <div className="md:hidden flex items-center gap-1 pb-2 overflow-x-auto">
             {navItems.map((item) => {
-              const isActive = pathname === item.href ||
-                (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              const isActive = item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
               const Icon = item.icon;
 
               return (

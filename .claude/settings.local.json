@@ -27,7 +27,18 @@
       "WebFetch(domain:www.npmjs.com)",
       "Bash(npm search:*)",
       "Bash(npm view:*)",
-      "Bash(node verify-calendar.js:*)"
+      "Bash(node verify-calendar.js:*)",
+      "Bash(findstr:*)",
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:www.tradinghours.com)",
+      "WebFetch(domain:www.nyse.com)",
+      "WebFetch(domain:www.londonstockexchange.com)",
+      "WebFetch(domain:www.jpx.co.jp)",
+      "WebFetch(domain:www.asx.com.au)",
+      "WebFetch(domain:stockanalysis.com)",
+      "WebFetch(domain:www.xtb.com)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
