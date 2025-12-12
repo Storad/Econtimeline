@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-12T17:28:19.671Z",
+  "lastUpdated": "2025-12-12T17:47:00.207Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -47,7 +47,7 @@
       "previous": "10.7",
       "actualDate": "2025-11-01",
       "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.819Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.149Z"
     },
     {
       "date": "2025-09-15",
@@ -130,7 +130,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.929Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.952Z"
     },
     {
       "date": "2025-09-16",
@@ -190,7 +190,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.455Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.678Z"
     },
     {
       "date": "2025-09-16",
@@ -270,7 +270,7 @@
       "previous": "1429K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.988Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.309Z"
     },
     {
       "date": "2025-09-17",
@@ -304,7 +304,7 @@
       "previous": "1362K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.169Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.627Z"
     },
     {
       "date": "2025-09-17",
@@ -463,7 +463,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-09-18",
@@ -667,7 +667,7 @@
       "previous": "1429K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.988Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.309Z"
     },
     {
       "date": "2025-09-24",
@@ -701,7 +701,7 @@
       "previous": "1362K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.169Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.627Z"
     },
     {
       "date": "2025-09-24",
@@ -735,7 +735,7 @@
       "previous": "664K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.380Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.827Z"
     },
     {
       "date": "2025-09-24",
@@ -821,7 +821,7 @@
       "previous": "-0.6%",
       "actualDate": "2025-04-01",
       "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.016Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.777Z"
     },
     {
       "date": "2025-09-25",
@@ -856,7 +856,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2025-09-25",
@@ -890,7 +890,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-09-25",
@@ -977,7 +977,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.856Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.604Z"
     },
     {
       "date": "2025-09-26",
@@ -1012,7 +1012,7 @@
       "previous": "55.1",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.100Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.270Z"
     },
     {
       "date": "2025-09-26",
@@ -1187,7 +1187,7 @@
       "previous": "7.7M",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:14.865Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.906Z"
     },
     {
       "date": "2025-09-30",
@@ -1841,7 +1841,7 @@
       "previous": "10.7",
       "actualDate": "2025-11-01",
       "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.819Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.149Z"
     },
     {
       "date": "2025-10-15",
@@ -2128,7 +2128,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:15.041Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.072Z"
     },
     {
       "date": "2025-10-24",
@@ -2163,7 +2163,7 @@
       "previous": "55.1",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.100Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.270Z"
     },
     {
       "date": "2025-10-24",
@@ -3111,7 +3111,7 @@
       "previous": "10.7",
       "actualDate": "2025-11-01",
       "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.819Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.149Z"
     },
     {
       "date": "2025-11-17",
@@ -3194,7 +3194,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2025-11-18",
@@ -3249,7 +3249,7 @@
       "previous": "-59.3B",
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.571Z"
+      "dataUpdatedAt": "2025-12-12T17:47:00.106Z"
     },
     {
       "date": "2025-11-19",
@@ -3334,7 +3334,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:12.227Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.136Z"
     },
     {
       "date": "2025-11-20",
@@ -3394,7 +3394,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-11-20",
@@ -3455,7 +3455,7 @@
       "previous": "55.1",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.100Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.270Z"
     },
     {
       "date": "2025-11-21",
@@ -3516,7 +3516,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.455Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.678Z"
     },
     {
       "date": "2025-11-24",
@@ -3624,7 +3624,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.929Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.952Z"
     },
     {
       "date": "2025-11-25",
@@ -3658,7 +3658,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.689Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.409Z"
     },
     {
       "date": "2025-11-25",
@@ -3833,7 +3833,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2025-11-26",
@@ -3867,7 +3867,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-11-26",
@@ -4267,7 +4267,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.455Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.678Z"
     },
     {
       "date": "2025-12-03",
@@ -4428,7 +4428,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2025-12-04",
@@ -4462,7 +4462,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-12-04",
@@ -4524,7 +4524,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.856Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.604Z"
     },
     {
       "date": "2025-12-05",
@@ -4633,7 +4633,7 @@
       "previous": "7.7M",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:14.865Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.906Z"
     },
     {
       "date": "2025-12-09",
@@ -4865,7 +4865,7 @@
       "previous": "-59.3B",
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.571Z"
+      "dataUpdatedAt": "2025-12-12T17:47:00.106Z"
     },
     {
       "date": "2025-12-11",
@@ -4899,7 +4899,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-12-11",
@@ -5009,7 +5009,7 @@
       "previous": "10.7",
       "actualDate": "2025-11-01",
       "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.819Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.149Z"
     },
     {
       "date": "2025-12-15",
@@ -5093,7 +5093,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:12.227Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.136Z"
     },
     {
       "date": "2025-12-16",
@@ -5128,7 +5128,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.929Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.952Z"
     },
     {
       "date": "2025-12-16",
@@ -5163,7 +5163,7 @@
       "previous": "1429K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.988Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.309Z"
     },
     {
       "date": "2025-12-16",
@@ -5197,7 +5197,7 @@
       "previous": "1362K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.169Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.627Z"
     },
     {
       "date": "2025-12-16",
@@ -5304,7 +5304,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:15.041Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.072Z"
     },
     {
       "date": "2025-12-18",
@@ -5364,7 +5364,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-12-18",
@@ -5426,7 +5426,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.856Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.604Z"
     },
     {
       "date": "2025-12-19",
@@ -5461,7 +5461,7 @@
       "previous": "55.1",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.100Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.270Z"
     },
     {
       "date": "2025-12-19",
@@ -5569,7 +5569,7 @@
       "previous": "-0.6%",
       "actualDate": "2025-04-01",
       "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.016Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.777Z"
     },
     {
       "date": "2025-12-23",
@@ -5604,7 +5604,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2025-12-23",
@@ -5639,7 +5639,7 @@
       "previous": "1429K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.988Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.309Z"
     },
     {
       "date": "2025-12-23",
@@ -5673,7 +5673,7 @@
       "previous": "1362K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.169Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.627Z"
     },
     {
       "date": "2025-12-23",
@@ -5708,7 +5708,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.455Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.678Z"
     },
     {
       "date": "2025-12-23",
@@ -5742,7 +5742,7 @@
       "previous": "664K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.380Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.827Z"
     },
     {
       "date": "2025-12-23",
@@ -5846,7 +5846,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-12-24",
@@ -6167,7 +6167,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2025-12-31",
@@ -6569,7 +6569,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2026-01-07",
@@ -6629,7 +6629,7 @@
       "previous": "-59.3B",
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.571Z"
+      "dataUpdatedAt": "2025-12-12T17:47:00.106Z"
     },
     {
       "date": "2026-01-08",
@@ -6715,7 +6715,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-01-08",
@@ -6830,7 +6830,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:12.227Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.136Z"
     },
     {
       "date": "2026-01-09",
@@ -6963,7 +6963,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:15.041Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.072Z"
     },
     {
       "date": "2026-01-13",
@@ -7019,7 +7019,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.689Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.409Z"
     },
     {
       "date": "2026-01-14",
@@ -7156,7 +7156,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.929Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.952Z"
     },
     {
       "date": "2026-01-15",
@@ -7216,7 +7216,7 @@
       "previous": "10.7",
       "actualDate": "2025-11-01",
       "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.819Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.149Z"
     },
     {
       "date": "2026-01-15",
@@ -7250,7 +7250,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-01-15",
@@ -7359,7 +7359,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.455Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.678Z"
     },
     {
       "date": "2026-01-19",
@@ -7512,7 +7512,7 @@
       "previous": "-0.6%",
       "actualDate": "2025-04-01",
       "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.016Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.777Z"
     },
     {
       "date": "2026-01-22",
@@ -7546,7 +7546,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-01-22",
@@ -7607,7 +7607,7 @@
       "previous": "55.1",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.100Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.270Z"
     },
     {
       "date": "2026-01-23",
@@ -7790,7 +7790,7 @@
       "previous": "1429K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.988Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.309Z"
     },
     {
       "date": "2026-01-27",
@@ -7824,7 +7824,7 @@
       "previous": "1362K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.169Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.627Z"
     },
     {
       "date": "2026-01-27",
@@ -7880,7 +7880,7 @@
       "previous": "664K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.380Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.827Z"
     },
     {
       "date": "2026-01-27",
@@ -7963,7 +7963,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2026-01-28",
@@ -8096,7 +8096,7 @@
       "previous": "-0.6%",
       "actualDate": "2025-04-01",
       "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.016Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.777Z"
     },
     {
       "date": "2026-01-29",
@@ -8132,7 +8132,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.856Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.604Z"
     },
     {
       "date": "2026-01-29",
@@ -8166,7 +8166,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-01-29",
@@ -8248,7 +8248,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.689Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.409Z"
     },
     {
       "date": "2026-01-30",
@@ -8478,7 +8478,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2026-02-04",
@@ -8613,7 +8613,7 @@
       "previous": "-59.3B",
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.571Z"
+      "dataUpdatedAt": "2025-12-12T17:47:00.106Z"
     },
     {
       "date": "2026-02-05",
@@ -8673,7 +8673,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-02-05",
@@ -8735,7 +8735,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:12.227Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.136Z"
     },
     {
       "date": "2026-02-06",
@@ -8944,7 +8944,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:15.041Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.072Z"
     },
     {
       "date": "2026-02-11",
@@ -9107,7 +9107,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.689Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.409Z"
     },
     {
       "date": "2026-02-12",
@@ -9141,7 +9141,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-02-12",
@@ -9298,7 +9298,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.929Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.952Z"
     },
     {
       "date": "2026-02-17",
@@ -9332,7 +9332,7 @@
       "previous": "10.7",
       "actualDate": "2025-11-01",
       "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.819Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.149Z"
     },
     {
       "date": "2026-02-17",
@@ -9437,7 +9437,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.455Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.678Z"
     },
     {
       "date": "2026-02-18",
@@ -9546,7 +9546,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-02-19",
@@ -9607,7 +9607,7 @@
       "previous": "55.1",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.100Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.270Z"
     },
     {
       "date": "2026-02-20",
@@ -9833,7 +9833,7 @@
       "previous": "1429K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.988Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.309Z"
     },
     {
       "date": "2026-02-25",
@@ -9867,7 +9867,7 @@
       "previous": "1362K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.169Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.627Z"
     },
     {
       "date": "2026-02-25",
@@ -9901,7 +9901,7 @@
       "previous": "664K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.380Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.827Z"
     },
     {
       "date": "2026-02-25",
@@ -9987,7 +9987,7 @@
       "previous": "-0.6%",
       "actualDate": "2025-04-01",
       "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.016Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.777Z"
     },
     {
       "date": "2026-02-26",
@@ -10023,7 +10023,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.856Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.604Z"
     },
     {
       "date": "2026-02-26",
@@ -10058,7 +10058,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2026-02-26",
@@ -10092,7 +10092,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-02-26",
@@ -10520,7 +10520,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2026-03-05",
@@ -10553,7 +10553,7 @@
       "previous": "-59.3B",
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.571Z"
+      "dataUpdatedAt": "2025-12-12T17:47:00.106Z"
     },
     {
       "date": "2026-03-05",
@@ -10613,7 +10613,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-03-05",
@@ -10675,7 +10675,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:12.227Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.136Z"
     },
     {
       "date": "2026-03-06",
@@ -10807,7 +10807,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:15.041Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.072Z"
     },
     {
       "date": "2026-03-11",
@@ -10944,7 +10944,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.689Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.409Z"
     },
     {
       "date": "2026-03-12",
@@ -10978,7 +10978,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-03-12",
@@ -11065,7 +11065,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.929Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.952Z"
     },
     {
       "date": "2026-03-16",
@@ -11099,7 +11099,7 @@
       "previous": "10.7",
       "actualDate": "2025-11-01",
       "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.819Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.149Z"
     },
     {
       "date": "2026-03-16",
@@ -11134,7 +11134,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.455Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.678Z"
     },
     {
       "date": "2026-03-16",
@@ -11411,7 +11411,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-03-19",
@@ -11546,7 +11546,7 @@
       "previous": "1429K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.988Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.309Z"
     },
     {
       "date": "2026-03-24",
@@ -11580,7 +11580,7 @@
       "previous": "1362K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.169Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.627Z"
     },
     {
       "date": "2026-03-24",
@@ -11614,7 +11614,7 @@
       "previous": "664K",
       "actualDate": "2025-08-01",
       "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.380Z"
+      "dataUpdatedAt": "2025-12-12T17:46:59.827Z"
     },
     {
       "date": "2026-03-24",
@@ -11718,7 +11718,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2026-03-25",
@@ -11829,7 +11829,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-03-26",
@@ -11935,7 +11935,7 @@
       "previous": "-0.6%",
       "actualDate": "2025-04-01",
       "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-12T17:28:17.016Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.777Z"
     },
     {
       "date": "2026-03-27",
@@ -11971,7 +11971,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:16.856Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.604Z"
     },
     {
       "date": "2026-03-27",
@@ -12006,7 +12006,7 @@
       "previous": "55.1",
       "actualDate": "2025-10-01",
       "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.100Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.270Z"
     },
     {
       "date": "2026-03-30",
@@ -12311,7 +12311,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:18.633Z"
+      "dataUpdatedAt": "2025-12-12T17:46:58.848Z"
     },
     {
       "date": "2026-04-02",
@@ -12344,7 +12344,7 @@
       "previous": "-59.3B",
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:19.571Z"
+      "dataUpdatedAt": "2025-12-12T17:47:00.106Z"
     },
     {
       "date": "2026-04-02",
@@ -12378,7 +12378,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-04-02",
@@ -12440,7 +12440,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:12.227Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.136Z"
     },
     {
       "date": "2026-04-03",
@@ -12743,7 +12743,7 @@
       "previous": "192000K",
       "actualDate": "2025-12-06",
       "previousDate": "2025-11-29",
-      "dataUpdatedAt": "2025-12-12T17:28:13.833Z"
+      "dataUpdatedAt": "2025-12-12T17:46:56.747Z"
     },
     {
       "date": "2026-04-09",
@@ -12830,7 +12830,7 @@
       "previous": null,
       "actualDate": "2025-09-01",
       "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-12T17:28:15.041Z"
+      "dataUpdatedAt": "2025-12-12T17:46:57.072Z"
     },
     {
       "date": "2026-04-10",
@@ -14788,5 +14788,5 @@
       "previous": null
     }
   ],
-  "dataRefreshedAt": "2025-12-12T17:28:19.671Z"
+  "dataRefreshedAt": "2025-12-12T17:47:00.207Z"
 }
