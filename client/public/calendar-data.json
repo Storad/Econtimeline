@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-13T11:16:28.434Z",
+  "lastUpdated": "2025-12-14T11:17:31.615Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -12573,6 +12573,37 @@
         "US Treasury yields"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-14",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "+0.1%",
+      "priorValue": "-0.1%",
+      "latestDate": "2025-09-01",
+      "priorDate": "2025-08-01",
+      "fredSeriesId": "PPIACO",
       "actual": null,
       "previous": null
     },
