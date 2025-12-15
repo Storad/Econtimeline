@@ -1,9 +1,10 @@
 "use client";
 
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Bell, Settings, Calendar, Clock, BarChart3 } from "lucide-react";
+import { Settings, Calendar, Clock, BarChart3, Lightbulb } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "@/components/Strategies/NotificationBell";
 
 // Logo Icon Component
 const LogoIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
@@ -48,6 +49,7 @@ const LogoIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
 const navItems = [
   { name: "Timeline", href: "/dashboard", icon: Clock },
   { name: "Economic Calendar", href: "/dashboard/calendar", icon: Calendar },
+  { name: "Strategies", href: "/dashboard/strategies", icon: Lightbulb },
   { name: "Market Breakdown", href: "/dashboard/market", icon: BarChart3 },
 ];
 
@@ -100,9 +102,7 @@ export default function DashboardLayout({
 
             {/* Right side actions */}
             <div className="flex items-center gap-4">
-              <button className="p-2 rounded-lg hover:bg-card-hover transition-colors text-muted hover:text-foreground">
-                <Bell className="w-5 h-5" />
-              </button>
+              <NotificationBell />
               <button className="p-2 rounded-lg hover:bg-card-hover transition-colors text-muted hover:text-foreground">
                 <Settings className="w-5 h-5" />
               </button>

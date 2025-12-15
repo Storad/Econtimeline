@@ -10,6 +10,8 @@ import {
   Bell,
   Plus,
   Settings,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
 
 // ============================================
@@ -33,6 +35,7 @@ interface CalendarEvent {
   title: string;
   impact: "high" | "medium" | "low";
   category: string;
+  currency?: string;
   actual?: string;
   previous?: string;
   forecast?: string;
@@ -133,6 +136,22 @@ const IMPACT_COLORS = {
   medium: "#F59E0B",
   low: "#10B981",
 };
+
+// Event categories for filtering
+const EVENT_CATEGORIES = [
+  { value: "All", label: "All Categories" },
+  { value: "central_bank", label: "Central Bank" },
+  { value: "employment", label: "Employment" },
+  { value: "inflation", label: "Inflation" },
+  { value: "growth", label: "Growth" },
+  { value: "consumer", label: "Consumer" },
+  { value: "housing", label: "Housing" },
+  { value: "manufacturing", label: "Manufacturing" },
+  { value: "trade", label: "Trade" },
+];
+
+// Currency options for filtering
+const CURRENCY_OPTIONS = ["All", "USD"];
 
 // ============================================
 // HELPER FUNCTIONS
@@ -375,12 +394,25 @@ function getSessionDateTime(
   return new Date(now.getTime() + hoursFromNow * 60 * 60 * 1000);
 }
 
+// Check if it's a weekend (Saturday or Sunday) in a specific timezone
+function isWeekendInTimezone(timezone: string): boolean {
+  const now = new Date();
+  // Get day of week: 0 = Sunday, 6 = Saturday
+  const dayNum = new Date(now.toLocaleString("en-US", { timeZone: timezone })).getDay();
+  return dayNum === 0 || dayNum === 6;
+}
+
 // Check if a session is currently active
 function isSessionActiveNow(
   session: MarketSession,
   currentTime: Date,
   type: "pre" | "regular" | "post"
 ): boolean {
+  // Markets are closed on weekends
+  if (isWeekendInTimezone(session.timezone)) {
+    return false;
+  }
+
   let timeRange;
   if (type === "pre") timeRange = session.preMarket;
   else if (type === "post") timeRange = session.postMarket;
@@ -458,6 +490,11 @@ function getTimeRemainingNow(
   return `${hours}h ${minutes}m left`;
 }
 
+// Get day of week in a timezone (0 = Sunday, 6 = Saturday)
+function getDayOfWeekInTimezone(date: Date, timezone: string): number {
+  return new Date(date.toLocaleString("en-US", { timeZone: timezone })).getDay();
+}
+
 // Get time until session opens
 function getTimeUntilOpenNow(
   session: MarketSession,
@@ -467,16 +504,23 @@ function getTimeUntilOpenNow(
 
   const tzDateStr = currentTime.toLocaleDateString("en-CA", { timeZone: session.timezone });
   const [year, month, day] = tzDateStr.split("-").map(Number);
-  const baseDate = new Date(year, month - 1, day);
+  let baseDate = new Date(year, month - 1, day);
 
   let sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone);
 
   // If session already passed today, look at tomorrow
   const sessionEnd = getSessionDateTime(baseDate, timeRange.end, session.timezone);
   if (currentTime >= sessionEnd) {
-    const tomorrow = new Date(baseDate);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    sessionStart = getSessionDateTime(tomorrow, timeRange.start, session.timezone);
+    baseDate = new Date(baseDate.getTime() + 24 * 60 * 60 * 1000);
+    sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone);
+  }
+
+  // Skip weekends - find the next trading day (max 7 iterations for safety)
+  for (let i = 0; i < 7; i++) {
+    const dayOfWeek = getDayOfWeekInTimezone(sessionStart, session.timezone);
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) break; // Not a weekend
+    baseDate = new Date(baseDate.getTime() + 24 * 60 * 60 * 1000);
+    sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone);
   }
 
   const until = sessionStart.getTime() - currentTime.getTime();
@@ -485,6 +529,14 @@ function getTimeUntilOpenNow(
 
   const hours = Math.floor(until / (1000 * 60 * 60));
   const minutes = Math.floor((until % (1000 * 60 * 60)) / (1000 * 60));
+
+  // Show days if more than 24 hours
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    if (remainingHours === 0) return `Opens in ${days}d`;
+    return `Opens in ${days}d ${remainingHours}h`;
+  }
 
   if (hours === 0) return `Opens in ${minutes}m`;
   if (minutes === 0) return `Opens in ${hours}h`;
@@ -516,6 +568,159 @@ const DAY_OPTIONS = [
   { label: "Fri", value: 5 },
   { label: "Sat", value: 6 },
 ];
+
+// Time picker helpers
+const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1); // 1-12
+const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5); // 0, 5, 10, ... 55
+
+function parse24hTo12h(time24: string): { hour: number; minute: number; period: "AM" | "PM" } {
+  const [h, m] = time24.split(":").map(Number);
+  const period: "AM" | "PM" = h >= 12 ? "PM" : "AM";
+  const hour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return { hour, minute: m, period };
+}
+
+function format12hTo24h(hour: number, minute: number, period: "AM" | "PM"): string {
+  let h = hour;
+  if (period === "AM" && hour === 12) h = 0;
+  else if (period === "PM" && hour !== 12) h = hour + 12;
+  return `${h.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+}
+
+// Parse time string to 24h format
+function parseTimeInput(input: string): string | null {
+  const cleaned = input.trim().toLowerCase();
+  if (!cleaned) return null;
+
+  // Try various formats
+  // Format: "9:30 am", "9:30am", "09:30 AM"
+  const match12h = cleaned.match(/^(\d{1,2}):?(\d{2})?\s*(am|pm|a|p)?$/);
+  if (match12h) {
+    let hour = parseInt(match12h[1], 10);
+    const minute = match12h[2] ? parseInt(match12h[2], 10) : 0;
+    const period = match12h[3];
+
+    if (minute > 59) return null;
+
+    // If period specified, convert to 24h
+    if (period) {
+      if (hour > 12 || hour < 1) return null;
+      if ((period === "pm" || period === "p") && hour !== 12) hour += 12;
+      if ((period === "am" || period === "a") && hour === 12) hour = 0;
+    } else {
+      // No period - assume 24h format or make smart guess
+      if (hour > 23) return null;
+    }
+
+    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+  }
+
+  // Format: "930", "0930", "1430"
+  const matchCompact = cleaned.match(/^(\d{3,4})\s*(am|pm|a|p)?$/);
+  if (matchCompact) {
+    const num = matchCompact[1];
+    const period = matchCompact[2];
+    let hour = parseInt(num.length === 3 ? num[0] : num.slice(0, 2), 10);
+    const minute = parseInt(num.length === 3 ? num.slice(1) : num.slice(2), 10);
+
+    if (minute > 59) return null;
+
+    if (period) {
+      if (hour > 12 || hour < 1) return null;
+      if ((period === "pm" || period === "p") && hour !== 12) hour += 12;
+      if ((period === "am" || period === "a") && hour === 12) hour = 0;
+    } else if (hour > 23) {
+      return null;
+    }
+
+    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+  }
+
+  return null;
+}
+
+// Format 24h time to display string
+function formatTimeDisplay(time24: string): string {
+  const parsed = parse24hTo12h(time24);
+  return `${parsed.hour}:${parsed.minute.toString().padStart(2, "0")} ${parsed.period}`;
+}
+
+// Custom TimePicker Component - Simple Text Input
+function TimePicker({
+  value,
+  onChange,
+  label,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+}) {
+  const [inputValue, setInputValue] = useState(formatTimeDisplay(value || "12:00"));
+  const [isFocused, setIsFocused] = useState(false);
+  const [isValid, setIsValid] = useState(true);
+
+  // Update display when value prop changes
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(formatTimeDisplay(value || "12:00"));
+    }
+  }, [value, isFocused]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+
+    // Try to parse and update parent
+    const parsed = parseTimeInput(newValue);
+    if (parsed) {
+      setIsValid(true);
+      onChange(parsed);
+    } else {
+      setIsValid(newValue === "" || newValue.length < 3);
+    }
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    // On blur, format the display nicely if valid
+    const parsed = parseTimeInput(inputValue);
+    if (parsed) {
+      setInputValue(formatTimeDisplay(parsed));
+      setIsValid(true);
+    } else {
+      // Reset to last valid value
+      setInputValue(formatTimeDisplay(value || "12:00"));
+      setIsValid(true);
+    }
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-muted mb-2">{label}</label>
+      <div className="relative">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          placeholder="9:30 AM"
+          className={`w-full px-3 py-2.5 rounded-lg bg-background border text-sm font-medium focus:ring-1 outline-none transition-colors ${
+            isValid
+              ? "border-border focus:border-accent focus:ring-accent"
+              : "border-red-500 focus:border-red-500 focus:ring-red-500"
+          }`}
+        />
+        <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+      </div>
+      <p className="text-[10px] text-muted mt-1">e.g. 9:30 AM, 2:00 PM, 14:30</p>
+    </div>
+  );
+}
 
 // ============================================
 // MAIN COMPONENT
@@ -551,6 +756,16 @@ export default function DashboardPage() {
   // Expanded card state
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
+  // Economic Events Filter State
+  const [eventsFilterExpanded, setEventsFilterExpanded] = useState(false);
+  const [filterImpacts, setFilterImpacts] = useState<Set<string>>(new Set(["high", "medium", "low"]));
+  const [filterCategory, setFilterCategory] = useState("All");
+  const [filterCurrency, setFilterCurrency] = useState("All");
+  const [showPastEvents, setShowPastEvents] = useState(true);
+
+  // Custom Sessions & Alerts Card State
+  const [customCardExpanded, setCustomCardExpanded] = useState(false);
+
   // Form state
   const [formName, setFormName] = useState("");
   const [formStartTime, setFormStartTime] = useState("09:00");
@@ -563,7 +778,6 @@ export default function DashboardPage() {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
 
   // Initialize on client only to avoid hydration mismatch
@@ -619,25 +833,21 @@ export default function DashboardPage() {
     }
   }, [customAlerts]);
 
-  // Real-time clock update (1 second = 1 second)
+  // Real-time clock update - use setInterval instead of requestAnimationFrame
+  // to avoid 60fps re-renders which cause slow page transitions
   useEffect(() => {
     if (!isMounted) return;
 
-    const updateTime = () => {
-      const now = Date.now();
-      lastTimeRef.current = now;
+    // Update immediately
+    setCurrentTime(new Date());
 
-      setCurrentTime(new Date(now));
-
-      animationRef.current = requestAnimationFrame(updateTime);
-    };
-
-    animationRef.current = requestAnimationFrame(updateTime);
+    // Then update every second
+    const intervalId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      clearInterval(intervalId);
     };
   }, [isMounted]);
 
@@ -856,10 +1066,36 @@ export default function DashboardPage() {
   // Get current hour in UTC for session calculations
   const currentHourUTC = currentTime.getUTCHours() + currentTime.getUTCMinutes() / 60;
 
-  // Filter events in visible range
-  const visibleEvents = events.filter((event) => {
+  // Filter events by visibility and user-selected filters
+  const filteredVisibleEvents = events.filter((event) => {
     const eventDateTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
-    return eventDateTime >= visibleStartTime && eventDateTime <= visibleEndTime;
+
+    // Time window check
+    if (eventDateTime < visibleStartTime || eventDateTime > visibleEndTime) {
+      return false;
+    }
+
+    // Impact filter
+    if (!filterImpacts.has(event.impact)) {
+      return false;
+    }
+
+    // Category filter
+    if (filterCategory !== "All" && event.category !== filterCategory) {
+      return false;
+    }
+
+    // Currency filter
+    if (filterCurrency !== "All" && event.currency !== filterCurrency) {
+      return false;
+    }
+
+    // Past events filter
+    if (!showPastEvents && eventDateTime < currentTime) {
+      return false;
+    }
+
+    return true;
   });
 
   // ============================================
@@ -945,7 +1181,7 @@ export default function DashboardPage() {
       {/* Main Timeline Container */}
       <div
         ref={timelineRef}
-        className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing"
+        className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing border-2 border-border/50 rounded-lg m-2"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -976,51 +1212,62 @@ export default function DashboardPage() {
           })}
         </div>
 
-        {/* Time Scale / Ruler */}
-        <div className="absolute top-0 left-0 right-0 h-10 border-b border-border bg-card/80 backdrop-blur-sm flex items-end z-10">
-          {Array.from({ length: TOTAL_HOURS * 2 + 2 }).map((_, i) => {
-            const minuteOffset = (i - HOURS_IN_PAST * 2) * 30; // Every 30 minutes
-            const lineTime = new Date(currentTime.getTime() + minuteOffset * 60 * 1000);
-            const xPos = getTimePosition(lineTime, currentTime, containerWidth) + scrollOffset;
-            const isHourLine = minuteOffset % 60 === 0;
-
-            if (xPos < -50 || xPos > containerWidth + 50) return null;
-
-            return (
-              <div
-                key={i}
-                className="absolute flex flex-col items-center"
-                style={{ left: xPos, transform: "translateX(-50%)" }}
-              >
-                {isHourLine ? (
-                  <>
-                    <span className="text-xs text-foreground font-mono font-medium mb-0.5">
-                      {lineTime.toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}
-                    </span>
-                    <div className="w-0.5 h-3 bg-border rounded-full" />
-                  </>
-                ) : (
-                  <>
-                    <span className="text-[10px] text-muted font-mono">
-                      {lineTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
-                    </span>
-                    <div className="w-px h-2 bg-border/50" />
-                  </>
-                )}
-              </div>
-            );
-          })}
+        {/* Sidebar Header Label */}
+        <div className="absolute top-0 left-0 w-60 h-10 border-b border-r border-border bg-card/80 backdrop-blur-sm flex items-center justify-center z-10">
+          <span className="text-xs font-semibold text-muted uppercase tracking-wider">Market Overview</span>
         </div>
 
-        {/* Top Lane - Market Sessions (Enhanced) */}
-        <div className="absolute top-12 left-0 right-0 h-[380px] border-b border-border bg-card/20">
-          <div className="absolute left-2 top-2 text-xs text-muted font-medium uppercase tracking-wider">
-            Market Sessions
-          </div>
+        {/* Time Scale / Ruler - starts after sidebar */}
+        <div className="absolute top-0 left-60 right-0 h-10 border-b border-border bg-card/80 backdrop-blur-sm flex items-end z-10">
+          {(() => {
+            const timelineWidth = containerWidth - 240; // Subtract sidebar width
+            const markers: React.ReactNode[] = [];
 
-          {/* Left sidebar with market info cards - collapsible */}
-          <div className="absolute left-2 top-[24px] w-56 flex flex-col gap-2 max-h-[350px] overflow-y-auto">
-            {MARKET_SESSIONS.map((session) => {
+            // Start from HOURS_IN_PAST hours ago, snapped to the hour
+            const startTime = new Date(currentTime);
+            startTime.setMinutes(0, 0, 0);
+            startTime.setHours(startTime.getHours() - HOURS_IN_PAST);
+
+            // Generate markers for each 30-minute increment
+            for (let i = 0; i <= TOTAL_HOURS * 2; i++) {
+              const markerTime = new Date(startTime.getTime() + i * 30 * 60 * 1000);
+              const xPos = getTimePosition(markerTime, currentTime, timelineWidth) + scrollOffset;
+              const isHourLine = markerTime.getMinutes() === 0;
+
+              if (xPos < -50 || xPos > timelineWidth + 50) continue;
+
+              markers.push(
+                <div
+                  key={markerTime.getTime()}
+                  className="absolute flex flex-col items-center"
+                  style={{ left: xPos, transform: "translateX(-50%)" }}
+                >
+                  {isHourLine ? (
+                    <>
+                      <span className="text-xs text-foreground font-mono font-medium mb-0.5">
+                        {markerTime.toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}
+                      </span>
+                      <div className="w-0.5 h-3 bg-border rounded-full" />
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[10px] text-muted font-mono">
+                        {markerTime.getHours() % 12 || 12}:30 {markerTime.getHours() >= 12 ? "PM" : "AM"}
+                      </span>
+                      <div className="w-px h-2 bg-border/50" />
+                    </>
+                  )}
+                </div>
+              );
+            }
+            return markers;
+          })()}
+        </div>
+
+        {/* Unified Left Sidebar - Below Time Scale */}
+        <div className="absolute top-10 left-0 bottom-0 w-60 bg-card/20 border-r border-border/30 flex flex-col p-1.5 gap-1 overflow-hidden">
+          {/* All cards in single flex container - each gets equal space */}
+          {MARKET_SESSIONS.map((session) => {
               const isPreActive = isSessionActiveNow(session, currentTime, "pre");
               const isRegularActive = isSessionActiveNow(session, currentTime, "regular");
               const isPostActive = isSessionActiveNow(session, currentTime, "post");
@@ -1034,16 +1281,19 @@ export default function DashboardPage() {
               return (
                 <div
                   key={`info-${session.id}`}
-                  className="rounded-xl cursor-pointer transition-all duration-200 overflow-hidden"
+                  className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${isExpanded ? 'relative z-50' : ''}`}
                   style={{
-                    height: isExpanded ? "auto" : 78,
+                    flex: '1 1 0',
+                    minHeight: 0,
                     background: isAnyActive
                       ? `linear-gradient(180deg, ${session.color}30 0%, ${session.color}15 100%)`
                       : `linear-gradient(180deg, ${session.color}20 0%, ${session.color}10 100%)`,
                     border: `2px solid ${session.color}${isAnyActive ? "60" : "35"}`,
-                    boxShadow: isAnyActive
-                      ? `0 8px 32px ${session.color}35, 0 0 0 1px ${session.color}20, inset 0 2px 0 ${session.color}20`
-                      : `0 2px 8px ${session.color}15, inset 0 1px 0 ${session.color}15`,
+                    boxShadow: isExpanded
+                      ? `0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px ${session.color}40`
+                      : isAnyActive
+                        ? `0 8px 32px ${session.color}35, 0 0 0 1px ${session.color}20, inset 0 2px 0 ${session.color}20`
+                        : `0 2px 8px ${session.color}15, inset 0 1px 0 ${session.color}15`,
                   }}
                   onClick={() => setExpandedCard(isExpanded ? null : session.id)}
                 >
@@ -1182,12 +1432,251 @@ export default function DashboardPage() {
                 </div>
               );
             })}
+
+          {/* Economic Events Filter Card */}
+          <div
+            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${eventsFilterExpanded ? 'relative z-50' : ''}`}
+            style={{
+              flex: '1 1 0',
+              minHeight: 0,
+              background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%)',
+              border: '2px solid rgba(239, 68, 68, 0.35)',
+              boxShadow: eventsFilterExpanded
+                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(239, 68, 68, 0.4)'
+                  : '0 2px 8px rgba(239, 68, 68, 0.15)',
+              }}
+              onClick={() => setEventsFilterExpanded(!eventsFilterExpanded)}
+            >
+              {/* Header */}
+              <div className="px-3 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-red-400" />
+                  <span className="text-sm font-semibold text-red-400">Filters</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted">
+                    {filteredVisibleEvents.length} events
+                  </span>
+                  <ChevronDown className={`w-3 h-3 transition-transform text-red-400/60 ${eventsFilterExpanded ? "rotate-180" : ""}`} />
+                </div>
+              </div>
+
+              {/* Quick filter summary when collapsed */}
+              {!eventsFilterExpanded && (
+                <div className="px-3 pb-2">
+                  <div className="flex gap-1.5 items-center">
+                    {filterImpacts.has("high") && <span className="w-2 h-2 rounded-full bg-red-500" title="High" />}
+                    {filterImpacts.has("medium") && <span className="w-2 h-2 rounded-full bg-yellow-500" title="Medium" />}
+                    {filterImpacts.has("low") && <span className="w-2 h-2 rounded-full bg-emerald-500" title="Low" />}
+                    {filterCategory !== "All" && (
+                      <span className="text-[9px] text-muted ml-1">{filterCategory}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Expanded filter controls */}
+              {eventsFilterExpanded && (
+                <div className="px-3 pb-3 space-y-3">
+                  {/* Impact Level Multi-select */}
+                  <div>
+                    <label className="block text-[10px] text-white/70 mb-1.5">Impact Level</label>
+                    <div className="flex gap-1">
+                      {(["high", "medium", "low"] as const).map((impact) => {
+                        const isSelected = filterImpacts.has(impact);
+                        const colors = { high: "#EF4444", medium: "#F59E0B", low: "#10B981" };
+                        return (
+                          <button
+                            key={impact}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newSet = new Set(filterImpacts);
+                              if (isSelected) newSet.delete(impact);
+                              else newSet.add(impact);
+                              setFilterImpacts(newSet);
+                            }}
+                            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded border transition-colors ${
+                              isSelected
+                                ? "bg-white/10 border-white/30"
+                                : "bg-transparent border-white/10 opacity-40"
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors[impact] }} />
+                            {impact.charAt(0).toUpperCase() + impact.slice(1)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Category Dropdown */}
+                  <div>
+                    <label className="block text-[10px] text-white/70 mb-1.5">Category</label>
+                    <select
+                      value={filterCategory}
+                      onChange={(e) => { e.stopPropagation(); setFilterCategory(e.target.value); }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full px-2 py-1.5 text-[11px] bg-black/30 border border-white/20 rounded text-white appearance-none cursor-pointer"
+                    >
+                      {EVENT_CATEGORIES.map(cat => (
+                        <option key={cat.value} value={cat.value} className="bg-gray-900">{cat.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Currency Dropdown */}
+                  <div>
+                    <label className="block text-[10px] text-white/70 mb-1.5">Currency</label>
+                    <select
+                      value={filterCurrency}
+                      onChange={(e) => { e.stopPropagation(); setFilterCurrency(e.target.value); }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full px-2 py-1.5 text-[11px] bg-black/30 border border-white/20 rounded text-white appearance-none cursor-pointer"
+                    >
+                      {CURRENCY_OPTIONS.map(curr => (
+                        <option key={curr} value={curr} className="bg-gray-900">{curr}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Show Past Events Toggle */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowPastEvents(!showPastEvents); }}
+                    className={`w-full flex items-center justify-between px-2 py-1.5 rounded border transition-colors ${
+                      showPastEvents ? "bg-white/10 border-white/30" : "bg-transparent border-white/10"
+                    }`}
+                  >
+                    <span className="text-[10px] text-white/80">Show Past Events</span>
+                    <div className={`w-8 h-4 rounded-full transition-colors relative ${showPastEvents ? "bg-red-400" : "bg-gray-600"}`}>
+                      <div className={`w-3 h-3 rounded-full bg-white shadow absolute top-0.5 transition-all ${showPastEvents ? "left-[18px]" : "left-0.5"}`} />
+                    </div>
+                  </button>
+
+                  {/* Reset Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFilterImpacts(new Set(["high", "medium", "low"]));
+                      setFilterCategory("All");
+                      setFilterCurrency("All");
+                      setShowPastEvents(true);
+                    }}
+                    className="w-full text-[10px] text-red-400 hover:text-red-300 py-1 border border-red-400/30 rounded hover:bg-red-400/10 transition-colors"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              )}
           </div>
 
-          {/* Session bars area - to the right of the info cards */}
-          {MARKET_SESSIONS.map((session, sessionIndex) => {
-            const rowHeight = 86; // Height per row for h-[380px] section
-            const yPos = 24 + sessionIndex * rowHeight;
+          {/* Custom Sessions & Alerts Card */}
+          <div
+            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${customCardExpanded ? 'relative z-50' : ''}`}
+            style={{
+              flex: '1 1 0',
+              minHeight: 0,
+              background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%)',
+              border: '2px solid rgba(59, 130, 246, 0.35)',
+              boxShadow: customCardExpanded
+                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(59, 130, 246, 0.4)'
+                  : '0 2px 8px rgba(59, 130, 246, 0.15)',
+              }}
+              onClick={() => setCustomCardExpanded(!customCardExpanded)}
+            >
+              {/* Header */}
+              <div className="px-3 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-semibold text-blue-400">Custom</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted">
+                    {customSessions.length + customAlerts.length} items
+                  </span>
+                  <ChevronDown className={`w-3 h-3 transition-transform text-blue-400/60 ${customCardExpanded ? "rotate-180" : ""}`} />
+                </div>
+              </div>
+
+              {/* Action buttons - always visible */}
+              <div className="px-3 pb-2 flex gap-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); openNewSessionModal(); }}
+                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  Session
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); openNewAlertModal(); }}
+                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 transition-colors"
+                >
+                  <Bell className="w-3 h-3" />
+                  Alert
+                </button>
+              </div>
+
+              {/* Expanded list of custom items */}
+              {customCardExpanded && (
+                <div className="px-3 pb-3 space-y-2 max-h-[200px] overflow-y-auto">
+                  {/* Sessions list */}
+                  {customSessions.length > 0 && (
+                    <div>
+                      <label className="block text-[10px] text-white/70 mb-1.5">Sessions</label>
+                      <div className="space-y-1">
+                        {customSessions.map((session) => (
+                          <button
+                            key={session.id}
+                            onClick={(e) => { e.stopPropagation(); editSession(session); }}
+                            className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-white/10 hover:bg-white/10 transition-colors text-left"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: session.color }} />
+                              <span className="text-[11px] text-white/90 truncate max-w-[100px]">{session.name}</span>
+                            </div>
+                            <span className="text-[9px] text-white/50 font-mono">{session.startTime}-{session.endTime}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Alerts list */}
+                  {customAlerts.length > 0 && (
+                    <div>
+                      <label className="block text-[10px] text-white/70 mb-1.5">Alerts</label>
+                      <div className="space-y-1">
+                        {customAlerts.map((alert) => (
+                          <button
+                            key={alert.id}
+                            onClick={(e) => { e.stopPropagation(); editAlert(alert); }}
+                            className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-orange-500/20 hover:bg-orange-500/10 transition-colors text-left"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Bell className="w-3 h-3 text-orange-400" />
+                              <span className="text-[11px] text-white/90 truncate max-w-[100px]">{alert.name}</span>
+                            </div>
+                            <span className="text-[9px] text-orange-400/70 font-mono">{alert.time}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty state in expanded view */}
+                  {customSessions.length === 0 && customAlerts.length === 0 && (
+                    <div className="text-center py-3">
+                      <span className="text-[10px] text-white/50">No custom items yet</span>
+                    </div>
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+
+        {/* Unified Right Timeline Area - Below Time Scale */}
+        <div className="absolute top-10 left-60 right-0 bottom-0 flex flex-col">
+          {/* Each market session gets its own lane */}
+          {MARKET_SESSIONS.map((session) => {
             const isPreActive = isSessionActiveNow(session, currentTime, "pre");
             const isRegularActive = isSessionActiveNow(session, currentTime, "regular");
             const isPostActive = isSessionActiveNow(session, currentTime, "post");
@@ -1195,15 +1684,42 @@ export default function DashboardPage() {
             return (
               <div
                 key={session.id}
-                className="absolute right-0"
-                style={{ top: yPos, left: 232, height: rowHeight - 8 }}
+                className="flex-1 relative min-h-0 border-b border-border/20"
               >
 
                 {/* Session Bars - render for visible time range */}
                 {(() => {
                   const elements: React.ReactNode[] = [];
-                  const barHeight = 78;
-                  const sidebarWidth = 232; // Width of the left sidebar (w-56 + padding)
+                  const timelineWidth = containerWidth - 240; // Timeline area width (minus sidebar)
+
+                  // Check if today is a weekend in this market's timezone
+                  const todayIsWeekend = isWeekendInTimezone(session.timezone);
+
+                  // Show "WEEKEND CLOSED" indicator if today is Saturday or Sunday
+                  if (todayIsWeekend) {
+                    return (
+                      <div
+                        key={`${session.id}-weekend-closed`}
+                        className="absolute rounded flex items-center justify-center"
+                        style={{
+                          left: 16,
+                          right: 16,
+                          height: "calc(100% - 8px)",
+                          top: 4,
+                          background: `linear-gradient(90deg, ${session.color}08 0%, transparent 50%, ${session.color}08 100%)`,
+                          borderTop: `1px dashed ${session.color}20`,
+                          borderBottom: `1px dashed ${session.color}20`,
+                        }}
+                      >
+                        <span
+                          className="text-[10px] font-medium tracking-widest uppercase"
+                          style={{ color: `${session.color}60` }}
+                        >
+                          Weekend
+                        </span>
+                      </div>
+                    );
+                  }
 
                   // Get the date in the session's timezone for today, yesterday, and tomorrow
                   for (let dayOffset = -1; dayOffset <= 1; dayOffset++) {
@@ -1211,17 +1727,21 @@ export default function DashboardPage() {
                     const [year, month, day] = tzDateStr.split("-").map(Number);
                     const baseDate = new Date(year, month - 1, day + dayOffset);
 
+                    // Skip weekend days
+                    const dayOfWeek = getDayOfWeekInTimezone(baseDate, session.timezone);
+                    if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
                     // Pre-market (US only)
                     if (session.preMarket) {
                       const preStart = getSessionDateTime(baseDate, session.preMarket.start, session.timezone);
                       const preEnd = getSessionDateTime(baseDate, session.preMarket.end, session.timezone);
 
-                      const preStartX = getTimePosition(preStart, currentTime, containerWidth) + scrollOffset;
-                      const preEndX = getTimePosition(preEnd, currentTime, containerWidth) + scrollOffset;
+                      const preStartX = getTimePosition(preStart, currentTime, timelineWidth) + scrollOffset;
+                      const preEndX = getTimePosition(preEnd, currentTime, timelineWidth) + scrollOffset;
 
-                      // Clip to visible area (accounting for sidebar)
-                      const clippedStartX = Math.max(sidebarWidth, preStartX);
-                      const clippedEndX = Math.min(containerWidth, preEndX);
+                      // Clip to visible area
+                      const clippedStartX = Math.max(0, preStartX);
+                      const clippedEndX = Math.min(timelineWidth, preEndX);
                       const clippedWidth = clippedEndX - clippedStartX;
 
                       if (clippedWidth > 20) {
@@ -1230,19 +1750,16 @@ export default function DashboardPage() {
                         elements.push(
                           <div
                             key={`${session.id}-pre-${dayOffset}`}
-                            className="absolute rounded-lg cursor-pointer transition-all hover:scale-[1.02] hover:z-10 overflow-hidden"
+                            className="absolute rounded cursor-pointer transition-all duration-300 hover:brightness-110 hover:z-10 overflow-hidden"
                             style={{
-                              left: clippedStartX - sidebarWidth,
+                              left: clippedStartX,
                               width: clippedWidth,
-                              height: barHeight - 16,
-                              top: 8,
+                              height: "calc(100% - 12px)",
+                              top: 6,
                               background: barIsActive
-                                ? `linear-gradient(135deg, ${session.color}25 0%, ${session.color}15 100%)`
-                                : `linear-gradient(135deg, ${session.color}12 0%, ${session.color}08 100%)`,
-                              border: `1px solid ${session.color}${barIsActive ? "50" : "25"}`,
-                              boxShadow: barIsActive
-                                ? `0 4px 20px ${session.color}30, inset 0 1px 0 ${session.color}20`
-                                : `inset 0 1px 0 ${session.color}10`,
+                                ? `linear-gradient(90deg, ${session.color}20 0%, ${session.color}12 100%)`
+                                : `linear-gradient(90deg, ${session.color}10 0%, ${session.color}06 100%)`,
+                              border: `1px dashed ${session.color}${barIsActive ? "50" : "25"}`,
                             }}
                             onMouseEnter={(e) => setHoveredSession({ session, type: "pre", x: e.clientX, y: e.clientY })}
                             onMouseLeave={() => setHoveredSession(null)}
@@ -1251,39 +1768,27 @@ export default function DashboardPage() {
                             {/* Progress fill */}
                             {barIsActive && (
                               <div
-                                className="absolute inset-y-0 left-0 transition-all duration-1000"
+                                className="absolute inset-y-0 left-0 transition-all duration-500"
                                 style={{
                                   width: `${preProgress}%`,
-                                  background: `linear-gradient(90deg, ${session.color}40 0%, ${session.color}25 100%)`,
+                                  background: `${session.color}25`,
                                 }}
                               />
                             )}
-                            {/* Diagonal stripes pattern */}
-                            <div
-                              className="absolute inset-0 opacity-30"
-                              style={{
-                                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 3px, ${session.color}15 3px, ${session.color}15 6px)`,
-                              }}
-                            />
-                            {/* Content */}
-                            <div className="absolute inset-0 flex items-center justify-between px-3">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold" style={{ color: session.color }}>
-                                  {session.id === "tokyo" ? "MORNING" : session.id === "sydney" ? "PRE-OPEN" : "PRE-MKT"}
-                                </span>
-                              </div>
-                              {barIsActive && clippedWidth > 100 && (
-                                <span className="text-[10px] font-mono font-bold" style={{ color: session.color }}>
+                            {/* Content - centered */}
+                            <div className="absolute inset-0 flex items-center justify-center gap-2 px-2">
+                              <span
+                                className="text-[10px] font-semibold uppercase tracking-wide"
+                                style={{ color: `${session.color}${barIsActive ? "" : "90"}` }}
+                              >
+                                {session.id === "tokyo" ? "AM" : session.id === "sydney" ? "PRE" : "PRE"}
+                              </span>
+                              {barIsActive && clippedWidth > 60 && (
+                                <span className="text-[10px] font-mono" style={{ color: session.color }}>
                                   {Math.round(preProgress)}%
                                 </span>
                               )}
                             </div>
-                            {/* Start/End time markers */}
-                            {preStartX >= sidebarWidth && clippedWidth > 80 && (
-                              <div className="absolute left-1 bottom-1 text-[8px] font-mono" style={{ color: `${session.color}70` }}>
-                                {formatLocalHour(session.preMarket!.start)}
-                              </div>
-                            )}
                           </div>
                         );
                       }
@@ -1293,12 +1798,12 @@ export default function DashboardPage() {
                     const regularStart = getSessionDateTime(baseDate, session.regular.start, session.timezone);
                     const regularEnd = getSessionDateTime(baseDate, session.regular.end, session.timezone);
 
-                    const regularStartX = getTimePosition(regularStart, currentTime, containerWidth) + scrollOffset;
-                    const regularEndX = getTimePosition(regularEnd, currentTime, containerWidth) + scrollOffset;
+                    const regularStartX = getTimePosition(regularStart, currentTime, timelineWidth) + scrollOffset;
+                    const regularEndX = getTimePosition(regularEnd, currentTime, timelineWidth) + scrollOffset;
 
                     // Clip to visible area
-                    const clippedStartX = Math.max(sidebarWidth, regularStartX);
-                    const clippedEndX = Math.min(containerWidth, regularEndX);
+                    const clippedStartX = Math.max(0, regularStartX);
+                    const clippedEndX = Math.min(timelineWidth, regularEndX);
                     const clippedWidth = clippedEndX - clippedStartX;
 
                     if (clippedWidth > 20) {
@@ -1309,118 +1814,96 @@ export default function DashboardPage() {
                       elements.push(
                         <div
                           key={`${session.id}-regular-${dayOffset}`}
-                          className="absolute rounded-xl cursor-pointer transition-all hover:scale-[1.01] hover:z-10 overflow-hidden"
+                          className="absolute rounded-lg cursor-pointer transition-all duration-300 hover:brightness-110 hover:z-10 overflow-hidden"
                           style={{
-                            left: clippedStartX - sidebarWidth,
+                            left: clippedStartX,
                             width: clippedWidth,
-                            height: barHeight,
-                            top: 0,
+                            height: "calc(100% - 8px)",
+                            top: 4,
                             background: barIsActive
-                              ? `linear-gradient(180deg, ${activeColor}30 0%, ${activeColor}15 100%)`
-                              : `linear-gradient(180deg, ${session.color}20 0%, ${session.color}10 100%)`,
-                            border: `2px solid ${barIsActive ? activeColor : session.color}${barIsActive ? "60" : "35"}`,
+                              ? `linear-gradient(135deg, ${activeColor}35 0%, ${activeColor}20 50%, ${activeColor}30 100%)`
+                              : `linear-gradient(135deg, ${session.color}18 0%, ${session.color}12 100%)`,
+                            border: `1px solid ${barIsActive ? activeColor : session.color}${barIsActive ? "70" : "30"}`,
                             boxShadow: barIsActive
-                              ? `0 8px 32px ${activeColor}35, 0 0 0 1px ${activeColor}20, inset 0 2px 0 ${activeColor}20`
-                              : `0 2px 8px ${session.color}15, inset 0 1px 0 ${session.color}15`,
+                              ? `0 0 20px ${activeColor}40, inset 0 1px 0 ${activeColor}30`
+                              : `inset 0 1px 0 ${session.color}15`,
                           }}
                           onMouseEnter={(e) => setHoveredSession({ session, type: "regular", x: e.clientX, y: e.clientY })}
                           onMouseLeave={() => setHoveredSession(null)}
                           onMouseMove={(e) => setHoveredSession({ session, type: "regular", x: e.clientX, y: e.clientY })}
                         >
-                          {/* Animated progress fill */}
+                          {/* Shimmer effect for active sessions */}
                           {barIsActive && (
                             <div
-                              className="absolute inset-y-0 left-0 overflow-hidden transition-all duration-1000"
-                              style={{ width: `${barProgress}%` }}
+                              className="absolute inset-0 overflow-hidden"
+                              style={{
+                                background: `linear-gradient(90deg, transparent 0%, ${activeColor}15 50%, transparent 100%)`,
+                                animation: "shimmer 2s ease-in-out infinite",
+                              }}
+                            />
+                          )}
+                          {/* Progress fill with glow */}
+                          {barIsActive && (
+                            <div
+                              className="absolute inset-y-0 left-0 transition-all duration-500"
+                              style={{
+                                width: `${barProgress}%`,
+                                background: `linear-gradient(90deg, ${activeColor}50 0%, ${activeColor}35 100%)`,
+                              }}
                             >
+                              {/* Glowing edge */}
                               <div
-                                className="absolute inset-0"
-                                style={{
-                                  background: `linear-gradient(90deg, ${activeColor}50 0%, ${activeColor}30 100%)`,
-                                }}
-                              />
-                              {/* Animated stripes */}
-                              <div
-                                className="absolute inset-0"
-                                style={{
-                                  backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 6px, ${activeColor}25 6px, ${activeColor}25 12px)`,
-                                  backgroundSize: "24px 24px",
-                                  animation: "moveStripes 1s linear infinite",
-                                }}
-                              />
-                              {/* Glow line at progress edge */}
-                              <div
-                                className="absolute right-0 top-0 bottom-0 w-1"
+                                className="absolute right-0 top-0 bottom-0 w-0.5"
                                 style={{
                                   background: activeColor,
-                                  boxShadow: `0 0 12px ${activeColor}, 0 0 24px ${activeColor}`,
+                                  boxShadow: `0 0 8px ${activeColor}, 0 0 16px ${activeColor}`,
                                 }}
                               />
                             </div>
                           )}
-                          {/* Content */}
-                          <div className="absolute inset-0 flex items-center justify-between px-4">
-                            <div className="flex items-center gap-3">
-                              {/* Status indicator */}
-                              {barIsActive && (
+                          {/* Left accent bar */}
+                          <div
+                            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+                            style={{
+                              backgroundColor: barIsActive ? activeColor : session.color,
+                              boxShadow: barIsActive ? `0 0 8px ${activeColor}` : 'none',
+                            }}
+                          />
+                          {/* Content - centered */}
+                          <div className="absolute inset-0 flex items-center justify-center gap-3 px-3">
+                            {/* Pulsing dot for active */}
+                            {barIsActive && (
+                              <div className="relative">
                                 <div
-                                  className="w-2.5 h-2.5 rounded-full animate-pulse"
-                                  style={{
-                                    backgroundColor: activeColor,
-                                    boxShadow: `0 0 8px ${activeColor}`,
-                                  }}
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: activeColor }}
                                 />
-                              )}
-                              <span
-                                className="text-sm font-bold tracking-wide"
-                                style={{ color: barIsActive ? activeColor : session.color }}
-                              >
-                                {session.shortName}
-                              </span>
-                              {clippedWidth > 150 && (
-                                <span className="text-xs font-medium text-muted">
-                                  {session.id === "tokyo" ? "Afternoon" : "Regular"}
-                                </span>
-                              )}
-                            </div>
-                            {barIsActive && clippedWidth > 120 && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-mono font-bold" style={{ color: activeColor }}>
-                                  {Math.round(barProgress)}%
-                                </span>
+                                <div
+                                  className="absolute inset-0 w-2 h-2 rounded-full animate-ping"
+                                  style={{ backgroundColor: activeColor, opacity: 0.5 }}
+                                />
                               </div>
                             )}
+                            {/* Session name */}
+                            <span
+                              className="text-xs font-bold uppercase tracking-wider"
+                              style={{
+                                color: barIsActive ? activeColor : session.color,
+                                textShadow: barIsActive ? `0 0 10px ${activeColor}50` : 'none',
+                              }}
+                            >
+                              {session.shortName}
+                            </span>
+                            {/* Progress percentage */}
+                            {barIsActive && clippedWidth > 100 && (
+                              <span
+                                className="text-xs font-mono font-bold"
+                                style={{ color: activeColor }}
+                              >
+                                {Math.round(barProgress)}%
+                              </span>
+                            )}
                           </div>
-                          {/* Edge markers with times */}
-                          {regularStartX >= sidebarWidth && (
-                            <div
-                              className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl"
-                              style={{ backgroundColor: barIsActive ? activeColor : session.color }}
-                            />
-                          )}
-                          {regularEndX <= containerWidth && (
-                            <div
-                              className="absolute right-0 top-0 bottom-0 w-1.5 rounded-r-xl"
-                              style={{ backgroundColor: barIsActive ? activeColor : session.color }}
-                            />
-                          )}
-                          {/* Time labels */}
-                          {regularStartX >= sidebarWidth && clippedWidth > 100 && (
-                            <div
-                              className="absolute left-2 bottom-1 text-[9px] font-mono font-medium"
-                              style={{ color: `${barIsActive ? activeColor : session.color}90` }}
-                            >
-                              {formatLocalHour(session.regular.start)}
-                            </div>
-                          )}
-                          {regularEndX <= containerWidth && clippedWidth > 100 && (
-                            <div
-                              className="absolute right-2 bottom-1 text-[9px] font-mono font-medium"
-                              style={{ color: `${barIsActive ? activeColor : session.color}90` }}
-                            >
-                              {formatLocalHour(session.regular.end)}
-                            </div>
-                          )}
                         </div>
                       );
                     }
@@ -1430,11 +1913,11 @@ export default function DashboardPage() {
                       const postStart = getSessionDateTime(baseDate, session.postMarket.start, session.timezone);
                       const postEnd = getSessionDateTime(baseDate, session.postMarket.end, session.timezone);
 
-                      const postStartX = getTimePosition(postStart, currentTime, containerWidth) + scrollOffset;
-                      const postEndX = getTimePosition(postEnd, currentTime, containerWidth) + scrollOffset;
+                      const postStartX = getTimePosition(postStart, currentTime, timelineWidth) + scrollOffset;
+                      const postEndX = getTimePosition(postEnd, currentTime, timelineWidth) + scrollOffset;
 
-                      const clippedStartX = Math.max(sidebarWidth, postStartX);
-                      const clippedEndX = Math.min(containerWidth, postEndX);
+                      const clippedStartX = Math.max(0, postStartX);
+                      const clippedEndX = Math.min(timelineWidth, postEndX);
                       const clippedWidth = clippedEndX - clippedStartX;
 
                       if (clippedWidth > 20) {
@@ -1443,19 +1926,16 @@ export default function DashboardPage() {
                         elements.push(
                           <div
                             key={`${session.id}-post-${dayOffset}`}
-                            className="absolute rounded-lg cursor-pointer transition-all hover:scale-[1.02] hover:z-10 overflow-hidden"
+                            className="absolute rounded cursor-pointer transition-all duration-300 hover:brightness-110 hover:z-10 overflow-hidden"
                             style={{
-                              left: clippedStartX - sidebarWidth,
+                              left: clippedStartX,
                               width: clippedWidth,
-                              height: barHeight - 16,
-                              top: 8,
+                              height: "calc(100% - 12px)",
+                              top: 6,
                               background: barIsActive
-                                ? `linear-gradient(135deg, ${session.color}25 0%, ${session.color}15 100%)`
-                                : `linear-gradient(135deg, ${session.color}12 0%, ${session.color}08 100%)`,
-                              border: `1px solid ${session.color}${barIsActive ? "50" : "25"}`,
-                              boxShadow: barIsActive
-                                ? `0 4px 20px ${session.color}30, inset 0 1px 0 ${session.color}20`
-                                : `inset 0 1px 0 ${session.color}10`,
+                                ? `linear-gradient(90deg, ${session.color}20 0%, ${session.color}12 100%)`
+                                : `linear-gradient(90deg, ${session.color}10 0%, ${session.color}06 100%)`,
+                              border: `1px dashed ${session.color}${barIsActive ? "50" : "25"}`,
                             }}
                             onMouseEnter={(e) => setHoveredSession({ session, type: "post", x: e.clientX, y: e.clientY })}
                             onMouseLeave={() => setHoveredSession(null)}
@@ -1464,39 +1944,27 @@ export default function DashboardPage() {
                             {/* Progress fill */}
                             {barIsActive && (
                               <div
-                                className="absolute inset-y-0 left-0 transition-all duration-1000"
+                                className="absolute inset-y-0 left-0 transition-all duration-500"
                                 style={{
                                   width: `${postProgress}%`,
-                                  background: `linear-gradient(90deg, ${session.color}40 0%, ${session.color}25 100%)`,
+                                  background: `${session.color}25`,
                                 }}
                               />
                             )}
-                            {/* Diagonal stripes pattern */}
-                            <div
-                              className="absolute inset-0 opacity-30"
-                              style={{
-                                backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 3px, ${session.color}15 3px, ${session.color}15 6px)`,
-                              }}
-                            />
-                            {/* Content */}
-                            <div className="absolute inset-0 flex items-center justify-between px-3">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold" style={{ color: session.color }}>
-                                  POST-MKT
-                                </span>
-                              </div>
-                              {barIsActive && clippedWidth > 100 && (
-                                <span className="text-[10px] font-mono font-bold" style={{ color: session.color }}>
+                            {/* Content - centered */}
+                            <div className="absolute inset-0 flex items-center justify-center gap-2 px-2">
+                              <span
+                                className="text-[10px] font-semibold uppercase tracking-wide"
+                                style={{ color: `${session.color}${barIsActive ? "" : "90"}` }}
+                              >
+                                POST
+                              </span>
+                              {barIsActive && clippedWidth > 60 && (
+                                <span className="text-[10px] font-mono" style={{ color: session.color }}>
                                   {Math.round(postProgress)}%
                                 </span>
                               )}
                             </div>
-                            {/* End time marker */}
-                            {postEndX <= containerWidth && clippedWidth > 80 && (
-                              <div className="absolute right-1 bottom-1 text-[8px] font-mono" style={{ color: `${session.color}70` }}>
-                                {formatLocalHour(session.postMarket!.end)}
-                              </div>
-                            )}
                           </div>
                         );
                       }
@@ -1508,7 +1976,6 @@ export default function DashboardPage() {
               </div>
             );
           })}
-        </div>
 
         {/* Session Overlap Zones */}
         {(() => {
@@ -1527,11 +1994,12 @@ export default function DashboardPage() {
             const overlapStart = new Date(dayStart.getTime() + londonNYOverlapStart * 60 * 60 * 1000);
             const overlapEnd = new Date(dayStart.getTime() + londonNYOverlapEnd * 60 * 60 * 1000);
 
-            const overlapStartX = getTimePosition(overlapStart, currentTime, containerWidth) + scrollOffset;
-            const overlapEndX = getTimePosition(overlapEnd, currentTime, containerWidth) + scrollOffset;
+            const timelineWidth = containerWidth - 240;
+            const overlapStartX = getTimePosition(overlapStart, currentTime, timelineWidth) + scrollOffset;
+            const overlapEndX = getTimePosition(overlapEnd, currentTime, timelineWidth) + scrollOffset;
             const overlapWidth = overlapEndX - overlapStartX;
 
-            if (overlapEndX > 0 && overlapStartX < containerWidth) {
+            if (overlapEndX > 0 && overlapStartX < timelineWidth) {
               const isActive = currentHourUTC >= londonNYOverlapStart && currentHourUTC < londonNYOverlapEnd;
 
               overlaps.push(
@@ -1540,7 +2008,7 @@ export default function DashboardPage() {
                   className="absolute pointer-events-none"
                   style={{
                     left: Math.max(0, overlapStartX),
-                    width: Math.min(overlapWidth, containerWidth - Math.max(0, overlapStartX)),
+                    width: Math.min(overlapWidth, timelineWidth - Math.max(0, overlapStartX)),
                     top: 10,
                     bottom: 0,
                     background: isActive
@@ -1689,274 +2157,273 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Middle - Events Lane */}
-        <div className="absolute top-[430px] left-0 right-0 bottom-32 border-b border-border">
-          <div className="absolute left-2 top-1 text-xs text-muted font-medium uppercase tracking-wider">
-            Economic Events
-          </div>
+          {/* Economic Events Timeline - Middle Third */}
+          <div className="flex-1 relative min-h-0 border-b border-border/20">
+            {filteredVisibleEvents.map((event, index) => {
+              const eventTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
+              const timelineWidth = containerWidth - 240;
+              const xPos = getTimePosition(eventTime, currentTime, timelineWidth) + scrollOffset;
 
-          {/* Event Cards */}
-          {visibleEvents.map((event, index) => {
-            const eventTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
-            const xPos = getTimePosition(eventTime, currentTime, containerWidth) + scrollOffset;
+              if (xPos < -100 || xPos > timelineWidth) return null;
 
-            if (xPos < -100 || xPos > containerWidth + 100) return null;
+              // Stagger vertically based on index to avoid overlap
+              const yOffset = 20 + (index % 3) * 90;
+              const isPast = eventTime < currentTime;
 
-            // Stagger vertically based on index to avoid overlap
-            const yOffset = 30 + (index % 4) * 80;
-            const isPast = eventTime < currentTime;
-
-            return (
-              <div
-                key={`${event.date}-${event.time}-${event.title}`}
-                className="absolute flex flex-col items-center"
-                style={{ left: xPos, top: yOffset }}
-              >
-                {/* Marker line */}
+              return (
                 <div
-                  className="w-0.5 h-4"
-                  style={{ backgroundColor: IMPACT_COLORS[event.impact] }}
-                />
-
-                {/* Event Card */}
-                <div
-                  className={`w-48 rounded-lg border shadow-lg p-2 transition-all ${
-                    isPast ? "opacity-60" : "opacity-100"
-                  }`}
-                  style={{
-                    backgroundColor: `${IMPACT_COLORS[event.impact]}10`,
-                    borderColor: `${IMPACT_COLORS[event.impact]}40`,
-                  }}
+                  key={`${event.date}-${event.time}-${event.title}`}
+                  className="absolute flex flex-col items-center"
+                  style={{ left: xPos, top: yOffset }}
                 >
-                  {/* Impact dot and time */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: IMPACT_COLORS[event.impact] }}
-                    />
-                    <span className="text-xs text-muted font-mono">
-                      {event.time}
-                    </span>
-                    {isPast && event.actual && (
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                        Released
+                  {/* Marker line */}
+                  <div
+                    className="w-0.5 h-4"
+                    style={{ backgroundColor: IMPACT_COLORS[event.impact] }}
+                  />
+
+                  {/* Event Card */}
+                  <div
+                    className={`w-44 rounded-lg border shadow-lg p-2 transition-all ${
+                      isPast ? "opacity-60" : "opacity-100"
+                    }`}
+                    style={{
+                      backgroundColor: `${IMPACT_COLORS[event.impact]}10`,
+                      borderColor: `${IMPACT_COLORS[event.impact]}40`,
+                    }}
+                  >
+                    {/* Impact dot and time */}
+                    <div className="flex items-center gap-2 mb-1">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: IMPACT_COLORS[event.impact] }}
+                      />
+                      <span className="text-xs text-muted font-mono">
+                        {event.time}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <div className="text-sm font-medium text-foreground truncate">
-                    {event.title}
-                  </div>
-
-                  {/* Values */}
-                  {(event.actual || event.forecast || event.previous) && (
-                    <div className="mt-1 flex gap-2 text-xs">
-                      {event.actual && (
-                        <span className="text-emerald-400">
-                          Act: {event.actual}
-                        </span>
-                      )}
-                      {event.forecast && (
-                        <span className="text-muted">
-                          Exp: {event.forecast}
-                        </span>
-                      )}
-                      {event.previous && (
-                        <span className="text-muted">
-                          Prev: {event.previous}
+                      {isPast && event.actual && (
+                        <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+                          Released
                         </span>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
 
-        {/* Bottom Lane - Custom Sessions */}
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-card/30">
-          <div className="absolute left-2 top-1 flex items-center gap-3">
-            <span className="text-xs text-muted font-medium uppercase tracking-wider">
-              Custom Sessions & Alerts
-            </span>
-            <div className="flex gap-1">
-              <button
-                onClick={openNewSessionModal}
-                className="flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-accent/10 hover:bg-accent/20 text-accent-light border border-accent/30 transition-colors"
-              >
-                <Plus className="w-3 h-3" />
-                Session
-              </button>
-              <button
-                onClick={openNewAlertModal}
-                className="flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 transition-colors"
-              >
-                <Bell className="w-3 h-3" />
-                Alert
-              </button>
-            </div>
-          </div>
+                    {/* Title */}
+                    <div className="text-xs font-medium text-foreground truncate">
+                      {event.title}
+                    </div>
 
-          {/* Custom Sessions */}
-          {customSessions.map((session) => {
-            const today = new Date(currentTime);
-            const todayDay = today.getDay();
-
-            // Check if session is active today
-            const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
-            if (!isActiveToday) return null;
-
-            // Calculate session bar position
-            const [startHour, startMin] = session.startTime.split(":").map(Number);
-            const [endHour, endMin] = session.endTime.split(":").map(Number);
-
-            const sessionStart = new Date(today);
-            sessionStart.setHours(startHour, startMin, 0, 0);
-
-            const sessionEnd = new Date(today);
-            sessionEnd.setHours(endHour, endMin, 0, 0);
-
-            // Handle sessions that cross midnight
-            if (sessionEnd <= sessionStart) {
-              sessionEnd.setDate(sessionEnd.getDate() + 1);
-            }
-
-            const startX = getTimePosition(sessionStart, currentTime, containerWidth) + scrollOffset;
-            const endX = getTimePosition(sessionEnd, currentTime, containerWidth) + scrollOffset;
-            const width = endX - startX;
-
-            // Only render if visible
-            if (endX < 0 || startX > containerWidth) return null;
-
-            const isActive = currentTime >= sessionStart && currentTime <= sessionEnd;
-            const progress = isActive
-              ? ((currentTime.getTime() - sessionStart.getTime()) / (sessionEnd.getTime() - sessionStart.getTime())) * 100
-              : 0;
-
-            return (
-              <div
-                key={session.id}
-                className="absolute cursor-pointer group"
-                style={{
-                  left: Math.max(60, startX),
-                  top: 24,
-                  width: Math.min(width, containerWidth - Math.max(60, startX)),
-                }}
-                onClick={() => editSession(session)}
-              >
-                {/* Session bar */}
-                <div
-                  className="h-8 rounded-lg overflow-hidden transition-all group-hover:ring-2"
-                  style={{
-                    backgroundColor: `${session.color}25`,
-                    border: `1px solid ${session.color}50`,
-                    boxShadow: isActive ? `0 0 8px ${session.color}40` : undefined,
-                  }}
-                >
-                  {/* Progress fill */}
-                  {isActive && (
-                    <div
-                      className="absolute inset-y-0 left-0 rounded-lg transition-all"
-                      style={{
-                        width: `${progress}%`,
-                        backgroundColor: `${session.color}50`,
-                      }}
-                    />
-                  )}
-                  {/* Session name */}
-                  <div className="absolute inset-0 flex items-center px-2">
-                    <span
-                      className="text-xs font-medium truncate"
-                      style={{ color: session.color }}
-                    >
-                      {session.name}
-                    </span>
+                    {/* Values */}
+                    {(event.actual || event.forecast || event.previous) && (
+                      <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px]">
+                        {event.actual && (
+                          <span className="text-emerald-400">
+                            Act: {event.actual}
+                          </span>
+                        )}
+                        {event.forecast && (
+                          <span className="text-muted">
+                            Exp: {event.forecast}
+                          </span>
+                        )}
+                        {event.previous && (
+                          <span className="text-muted">
+                            Prev: {event.previous}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-                {/* Time labels */}
-                <div className="flex justify-between mt-0.5 px-1">
-                  <span className="text-[10px] text-muted">{session.startTime}</span>
-                  <span className="text-[10px] text-muted">{session.endTime}</span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
 
-          {/* Custom Alerts */}
-          {customAlerts.map((alert) => {
-            const today = new Date(currentTime);
-            const todayDay = today.getDay();
+          {/* Custom Sessions & Alerts Timeline - Bottom */}
+          <div className="flex-1 relative min-h-0">
+            {/* Custom Sessions */}
+            {customSessions.map((session) => {
+              const today = new Date(currentTime);
+              const todayDay = today.getDay();
 
-            // Check if alert is active today
-            const isActiveToday = !alert.recurring || (alert.days?.includes(todayDay) ?? false);
-            if (!isActiveToday) return null;
+              // Check if session is active today
+              const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+              if (!isActiveToday) return null;
 
-            // Calculate alert position
-            const [alertHour, alertMin] = alert.time.split(":").map(Number);
-            const alertTime = new Date(today);
-            alertTime.setHours(alertHour, alertMin, 0, 0);
+              // Calculate session bar position
+              const [startHour, startMin] = session.startTime.split(":").map(Number);
+              const [endHour, endMin] = session.endTime.split(":").map(Number);
 
-            const xPos = getTimePosition(alertTime, currentTime, containerWidth) + scrollOffset;
+              const sessionStart = new Date(today);
+              sessionStart.setHours(startHour, startMin, 0, 0);
 
-            // Only render if visible
-            if (xPos < 0 || xPos > containerWidth) return null;
+              const sessionEnd = new Date(today);
+              sessionEnd.setHours(endHour, endMin, 0, 0);
 
-            const isPast = currentTime > alertTime;
+              // Handle sessions that cross midnight
+              if (sessionEnd <= sessionStart) {
+                sessionEnd.setDate(sessionEnd.getDate() + 1);
+              }
 
-            return (
-              <div
-                key={alert.id}
-                className="absolute cursor-pointer"
-                style={{ left: xPos, top: 70 }}
-                onClick={() => editAlert(alert)}
-              >
-                {/* Alert marker */}
-                <div className="flex flex-col items-center">
+              const timelineWidth = containerWidth - 240;
+              const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
+              const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
+              const width = endX - startX;
+
+              // Only render if visible
+              if (endX < -100 || startX > timelineWidth) return null;
+
+              const isActive = currentTime >= sessionStart && currentTime <= sessionEnd;
+              const progress = isActive
+                ? ((currentTime.getTime() - sessionStart.getTime()) / (sessionEnd.getTime() - sessionStart.getTime())) * 100
+                : 0;
+
+              return (
+                <div
+                  key={session.id}
+                  className="absolute cursor-pointer group"
+                  style={{
+                    left: Math.max(0, startX),
+                    top: 4,
+                    bottom: 4,
+                    width: Math.max(80, Math.min(width, timelineWidth - Math.max(0, startX))),
+                  }}
+                  onClick={() => editSession(session)}
+                >
+                  {/* Session bar - fills lane height */}
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                      isPast ? "opacity-50" : "animate-pulse"
-                    }`}
+                    className="h-full rounded-lg overflow-hidden transition-all group-hover:brightness-110"
                     style={{
-                      backgroundColor: "#F9731630",
-                      border: "2px solid #F97316",
+                      backgroundColor: `${session.color}20`,
+                      border: `1px solid ${session.color}${isActive ? "60" : "40"}`,
+                      boxShadow: isActive ? `0 0 12px ${session.color}40` : undefined,
                     }}
                   >
-                    <Bell className="w-3 h-3 text-orange-400" />
+                    {/* Progress fill */}
+                    {isActive && (
+                      <div
+                        className="absolute inset-y-0 left-0 transition-all"
+                        style={{
+                          width: `${progress}%`,
+                          backgroundColor: `${session.color}35`,
+                        }}
+                      />
+                    )}
+                    {/* Left accent bar */}
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+                      style={{ backgroundColor: session.color }}
+                    />
+                    {/* Session info - centered */}
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 px-3">
+                      {isActive && (
+                        <div className="relative">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: session.color }} />
+                          <div className="absolute inset-0 w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: session.color, opacity: 0.5 }} />
+                        </div>
+                      )}
+                      <span className="text-[10px] font-bold uppercase tracking-wide truncate" style={{ color: session.color }}>
+                        {session.name}
+                      </span>
+                      {isActive && width > 120 && (
+                        <span className="text-[10px] font-mono" style={{ color: session.color }}>
+                          {Math.round(progress)}%
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-[10px] text-orange-400 mt-0.5 whitespace-nowrap">
-                    {alert.name}
-                  </span>
                 </div>
+              );
+            })}
+
+            {/* Custom Alerts */}
+            {customAlerts.map((alert) => {
+              const today = new Date(currentTime);
+              const todayDay = today.getDay();
+
+              // Check if alert is active today
+              const isActiveToday = !alert.recurring || (alert.days?.includes(todayDay) ?? false);
+              if (!isActiveToday) return null;
+
+              // Calculate alert position
+              const [alertHour, alertMin] = alert.time.split(":").map(Number);
+              const alertTime = new Date(today);
+              alertTime.setHours(alertHour, alertMin, 0, 0);
+
+              const timelineWidth = containerWidth - 240; // Timeline area width (minus sidebar)
+              const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
+
+              // Only render if visible
+              if (xPos < -50 || xPos > timelineWidth) return null;
+
+              const isPast = currentTime > alertTime;
+
+              return (
+                <div
+                  key={alert.id}
+                  className="absolute cursor-pointer top-1/2 -translate-y-1/2"
+                  style={{ left: xPos }}
+                  onClick={() => editAlert(alert)}
+                >
+                  {/* Alert marker - compact design */}
+                  <div className="flex items-center gap-2 -translate-x-1/2">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                        isPast ? "opacity-50" : ""
+                      }`}
+                      style={{
+                        backgroundColor: "#F9731620",
+                        border: "2px solid #F97316",
+                        boxShadow: !isPast ? "0 0 12px rgba(249, 115, 22, 0.4)" : undefined,
+                      }}
+                    >
+                      {!isPast && (
+                        <div
+                          className="absolute w-6 h-6 rounded-full animate-ping"
+                          style={{ backgroundColor: "#F9731630" }}
+                        />
+                      )}
+                      <Bell className="w-3 h-3 text-orange-400" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-orange-400 whitespace-nowrap font-medium leading-tight">
+                        {alert.name}
+                      </span>
+                      <span className="text-[9px] text-orange-400/60 font-mono leading-tight">
+                        {formatTimeDisplay(alert.time)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Empty state for timeline area */}
+            {customSessions.length === 0 && customAlerts.length === 0 && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs text-muted">
+                  Add sessions or alerts using the sidebar
+                </span>
               </div>
-            );
-          })}
+            )}
+          </div>
 
-          {/* Empty state */}
-          {customSessions.length === 0 && customAlerts.length === 0 && (
-            <div className="absolute inset-x-0 top-8 bottom-2 flex items-center justify-center">
-              <span className="text-xs text-muted">
-                Click + Session or + Alert above to add custom markers
-              </span>
+          {/* NOW Line - spans full height of timeline area */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-accent z-20 pointer-events-none"
+            style={{
+              left: `${NOW_LINE_POSITION * 100}%`,
+              transform: `translateX(${scrollOffset}px)`,
+              boxShadow: "0 0 10px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3)",
+            }}
+          >
+            {/* NOW label */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-accent text-white text-xs font-bold">
+              NOW
             </div>
-          )}
-        </div>
-
-        {/* NOW Line */}
-        <div
-          className="absolute top-0 bottom-0 w-0.5 bg-accent z-20 pointer-events-none"
-          style={{
-            left: `${NOW_LINE_POSITION * 100}%`,
-            transform: `translateX(${scrollOffset}px)`,
-            boxShadow: "0 0 10px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3)",
-          }}
-        >
-          {/* NOW label */}
-          <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-accent text-white text-xs font-bold">
-            NOW
           </div>
         </div>
+
       </div>
 
       {/* Modal for Custom Session/Alert */}
@@ -1999,42 +2466,24 @@ export default function DashboardPage() {
 
               {/* Time inputs */}
               {modalMode === "session" ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={formStartTime}
-                      onChange={(e) => setFormStartTime(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={formEndTime}
-                      onChange={(e) => setFormEndTime(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-muted mb-1">
-                    Alert Time
-                  </label>
-                  <input
-                    type="time"
-                    value={formAlertTime}
-                    onChange={(e) => setFormAlertTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors"
+                <div className="grid grid-cols-2 gap-6">
+                  <TimePicker
+                    label="Start Time"
+                    value={formStartTime}
+                    onChange={setFormStartTime}
+                  />
+                  <TimePicker
+                    label="End Time"
+                    value={formEndTime}
+                    onChange={setFormEndTime}
                   />
                 </div>
+              ) : (
+                <TimePicker
+                  label="Alert Time"
+                  value={formAlertTime}
+                  onChange={setFormAlertTime}
+                />
               )}
 
               {/* Color picker (for sessions) */}

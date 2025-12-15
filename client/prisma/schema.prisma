@@ -42,7 +42,9 @@ model Trade {
   updatedAt  DateTime @updatedAt
 
   // Many-to-many relation with tags
-  tags       TradeTag[]
+  tags           TradeTag[]
+  // Relation to strategy trades
+  strategyTrades StrategyTrade[]
 
   @@index([userId])
   @@index([date])
@@ -76,4 +78,129 @@ model TradeTag {
   @@unique([tradeId, tagId])
   @@index([tradeId])
   @@index([tagId])
+}
+
+// ============================================
+// STRATEGIES FEATURE
+// ============================================
+
+model Strategy {
+  id                  String   @id @default(cuid())
+  userId              String   // Clerk user ID (creator/owner)
+  name                String   // e.g., "Momentum", "Breakout"
+  description         String?  // Detailed strategy description
+  type                String   // e.g., "MOMENTUM", "BREAKOUT", "REVERSAL", "SCALPING"
+  status              String   @default("ACTIVE") // ACTIVE, PAUSED, ARCHIVED
+  isPublished         Boolean  @default(false) // Visible to subscribers
+  color               String   @default("#3b82f6") // UI display color
+  defaultRiskPercent  Float?   // Default risk per trade
+  maxDrawdownPercent  Float?   // Maximum allowed drawdown
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  trades        StrategyTrade[]
+  signals       StrategySignal[]
+  subscriptions StrategySubscription[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([isPublished])
+}
+
+model StrategyTrade {
+  id         String   @id @default(cuid())
+  strategyId String
+  tradeId    String?  // Link to existing Trade (optional)
+
+  // If not linked to Trade, manual entry fields:
+  date       String   // YYYY-MM-DD
+  time       String?  // HH:MM
+  ticker     String
+  direction  String   // LONG or SHORT
+  entryPrice Float?
+  exitPrice  Float?
+  size       Float?
+  pnl        Float
+  notes      String?
+  isBacktest Boolean  @default(false) // true = historical backtest entry
+  createdAt  DateTime @default(now())
+
+  strategy Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  trade    Trade?   @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+
+  @@index([strategyId])
+  @@index([tradeId])
+  @@index([date])
+  @@index([isBacktest])
+}
+
+model StrategySignal {
+  id          String    @id @default(cuid())
+  strategyId  String
+  type        String    // ENTRY, EXIT, ALERT
+  direction   String?   // LONG, SHORT
+  ticker      String
+  price       Float?    // Target/trigger price
+  message     String    // Alert message
+  status      String    @default("PENDING") // PENDING, TRIGGERED, EXPIRED, CANCELLED
+  triggerAt   DateTime? // When to trigger (for scheduled alerts)
+  triggeredAt DateTime? // When actually triggered
+  expiresAt   DateTime? // Auto-expire time
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  strategy      Strategy             @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  notifications SignalNotification[]
+
+  @@index([strategyId])
+  @@index([status])
+  @@index([triggerAt])
+}
+
+model StrategySubscription {
+  id         String   @id @default(cuid())
+  strategyId String
+  userId     String   // Subscriber's Clerk user ID
+  inApp      Boolean  @default(true)
+  email      Boolean  @default(false)
+  push       Boolean  @default(false)
+  status     String   @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  strategy Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  @@unique([strategyId, userId])
+  @@index([userId])
+  @@index([strategyId])
+}
+
+model SignalNotification {
+  id       String    @id @default(cuid())
+  signalId String
+  userId   String    // Recipient
+  type     String    // IN_APP, EMAIL, PUSH
+  status   String    @default("PENDING") // PENDING, SENT, FAILED, READ
+  sentAt   DateTime?
+  readAt   DateTime?
+  createdAt DateTime @default(now())
+
+  signal StrategySignal @relation(fields: [signalId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([signalId])
+  @@index([status])
+}
+
+model UserNotificationPreferences {
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  emailEnabled     Boolean @default(true)
+  pushEnabled      Boolean @default(false)
+  inAppEnabled     Boolean @default(true)
+  pushSubscription String? // JSON Web Push subscription
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
 }

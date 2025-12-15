@@ -38,7 +38,9 @@
       "WebFetch(domain:www.asx.com.au)",
       "WebFetch(domain:stockanalysis.com)",
       "WebFetch(domain:www.xtb.com)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(dir \"C:\\Users\\stora\\OneDrive\\Desktop\\econtimeline\")",
+      "Bash(npx prisma migrate dev:*)"
     ],
     "deny": [],
     "ask": []

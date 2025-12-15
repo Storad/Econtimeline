@@ -10,8 +10,8 @@ import { NextResponse } from "next/server";
 const FRED_API_KEY = process.env.FRED_API_KEY;
 const FRED_BASE_URL = "https://api.stlouisfed.org/fred";
 
-// Cache configuration
-const CACHE_TTL_MS = 60 * 1000; // 1 minute cache
+// Cache configuration - 10 minutes to reduce FRED API calls
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minute cache
 
 interface CacheEntry {
   data: Record<string, SeriesData>;

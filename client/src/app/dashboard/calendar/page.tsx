@@ -473,41 +473,43 @@ export default function EconomicCalendarPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      // Fetch calendar events and live data in parallel
-      const [calendarResponse, liveDataResponse] = await Promise.all([
-        fetch("/api/calendar"),
-        fetch("/api/live-data").catch(() => null), // Don't fail if live data unavailable
-      ]);
-
+      // Fetch calendar events first for fast initial load
+      const calendarResponse = await fetch("/api/calendar");
       const calendarData = await calendarResponse.json();
-      let liveData: Record<string, { actual: string | null; previous: string | null }> = {};
 
-      if (liveDataResponse?.ok) {
-        const liveJson = await liveDataResponse.json();
-        liveData = liveJson.data || {};
-      }
+      // Show calendar immediately with static data
+      setEvents(calendarData.events || []);
+      setLoading(false);
 
-      // Merge live data into events - ONLY for past events where release time has passed
-      const eventsWithLiveData = (calendarData.events || []).map((event: EconomicEvent) => {
-        const live = liveData[event.event];
-        const hasReleased = isEventReleased(event.date, event.time);
+      // Then fetch live data in background and merge it
+      fetch("/api/live-data")
+        .then(res => res.ok ? res.json() : null)
+        .then(liveJson => {
+          if (!liveJson?.data) return;
 
-        if (live && hasReleased) {
-          // Event has been released - use live data
-          return {
-            ...event,
-            actual: live.actual || event.actual,
-            previous: live.previous || event.previous,
-          };
-        }
-        // Future event or no live data - keep calendar API values (actual will be null for future)
-        return event;
-      });
+          const liveData = liveJson.data as Record<string, { actual: string | null; previous: string | null }>;
 
-      setEvents(eventsWithLiveData);
+          // Merge live data into events
+          setEvents(prevEvents =>
+            prevEvents.map((event: EconomicEvent) => {
+              const live = liveData[event.event];
+              const hasReleased = isEventReleased(event.date, event.time);
+
+              if (live && hasReleased) {
+                return {
+                  ...event,
+                  actual: live.actual || event.actual,
+                  previous: live.previous || event.previous,
+                };
+              }
+              return event;
+            })
+          );
+        })
+        .catch(() => {}); // Silently ignore live data errors
+
     } catch (error) {
       console.error("Failed to fetch events:", error);
-    } finally {
       setLoading(false);
     }
   };
