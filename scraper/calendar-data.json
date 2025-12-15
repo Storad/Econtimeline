@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-14T11:17:31.615Z",
+  "lastUpdated": "2025-12-15T11:19:39.310Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -43,54 +43,6 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-09-15",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-09-15",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -12626,6 +12578,62 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-15",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "18.7",
+      "priorValue": "10.7",
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-15",
+      "time": "08:30",
+      "title": "Import Price Index m/m",
+      "impact": "low",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=188",
+      "fredReleaseId": 188,
+      "description": "Monthly change in the price of imported goods and services.",
+      "whyItMatters": "Shows imported inflation pressures. Affected by USD strength and commodity prices.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish (inflation)",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
