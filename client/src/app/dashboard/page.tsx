@@ -12,6 +12,11 @@ import {
   Settings,
   Filter,
   ChevronDown,
+  Eye,
+  EyeOff,
+  TrendingUp,
+  Calendar,
+  Palette,
 } from "lucide-react";
 
 // ============================================
@@ -356,9 +361,8 @@ function getTimezoneAbbr(timezone: string): string {
 }
 
 // Get current hour (as decimal) in a specific timezone
-function getCurrentHourInTimezone(timezone: string): number {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString("en-US", {
+function getCurrentHourInTimezone(timezone: string, currentTime: Date): number {
+  const timeStr = currentTime.toLocaleTimeString("en-US", {
     timeZone: timezone,
     hour: "2-digit",
     minute: "2-digit",
@@ -372,17 +376,17 @@ function getCurrentHourInTimezone(timezone: string): number {
 function getSessionDateTime(
   baseDate: Date,
   localHour: number,
-  timezone: string
+  timezone: string,
+  currentTime: Date
 ): Date {
   // Get the current time in the target timezone
-  const now = new Date();
-  const currentHourInTz = getCurrentHourInTimezone(timezone);
+  const currentHourInTz = getCurrentHourInTimezone(timezone, currentTime);
 
   // Calculate how many hours from now until the target time
   let hoursFromNow = localHour - currentHourInTz;
 
   // Adjust baseDate offset (baseDate is relative to today in that timezone)
-  const tzDateStr = now.toLocaleDateString("en-CA", { timeZone: timezone });
+  const tzDateStr = currentTime.toLocaleDateString("en-CA", { timeZone: timezone });
   const baseDateStr = `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, "0")}-${String(baseDate.getDate()).padStart(2, "0")}`;
 
   if (baseDateStr < tzDateStr) {
@@ -391,14 +395,13 @@ function getSessionDateTime(
     hoursFromNow += 24; // Tomorrow
   }
 
-  return new Date(now.getTime() + hoursFromNow * 60 * 60 * 1000);
+  return new Date(currentTime.getTime() + hoursFromNow * 60 * 60 * 1000);
 }
 
 // Check if it's a weekend (Saturday or Sunday) in a specific timezone
-function isWeekendInTimezone(timezone: string): boolean {
-  const now = new Date();
+function isWeekendInTimezone(timezone: string, currentTime: Date): boolean {
   // Get day of week: 0 = Sunday, 6 = Saturday
-  const dayNum = new Date(now.toLocaleString("en-US", { timeZone: timezone })).getDay();
+  const dayNum = new Date(currentTime.toLocaleString("en-US", { timeZone: timezone })).getDay();
   return dayNum === 0 || dayNum === 6;
 }
 
@@ -409,7 +412,7 @@ function isSessionActiveNow(
   type: "pre" | "regular" | "post"
 ): boolean {
   // Markets are closed on weekends
-  if (isWeekendInTimezone(session.timezone)) {
+  if (isWeekendInTimezone(session.timezone, currentTime)) {
     return false;
   }
 
@@ -421,9 +424,18 @@ function isSessionActiveNow(
   if (!timeRange) return false;
 
   // Get current hour in the session's timezone
-  const currentHour = getCurrentHourInTimezone(session.timezone);
+  const currentHour = getCurrentHourInTimezone(session.timezone, currentTime);
 
   return currentHour >= timeRange.start && currentHour < timeRange.end;
+}
+
+// Check if any session type (pre, regular, post) is active for a market
+function isMarketActive(session: MarketSession, currentTime: Date): boolean {
+  return (
+    isSessionActiveNow(session, currentTime, "pre") ||
+    isSessionActiveNow(session, currentTime, "regular") ||
+    isSessionActiveNow(session, currentTime, "post")
+  );
 }
 
 // Get session progress percentage
@@ -440,7 +452,7 @@ function getSessionProgressNow(
   if (!timeRange) return 0;
 
   // Get current hour in the session's timezone
-  const currentHour = getCurrentHourInTimezone(session.timezone);
+  const currentHour = getCurrentHourInTimezone(session.timezone, currentTime);
 
   if (currentHour < timeRange.start) return 0;
   if (currentHour >= timeRange.end) return 100;
@@ -477,7 +489,7 @@ function getTimeRemainingNow(
   const [year, month, day] = tzDateStr.split("-").map(Number);
   const baseDate = new Date(year, month - 1, day);
 
-  const sessionEnd = getSessionDateTime(baseDate, timeRange.end, session.timezone);
+  const sessionEnd = getSessionDateTime(baseDate, timeRange.end, session.timezone, currentTime);
   const remaining = sessionEnd.getTime() - currentTime.getTime();
 
   if (remaining <= 0) return "Closed";
@@ -506,13 +518,13 @@ function getTimeUntilOpenNow(
   const [year, month, day] = tzDateStr.split("-").map(Number);
   let baseDate = new Date(year, month - 1, day);
 
-  let sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone);
+  let sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone, currentTime);
 
   // If session already passed today, look at tomorrow
-  const sessionEnd = getSessionDateTime(baseDate, timeRange.end, session.timezone);
+  const sessionEnd = getSessionDateTime(baseDate, timeRange.end, session.timezone, currentTime);
   if (currentTime >= sessionEnd) {
     baseDate = new Date(baseDate.getTime() + 24 * 60 * 60 * 1000);
-    sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone);
+    sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone, currentTime);
   }
 
   // Skip weekends - find the next trading day (max 7 iterations for safety)
@@ -520,7 +532,7 @@ function getTimeUntilOpenNow(
     const dayOfWeek = getDayOfWeekInTimezone(sessionStart, session.timezone);
     if (dayOfWeek !== 0 && dayOfWeek !== 6) break; // Not a weekend
     baseDate = new Date(baseDate.getTime() + 24 * 60 * 60 * 1000);
-    sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone);
+    sessionStart = getSessionDateTime(baseDate, timeRange.start, session.timezone, currentTime);
   }
 
   const until = sessionStart.getTime() - currentTime.getTime();
@@ -766,6 +778,42 @@ export default function DashboardPage() {
   // Custom Sessions & Alerts Card State
   const [customCardExpanded, setCustomCardExpanded] = useState(false);
 
+  // Visibility toggles
+  const [visibleMarkets, setVisibleMarkets] = useState<Set<string>>(new Set(["nyse", "london", "tokyo", "sydney"]));
+  const [showMarketDropdown, setShowMarketDropdown] = useState(false);
+  const [showEventsCard, setShowEventsCard] = useState(true);
+  const [showCustomCard, setShowCustomCard] = useState(true);
+  const [activeMarketsOnly, setActiveMarketsOnly] = useState(false);
+
+  // Toggle individual market visibility
+  const toggleMarket = (marketId: string) => {
+    setVisibleMarkets(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(marketId)) {
+        newSet.delete(marketId);
+      } else {
+        newSet.add(marketId);
+      }
+      return newSet;
+    });
+    // Disable active-only mode when manually toggling
+    setActiveMarketsOnly(false);
+  };
+
+  // Toggle active markets only mode
+  const toggleActiveMarketsOnly = () => {
+    if (activeMarketsOnly) {
+      // Turning off: show all markets
+      setVisibleMarkets(new Set(MARKET_SESSIONS.map(s => s.id)));
+      setActiveMarketsOnly(false);
+    } else {
+      // Turning on: show only active markets
+      const activeMarkets = MARKET_SESSIONS.filter(s => isMarketActive(s, currentTime)).map(s => s.id);
+      setVisibleMarkets(new Set(activeMarkets));
+      setActiveMarketsOnly(true);
+    }
+  };
+
   // Form state
   const [formName, setFormName] = useState("");
   const [formStartTime, setFormStartTime] = useState("09:00");
@@ -786,6 +834,21 @@ export default function DashboardPage() {
     lastTimeRef.current = Date.now();
     setIsMounted(true);
   }, []);
+
+  // Auto-update visible markets when in "active only" mode
+  useEffect(() => {
+    if (activeMarketsOnly) {
+      const activeMarkets = MARKET_SESSIONS.filter(s => isMarketActive(s, currentTime)).map(s => s.id);
+      setVisibleMarkets(prev => {
+        const newSet = new Set(activeMarkets);
+        // Only update if different to avoid unnecessary re-renders
+        if (prev.size !== newSet.size || ![...prev].every(id => newSet.has(id))) {
+          return newSet;
+        }
+        return prev;
+      });
+    }
+  }, [activeMarketsOnly, currentTime]);
 
   // Load calendar events
   useEffect(() => {
@@ -1152,6 +1215,118 @@ export default function DashboardPage() {
             </button>
           )}
 
+          {/* Visibility Toggles */}
+          <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-card/50 border border-border/50">
+            {/* Market Sessions Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMarketDropdown(!showMarketDropdown)}
+                className={`p-1.5 rounded transition-colors flex items-center gap-1 ${
+                  visibleMarkets.size > 0
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-transparent text-muted hover:text-white/70'
+                }`}
+                title="Toggle Market Sessions"
+              >
+                <TrendingUp className="w-4 h-4" />
+                <ChevronDown className={`w-3 h-3 transition-transform ${showMarketDropdown ? 'rotate-180' : ''}`} />
+              </button>
+              {showMarketDropdown && (
+                <div
+                  className="absolute top-full right-0 mt-1 bg-card border border-border rounded-lg shadow-xl z-50 py-1 min-w-[140px]"
+                  onMouseLeave={() => setShowMarketDropdown(false)}
+                >
+                  {/* Active Only Toggle */}
+                  <button
+                    onClick={toggleActiveMarketsOnly}
+                    className={`w-full px-3 py-1.5 flex items-center gap-2 hover:bg-white/5 transition-colors ${
+                      activeMarketsOnly ? 'bg-amber-500/10' : ''
+                    }`}
+                  >
+                    <div
+                      className={`w-3 h-3 rounded border-2 flex items-center justify-center transition-colors ${
+                        activeMarketsOnly
+                          ? 'border-amber-400 bg-amber-400'
+                          : 'border-white/30'
+                      }`}
+                    >
+                      {activeMarketsOnly && (
+                        <svg className="w-2 h-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-amber-400">
+                      Active Only
+                    </span>
+                  </button>
+                  {/* Divider */}
+                  <div className="h-px bg-border/50 my-1" />
+                  {/* Individual Market Toggles */}
+                  {MARKET_SESSIONS.map(session => {
+                    const isActive = isMarketActive(session, currentTime);
+                    return (
+                      <button
+                        key={session.id}
+                        onClick={() => toggleMarket(session.id)}
+                        className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-white/5 transition-colors"
+                      >
+                        <div
+                          className={`w-3 h-3 rounded border-2 flex items-center justify-center transition-colors ${
+                            visibleMarkets.has(session.id)
+                              ? 'border-emerald-400 bg-emerald-400'
+                              : 'border-white/30'
+                          }`}
+                        >
+                          {visibleMarkets.has(session.id) && (
+                            <svg className="w-2 h-2 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        <span
+                          className="text-xs font-medium"
+                          style={{ color: session.color }}
+                        >
+                          {session.shortName}
+                        </span>
+                        {/* Active indicator dot */}
+                        {isActive && (
+                          <div
+                            className="w-1.5 h-1.5 rounded-full ml-auto animate-pulse"
+                            style={{ backgroundColor: session.color }}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setShowEventsCard(!showEventsCard)}
+              className={`p-1.5 rounded transition-colors ${
+                showEventsCard
+                  ? 'bg-slate-500/20 text-slate-300'
+                  : 'bg-transparent text-muted hover:text-white/70'
+              }`}
+              title={showEventsCard ? "Hide Events" : "Show Events"}
+            >
+              <Calendar className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setShowCustomCard(!showCustomCard)}
+              className={`p-1.5 rounded transition-colors ${
+                showCustomCard
+                  ? 'bg-purple-500/20 text-purple-400'
+                  : 'bg-transparent text-muted hover:text-white/70'
+              }`}
+              title={showCustomCard ? "Hide Custom" : "Show Custom"}
+            >
+              <Palette className="w-4 h-4" />
+            </button>
+          </div>
+
           <button
             onClick={toggleFullscreen}
             className="p-2 rounded-lg hover:bg-card-hover transition-colors"
@@ -1266,8 +1441,8 @@ export default function DashboardPage() {
 
         {/* Unified Left Sidebar - Below Time Scale */}
         <div className="absolute top-10 left-0 bottom-0 w-60 bg-card/20 border-r border-border/30 flex flex-col p-1.5 gap-1 overflow-hidden">
-          {/* All cards in single flex container - each gets equal space */}
-          {MARKET_SESSIONS.map((session) => {
+          {/* Market Session Cards */}
+          {MARKET_SESSIONS.filter(s => visibleMarkets.has(s.id)).map((session) => {
               const isPreActive = isSessionActiveNow(session, currentTime, "pre");
               const isRegularActive = isSessionActiveNow(session, currentTime, "regular");
               const isPostActive = isSessionActiveNow(session, currentTime, "post");
@@ -1281,46 +1456,60 @@ export default function DashboardPage() {
               return (
                 <div
                   key={`info-${session.id}`}
-                  className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${isExpanded ? 'relative z-50' : ''}`}
+                  className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${isExpanded ? 'relative z-50' : ''} ${isAnyActive && !isExpanded ? 'animate-pulse-subtle' : ''}`}
                   style={{
                     flex: '1 1 0',
                     minHeight: 0,
                     background: isAnyActive
-                      ? `linear-gradient(180deg, ${session.color}30 0%, ${session.color}15 100%)`
-                      : `linear-gradient(180deg, ${session.color}20 0%, ${session.color}10 100%)`,
-                    border: `2px solid ${session.color}${isAnyActive ? "60" : "35"}`,
+                      ? `linear-gradient(135deg, ${session.color}35 0%, ${session.color}15 50%, ${session.color}25 100%)`
+                      : `linear-gradient(135deg, ${session.color}15 0%, ${session.color}08 100%)`,
+                    border: `2px solid ${session.color}${isAnyActive ? "70" : "30"}`,
                     boxShadow: isExpanded
                       ? `0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px ${session.color}40`
                       : isAnyActive
-                        ? `0 8px 32px ${session.color}35, 0 0 0 1px ${session.color}20, inset 0 2px 0 ${session.color}20`
-                        : `0 2px 8px ${session.color}15, inset 0 1px 0 ${session.color}15`,
+                        ? `0 0 20px ${session.color}40, 0 0 40px ${session.color}20, 0 8px 32px ${session.color}30, inset 0 1px 0 ${session.color}30`
+                        : `0 2px 8px ${session.color}10, inset 0 1px 0 ${session.color}10`,
                   }}
                   onClick={() => setExpandedCard(isExpanded ? null : session.id)}
                 >
                   {/* Header row */}
-                  <div className="px-3 py-2 flex items-center justify-between">
+                  <div className="px-3 py-1.5 flex items-center justify-between relative">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold" style={{ color: session.color }}>
+                      {/* Pulsing dot for active */}
+                      {isAnyActive && (
+                        <div className="relative">
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: session.color }}
+                          />
+                          <div
+                            className="absolute inset-0 w-2 h-2 rounded-full animate-ping"
+                            style={{ backgroundColor: session.color, opacity: 0.6 }}
+                          />
+                        </div>
+                      )}
+                      <span className="text-sm font-bold tracking-wide" style={{ color: session.color }}>
                         {session.shortName}
                       </span>
                       <span
-                        className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${isAnyActive ? 'animate-pulse' : ''}`}
                         style={{
-                          backgroundColor: isExpanded ? "rgba(255,255,255,0.2)" : (isAnyActive ? `${session.color}30` : `${session.color}20`),
-                          color: isExpanded ? "#ffffff" : (isAnyActive ? session.color : `${session.color}80`),
+                          backgroundColor: isAnyActive ? session.color : `${session.color}20`,
+                          color: isAnyActive ? '#000' : `${session.color}90`,
+                          boxShadow: isAnyActive ? `0 0 8px ${session.color}60` : 'none',
                         }}
                       >
-                        {isRegularActive ? "OPEN" : isPreActive ? "PRE" : isPostActive ? "POST" : "CLOSED"}
+                        {isRegularActive ? "LIVE" : isPreActive ? "PRE" : isPostActive ? "POST" : "CLOSED"}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-mono font-bold" style={{ color: session.color }}>
                         {getTimeInTimezone(session.timezone).replace(/:(\d{2}):\d{2}/, ":$1")}
                       </span>
-                      <span className="text-[9px]" style={{ color: isExpanded ? "rgba(255,255,255,0.7)" : undefined }}>{getTimezoneAbbr(session.timezone)}</span>
+                      <span className="text-[9px] text-muted">{getTimezoneAbbr(session.timezone)}</span>
                       <svg
                         className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                        style={{ color: isExpanded ? "rgba(255,255,255,0.6)" : `${session.color}60` }}
+                        style={{ color: `${session.color}60` }}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1332,30 +1521,114 @@ export default function DashboardPage() {
 
                   {/* Progress/countdown row - compact view */}
                   {!isExpanded && (
-                    <div className="px-3 pb-2">
+                    <div className="px-3 pb-2 relative">
                       {isAnyActive ? (
-                        <>
-                          <div className="flex justify-between text-[10px] mb-1">
-                            <span style={{ color: `${session.color}90` }}>
-                              {isRegularActive ? "Regular" : isPreActive ? "Pre-Market" : "Post-Market"}
-                            </span>
-                            <span className="font-mono" style={{ color: session.color }}>
-                              {Math.round(progress)}% · {currentSessionType ? getTimeRemainingNow(session, currentTime, currentSessionType) : ""}
-                            </span>
+                        <div className="space-y-1.5">
+                          {/* Sparkline and info row */}
+                          <div className="flex items-center justify-between">
+                            {/* Mini sparkline with smooth SVG animation */}
+                            <svg className="w-16 h-4" viewBox="0 0 64 16" preserveAspectRatio="none">
+                              <defs>
+                                <linearGradient id={`spark-${session.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                                  <stop offset="0%" stopColor={session.color} stopOpacity="0.3" />
+                                  <stop offset="100%" stopColor={session.color} stopOpacity="1" />
+                                </linearGradient>
+                              </defs>
+                              <path
+                                fill="none"
+                                stroke={`url(#spark-${session.id})`}
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                              >
+                                <animate
+                                  attributeName="d"
+                                  dur="4s"
+                                  repeatCount="indefinite"
+                                  values="M0,10 C10,12 20,6 32,8 S50,10 64,4;
+                                          M0,8 C10,6 20,12 32,10 S50,6 64,6;
+                                          M0,12 C10,8 20,10 32,6 S50,8 64,5;
+                                          M0,10 C10,12 20,6 32,8 S50,10 64,4"
+                                  calcMode="spline"
+                                  keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                                />
+                              </path>
+                              {/* Animated endpoint dot */}
+                              <circle r="2.5" fill={session.color}>
+                                <animate
+                                  attributeName="cx"
+                                  dur="4s"
+                                  repeatCount="indefinite"
+                                  values="64;64;64;64"
+                                />
+                                <animate
+                                  attributeName="cy"
+                                  dur="4s"
+                                  repeatCount="indefinite"
+                                  values="4;6;5;4"
+                                  calcMode="spline"
+                                  keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                                />
+                                <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
+                              </circle>
+                            </svg>
+                            {/* Time remaining */}
+                            <div className="text-right">
+                              <span className="text-[10px] font-mono font-bold" style={{ color: session.color }}>
+                                {currentSessionType ? getTimeRemainingNow(session, currentTime, currentSessionType) : ""}
+                              </span>
+                            </div>
                           </div>
-                          <div
-                            className="h-[3px] rounded-full overflow-hidden"
-                            style={{ backgroundColor: `${session.color}25` }}
-                          >
+                          {/* Progress bar */}
+                          <div className="relative">
                             <div
-                              className="h-full rounded-full transition-all duration-1000"
-                              style={{ width: `${progress}%`, backgroundColor: session.color }}
-                            />
+                              className="h-1.5 rounded-full overflow-hidden"
+                              style={{ backgroundColor: `${session.color}20` }}
+                            >
+                              <div
+                                className="h-full rounded-full transition-all duration-1000 relative"
+                                style={{
+                                  width: `${progress}%`,
+                                  background: `linear-gradient(90deg, ${session.color}80 0%, ${session.color} 100%)`,
+                                  boxShadow: `0 0 8px ${session.color}80`,
+                                }}
+                              >
+                                {/* Animated shine */}
+                                <div
+                                  className="absolute inset-0"
+                                  style={{
+                                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                                    animation: 'shimmer 2s ease-in-out infinite',
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            {/* Progress percentage badge */}
+                            <div
+                              className="absolute -top-0.5 text-[8px] font-bold font-mono px-1 rounded"
+                              style={{
+                                left: `${Math.min(progress, 85)}%`,
+                                backgroundColor: session.color,
+                                color: '#000',
+                                transform: 'translateX(-50%)',
+                              }}
+                            >
+                              {Math.round(progress)}%
+                            </div>
                           </div>
-                        </>
+                          {/* Session type label */}
+                          <div className="text-[9px] text-center" style={{ color: `${session.color}80` }}>
+                            {isRegularActive ? "Regular Session" : isPreActive ? "Pre-Market Session" : "After-Hours Session"}
+                          </div>
+                        </div>
                       ) : (
-                        <div className="text-[10px]" style={{ color: `${session.color}80` }}>
-                          {getTimeUntilOpenNow(session, currentTime)}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px]" style={{ color: `${session.color}70` }}>
+                            {getTimeUntilOpenNow(session, currentTime)}
+                          </span>
+                          {/* Closed state mini chart - flat line */}
+                          <svg className="w-12 h-3 opacity-40" viewBox="0 0 48 12">
+                            <line x1="0" y1="6" x2="48" y2="6" stroke={session.color} strokeWidth="1" strokeDasharray="2,2" />
+                          </svg>
                         </div>
                       )}
                     </div>
@@ -1434,44 +1707,144 @@ export default function DashboardPage() {
             })}
 
           {/* Economic Events Filter Card */}
+          {showEventsCard && (() => {
+            // Calculate next upcoming event and event stats
+            const upcomingEvents = filteredVisibleEvents
+              .filter(e => new Date(`${e.date}T${e.time || "00:00"}:00`) > currentTime)
+              .sort((a, b) => new Date(`${a.date}T${a.time || "00:00"}:00`).getTime() - new Date(`${b.date}T${b.time || "00:00"}:00`).getTime());
+            const nextEvent = upcomingEvents[0];
+            const nextEventTime = nextEvent ? new Date(`${nextEvent.date}T${nextEvent.time || "00:00"}:00`) : null;
+            const timeToNextEvent = nextEventTime ? nextEventTime.getTime() - currentTime.getTime() : null;
+
+            // Check for high-impact event within the next hour
+            const highImpactSoon = upcomingEvents.some(e => {
+              if (e.impact !== "high") return false;
+              const eventTime = new Date(`${e.date}T${e.time || "00:00"}:00`);
+              return eventTime.getTime() - currentTime.getTime() < 60 * 60 * 1000; // 1 hour
+            });
+
+            // Impact distribution stats
+            const highCount = filteredVisibleEvents.filter(e => e.impact === "high").length;
+            const mediumCount = filteredVisibleEvents.filter(e => e.impact === "medium").length;
+            const lowCount = filteredVisibleEvents.filter(e => e.impact === "low").length;
+            const totalCount = filteredVisibleEvents.length || 1;
+
+            // Format countdown
+            const formatCountdown = (ms: number) => {
+              const hours = Math.floor(ms / (1000 * 60 * 60));
+              const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+              if (hours > 0) return `${hours}h ${minutes}m`;
+              return `${minutes}m`;
+            };
+
+            return (
           <div
-            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${eventsFilterExpanded ? 'relative z-50' : ''}`}
+            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${eventsFilterExpanded ? 'relative z-50' : ''} ${highImpactSoon && !eventsFilterExpanded ? 'animate-pulse-subtle' : ''}`}
             style={{
               flex: '1 1 0',
               minHeight: 0,
-              background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%)',
-              border: '2px solid rgba(239, 68, 68, 0.35)',
+              background: 'linear-gradient(180deg, rgba(148, 163, 184, 0.15) 0%, rgba(148, 163, 184, 0.08) 100%)',
+              border: highImpactSoon ? '2px solid rgba(239, 68, 68, 0.6)' : '2px solid rgba(148, 163, 184, 0.3)',
               boxShadow: eventsFilterExpanded
-                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(239, 68, 68, 0.4)'
-                  : '0 2px 8px rgba(239, 68, 68, 0.15)',
+                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(148, 163, 184, 0.35)'
+                  : highImpactSoon
+                    ? '0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.15), 0 2px 8px rgba(148, 163, 184, 0.1)'
+                    : '0 2px 8px rgba(148, 163, 184, 0.1)',
               }}
               onClick={() => setEventsFilterExpanded(!eventsFilterExpanded)}
             >
               {/* Header */}
               <div className="px-3 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-red-400" />
-                  <span className="text-sm font-semibold text-red-400">Filters</span>
+                  <div className="relative">
+                    <Calendar className="w-4 h-4 text-slate-400" />
+                    {highImpactSoon && (
+                      <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold text-slate-300">Events</span>
+                  {highImpactSoon && (
+                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-red-500/20 text-red-400 rounded border border-red-500/30 animate-pulse">
+                      HIGH IMPACT
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] text-muted">
                     {filteredVisibleEvents.length} events
                   </span>
-                  <ChevronDown className={`w-3 h-3 transition-transform text-red-400/60 ${eventsFilterExpanded ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w-3 h-3 transition-transform text-slate-400/60 ${eventsFilterExpanded ? "rotate-180" : ""}`} />
                 </div>
               </div>
 
-              {/* Quick filter summary when collapsed */}
+              {/* Enhanced collapsed view */}
               {!eventsFilterExpanded && (
-                <div className="px-3 pb-2">
-                  <div className="flex gap-1.5 items-center">
-                    {filterImpacts.has("high") && <span className="w-2 h-2 rounded-full bg-red-500" title="High" />}
-                    {filterImpacts.has("medium") && <span className="w-2 h-2 rounded-full bg-yellow-500" title="Medium" />}
-                    {filterImpacts.has("low") && <span className="w-2 h-2 rounded-full bg-emerald-500" title="Low" />}
-                    {filterCategory !== "All" && (
-                      <span className="text-[9px] text-muted ml-1">{filterCategory}</span>
-                    )}
-                  </div>
+                <div className="px-3 pb-2 space-y-2">
+                  {/* No events message */}
+                  {filteredVisibleEvents.length === 0 ? (
+                    <div className="flex items-center justify-center py-2">
+                      <span className="text-[10px] text-white/40 italic">
+                        No events in next {HOURS_IN_FUTURE} hours
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Next event countdown */}
+                      {nextEvent && timeToNextEvent && (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <div
+                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                              style={{
+                                backgroundColor: nextEvent.impact === "high" ? "#EF4444" : nextEvent.impact === "medium" ? "#F59E0B" : "#10B981"
+                              }}
+                            />
+                            <span className="text-[10px] text-white/80 truncate">{nextEvent.title}</span>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            <span className="text-[10px] font-mono font-bold text-slate-300">
+                              {formatCountdown(timeToNextEvent)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Impact distribution bar */}
+                      <div className="space-y-1">
+                        <div className="flex h-1.5 rounded-full overflow-hidden bg-white/5">
+                          {highCount > 0 && (
+                            <div
+                              className="h-full bg-red-500 transition-all duration-500"
+                              style={{ width: `${(highCount / totalCount) * 100}%` }}
+                            />
+                          )}
+                          {mediumCount > 0 && (
+                            <div
+                              className="h-full bg-yellow-500 transition-all duration-500"
+                              style={{ width: `${(mediumCount / totalCount) * 100}%` }}
+                            />
+                          )}
+                          {lowCount > 0 && (
+                            <div
+                              className="h-full bg-emerald-500 transition-all duration-500"
+                              style={{ width: `${(lowCount / totalCount) * 100}%` }}
+                            />
+                          )}
+                        </div>
+                        <div className="flex justify-between text-[8px] text-white/50">
+                          <div className="flex gap-2">
+                            {highCount > 0 && <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />{highCount}</span>}
+                            {mediumCount > 0 && <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />{mediumCount}</span>}
+                            {lowCount > 0 && <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{lowCount}</span>}
+                          </div>
+                          {filterCategory !== "All" && (
+                            <span className="text-slate-400">{filterCategory}</span>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -1568,40 +1941,191 @@ export default function DashboardPage() {
                 </div>
               )}
           </div>
+            );
+          })()}
 
           {/* Custom Sessions & Alerts Card */}
+          {showCustomCard && (() => {
+            // Check for active custom sessions
+            const currentTimeStr = currentTime.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" });
+            const currentMinutes = parseInt(currentTimeStr.split(":")[0]) * 60 + parseInt(currentTimeStr.split(":")[1]);
+
+            const activeSession = customSessions.find(session => {
+              const [startH, startM] = session.startTime.split(":").map(Number);
+              const [endH, endM] = session.endTime.split(":").map(Number);
+              const startMinutes = startH * 60 + startM;
+              const endMinutes = endH * 60 + endM;
+              // Handle overnight sessions
+              if (endMinutes < startMinutes) {
+                return currentMinutes >= startMinutes || currentMinutes < endMinutes;
+              }
+              return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+            });
+
+            // Calculate active session progress
+            const getSessionProgress = (session: CustomSession) => {
+              const [startH, startM] = session.startTime.split(":").map(Number);
+              const [endH, endM] = session.endTime.split(":").map(Number);
+              const startMinutes = startH * 60 + startM;
+              let endMinutes = endH * 60 + endM;
+              if (endMinutes < startMinutes) endMinutes += 24 * 60;
+              let current = currentMinutes;
+              if (current < startMinutes) current += 24 * 60;
+              const duration = endMinutes - startMinutes;
+              const elapsed = current - startMinutes;
+              return Math.min(100, Math.max(0, (elapsed / duration) * 100));
+            };
+
+            // Find next alert
+            const upcomingAlerts = customAlerts
+              .map(alert => {
+                const [h, m] = alert.time.split(":").map(Number);
+                const alertMinutes = h * 60 + m;
+                let diff = alertMinutes - currentMinutes;
+                if (diff < 0) diff += 24 * 60; // Next day
+                return { ...alert, minutesUntil: diff };
+              })
+              .sort((a, b) => a.minutesUntil - b.minutesUntil);
+            const nextAlert = upcomingAlerts[0];
+
+            // Format minutes to countdown
+            const formatMinutes = (mins: number) => {
+              const h = Math.floor(mins / 60);
+              const m = mins % 60;
+              if (h > 0) return `${h}h ${m}m`;
+              return `${m}m`;
+            };
+
+            const hasActiveSession = !!activeSession;
+            const sessionProgress = activeSession ? getSessionProgress(activeSession) : 0;
+
+            return (
           <div
-            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${customCardExpanded ? 'relative z-50' : ''}`}
+            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${customCardExpanded ? 'relative z-50' : ''} ${hasActiveSession && !customCardExpanded ? 'animate-pulse-subtle' : ''}`}
             style={{
               flex: '1 1 0',
               minHeight: 0,
-              background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%)',
-              border: '2px solid rgba(59, 130, 246, 0.35)',
+              background: 'linear-gradient(180deg, rgba(168, 85, 247, 0.2) 0%, rgba(168, 85, 247, 0.1) 100%)',
+              border: hasActiveSession ? '2px solid rgba(168, 85, 247, 0.7)' : '2px solid rgba(168, 85, 247, 0.35)',
               boxShadow: customCardExpanded
-                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(59, 130, 246, 0.4)'
-                  : '0 2px 8px rgba(59, 130, 246, 0.15)',
+                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(168, 85, 247, 0.4)'
+                  : hasActiveSession
+                    ? '0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2), 0 2px 8px rgba(168, 85, 247, 0.15)'
+                    : '0 2px 8px rgba(168, 85, 247, 0.15)',
               }}
               onClick={() => setCustomCardExpanded(!customCardExpanded)}
             >
               {/* Header */}
               <div className="px-3 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm font-semibold text-blue-400">Custom</span>
+                  <div className="relative">
+                    <Settings className="w-4 h-4 text-purple-400" style={hasActiveSession ? { animation: 'spin 8s linear infinite' } : undefined} />
+                    {hasActiveSession && (
+                      <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-purple-500 rounded-full animate-ping" />
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold text-purple-400">Custom</span>
+                  {hasActiveSession && (
+                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-purple-500/20 text-purple-300 rounded border border-purple-500/30">
+                      ACTIVE
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] text-muted">
                     {customSessions.length + customAlerts.length} items
                   </span>
-                  <ChevronDown className={`w-3 h-3 transition-transform text-blue-400/60 ${customCardExpanded ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w-3 h-3 transition-transform text-purple-400/60 ${customCardExpanded ? "rotate-180" : ""}`} />
                 </div>
               </div>
+
+              {/* Enhanced collapsed view with active session and next alert */}
+              {!customCardExpanded && (customSessions.length > 0 || customAlerts.length > 0) && (
+                <div className="px-3 pb-2 space-y-2">
+                  {/* Active session with progress */}
+                  {activeSession && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: activeSession.color }} />
+                          <span className="text-[10px] text-white/80 truncate">{activeSession.name}</span>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold text-purple-300">{Math.round(sessionProgress)}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden bg-purple-500/20">
+                        <div
+                          className="h-full rounded-full transition-all duration-1000"
+                          style={{
+                            width: `${sessionProgress}%`,
+                            background: `linear-gradient(90deg, ${activeSession.color}80 0%, ${activeSession.color} 100%)`,
+                            boxShadow: `0 0 8px ${activeSession.color}80`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Next alert countdown */}
+                  {nextAlert && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Bell className="w-3 h-3 text-orange-400" />
+                        <span className="text-[10px] text-white/80 truncate">{nextAlert.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-orange-400/60" />
+                        <span className="text-[10px] font-mono font-bold text-orange-400">
+                          {formatMinutes(nextAlert.minutesUntil)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Animated sparkline */}
+                  <div className="flex items-center justify-between">
+                    <svg className="w-full h-4" viewBox="0 0 120 16" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="custom-spark" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#A855F7" stopOpacity="0.2" />
+                          <stop offset="50%" stopColor="#A855F7" stopOpacity="0.6" />
+                          <stop offset="100%" stopColor="#A855F7" stopOpacity="1" />
+                        </linearGradient>
+                      </defs>
+                      <path fill="none" stroke="url(#custom-spark)" strokeWidth="1.5" strokeLinecap="round">
+                        <animate
+                          attributeName="d"
+                          dur="5s"
+                          repeatCount="indefinite"
+                          values="M0,8 Q15,12 30,8 T60,10 T90,6 T120,8;
+                                  M0,10 Q15,6 30,10 T60,6 T90,12 T120,7;
+                                  M0,6 Q15,10 30,6 T60,12 T90,8 T120,10;
+                                  M0,8 Q15,12 30,8 T60,10 T90,6 T120,8"
+                          calcMode="spline"
+                          keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                        />
+                      </path>
+                      <circle r="2" fill="#A855F7">
+                        <animate attributeName="cx" values="120;120;120;120" dur="5s" repeatCount="indefinite" />
+                        <animate
+                          attributeName="cy"
+                          dur="5s"
+                          repeatCount="indefinite"
+                          values="8;7;10;8"
+                          calcMode="spline"
+                          keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                        />
+                        <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                    </svg>
+                  </div>
+                </div>
+              )}
 
               {/* Action buttons - always visible */}
               <div className="px-3 pb-2 flex gap-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); openNewSessionModal(); }}
-                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 transition-colors"
                 >
                   <Plus className="w-3 h-3" />
                   Session
@@ -1623,19 +2147,36 @@ export default function DashboardPage() {
                     <div>
                       <label className="block text-[10px] text-white/70 mb-1.5">Sessions</label>
                       <div className="space-y-1">
-                        {customSessions.map((session) => (
-                          <button
-                            key={session.id}
-                            onClick={(e) => { e.stopPropagation(); editSession(session); }}
-                            className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-white/10 hover:bg-white/10 transition-colors text-left"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: session.color }} />
-                              <span className="text-[11px] text-white/90 truncate max-w-[100px]">{session.name}</span>
-                            </div>
-                            <span className="text-[9px] text-white/50 font-mono">{session.startTime}-{session.endTime}</span>
-                          </button>
-                        ))}
+                        {customSessions.map((session) => {
+                          const isActive = session.id === activeSession?.id;
+                          const progress = isActive ? getSessionProgress(session) : 0;
+                          return (
+                            <button
+                              key={session.id}
+                              onClick={(e) => { e.stopPropagation(); editSession(session); }}
+                              className={`w-full flex flex-col gap-1 px-2 py-1.5 rounded border transition-colors text-left ${
+                                isActive ? 'border-purple-500/50 bg-purple-500/10' : 'border-white/10 hover:bg-white/10'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-2 h-2 rounded-full ${isActive ? 'animate-pulse' : ''}`} style={{ backgroundColor: session.color }} />
+                                  <span className="text-[11px] text-white/90 truncate max-w-[100px]">{session.name}</span>
+                                  {isActive && <span className="text-[8px] text-purple-400 font-bold">LIVE</span>}
+                                </div>
+                                <span className="text-[9px] text-white/50 font-mono">{session.startTime}-{session.endTime}</span>
+                              </div>
+                              {isActive && (
+                                <div className="h-1 rounded-full overflow-hidden bg-white/10 w-full">
+                                  <div
+                                    className="h-full rounded-full"
+                                    style={{ width: `${progress}%`, backgroundColor: session.color }}
+                                  />
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1645,19 +2186,27 @@ export default function DashboardPage() {
                     <div>
                       <label className="block text-[10px] text-white/70 mb-1.5">Alerts</label>
                       <div className="space-y-1">
-                        {customAlerts.map((alert) => (
-                          <button
-                            key={alert.id}
-                            onClick={(e) => { e.stopPropagation(); editAlert(alert); }}
-                            className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-orange-500/20 hover:bg-orange-500/10 transition-colors text-left"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Bell className="w-3 h-3 text-orange-400" />
-                              <span className="text-[11px] text-white/90 truncate max-w-[100px]">{alert.name}</span>
-                            </div>
-                            <span className="text-[9px] text-orange-400/70 font-mono">{alert.time}</span>
-                          </button>
-                        ))}
+                        {customAlerts.map((alert) => {
+                          const alertInfo = upcomingAlerts.find(a => a.id === alert.id);
+                          return (
+                            <button
+                              key={alert.id}
+                              onClick={(e) => { e.stopPropagation(); editAlert(alert); }}
+                              className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-orange-500/20 hover:bg-orange-500/10 transition-colors text-left"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Bell className="w-3 h-3 text-orange-400" />
+                                <span className="text-[11px] text-white/90 truncate max-w-[100px]">{alert.name}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[9px] text-orange-400/70 font-mono">{alert.time}</span>
+                                {alertInfo && (
+                                  <span className="text-[8px] text-orange-400/50">in {formatMinutes(alertInfo.minutesUntil)}</span>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1671,12 +2220,14 @@ export default function DashboardPage() {
                 </div>
               )}
           </div>
+            );
+          })()}
         </div>
 
         {/* Unified Right Timeline Area - Below Time Scale */}
         <div className="absolute top-10 left-60 right-0 bottom-0 flex flex-col">
           {/* Each market session gets its own lane */}
-          {MARKET_SESSIONS.map((session) => {
+          {MARKET_SESSIONS.filter(s => visibleMarkets.has(s.id)).map((session) => {
             const isPreActive = isSessionActiveNow(session, currentTime, "pre");
             const isRegularActive = isSessionActiveNow(session, currentTime, "regular");
             const isPostActive = isSessionActiveNow(session, currentTime, "post");
@@ -1693,7 +2244,7 @@ export default function DashboardPage() {
                   const timelineWidth = containerWidth - 240; // Timeline area width (minus sidebar)
 
                   // Check if today is a weekend in this market's timezone
-                  const todayIsWeekend = isWeekendInTimezone(session.timezone);
+                  const todayIsWeekend = isWeekendInTimezone(session.timezone, currentTime);
 
                   // Show "WEEKEND CLOSED" indicator if today is Saturday or Sunday
                   if (todayIsWeekend) {
@@ -1733,8 +2284,8 @@ export default function DashboardPage() {
 
                     // Pre-market (US only)
                     if (session.preMarket) {
-                      const preStart = getSessionDateTime(baseDate, session.preMarket.start, session.timezone);
-                      const preEnd = getSessionDateTime(baseDate, session.preMarket.end, session.timezone);
+                      const preStart = getSessionDateTime(baseDate, session.preMarket.start, session.timezone, currentTime);
+                      const preEnd = getSessionDateTime(baseDate, session.preMarket.end, session.timezone, currentTime);
 
                       const preStartX = getTimePosition(preStart, currentTime, timelineWidth) + scrollOffset;
                       const preEndX = getTimePosition(preEnd, currentTime, timelineWidth) + scrollOffset;
@@ -1765,15 +2316,86 @@ export default function DashboardPage() {
                             onMouseLeave={() => setHoveredSession(null)}
                             onMouseMove={(e) => setHoveredSession({ session, type: "pre", x: e.clientX, y: e.clientY })}
                           >
-                            {/* Progress fill */}
+                            {/* Progress fill with prominent V-notch */}
                             {barIsActive && (
-                              <div
-                                className="absolute inset-y-0 left-0 transition-all duration-500"
-                                style={{
-                                  width: `${preProgress}%`,
-                                  background: `${session.color}25`,
-                                }}
-                              />
+                              <>
+                                {/* Main progress fill */}
+                                <div
+                                  className="absolute inset-y-0 left-0 transition-all duration-500"
+                                  style={{
+                                    width: `${preProgress}%`,
+                                    background: `${session.color}25`,
+                                    clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%)',
+                                  }}
+                                />
+                                {/* V-notch glow and marker */}
+                                <div
+                                  className="absolute inset-y-0 pointer-events-none"
+                                  style={{
+                                    left: `${preProgress}%`,
+                                    transform: 'translateX(-16px)',
+                                    width: 32,
+                                  }}
+                                >
+                                  {/* Outer glow pulse */}
+                                  <div
+                                    className="absolute inset-y-0 left-0 right-0"
+                                    style={{
+                                      background: `radial-gradient(ellipse at right center, ${session.color}30 0%, transparent 70%)`,
+                                      animation: 'pulse 2s ease-in-out infinite',
+                                    }}
+                                  />
+                                  {/* V-notch SVG with glow */}
+                                  <svg
+                                    className="absolute inset-0 w-full h-full"
+                                    viewBox="0 0 32 100"
+                                    preserveAspectRatio="none"
+                                  >
+                                    <defs>
+                                      <filter id={`notch-glow-pre-${session.id}`} x="-100%" y="-50%" width="300%" height="200%">
+                                        <feGaussianBlur stdDeviation="2" result="blur1" />
+                                        <feGaussianBlur stdDeviation="4" result="blur2" />
+                                        <feMerge>
+                                          <feMergeNode in="blur2" />
+                                          <feMergeNode in="blur1" />
+                                          <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                      </filter>
+                                    </defs>
+                                    <polyline
+                                      points="2,0 16,50 2,100"
+                                      fill="none"
+                                      stroke={session.color}
+                                      strokeWidth="2"
+                                      filter={`url(#notch-glow-pre-${session.id})`}
+                                    />
+                                  </svg>
+                                  {/* Glowing diamond marker */}
+                                  <div
+                                    className="absolute left-1/2 top-1/2"
+                                    style={{
+                                      width: 10,
+                                      height: 10,
+                                      background: session.color,
+                                      transform: 'translate(-50%, -50%) rotate(45deg)',
+                                      boxShadow: `0 0 6px ${session.color}, 0 0 12px ${session.color}, 0 0 18px ${session.color}`,
+                                      animation: 'pulse 1.5s ease-in-out infinite',
+                                    }}
+                                  />
+                                  {/* Inner bright dot */}
+                                  <div
+                                    className="absolute left-1/2 top-1/2"
+                                    style={{
+                                      width: 4,
+                                      height: 4,
+                                      background: 'white',
+                                      borderRadius: '50%',
+                                      transform: 'translate(-50%, -50%)',
+                                      boxShadow: `0 0 3px white`,
+                                    }}
+                                  />
+                                </div>
+                              </>
                             )}
                             {/* Content - centered */}
                             <div className="absolute inset-0 flex items-center justify-center gap-2 px-2">
@@ -1795,8 +2417,8 @@ export default function DashboardPage() {
                     }
 
                     // Regular session
-                    const regularStart = getSessionDateTime(baseDate, session.regular.start, session.timezone);
-                    const regularEnd = getSessionDateTime(baseDate, session.regular.end, session.timezone);
+                    const regularStart = getSessionDateTime(baseDate, session.regular.start, session.timezone, currentTime);
+                    const regularEnd = getSessionDateTime(baseDate, session.regular.end, session.timezone, currentTime);
 
                     const regularStartX = getTimePosition(regularStart, currentTime, timelineWidth) + scrollOffset;
                     const regularEndX = getTimePosition(regularEnd, currentTime, timelineWidth) + scrollOffset;
@@ -1842,24 +2464,86 @@ export default function DashboardPage() {
                               }}
                             />
                           )}
-                          {/* Progress fill with glow */}
+                          {/* Progress fill with prominent V-notch */}
                           {barIsActive && (
-                            <div
-                              className="absolute inset-y-0 left-0 transition-all duration-500"
-                              style={{
-                                width: `${barProgress}%`,
-                                background: `linear-gradient(90deg, ${activeColor}50 0%, ${activeColor}35 100%)`,
-                              }}
-                            >
-                              {/* Glowing edge */}
+                            <>
+                              {/* Main progress fill */}
                               <div
-                                className="absolute right-0 top-0 bottom-0 w-0.5"
+                                className="absolute inset-y-0 left-0 transition-all duration-500"
                                 style={{
-                                  background: activeColor,
-                                  boxShadow: `0 0 8px ${activeColor}, 0 0 16px ${activeColor}`,
+                                  width: `${barProgress}%`,
+                                  background: `linear-gradient(90deg, ${activeColor}50 0%, ${activeColor}35 100%)`,
+                                  clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%)',
                                 }}
                               />
-                            </div>
+                              {/* V-notch glow and marker - positioned at progress edge */}
+                              <div
+                                className="absolute inset-y-0 pointer-events-none"
+                                style={{
+                                  left: `${barProgress}%`,
+                                  transform: 'translateX(-18px)',
+                                  width: 36,
+                                }}
+                              >
+                                {/* Outer glow pulse */}
+                                <div
+                                  className="absolute inset-y-0 left-0 right-0"
+                                  style={{
+                                    background: `radial-gradient(ellipse at right center, ${activeColor}40 0%, transparent 70%)`,
+                                    animation: 'pulse 2s ease-in-out infinite',
+                                  }}
+                                />
+                                {/* V-notch SVG with glow */}
+                                <svg
+                                  className="absolute inset-0 w-full h-full"
+                                  viewBox="0 0 36 100"
+                                  preserveAspectRatio="none"
+                                >
+                                  <defs>
+                                    <filter id={`notch-glow-${session.id}`} x="-100%" y="-50%" width="300%" height="200%">
+                                      <feGaussianBlur stdDeviation="3" result="blur1" />
+                                      <feGaussianBlur stdDeviation="6" result="blur2" />
+                                      <feMerge>
+                                        <feMergeNode in="blur2" />
+                                        <feMergeNode in="blur1" />
+                                        <feMergeNode in="SourceGraphic" />
+                                      </feMerge>
+                                    </filter>
+                                  </defs>
+                                  {/* V-notch lines */}
+                                  <polyline
+                                    points="2,0 18,50 2,100"
+                                    fill="none"
+                                    stroke={activeColor}
+                                    strokeWidth="3"
+                                    filter={`url(#notch-glow-${session.id})`}
+                                  />
+                                </svg>
+                                {/* Glowing diamond marker at V-point */}
+                                <div
+                                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                                  style={{
+                                    width: 12,
+                                    height: 12,
+                                    background: activeColor,
+                                    transform: 'translate(-50%, -50%) rotate(45deg)',
+                                    boxShadow: `0 0 8px ${activeColor}, 0 0 16px ${activeColor}, 0 0 24px ${activeColor}`,
+                                    animation: 'pulse 1.5s ease-in-out infinite',
+                                  }}
+                                />
+                                {/* Inner bright dot */}
+                                <div
+                                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                                  style={{
+                                    width: 6,
+                                    height: 6,
+                                    background: 'white',
+                                    borderRadius: '50%',
+                                    boxShadow: `0 0 4px white, 0 0 8px ${activeColor}`,
+                                  }}
+                                />
+                              </div>
+                            </>
                           )}
                           {/* Left accent bar */}
                           <div
@@ -1910,8 +2594,8 @@ export default function DashboardPage() {
 
                     // Post-market (US only)
                     if (session.postMarket) {
-                      const postStart = getSessionDateTime(baseDate, session.postMarket.start, session.timezone);
-                      const postEnd = getSessionDateTime(baseDate, session.postMarket.end, session.timezone);
+                      const postStart = getSessionDateTime(baseDate, session.postMarket.start, session.timezone, currentTime);
+                      const postEnd = getSessionDateTime(baseDate, session.postMarket.end, session.timezone, currentTime);
 
                       const postStartX = getTimePosition(postStart, currentTime, timelineWidth) + scrollOffset;
                       const postEndX = getTimePosition(postEnd, currentTime, timelineWidth) + scrollOffset;
@@ -1941,15 +2625,86 @@ export default function DashboardPage() {
                             onMouseLeave={() => setHoveredSession(null)}
                             onMouseMove={(e) => setHoveredSession({ session, type: "post", x: e.clientX, y: e.clientY })}
                           >
-                            {/* Progress fill */}
+                            {/* Progress fill with prominent V-notch */}
                             {barIsActive && (
-                              <div
-                                className="absolute inset-y-0 left-0 transition-all duration-500"
-                                style={{
-                                  width: `${postProgress}%`,
-                                  background: `${session.color}25`,
-                                }}
-                              />
+                              <>
+                                {/* Main progress fill */}
+                                <div
+                                  className="absolute inset-y-0 left-0 transition-all duration-500"
+                                  style={{
+                                    width: `${postProgress}%`,
+                                    background: `${session.color}25`,
+                                    clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%)',
+                                  }}
+                                />
+                                {/* V-notch glow and marker */}
+                                <div
+                                  className="absolute inset-y-0 pointer-events-none"
+                                  style={{
+                                    left: `${postProgress}%`,
+                                    transform: 'translateX(-16px)',
+                                    width: 32,
+                                  }}
+                                >
+                                  {/* Outer glow pulse */}
+                                  <div
+                                    className="absolute inset-y-0 left-0 right-0"
+                                    style={{
+                                      background: `radial-gradient(ellipse at right center, ${session.color}30 0%, transparent 70%)`,
+                                      animation: 'pulse 2s ease-in-out infinite',
+                                    }}
+                                  />
+                                  {/* V-notch SVG with glow */}
+                                  <svg
+                                    className="absolute inset-0 w-full h-full"
+                                    viewBox="0 0 32 100"
+                                    preserveAspectRatio="none"
+                                  >
+                                    <defs>
+                                      <filter id={`notch-glow-post-${session.id}`} x="-100%" y="-50%" width="300%" height="200%">
+                                        <feGaussianBlur stdDeviation="2" result="blur1" />
+                                        <feGaussianBlur stdDeviation="4" result="blur2" />
+                                        <feMerge>
+                                          <feMergeNode in="blur2" />
+                                          <feMergeNode in="blur1" />
+                                          <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                      </filter>
+                                    </defs>
+                                    <polyline
+                                      points="2,0 16,50 2,100"
+                                      fill="none"
+                                      stroke={session.color}
+                                      strokeWidth="2"
+                                      filter={`url(#notch-glow-post-${session.id})`}
+                                    />
+                                  </svg>
+                                  {/* Glowing diamond marker */}
+                                  <div
+                                    className="absolute left-1/2 top-1/2"
+                                    style={{
+                                      width: 10,
+                                      height: 10,
+                                      background: session.color,
+                                      transform: 'translate(-50%, -50%) rotate(45deg)',
+                                      boxShadow: `0 0 6px ${session.color}, 0 0 12px ${session.color}, 0 0 18px ${session.color}`,
+                                      animation: 'pulse 1.5s ease-in-out infinite',
+                                    }}
+                                  />
+                                  {/* Inner bright dot */}
+                                  <div
+                                    className="absolute left-1/2 top-1/2"
+                                    style={{
+                                      width: 4,
+                                      height: 4,
+                                      background: 'white',
+                                      borderRadius: '50%',
+                                      transform: 'translate(-50%, -50%)',
+                                      boxShadow: `0 0 3px white`,
+                                    }}
+                                  />
+                                </div>
+                              </>
                             )}
                             {/* Content - centered */}
                             <div className="absolute inset-0 flex items-center justify-center gap-2 px-2">
@@ -1976,65 +2731,6 @@ export default function DashboardPage() {
               </div>
             );
           })}
-
-        {/* Session Overlap Zones */}
-        {(() => {
-          const overlaps: React.ReactNode[] = [];
-
-          // London/NY overlap: London 8:00-16:30 UTC, NY Regular 14:30-21:00 UTC
-          // Overlap is 14:30-16:30 UTC (2 hours)
-          const londonNYOverlapStart = 14.5; // 14:30 UTC
-          const londonNYOverlapEnd = 16.5; // 16:30 UTC
-
-          for (let dayOffset = -1; dayOffset <= 1; dayOffset++) {
-            const dayStart = new Date(currentTime);
-            dayStart.setUTCHours(0, 0, 0, 0);
-            dayStart.setUTCDate(dayStart.getUTCDate() + dayOffset);
-
-            const overlapStart = new Date(dayStart.getTime() + londonNYOverlapStart * 60 * 60 * 1000);
-            const overlapEnd = new Date(dayStart.getTime() + londonNYOverlapEnd * 60 * 60 * 1000);
-
-            const timelineWidth = containerWidth - 240;
-            const overlapStartX = getTimePosition(overlapStart, currentTime, timelineWidth) + scrollOffset;
-            const overlapEndX = getTimePosition(overlapEnd, currentTime, timelineWidth) + scrollOffset;
-            const overlapWidth = overlapEndX - overlapStartX;
-
-            if (overlapEndX > 0 && overlapStartX < timelineWidth) {
-              const isActive = currentHourUTC >= londonNYOverlapStart && currentHourUTC < londonNYOverlapEnd;
-
-              overlaps.push(
-                <div
-                  key={`overlap-london-ny-${dayOffset}`}
-                  className="absolute pointer-events-none"
-                  style={{
-                    left: Math.max(0, overlapStartX),
-                    width: Math.min(overlapWidth, timelineWidth - Math.max(0, overlapStartX)),
-                    top: 10,
-                    bottom: 0,
-                    background: isActive
-                      ? "linear-gradient(180deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 100%)"
-                      : "linear-gradient(180deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.02) 50%, transparent 100%)",
-                    borderLeft: "1px dashed rgba(168, 85, 247, 0.3)",
-                    borderRight: "1px dashed rgba(168, 85, 247, 0.3)",
-                  }}
-                >
-                  {/* Overlap label at top */}
-                  <div
-                    className="absolute top-0 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-b-md text-[10px] font-medium whitespace-nowrap"
-                    style={{
-                      backgroundColor: isActive ? "rgba(168, 85, 247, 0.3)" : "rgba(168, 85, 247, 0.15)",
-                      color: isActive ? "#A855F7" : "#A855F780",
-                    }}
-                  >
-                    {isActive ? "PRIME TRADING" : "LSE/NYSE OVERLAP"}
-                  </div>
-                </div>
-              );
-            }
-          }
-
-          return overlaps;
-        })()}
 
         {/* Session Tooltip */}
         {hoveredSession && (
@@ -2159,6 +2855,15 @@ export default function DashboardPage() {
 
           {/* Economic Events Timeline - Middle Third */}
           <div className="flex-1 relative min-h-0 border-b border-border/20">
+            {/* Empty state when no events */}
+            {filteredVisibleEvents.length === 0 && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-500/10 border border-slate-500/20">
+                  <Calendar className="w-4 h-4 text-slate-500" />
+                  <span className="text-sm text-slate-500">No events in next {HOURS_IN_FUTURE} hours</span>
+                </div>
+              </div>
+            )}
             {filteredVisibleEvents.map((event, index) => {
               const eventTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
               const timelineWidth = containerWidth - 240;
@@ -2240,7 +2945,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Custom Sessions & Alerts Timeline - Bottom */}
-          <div className="flex-1 relative min-h-0">
+          <div className="flex-1 relative min-h-0 bg-purple-500/5 border-t border-purple-500/20">
+            {/* Lane Label */}
+            <div className="absolute top-1 left-2 px-2 py-0.5 rounded bg-purple-500/20 text-[10px] text-purple-400 font-medium z-10">
+              CUSTOM ({customSessions.length} sessions, {customAlerts.length} alerts)
+            </div>
             {/* Custom Sessions */}
             {customSessions.map((session) => {
               const today = new Date(currentTime);
@@ -2361,35 +3070,57 @@ export default function DashboardPage() {
               return (
                 <div
                   key={alert.id}
-                  className="absolute cursor-pointer top-1/2 -translate-y-1/2"
-                  style={{ left: xPos }}
+                  className={`absolute cursor-pointer ${isPast ? "opacity-50" : ""}`}
+                  style={{ left: xPos, top: 0, bottom: 0 }}
                   onClick={() => editAlert(alert)}
                 >
-                  {/* Alert marker - compact design */}
-                  <div className="flex items-center gap-2 -translate-x-1/2">
+                  {/* Vertical line from pin to bottom */}
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 w-px"
+                    style={{
+                      top: 24,
+                      bottom: 0,
+                      background: `linear-gradient(180deg, #F97316 0%, transparent 100%)`,
+                    }}
+                  />
+                  {/* Diamond pin marker */}
+                  <div className="absolute left-1/2 -translate-x-1/2 top-0 flex flex-col items-center">
+                    {/* Glow effect for upcoming alerts */}
+                    {!isPast && (
+                      <div
+                        className="absolute top-1 w-4 h-4 rounded-full animate-ping"
+                        style={{ backgroundColor: "#F9731640" }}
+                      />
+                    )}
+                    {/* Diamond shape */}
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                        isPast ? "opacity-50" : ""
-                      }`}
+                      className="relative w-5 h-5 flex items-center justify-center"
                       style={{
-                        backgroundColor: "#F9731620",
-                        border: "2px solid #F97316",
-                        boxShadow: !isPast ? "0 0 12px rgba(249, 115, 22, 0.4)" : undefined,
+                        transform: "rotate(45deg)",
+                        backgroundColor: "#F97316",
+                        boxShadow: !isPast ? "0 0 12px rgba(249, 115, 22, 0.5)" : undefined,
                       }}
                     >
-                      {!isPast && (
-                        <div
-                          className="absolute w-6 h-6 rounded-full animate-ping"
-                          style={{ backgroundColor: "#F9731630" }}
-                        />
-                      )}
-                      <Bell className="w-3 h-3 text-orange-400" />
+                      <Bell
+                        className="w-2.5 h-2.5 text-white"
+                        style={{ transform: "rotate(-45deg)" }}
+                      />
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-orange-400 whitespace-nowrap font-medium leading-tight">
+                    {/* Pointer triangle */}
+                    <div
+                      className="w-0 h-0 -mt-0.5"
+                      style={{
+                        borderLeft: "4px solid transparent",
+                        borderRight: "4px solid transparent",
+                        borderTop: "6px solid #F97316",
+                      }}
+                    />
+                    {/* Label below */}
+                    <div className="mt-1 flex flex-col items-center">
+                      <span className="text-[9px] text-orange-400 whitespace-nowrap font-bold leading-tight px-1 py-0.5 rounded bg-orange-500/10">
                         {alert.name}
                       </span>
-                      <span className="text-[9px] text-orange-400/60 font-mono leading-tight">
+                      <span className="text-[8px] text-orange-400/60 font-mono leading-tight">
                         {formatTimeDisplay(alert.time)}
                       </span>
                     </div>
@@ -2401,11 +3132,64 @@ export default function DashboardPage() {
             {/* Empty state for timeline area */}
             {customSessions.length === 0 && customAlerts.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs text-muted">
-                  Add sessions or alerts using the sidebar
-                </span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                  <Settings className="w-4 h-4 text-purple-500" />
+                  <span className="text-sm text-purple-500">Add sessions or alerts using the Custom card</span>
+                </div>
               </div>
             )}
+            {/* Message when sessions/alerts exist but none visible in current time window */}
+            {(customSessions.length > 0 || customAlerts.length > 0) && (() => {
+              // Count how many are actually rendered (visible in time window)
+              const visibleSessions = customSessions.filter(session => {
+                const today = new Date(currentTime);
+                const todayDay = today.getDay();
+                const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                if (!isActiveToday) return false;
+
+                const [startHour, startMin] = session.startTime.split(":").map(Number);
+                const [endHour, endMin] = session.endTime.split(":").map(Number);
+                const sessionStart = new Date(today);
+                sessionStart.setHours(startHour, startMin, 0, 0);
+                const sessionEnd = new Date(today);
+                sessionEnd.setHours(endHour, endMin, 0, 0);
+                if (sessionEnd <= sessionStart) sessionEnd.setDate(sessionEnd.getDate() + 1);
+
+                const timelineWidth = containerWidth - 240;
+                const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
+                const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
+                return !(endX < -100 || startX > timelineWidth);
+              });
+
+              const visibleAlerts = customAlerts.filter(alert => {
+                const today = new Date(currentTime);
+                const todayDay = today.getDay();
+                const isActiveToday = !alert.recurring || (alert.days?.includes(todayDay) ?? false);
+                if (!isActiveToday) return false;
+
+                const [alertHour, alertMin] = alert.time.split(":").map(Number);
+                const alertTime = new Date(today);
+                alertTime.setHours(alertHour, alertMin, 0, 0);
+
+                const timelineWidth = containerWidth - 240;
+                const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
+                return !(xPos < -50 || xPos > timelineWidth);
+              });
+
+              if (visibleSessions.length === 0 && visibleAlerts.length === 0) {
+                return (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                      <Clock className="w-4 h-4 text-purple-500/60" />
+                      <span className="text-sm text-purple-500/60">
+                        {customSessions.length} session{customSessions.length !== 1 ? 's' : ''}, {customAlerts.length} alert{customAlerts.length !== 1 ? 's' : ''} — none in visible time window
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           {/* NOW Line - spans full height of timeline area */}
