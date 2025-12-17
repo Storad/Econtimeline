@@ -808,7 +808,8 @@ export default function DashboardPage() {
       setActiveMarketsOnly(false);
     } else {
       // Turning on: show only active markets
-      const activeMarkets = MARKET_SESSIONS.filter(s => isMarketActive(s, currentTime)).map(s => s.id);
+      const time = currentTime ?? new Date();
+      const activeMarkets = MARKET_SESSIONS.filter(s => isMarketActive(s, time)).map(s => s.id);
       setVisibleMarkets(new Set(activeMarkets));
       setActiveMarketsOnly(true);
     }
@@ -837,7 +838,7 @@ export default function DashboardPage() {
 
   // Auto-update visible markets when in "active only" mode
   useEffect(() => {
-    if (activeMarketsOnly) {
+    if (activeMarketsOnly && currentTime) {
       const activeMarkets = MARKET_SESSIONS.filter(s => isMarketActive(s, currentTime)).map(s => s.id);
       setVisibleMarkets(prev => {
         const newSet = new Set(activeMarkets);
