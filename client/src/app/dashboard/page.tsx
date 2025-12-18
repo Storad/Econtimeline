@@ -64,6 +64,7 @@ interface CustomAlert {
   sound: string;
   recurring: boolean;
   days?: number[];
+  color: string;
 }
 
 // ============================================
@@ -560,6 +561,7 @@ function getTimeUntilOpenNow(
 // ============================================
 
 const COLOR_OPTIONS = [
+  { name: "Gray", value: "#94A3B8" },
   { name: "Blue", value: "#3B82F6" },
   { name: "Purple", value: "#8B5CF6" },
   { name: "Pink", value: "#EC4899" },
@@ -778,8 +780,24 @@ export default function DashboardPage() {
   // Custom Sessions & Alerts Card State
   const [customCardExpanded, setCustomCardExpanded] = useState(false);
 
+  // Custom lane tooltip state (for empty lane hover)
+  const [showCustomLaneTooltip, setShowCustomLaneTooltip] = useState(false);
+  const [customLaneTooltipPos, setCustomLaneTooltipPos] = useState({ x: 0, y: 0 });
+  const customLaneHoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Custom session tooltip state (for hovering on session bars)
+  const [hoveredCustomSession, setHoveredCustomSession] = useState<{
+    session: CustomSession;
+    x: number;
+    y: number;
+    isActive: boolean;
+    progress: number;
+    startTime: Date;
+    endTime: Date;
+  } | null>(null);
+
   // Visibility toggles
-  const [visibleMarkets, setVisibleMarkets] = useState<Set<string>>(new Set(["nyse", "london", "tokyo", "sydney"]));
+  const [visibleMarkets, setVisibleMarkets] = useState<Set<string>>(new Set(MARKET_SESSIONS.map(s => s.id)));
   const [showMarketDropdown, setShowMarketDropdown] = useState(false);
   const [showEventsCard, setShowEventsCard] = useState(true);
   const [showCustomCard, setShowCustomCard] = useState(true);
@@ -978,7 +996,7 @@ export default function DashboardPage() {
     setEditingItem(null);
     setFormName("");
     setFormAlertTime("09:00");
-    setFormColor(COLOR_OPTIONS[4].value); // Orange for alerts
+    setFormColor("#94A3B8"); // Gray for alerts
     setFormRecurring(false);
     setFormDays([1, 2, 3, 4, 5]);
     setShowModal(true);
@@ -1003,7 +1021,7 @@ export default function DashboardPage() {
     setEditingItem(alert);
     setFormName(alert.name);
     setFormAlertTime(alert.time);
-    setFormColor("#F97316");
+    setFormColor(alert.color || "#F97316");
     setFormRecurring(alert.recurring);
     setFormDays(alert.days || [1, 2, 3, 4, 5]);
     setShowModal(true);
@@ -1046,6 +1064,7 @@ export default function DashboardPage() {
         sound: "default",
         recurring: formRecurring,
         days: formRecurring ? formDays : undefined,
+        color: formColor,
       };
 
       if (editingItem) {
@@ -1123,7 +1142,8 @@ export default function DashboardPage() {
   }
 
   // Calculate visible time range
-  const containerWidth = containerRef.current?.clientWidth || 1200;
+  // Use timelineRef for accurate width - it's the actual timeline container
+  const containerWidth = timelineRef.current?.clientWidth || 1200;
   const visibleStartTime = new Date(currentTime.getTime() - HOURS_IN_PAST * 60 * 60 * 1000);
   const visibleEndTime = new Date(currentTime.getTime() + HOURS_IN_FUTURE * 60 * 60 * 1000);
 
@@ -1364,28 +1384,39 @@ export default function DashboardPage() {
         onMouseLeave={handleMouseLeave}
       >
         {/* Vertical Gridlines - extending through entire timeline */}
-        <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">
-          {/* Hour gridlines */}
-          {Array.from({ length: TOTAL_HOURS * 2 + 2 }).map((_, i) => {
-            const minuteOffset = (i - HOURS_IN_PAST * 2) * 30; // Every 30 minutes
-            const lineTime = new Date(currentTime.getTime() + minuteOffset * 60 * 1000);
-            const xPos = getTimePosition(lineTime, currentTime, containerWidth) + scrollOffset;
-            const isHourLine = minuteOffset % 60 === 0;
+        <div className="absolute top-0 left-60 right-0 bottom-0 pointer-events-none overflow-hidden">
+          {/* Hour gridlines - snapped to actual clock times like the time scale */}
+          {(() => {
+            const timelineWidth = containerWidth - 240; // Same as session bars
+            const elements: React.ReactNode[] = [];
 
-            if (xPos < 0 || xPos > containerWidth) return null;
+            // Start from current time snapped to the hour, minus HOURS_IN_PAST (same as time scale)
+            const startTime = new Date(currentTime);
+            startTime.setMinutes(0, 0, 0);
+            startTime.setHours(startTime.getHours() - HOURS_IN_PAST);
 
-            return (
-              <div
-                key={`grid-${i}`}
-                className="absolute top-8 bottom-0"
-                style={{
-                  left: xPos,
-                  width: isHourLine ? 1 : 1,
-                  backgroundColor: isHourLine ? "rgba(51, 65, 85, 0.5)" : "rgba(51, 65, 85, 0.25)",
-                }}
-              />
-            );
-          })}
+            // Generate gridlines for each 30-minute increment (same as time scale)
+            for (let i = 0; i <= TOTAL_HOURS * 2 + 2; i++) {
+              const lineTime = new Date(startTime.getTime() + i * 30 * 60 * 1000);
+              const xPos = getTimePosition(lineTime, currentTime, timelineWidth) + scrollOffset;
+              const isHourLine = lineTime.getMinutes() === 0;
+
+              if (xPos < 0 || xPos > timelineWidth) continue;
+
+              elements.push(
+                <div
+                  key={`grid-${lineTime.getTime()}`}
+                  className="absolute top-0 bottom-0"
+                  style={{
+                    left: xPos,
+                    width: 1,
+                    backgroundColor: isHourLine ? "rgba(51, 65, 85, 0.5)" : "rgba(51, 65, 85, 0.25)",
+                  }}
+                />
+              );
+            }
+            return elements;
+          })()}
         </div>
 
         {/* Sidebar Header Label */}
@@ -1394,7 +1425,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Time Scale / Ruler - starts after sidebar */}
-        <div className="absolute top-0 left-60 right-0 h-10 border-b border-border bg-card/80 backdrop-blur-sm flex items-end z-10">
+        <div className="absolute top-0 left-60 right-0 h-10 border-b border-border bg-card/80 backdrop-blur-sm flex items-end z-10 overflow-hidden">
           {(() => {
             const timelineWidth = containerWidth - 240; // Subtract sidebar width
             const markers: React.ReactNode[] = [];
@@ -1441,7 +1472,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Unified Left Sidebar - Below Time Scale */}
-        <div className="absolute top-10 left-0 bottom-0 w-60 bg-card/20 border-r border-border/30 flex flex-col p-1.5 gap-1 overflow-hidden">
+        <div className="absolute top-10 left-0 bottom-0 w-60 bg-card/20 border-r border-border/30 flex flex-col p-1.5 gap-1 overflow-y-auto overflow-x-visible">
           {/* Market Session Cards */}
           {MARKET_SESSIONS.filter(s => visibleMarkets.has(s.id)).map((session) => {
               const isPreActive = isSessionActiveNow(session, currentTime, "pre");
@@ -1474,11 +1505,11 @@ export default function DashboardPage() {
                   onClick={() => setExpandedCard(isExpanded ? null : session.id)}
                 >
                   {/* Header row */}
-                  <div className="px-3 py-1.5 flex items-center justify-between relative">
-                    <div className="flex items-center gap-2">
+                  <div className="px-2.5 py-1.5 flex items-center justify-between relative">
+                    <div className="flex items-center gap-1.5">
                       {/* Pulsing dot for active */}
                       {isAnyActive && (
-                        <div className="relative">
+                        <div className="relative flex-shrink-0">
                           <div
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: session.color }}
@@ -1489,11 +1520,11 @@ export default function DashboardPage() {
                           />
                         </div>
                       )}
-                      <span className="text-sm font-bold tracking-wide" style={{ color: session.color }}>
+                      <span className="text-sm font-bold" style={{ color: session.color }}>
                         {session.shortName}
                       </span>
                       <span
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${isAnyActive ? 'animate-pulse' : ''}`}
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${isAnyActive ? 'animate-pulse' : ''}`}
                         style={{
                           backgroundColor: isAnyActive ? session.color : `${session.color}20`,
                           color: isAnyActive ? '#000' : `${session.color}90`,
@@ -1503,13 +1534,13 @@ export default function DashboardPage() {
                         {isRegularActive ? "LIVE" : isPreActive ? "PRE" : isPostActive ? "POST" : "CLOSED"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <span className="text-sm font-mono font-bold" style={{ color: session.color }}>
                         {getTimeInTimezone(session.timezone).replace(/:(\d{2}):\d{2}/, ":$1")}
                       </span>
-                      <span className="text-[9px] text-muted">{getTimezoneAbbr(session.timezone)}</span>
+                      <span className="text-[10px] text-muted">{getTimezoneAbbr(session.timezone)}</span>
                       <svg
-                        className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                        className={`w-3 h-3 transition-transform flex-shrink-0 ${isExpanded ? "rotate-180" : ""}`}
                         style={{ color: `${session.color}60` }}
                         fill="none"
                         viewBox="0 0 24 24"
@@ -1522,108 +1553,63 @@ export default function DashboardPage() {
 
                   {/* Progress/countdown row - compact view */}
                   {!isExpanded && (
-                    <div className="px-3 pb-2 relative">
+                    <div className="px-2.5 pb-2 relative">
                       {isAnyActive ? (
-                        <div className="space-y-1.5">
-                          {/* Sparkline and info row */}
-                          <div className="flex items-center justify-between">
-                            {/* Mini sparkline with smooth SVG animation */}
-                            <svg className="w-16 h-4" viewBox="0 0 64 16" preserveAspectRatio="none">
-                              <defs>
-                                <linearGradient id={`spark-${session.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                                  <stop offset="0%" stopColor={session.color} stopOpacity="0.3" />
-                                  <stop offset="100%" stopColor={session.color} stopOpacity="1" />
-                                </linearGradient>
-                              </defs>
-                              <path
-                                fill="none"
-                                stroke={`url(#spark-${session.id})`}
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                              >
-                                <animate
-                                  attributeName="d"
-                                  dur="4s"
-                                  repeatCount="indefinite"
-                                  values="M0,10 C10,12 20,6 32,8 S50,10 64,4;
-                                          M0,8 C10,6 20,12 32,10 S50,6 64,6;
-                                          M0,12 C10,8 20,10 32,6 S50,8 64,5;
-                                          M0,10 C10,12 20,6 32,8 S50,10 64,4"
-                                  calcMode="spline"
-                                  keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-                                />
-                              </path>
-                              {/* Animated endpoint dot */}
-                              <circle r="2.5" fill={session.color}>
-                                <animate
-                                  attributeName="cx"
-                                  dur="4s"
-                                  repeatCount="indefinite"
-                                  values="64;64;64;64"
-                                />
-                                <animate
-                                  attributeName="cy"
-                                  dur="4s"
-                                  repeatCount="indefinite"
-                                  values="4;6;5;4"
-                                  calcMode="spline"
-                                  keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-                                />
-                                <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
-                              </circle>
-                            </svg>
-                            {/* Time remaining */}
-                            <div className="text-right">
-                              <span className="text-[10px] font-mono font-bold" style={{ color: session.color }}>
-                                {currentSessionType ? getTimeRemainingNow(session, currentTime, currentSessionType) : ""}
-                              </span>
-                            </div>
+                        <div className="space-y-1">
+                          {/* Progress bar with time remaining */}
+                          <div className="flex items-center justify-between text-[11px] font-medium mb-1">
+                            <span style={{ color: `${session.color}90` }}>
+                              {isRegularActive ? "Regular" : isPreActive ? "Pre-Market" : "After-Hours"}
+                            </span>
+                            <span className="font-mono font-bold" style={{ color: session.color }}>
+                              {currentSessionType ? getTimeRemainingNow(session, currentTime, currentSessionType) : ""}
+                            </span>
                           </div>
                           {/* Progress bar */}
-                          <div className="relative">
+                          <div className="relative h-2">
                             <div
-                              className="h-1.5 rounded-full overflow-hidden"
+                              className="h-full rounded-full overflow-hidden relative"
                               style={{ backgroundColor: `${session.color}20` }}
                             >
+                              {/* Progress fill */}
                               <div
-                                className="h-full rounded-full transition-all duration-1000 relative"
+                                className="h-full rounded-full transition-all duration-1000"
                                 style={{
                                   width: `${progress}%`,
                                   background: `linear-gradient(90deg, ${session.color}80 0%, ${session.color} 100%)`,
-                                  boxShadow: `0 0 8px ${session.color}80`,
+                                  boxShadow: `0 0 6px ${session.color}60`,
+                                }}
+                              />
+                              {/* Animated shine */}
+                              <div
+                                className="absolute inset-y-0 left-0 pointer-events-none"
+                                style={{
+                                  width: `${progress}%`,
+                                  overflow: 'hidden',
                                 }}
                               >
-                                {/* Animated shine */}
                                 <div
-                                  className="absolute inset-0"
                                   style={{
-                                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                                    position: 'absolute',
+                                    inset: 0,
+                                    width: '200%',
+                                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
                                     animation: 'shimmer 2s ease-in-out infinite',
                                   }}
                                 />
                               </div>
                             </div>
-                            {/* Progress percentage badge */}
-                            <div
-                              className="absolute -top-0.5 text-[8px] font-bold font-mono px-1 rounded"
-                              style={{
-                                left: `${Math.min(progress, 85)}%`,
-                                backgroundColor: session.color,
-                                color: '#000',
-                                transform: 'translateX(-50%)',
-                              }}
-                            >
-                              {Math.round(progress)}%
-                            </div>
                           </div>
-                          {/* Session type label */}
-                          <div className="text-[9px] text-center" style={{ color: `${session.color}80` }}>
-                            {isRegularActive ? "Regular Session" : isPreActive ? "Pre-Market Session" : "After-Hours Session"}
+                          {/* Progress percentage */}
+                          <div className="text-right">
+                            <span className="text-[11px] font-mono font-bold" style={{ color: session.color }}>
+                              {Math.round(progress)}%
+                            </span>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px]" style={{ color: `${session.color}70` }}>
+                        <div className="flex items-center justify-between py-1">
+                          <span className="text-[11px]" style={{ color: `${session.color}70` }}>
                             {getTimeUntilOpenNow(session, currentTime)}
                           </span>
                           {/* Closed state mini chart - flat line */}
@@ -2226,7 +2212,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Unified Right Timeline Area - Below Time Scale */}
-        <div className="absolute top-10 left-60 right-0 bottom-0 flex flex-col">
+        <div className="absolute top-10 left-60 right-0 bottom-0 flex flex-col overflow-hidden">
           {/* Each market session gets its own lane */}
           {MARKET_SESSIONS.filter(s => visibleMarkets.has(s.id)).map((session) => {
             const isPreActive = isSessionActiveNow(session, currentTime, "pre");
@@ -2236,7 +2222,7 @@ export default function DashboardPage() {
             return (
               <div
                 key={session.id}
-                className="flex-1 relative min-h-0 border-b border-border/20"
+                className="flex-1 relative min-h-0 border-b border-border/20 overflow-hidden"
               >
 
                 {/* Session Bars - render for visible time range */}
@@ -2298,7 +2284,14 @@ export default function DashboardPage() {
 
                       if (clippedWidth > 20) {
                         const barIsActive = isPreActive && dayOffset === 0;
-                        const preProgress = barIsActive ? getSessionProgressNow(session, currentTime, "pre") : 0;
+
+                        // Calculate TRUE progress based on full session duration
+                        const fullSessionWidth = preEndX - preStartX;
+                        const sessionDuration = preEnd.getTime() - preStart.getTime();
+                        const elapsed = currentTime.getTime() - preStart.getTime();
+                        const trueProgress = barIsActive ? Math.max(0, Math.min(100, (elapsed / sessionDuration) * 100)) : 0;
+                        const clipStartOffset = clippedStartX - preStartX;
+
                         elements.push(
                           <div
                             key={`${session.id}-pre-${dayOffset}`}
@@ -2317,87 +2310,59 @@ export default function DashboardPage() {
                             onMouseLeave={() => setHoveredSession(null)}
                             onMouseMove={(e) => setHoveredSession({ session, type: "pre", x: e.clientX, y: e.clientY })}
                           >
-                            {/* Progress fill with prominent V-notch */}
+                            {/* Progress fill - dims the passed portion (left of NOW) */}
                             {barIsActive && (
-                              <>
-                                {/* Main progress fill */}
+                              <div
+                                className="absolute inset-y-0 transition-all duration-300"
+                                style={{
+                                  left: -clipStartOffset,
+                                  width: fullSessionWidth * (trueProgress / 100),
+                                  background: `linear-gradient(90deg, rgba(15,23,42,0.5) 0%, rgba(15,23,42,0.4) 90%, transparent 100%)`,
+                                }}
+                              />
+                            )}
+                            {/* Progress tick markers - positioned relative to FULL session */}
+                            {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => {
+                              const markerPosInFull = fullSessionWidth * (percent / 100);
+                              const markerPosInClipped = markerPosInFull - clipStartOffset;
+                              if (markerPosInClipped < 0 || markerPosInClipped > clippedWidth) return null;
+
+                              // Check if session has completely ended (for today's session)
+                              const sessionEnded = dayOffset === 0 && currentTime.getTime() > preEnd.getTime();
+                              // Check if this is a past day's session
+                              const sessionInPast = dayOffset < 0;
+                              const isPassed = (barIsActive && trueProgress >= percent) || sessionEnded || sessionInPast;
+
+                              return (
                                 <div
-                                  className="absolute inset-y-0 left-0 transition-all duration-500"
+                                  key={percent}
+                                  className="absolute bottom-0 flex flex-col items-center pointer-events-none"
                                   style={{
-                                    width: `${preProgress}%`,
-                                    background: `${session.color}25`,
-                                    clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%)',
-                                  }}
-                                />
-                                {/* V-notch glow and marker */}
-                                <div
-                                  className="absolute inset-y-0 pointer-events-none"
-                                  style={{
-                                    left: `${preProgress}%`,
-                                    transform: 'translateX(-16px)',
-                                    width: 32,
+                                    left: markerPosInClipped,
+                                    transform: 'translateX(-50%)',
                                   }}
                                 >
-                                  {/* Outer glow pulse */}
-                                  <div
-                                    className="absolute inset-y-0 left-0 right-0"
+                                  {/* Label above tick - bright when ahead, dim when passed */}
+                                  <span
+                                    className="text-[9px] font-mono font-semibold"
                                     style={{
-                                      background: `radial-gradient(ellipse at right center, ${session.color}30 0%, transparent 70%)`,
-                                      animation: 'pulse 2s ease-in-out infinite',
+                                      color: isPassed ? `${session.color}40` : session.color,
                                     }}
-                                  />
-                                  {/* V-notch SVG with glow */}
-                                  <svg
-                                    className="absolute inset-0 w-full h-full"
-                                    viewBox="0 0 32 100"
-                                    preserveAspectRatio="none"
                                   >
-                                    <defs>
-                                      <filter id={`notch-glow-pre-${session.id}`} x="-100%" y="-50%" width="300%" height="200%">
-                                        <feGaussianBlur stdDeviation="2" result="blur1" />
-                                        <feGaussianBlur stdDeviation="4" result="blur2" />
-                                        <feMerge>
-                                          <feMergeNode in="blur2" />
-                                          <feMergeNode in="blur1" />
-                                          <feMergeNode in="SourceGraphic" />
-                                        </feMerge>
-                                      </filter>
-                                    </defs>
-                                    <polyline
-                                      points="2,0 16,50 2,100"
-                                      fill="none"
-                                      stroke={session.color}
-                                      strokeWidth="2"
-                                      filter={`url(#notch-glow-pre-${session.id})`}
-                                    />
-                                  </svg>
-                                  {/* Glowing diamond marker */}
+                                    {percent}
+                                  </span>
+                                  {/* Short tick mark connected to bottom edge */}
                                   <div
-                                    className="absolute left-1/2 top-1/2"
                                     style={{
-                                      width: 10,
-                                      height: 10,
-                                      background: session.color,
-                                      transform: 'translate(-50%, -50%) rotate(45deg)',
-                                      boxShadow: `0 0 6px ${session.color}, 0 0 12px ${session.color}, 0 0 18px ${session.color}`,
-                                      animation: 'pulse 1.5s ease-in-out infinite',
-                                    }}
-                                  />
-                                  {/* Inner bright dot */}
-                                  <div
-                                    className="absolute left-1/2 top-1/2"
-                                    style={{
-                                      width: 4,
-                                      height: 4,
-                                      background: 'white',
-                                      borderRadius: '50%',
-                                      transform: 'translate(-50%, -50%)',
-                                      boxShadow: `0 0 3px white`,
+                                      width: 2,
+                                      height: 6,
+                                      backgroundColor: isPassed ? `${session.color}30` : session.color,
+                                      borderRadius: 1,
                                     }}
                                   />
                                 </div>
-                              </>
-                            )}
+                              );
+                            })}
                             {/* Content - centered */}
                             <div className="absolute inset-0 flex items-center justify-center gap-2 px-2">
                               <span
@@ -2406,9 +2371,9 @@ export default function DashboardPage() {
                               >
                                 {session.id === "tokyo" ? "AM" : session.id === "sydney" ? "PRE" : "PRE"}
                               </span>
-                              {barIsActive && clippedWidth > 60 && (
-                                <span className="text-[10px] font-mono" style={{ color: session.color }}>
-                                  {Math.round(preProgress)}%
+                              {barIsActive && (
+                                <span className="text-[9px] font-mono" style={{ color: session.color }}>
+                                  {Math.round(trueProgress)}%
                                 </span>
                               )}
                             </div>
@@ -2431,8 +2396,16 @@ export default function DashboardPage() {
 
                     if (clippedWidth > 20) {
                       const barIsActive = isRegularActive && dayOffset === 0;
-                      const barProgress = barIsActive ? getSessionProgressNow(session, currentTime, "regular") : 0;
                       const activeColor = session.color;
+
+                      // Calculate TRUE progress based on full session duration (not clipped)
+                      const fullSessionWidth = regularEndX - regularStartX;
+                      const sessionDuration = regularEnd.getTime() - regularStart.getTime();
+                      const elapsed = currentTime.getTime() - regularStart.getTime();
+                      const trueProgress = barIsActive ? Math.max(0, Math.min(100, (elapsed / sessionDuration) * 100)) : 0;
+
+                      // Calculate where the clipped area starts relative to full session (for positioning markers)
+                      const clipStartOffset = clippedStartX - regularStartX; // How much of the start is cut off
 
                       elements.push(
                         <div
@@ -2465,86 +2438,16 @@ export default function DashboardPage() {
                               }}
                             />
                           )}
-                          {/* Progress fill with prominent V-notch */}
+                          {/* Progress fill - dims the passed portion (left of NOW) */}
                           {barIsActive && (
-                            <>
-                              {/* Main progress fill */}
-                              <div
-                                className="absolute inset-y-0 left-0 transition-all duration-500"
-                                style={{
-                                  width: `${barProgress}%`,
-                                  background: `linear-gradient(90deg, ${activeColor}50 0%, ${activeColor}35 100%)`,
-                                  clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%)',
-                                }}
-                              />
-                              {/* V-notch glow and marker - positioned at progress edge */}
-                              <div
-                                className="absolute inset-y-0 pointer-events-none"
-                                style={{
-                                  left: `${barProgress}%`,
-                                  transform: 'translateX(-18px)',
-                                  width: 36,
-                                }}
-                              >
-                                {/* Outer glow pulse */}
-                                <div
-                                  className="absolute inset-y-0 left-0 right-0"
-                                  style={{
-                                    background: `radial-gradient(ellipse at right center, ${activeColor}40 0%, transparent 70%)`,
-                                    animation: 'pulse 2s ease-in-out infinite',
-                                  }}
-                                />
-                                {/* V-notch SVG with glow */}
-                                <svg
-                                  className="absolute inset-0 w-full h-full"
-                                  viewBox="0 0 36 100"
-                                  preserveAspectRatio="none"
-                                >
-                                  <defs>
-                                    <filter id={`notch-glow-${session.id}`} x="-100%" y="-50%" width="300%" height="200%">
-                                      <feGaussianBlur stdDeviation="3" result="blur1" />
-                                      <feGaussianBlur stdDeviation="6" result="blur2" />
-                                      <feMerge>
-                                        <feMergeNode in="blur2" />
-                                        <feMergeNode in="blur1" />
-                                        <feMergeNode in="SourceGraphic" />
-                                      </feMerge>
-                                    </filter>
-                                  </defs>
-                                  {/* V-notch lines */}
-                                  <polyline
-                                    points="2,0 18,50 2,100"
-                                    fill="none"
-                                    stroke={activeColor}
-                                    strokeWidth="3"
-                                    filter={`url(#notch-glow-${session.id})`}
-                                  />
-                                </svg>
-                                {/* Glowing diamond marker at V-point */}
-                                <div
-                                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                                  style={{
-                                    width: 12,
-                                    height: 12,
-                                    background: activeColor,
-                                    transform: 'translate(-50%, -50%) rotate(45deg)',
-                                    boxShadow: `0 0 8px ${activeColor}, 0 0 16px ${activeColor}, 0 0 24px ${activeColor}`,
-                                    animation: 'pulse 1.5s ease-in-out infinite',
-                                  }}
-                                />
-                                {/* Inner bright dot */}
-                                <div
-                                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                                  style={{
-                                    width: 6,
-                                    height: 6,
-                                    background: 'white',
-                                    borderRadius: '50%',
-                                    boxShadow: `0 0 4px white, 0 0 8px ${activeColor}`,
-                                  }}
-                                />
-                              </div>
-                            </>
+                            <div
+                              className="absolute inset-y-0 transition-all duration-300"
+                              style={{
+                                left: -clipStartOffset,
+                                width: fullSessionWidth * (trueProgress / 100),
+                                background: `linear-gradient(90deg, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.5) 90%, transparent 100%)`,
+                              }}
+                            />
                           )}
                           {/* Left accent bar */}
                           <div
@@ -2554,6 +2457,51 @@ export default function DashboardPage() {
                               boxShadow: barIsActive ? `0 0 8px ${activeColor}` : 'none',
                             }}
                           />
+                          {/* Progress tick markers at 10%, 20%, 30%, etc. - positioned relative to FULL session */}
+                          {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => {
+                            // Calculate marker position relative to the clipped view
+                            const markerPosInFull = fullSessionWidth * (percent / 100);
+                            const markerPosInClipped = markerPosInFull - clipStartOffset;
+
+                            // Only render if marker is within the visible clipped area
+                            if (markerPosInClipped < 0 || markerPosInClipped > clippedWidth) return null;
+
+                            // Check if session has completely ended (for today's session)
+                            const sessionEnded = dayOffset === 0 && currentTime.getTime() > regularEnd.getTime();
+                            // Check if this is a past day's session
+                            const sessionInPast = dayOffset < 0;
+                            const isPassed = (barIsActive && trueProgress >= percent) || sessionEnded || sessionInPast;
+
+                            return (
+                              <div
+                                key={percent}
+                                className="absolute bottom-0 flex flex-col items-center pointer-events-none"
+                                style={{
+                                  left: markerPosInClipped,
+                                  transform: 'translateX(-50%)',
+                                }}
+                              >
+                                {/* Label above tick - bright when ahead, dim when passed */}
+                                <span
+                                  className="text-[10px] font-mono font-semibold mb-0.5"
+                                  style={{
+                                    color: isPassed ? `${session.color}40` : activeColor,
+                                  }}
+                                >
+                                  {percent}
+                                </span>
+                                {/* Short tick mark connected to bottom edge */}
+                                <div
+                                  style={{
+                                    width: 2,
+                                    height: 8,
+                                    backgroundColor: isPassed ? `${session.color}30` : activeColor,
+                                    borderRadius: 1,
+                                  }}
+                                />
+                              </div>
+                            );
+                          })}
                           {/* Content - centered */}
                           <div className="absolute inset-0 flex items-center justify-center gap-3 px-3">
                             {/* Pulsing dot for active */}
@@ -2569,7 +2517,7 @@ export default function DashboardPage() {
                                 />
                               </div>
                             )}
-                            {/* Session name */}
+                            {/* Session name and TRUE progress */}
                             <span
                               className="text-xs font-bold uppercase tracking-wider"
                               style={{
@@ -2579,13 +2527,13 @@ export default function DashboardPage() {
                             >
                               {session.shortName}
                             </span>
-                            {/* Progress percentage */}
-                            {barIsActive && clippedWidth > 100 && (
+                            {/* Show TRUE progress percentage */}
+                            {barIsActive && (
                               <span
                                 className="text-xs font-mono font-bold"
                                 style={{ color: activeColor }}
                               >
-                                {Math.round(barProgress)}%
+                                {Math.round(trueProgress)}%
                               </span>
                             )}
                           </div>
@@ -2607,7 +2555,14 @@ export default function DashboardPage() {
 
                       if (clippedWidth > 20) {
                         const barIsActive = isPostActive && dayOffset === 0;
-                        const postProgress = barIsActive ? getSessionProgressNow(session, currentTime, "post") : 0;
+
+                        // Calculate TRUE progress based on full session duration
+                        const fullSessionWidth = postEndX - postStartX;
+                        const sessionDuration = postEnd.getTime() - postStart.getTime();
+                        const elapsed = currentTime.getTime() - postStart.getTime();
+                        const trueProgress = barIsActive ? Math.max(0, Math.min(100, (elapsed / sessionDuration) * 100)) : 0;
+                        const clipStartOffset = clippedStartX - postStartX;
+
                         elements.push(
                           <div
                             key={`${session.id}-post-${dayOffset}`}
@@ -2626,87 +2581,59 @@ export default function DashboardPage() {
                             onMouseLeave={() => setHoveredSession(null)}
                             onMouseMove={(e) => setHoveredSession({ session, type: "post", x: e.clientX, y: e.clientY })}
                           >
-                            {/* Progress fill with prominent V-notch */}
+                            {/* Progress fill - dims the passed portion (left of NOW) */}
                             {barIsActive && (
-                              <>
-                                {/* Main progress fill */}
+                              <div
+                                className="absolute inset-y-0 transition-all duration-300"
+                                style={{
+                                  left: -clipStartOffset,
+                                  width: fullSessionWidth * (trueProgress / 100),
+                                  background: `linear-gradient(90deg, rgba(15,23,42,0.5) 0%, rgba(15,23,42,0.4) 90%, transparent 100%)`,
+                                }}
+                              />
+                            )}
+                            {/* Progress tick markers - positioned relative to FULL session */}
+                            {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => {
+                              const markerPosInFull = fullSessionWidth * (percent / 100);
+                              const markerPosInClipped = markerPosInFull - clipStartOffset;
+                              if (markerPosInClipped < 0 || markerPosInClipped > clippedWidth) return null;
+
+                              // Check if session has completely ended (for today's session)
+                              const sessionEnded = dayOffset === 0 && currentTime.getTime() > postEnd.getTime();
+                              // Check if this is a past day's session
+                              const sessionInPast = dayOffset < 0;
+                              const isPassed = (barIsActive && trueProgress >= percent) || sessionEnded || sessionInPast;
+
+                              return (
                                 <div
-                                  className="absolute inset-y-0 left-0 transition-all duration-500"
+                                  key={percent}
+                                  className="absolute bottom-0 flex flex-col items-center pointer-events-none"
                                   style={{
-                                    width: `${postProgress}%`,
-                                    background: `${session.color}25`,
-                                    clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%)',
-                                  }}
-                                />
-                                {/* V-notch glow and marker */}
-                                <div
-                                  className="absolute inset-y-0 pointer-events-none"
-                                  style={{
-                                    left: `${postProgress}%`,
-                                    transform: 'translateX(-16px)',
-                                    width: 32,
+                                    left: markerPosInClipped,
+                                    transform: 'translateX(-50%)',
                                   }}
                                 >
-                                  {/* Outer glow pulse */}
-                                  <div
-                                    className="absolute inset-y-0 left-0 right-0"
+                                  {/* Label above tick - bright when ahead, dim when passed */}
+                                  <span
+                                    className="text-[9px] font-mono font-semibold"
                                     style={{
-                                      background: `radial-gradient(ellipse at right center, ${session.color}30 0%, transparent 70%)`,
-                                      animation: 'pulse 2s ease-in-out infinite',
+                                      color: isPassed ? `${session.color}40` : session.color,
                                     }}
-                                  />
-                                  {/* V-notch SVG with glow */}
-                                  <svg
-                                    className="absolute inset-0 w-full h-full"
-                                    viewBox="0 0 32 100"
-                                    preserveAspectRatio="none"
                                   >
-                                    <defs>
-                                      <filter id={`notch-glow-post-${session.id}`} x="-100%" y="-50%" width="300%" height="200%">
-                                        <feGaussianBlur stdDeviation="2" result="blur1" />
-                                        <feGaussianBlur stdDeviation="4" result="blur2" />
-                                        <feMerge>
-                                          <feMergeNode in="blur2" />
-                                          <feMergeNode in="blur1" />
-                                          <feMergeNode in="SourceGraphic" />
-                                        </feMerge>
-                                      </filter>
-                                    </defs>
-                                    <polyline
-                                      points="2,0 16,50 2,100"
-                                      fill="none"
-                                      stroke={session.color}
-                                      strokeWidth="2"
-                                      filter={`url(#notch-glow-post-${session.id})`}
-                                    />
-                                  </svg>
-                                  {/* Glowing diamond marker */}
+                                    {percent}
+                                  </span>
+                                  {/* Short tick mark connected to bottom edge */}
                                   <div
-                                    className="absolute left-1/2 top-1/2"
                                     style={{
-                                      width: 10,
-                                      height: 10,
-                                      background: session.color,
-                                      transform: 'translate(-50%, -50%) rotate(45deg)',
-                                      boxShadow: `0 0 6px ${session.color}, 0 0 12px ${session.color}, 0 0 18px ${session.color}`,
-                                      animation: 'pulse 1.5s ease-in-out infinite',
-                                    }}
-                                  />
-                                  {/* Inner bright dot */}
-                                  <div
-                                    className="absolute left-1/2 top-1/2"
-                                    style={{
-                                      width: 4,
-                                      height: 4,
-                                      background: 'white',
-                                      borderRadius: '50%',
-                                      transform: 'translate(-50%, -50%)',
-                                      boxShadow: `0 0 3px white`,
+                                      width: 2,
+                                      height: 6,
+                                      backgroundColor: isPassed ? `${session.color}30` : session.color,
+                                      borderRadius: 1,
                                     }}
                                   />
                                 </div>
-                              </>
-                            )}
+                              );
+                            })}
                             {/* Content - centered */}
                             <div className="absolute inset-0 flex items-center justify-center gap-2 px-2">
                               <span
@@ -2715,9 +2642,9 @@ export default function DashboardPage() {
                               >
                                 POST
                               </span>
-                              {barIsActive && clippedWidth > 60 && (
-                                <span className="text-[10px] font-mono" style={{ color: session.color }}>
-                                  {Math.round(postProgress)}%
+                              {barIsActive && (
+                                <span className="text-[9px] font-mono" style={{ color: session.color }}>
+                                  {Math.round(trueProgress)}%
                                 </span>
                               )}
                             </div>
@@ -2854,8 +2781,103 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Custom Session Tooltip */}
+        {hoveredCustomSession && (
+          <div
+            className="fixed z-50 pointer-events-none"
+            style={{
+              left: Math.min(hoveredCustomSession.x + 12, window.innerWidth - 280),
+              top: hoveredCustomSession.y + 12,
+            }}
+          >
+            <div
+              className="bg-card border-2 rounded-lg shadow-2xl p-3 min-w-[220px] max-w-[260px]"
+              style={{ borderColor: hoveredCustomSession.session.color }}
+            >
+              {/* Header */}
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: hoveredCustomSession.session.color }}
+                />
+                <div>
+                  <span className="font-bold text-sm">{hoveredCustomSession.session.name}</span>
+                  <div className="text-[10px] text-muted">Custom Session</div>
+                </div>
+              </div>
+
+              {/* Time range */}
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-muted">Time</span>
+                <span className="text-sm font-mono font-bold" style={{ color: hoveredCustomSession.session.color }}>
+                  {hoveredCustomSession.session.startTime} - {hoveredCustomSession.session.endTime}
+                </span>
+              </div>
+
+              {/* Recurring info */}
+              {hoveredCustomSession.session.recurring && hoveredCustomSession.session.days && (
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-muted">Repeats</span>
+                  <span className="text-xs font-medium">
+                    {hoveredCustomSession.session.days.map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]).join(', ')}
+                  </span>
+                </div>
+              )}
+
+              {/* Progress section (if active) */}
+              {hoveredCustomSession.isActive && (
+                <>
+                  <div className="border-t border-border my-2" />
+                  {(() => {
+                    const progress = hoveredCustomSession.progress;
+                    const remaining = hoveredCustomSession.endTime.getTime() - currentTime.getTime();
+                    const hours = Math.floor(remaining / (1000 * 60 * 60));
+                    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const color = hoveredCustomSession.session.color;
+
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted">Progress</span>
+                          <span className="font-bold" style={{ color }}>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-card-hover overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${progress}%`, backgroundColor: color }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted">Remaining</span>
+                          <span className="font-medium" style={{ color }}>
+                            {hours > 0 ? `${hours}h ` : ''}{minutes}m
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
+
+              {/* Status when not active */}
+              {!hoveredCustomSession.isActive && (
+                <>
+                  <div className="border-t border-border my-2" />
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted">Status</span>
+                    <span className="font-medium" style={{ color: hoveredCustomSession.session.color }}>
+                      {currentTime < hoveredCustomSession.startTime ? 'Upcoming' : 'Ended'}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
           {/* Economic Events Timeline - Middle Third */}
-          <div className="flex-1 relative min-h-0 border-b border-border/20">
+          {showEventsCard && (
+          <div className="flex-1 relative min-h-0 border-b border-border/20 overflow-hidden">
             {/* Empty state when no events */}
             {filteredVisibleEvents.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -2879,8 +2901,12 @@ export default function DashboardPage() {
               return (
                 <div
                   key={`${event.date}-${event.time}-${event.title}`}
-                  className="absolute flex flex-col items-center"
-                  style={{ left: xPos, top: yOffset }}
+                  className="absolute flex flex-col items-center transition-opacity"
+                  style={{
+                    left: xPos,
+                    top: yOffset,
+                    opacity: isPast ? 0.35 : 1,
+                  }}
                 >
                   {/* Marker line */}
                   <div
@@ -2890,9 +2916,7 @@ export default function DashboardPage() {
 
                   {/* Event Card */}
                   <div
-                    className={`w-44 rounded-lg border shadow-lg p-2 transition-all ${
-                      isPast ? "opacity-60" : "opacity-100"
-                    }`}
+                    className="w-44 rounded-lg border shadow-lg p-2 transition-all"
                     style={{
                       backgroundColor: `${IMPACT_COLORS[event.impact]}10`,
                       borderColor: `${IMPACT_COLORS[event.impact]}40`,
@@ -2944,54 +2968,115 @@ export default function DashboardPage() {
               );
             })}
           </div>
+          )}
 
           {/* Custom Sessions & Alerts Timeline - Bottom */}
-          <div className="flex-1 relative min-h-0 bg-purple-500/5 border-t border-purple-500/20">
-            {/* Lane Label */}
-            <div className="absolute top-1 left-2 px-2 py-0.5 rounded bg-purple-500/20 text-[10px] text-purple-400 font-medium z-10">
-              CUSTOM ({customSessions.length} sessions, {customAlerts.length} alerts)
-            </div>
+          {showCustomCard && (
+          <div
+            className="flex-1 relative min-h-0 border-b border-border/20 overflow-hidden"
+            onMouseEnter={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setCustomLaneTooltipPos({ x: e.clientX, y: rect.top });
+              customLaneHoverTimeout.current = setTimeout(() => {
+                setShowCustomLaneTooltip(true);
+              }, 3000);
+            }}
+            onMouseMove={(e) => {
+              if (!showCustomLaneTooltip) {
+                setCustomLaneTooltipPos({ x: e.clientX, y: e.currentTarget.getBoundingClientRect().top });
+              }
+            }}
+            onMouseLeave={() => {
+              if (customLaneHoverTimeout.current) {
+                clearTimeout(customLaneHoverTimeout.current);
+                customLaneHoverTimeout.current = null;
+              }
+              setShowCustomLaneTooltip(false);
+            }}
+          >
+            {/* Custom Lane Tooltip */}
+            {showCustomLaneTooltip && (
+              <div
+                className="fixed z-50 px-3 py-2 rounded-lg bg-card border border-purple-500/40 shadow-lg pointer-events-none"
+                style={{
+                  left: customLaneTooltipPos.x,
+                  top: Math.max(50, customLaneTooltipPos.y - 45),
+                  transform: 'translateX(-50%)',
+                }}
+              >
+                <div className="text-xs font-medium text-purple-400">
+                  Custom: {customSessions.length} session{customSessions.length !== 1 ? 's' : ''}, {customAlerts.length} alert{customAlerts.length !== 1 ? 's' : ''}
+                </div>
+              </div>
+            )}
             {/* Custom Sessions */}
-            {customSessions.map((session) => {
+            {customSessions.flatMap((session) => {
               const today = new Date(currentTime);
               const todayDay = today.getDay();
-
-              // Check if session is active today
-              const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
-              if (!isActiveToday) return null;
+              const yesterdayDay = (todayDay + 6) % 7; // Previous day (0-6)
 
               // Calculate session bar position
               const [startHour, startMin] = session.startTime.split(":").map(Number);
               const [endHour, endMin] = session.endTime.split(":").map(Number);
 
-              const sessionStart = new Date(today);
-              sessionStart.setHours(startHour, startMin, 0, 0);
+              const timelineWidth = containerWidth - 240;
+              const sessionsToRender: { start: Date; end: Date; key: string }[] = [];
 
-              const sessionEnd = new Date(today);
-              sessionEnd.setHours(endHour, endMin, 0, 0);
+              // Check if this is an overnight session (end time is before start time)
+              const isOvernight = endHour < startHour || (endHour === startHour && endMin < startMin);
 
-              // Handle sessions that cross midnight
-              if (sessionEnd <= sessionStart) {
-                sessionEnd.setDate(sessionEnd.getDate() + 1);
+              if (isOvernight) {
+                // For overnight sessions, check each instance separately based on start day
+                // 1. Yesterday's start to today's end - check if yesterday was an active day
+                const isYesterdayActive = !session.recurring || (session.days?.includes(yesterdayDay) ?? false);
+                if (isYesterdayActive) {
+                  const yesterdayStart = new Date(today);
+                  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+                  yesterdayStart.setHours(startHour, startMin, 0, 0);
+                  const todayEnd = new Date(today);
+                  todayEnd.setHours(endHour, endMin, 0, 0);
+                  sessionsToRender.push({ start: yesterdayStart, end: todayEnd, key: `${session.id}-yesterday` });
+                }
+
+                // 2. Today's start to tomorrow's end - check if today is an active day
+                const isTodayActive = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                if (isTodayActive) {
+                  const todayStart = new Date(today);
+                  todayStart.setHours(startHour, startMin, 0, 0);
+                  const tomorrowEnd = new Date(today);
+                  tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
+                  tomorrowEnd.setHours(endHour, endMin, 0, 0);
+                  sessionsToRender.push({ start: todayStart, end: tomorrowEnd, key: `${session.id}-today` });
+                }
+              } else {
+                // Regular same-day session - check if today is active
+                const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                if (isActiveToday) {
+                  const sessionStart = new Date(today);
+                  sessionStart.setHours(startHour, startMin, 0, 0);
+                  const sessionEnd = new Date(today);
+                  sessionEnd.setHours(endHour, endMin, 0, 0);
+                  sessionsToRender.push({ start: sessionStart, end: sessionEnd, key: session.id });
+                }
               }
 
-              const timelineWidth = containerWidth - 240;
-              const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
-              const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
-              const width = endX - startX;
+              return sessionsToRender.map(({ start: sessionStart, end: sessionEnd, key }) => {
+                const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
+                const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
+                const width = endX - startX;
 
-              // Only render if visible
-              if (endX < -100 || startX > timelineWidth) return null;
+                // Only render if visible
+                if (endX < -100 || startX > timelineWidth) return null;
 
-              const isActive = currentTime >= sessionStart && currentTime <= sessionEnd;
-              const progress = isActive
-                ? ((currentTime.getTime() - sessionStart.getTime()) / (sessionEnd.getTime() - sessionStart.getTime())) * 100
-                : 0;
+                const isActive = currentTime >= sessionStart && currentTime <= sessionEnd;
+                const progress = isActive
+                  ? ((currentTime.getTime() - sessionStart.getTime()) / (sessionEnd.getTime() - sessionStart.getTime())) * 100
+                  : 0;
 
               return (
                 <div
-                  key={session.id}
-                  className="absolute cursor-pointer group"
+                  key={key}
+                  className="absolute cursor-pointer group z-10"
                   style={{
                     left: Math.max(0, startX),
                     top: 4,
@@ -2999,51 +3084,119 @@ export default function DashboardPage() {
                     width: Math.max(80, Math.min(width, timelineWidth - Math.max(0, startX))),
                   }}
                   onClick={() => editSession(session)}
+                  onMouseEnter={(e) => {
+                    setHoveredCustomSession({
+                      session,
+                      x: e.clientX,
+                      y: e.clientY,
+                      isActive,
+                      progress,
+                      startTime: sessionStart,
+                      endTime: sessionEnd,
+                    });
+                  }}
+                  onMouseMove={(e) => {
+                    if (hoveredCustomSession?.session.id === session.id) {
+                      setHoveredCustomSession(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
+                    }
+                  }}
+                  onMouseLeave={() => setHoveredCustomSession(null)}
                 >
                   {/* Session bar - fills lane height */}
-                  <div
-                    className="h-full rounded-lg overflow-hidden transition-all group-hover:brightness-110"
-                    style={{
-                      backgroundColor: `${session.color}20`,
-                      border: `1px solid ${session.color}${isActive ? "60" : "40"}`,
-                      boxShadow: isActive ? `0 0 12px ${session.color}40` : undefined,
-                    }}
-                  >
-                    {/* Progress fill */}
-                    {isActive && (
+                  {(() => {
+                    // Calculate clipped dimensions for tick markers
+                    const clippedStartX = Math.max(0, startX);
+                    const clippedEndX = Math.min(timelineWidth, endX);
+                    const clippedWidth = clippedEndX - clippedStartX;
+                    const fullSessionWidth = endX - startX;
+                    const clipStartOffset = clippedStartX - startX;
+
+                    // Check if session has completely ended
+                    const sessionEnded = currentTime.getTime() > sessionEnd.getTime();
+
+                    return (
                       <div
-                        className="absolute inset-y-0 left-0 transition-all"
+                        className="h-full rounded-lg overflow-hidden transition-all group-hover:brightness-110"
                         style={{
-                          width: `${progress}%`,
-                          backgroundColor: `${session.color}35`,
+                          backgroundColor: `${session.color}20`,
+                          border: `1px solid ${session.color}${isActive ? "60" : "40"}`,
+                          boxShadow: isActive ? `0 0 12px ${session.color}40` : undefined,
                         }}
-                      />
-                    )}
-                    {/* Left accent bar */}
-                    <div
-                      className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
-                      style={{ backgroundColor: session.color }}
-                    />
-                    {/* Session info - centered */}
-                    <div className="absolute inset-0 flex items-center justify-center gap-2 px-3">
-                      {isActive && (
-                        <div className="relative">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: session.color }} />
-                          <div className="absolute inset-0 w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: session.color, opacity: 0.5 }} />
+                      >
+                        {/* Progress dim overlay - dims passed portion */}
+                        {isActive && (
+                          <div
+                            className="absolute inset-y-0 left-0 transition-all"
+                            style={{
+                              width: `${progress}%`,
+                              background: `linear-gradient(90deg, rgba(15,23,42,0.5) 0%, rgba(15,23,42,0.4) 90%, transparent 100%)`,
+                            }}
+                          />
+                        )}
+                        {/* Left accent bar */}
+                        <div
+                          className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+                          style={{ backgroundColor: session.color }}
+                        />
+                        {/* Progress tick markers */}
+                        {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => {
+                          const markerPosInFull = fullSessionWidth * (percent / 100);
+                          const markerPosInClipped = markerPosInFull - clipStartOffset;
+                          if (markerPosInClipped < 0 || markerPosInClipped > clippedWidth) return null;
+
+                          const isPassed = (isActive && progress >= percent) || sessionEnded;
+
+                          return (
+                            <div
+                              key={percent}
+                              className="absolute bottom-0 flex flex-col items-center pointer-events-none"
+                              style={{
+                                left: markerPosInClipped,
+                                transform: 'translateX(-50%)',
+                              }}
+                            >
+                              <span
+                                className="text-[9px] font-mono font-semibold"
+                                style={{
+                                  color: isPassed ? `${session.color}40` : session.color,
+                                }}
+                              >
+                                {percent}
+                              </span>
+                              <div
+                                style={{
+                                  width: 2,
+                                  height: 6,
+                                  backgroundColor: isPassed ? `${session.color}30` : session.color,
+                                  borderRadius: 1,
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                        {/* Session info - centered */}
+                        <div className="absolute inset-0 flex items-center justify-center gap-2 px-3">
+                          {isActive && (
+                            <div className="relative">
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: session.color }} />
+                              <div className="absolute inset-0 w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: session.color, opacity: 0.5 }} />
+                            </div>
+                          )}
+                          <span className="text-[10px] font-bold uppercase tracking-wide truncate" style={{ color: session.color }}>
+                            {session.name}
+                          </span>
+                          {isActive && width > 120 && (
+                            <span className="text-[10px] font-mono" style={{ color: session.color }}>
+                              {Math.round(progress)}%
+                            </span>
+                          )}
                         </div>
-                      )}
-                      <span className="text-[10px] font-bold uppercase tracking-wide truncate" style={{ color: session.color }}>
-                        {session.name}
-                      </span>
-                      {isActive && width > 120 && (
-                        <span className="text-[10px] font-mono" style={{ color: session.color }}>
-                          {Math.round(progress)}%
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
+            });
             })}
 
             {/* Custom Alerts */}
@@ -3067,61 +3220,40 @@ export default function DashboardPage() {
               if (xPos < -50 || xPos > timelineWidth) return null;
 
               const isPast = currentTime > alertTime;
+              const alertColor = alert.color || "#94A3B8";
 
               return (
                 <div
                   key={alert.id}
-                  className={`absolute cursor-pointer ${isPast ? "opacity-50" : ""}`}
-                  style={{ left: xPos, top: 0, bottom: 0 }}
+                  className="absolute cursor-pointer z-30"
+                  style={{
+                    left: xPos,
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}
                   onClick={() => editAlert(alert)}
                 >
-                  {/* Vertical line from pin to bottom */}
+                  {/* Alert marker - centered pill design */}
                   <div
-                    className="absolute left-1/2 -translate-x-1/2 w-px"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg relative overflow-hidden"
                     style={{
-                      top: 24,
-                      bottom: 0,
-                      background: `linear-gradient(180deg, #F97316 0%, transparent 100%)`,
+                      backgroundColor: alertColor,
+                      boxShadow: isPast ? 'none' : `0 4px 12px ${alertColor}40`,
                     }}
-                  />
-                  {/* Diamond pin marker */}
-                  <div className="absolute left-1/2 -translate-x-1/2 top-0 flex flex-col items-center">
-                    {/* Glow effect for upcoming alerts */}
-                    {!isPast && (
+                  >
+                    {/* Dark overlay when past */}
+                    {isPast && (
                       <div
-                        className="absolute top-1 w-4 h-4 rounded-full animate-ping"
-                        style={{ backgroundColor: "#F9731640" }}
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ backgroundColor: 'rgba(15, 23, 42, 0.6)' }}
                       />
                     )}
-                    {/* Diamond shape */}
-                    <div
-                      className="relative w-5 h-5 flex items-center justify-center"
-                      style={{
-                        transform: "rotate(45deg)",
-                        backgroundColor: "#F97316",
-                        boxShadow: !isPast ? "0 0 12px rgba(249, 115, 22, 0.5)" : undefined,
-                      }}
-                    >
-                      <Bell
-                        className="w-2.5 h-2.5 text-white"
-                        style={{ transform: "rotate(-45deg)" }}
-                      />
-                    </div>
-                    {/* Pointer triangle */}
-                    <div
-                      className="w-0 h-0 -mt-0.5"
-                      style={{
-                        borderLeft: "4px solid transparent",
-                        borderRight: "4px solid transparent",
-                        borderTop: "6px solid #F97316",
-                      }}
-                    />
-                    {/* Label below */}
-                    <div className="mt-1 flex flex-col items-center">
-                      <span className="text-[9px] text-orange-400 whitespace-nowrap font-bold leading-tight px-1 py-0.5 rounded bg-orange-500/10">
+                    <Bell className="w-3.5 h-3.5 relative z-10" style={{ color: isPast ? "#0f172a80" : "#0f172a" }} />
+                    <div className="flex flex-col relative z-10">
+                      <span className="text-[11px] font-bold leading-tight" style={{ color: isPast ? "#0f172a80" : "#0f172a" }}>
                         {alert.name}
                       </span>
-                      <span className="text-[8px] text-orange-400/60 font-mono leading-tight">
+                      <span className="text-[9px] font-mono leading-tight" style={{ color: isPast ? "#0f172a50" : "#0f172a99" }}>
                         {formatTimeDisplay(alert.time)}
                       </span>
                     </div>
@@ -3142,42 +3274,83 @@ export default function DashboardPage() {
             {/* Message when sessions/alerts exist but none visible in current time window */}
             {(customSessions.length > 0 || customAlerts.length > 0) && (() => {
               // Count how many are actually rendered (visible in time window)
-              const visibleSessions = customSessions.filter(session => {
-                const today = new Date(currentTime);
-                const todayDay = today.getDay();
-                const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
-                if (!isActiveToday) return false;
+              const timelineWidth = containerWidth - 240;
+              const today = new Date(currentTime);
+              const todayDay = today.getDay();
+              const yesterdayDay = (todayDay + 6) % 7;
 
+              let hasVisibleSession = false;
+              for (const session of customSessions) {
                 const [startHour, startMin] = session.startTime.split(":").map(Number);
                 const [endHour, endMin] = session.endTime.split(":").map(Number);
-                const sessionStart = new Date(today);
-                sessionStart.setHours(startHour, startMin, 0, 0);
-                const sessionEnd = new Date(today);
-                sessionEnd.setHours(endHour, endMin, 0, 0);
-                if (sessionEnd <= sessionStart) sessionEnd.setDate(sessionEnd.getDate() + 1);
+                const isOvernight = endHour < startHour || (endHour === startHour && endMin < startMin);
 
-                const timelineWidth = containerWidth - 240;
-                const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
-                const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
-                return !(endX < -100 || startX > timelineWidth);
-              });
+                if (isOvernight) {
+                  // Check yesterday→today instance
+                  const isYesterdayActive = !session.recurring || (session.days?.includes(yesterdayDay) ?? false);
+                  if (isYesterdayActive) {
+                    const yesterdayStart = new Date(today);
+                    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+                    yesterdayStart.setHours(startHour, startMin, 0, 0);
+                    const todayEnd = new Date(today);
+                    todayEnd.setHours(endHour, endMin, 0, 0);
+                    const startX = getTimePosition(yesterdayStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(todayEnd, currentTime, timelineWidth) + scrollOffset;
+                    if (!(endX < -100 || startX > timelineWidth)) {
+                      hasVisibleSession = true;
+                      break;
+                    }
+                  }
+                  // Check today→tomorrow instance
+                  const isTodayActive = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                  if (isTodayActive) {
+                    const todayStart = new Date(today);
+                    todayStart.setHours(startHour, startMin, 0, 0);
+                    const tomorrowEnd = new Date(today);
+                    tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
+                    tomorrowEnd.setHours(endHour, endMin, 0, 0);
+                    const startX = getTimePosition(todayStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(tomorrowEnd, currentTime, timelineWidth) + scrollOffset;
+                    if (!(endX < -100 || startX > timelineWidth)) {
+                      hasVisibleSession = true;
+                      break;
+                    }
+                  }
+                } else {
+                  const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                  if (isActiveToday) {
+                    const sessionStart = new Date(today);
+                    sessionStart.setHours(startHour, startMin, 0, 0);
+                    const sessionEnd = new Date(today);
+                    sessionEnd.setHours(endHour, endMin, 0, 0);
+                    const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
+                    if (!(endX < -100 || startX > timelineWidth)) {
+                      hasVisibleSession = true;
+                      break;
+                    }
+                  }
+                }
+              }
 
-              const visibleAlerts = customAlerts.filter(alert => {
-                const today = new Date(currentTime);
-                const todayDay = today.getDay();
-                const isActiveToday = !alert.recurring || (alert.days?.includes(todayDay) ?? false);
-                if (!isActiveToday) return false;
+              let hasVisibleAlert = false;
+              if (!hasVisibleSession) {
+                for (const alert of customAlerts) {
+                  const isActiveToday = !alert.recurring || (alert.days?.includes(todayDay) ?? false);
+                  if (!isActiveToday) continue;
 
-                const [alertHour, alertMin] = alert.time.split(":").map(Number);
-                const alertTime = new Date(today);
-                alertTime.setHours(alertHour, alertMin, 0, 0);
+                  const [alertHour, alertMin] = alert.time.split(":").map(Number);
+                  const alertTime = new Date(today);
+                  alertTime.setHours(alertHour, alertMin, 0, 0);
+                  const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
+                  if (!(xPos < -50 || xPos > timelineWidth)) {
+                    hasVisibleAlert = true;
+                    break;
+                  }
+                }
+              }
 
-                const timelineWidth = containerWidth - 240;
-                const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
-                return !(xPos < -50 || xPos > timelineWidth);
-              });
-
-              if (visibleSessions.length === 0 && visibleAlerts.length === 0) {
+              if (!hasVisibleSession && !hasVisibleAlert) {
                 return (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
@@ -3192,21 +3365,215 @@ export default function DashboardPage() {
               return null;
             })()}
           </div>
+          )}
 
-          {/* NOW Line - spans full height of timeline area */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-accent z-20 pointer-events-none"
-            style={{
-              left: `${NOW_LINE_POSITION * 100}%`,
-              transform: `translateX(${scrollOffset}px)`,
-              boxShadow: "0 0 10px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3)",
-            }}
-          >
-            {/* NOW label */}
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-accent text-white text-xs font-bold">
-              NOW
-            </div>
-          </div>
+          {/* NOW Line - tech style pointers at session boundaries */}
+          {(() => {
+            const timelineWidth = containerWidth - 240;
+            const nowX = getTimePosition(currentTime, currentTime, timelineWidth) + scrollOffset;
+            const visibleSessions = MARKET_SESSIONS.filter(s => visibleMarkets.has(s.id));
+            const marketLaneCount = visibleSessions.length;
+            // Total flex lanes = market sessions + events lane (if visible) + custom lane (if visible)
+            const totalLanes = marketLaneCount + (showEventsCard ? 1 : 0) + (showCustomCard ? 1 : 0);
+            // Each market session takes up 1/totalLanes of the height
+            const laneHeightPercent = 100 / totalLanes;
+
+            return (
+              <div
+                className="absolute top-0 bottom-0 z-20 pointer-events-none"
+                style={{ left: nowX }}
+              >
+                {/* NOW label */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-accent text-white text-xs font-bold whitespace-nowrap">
+                  NOW
+                </div>
+
+                {/* Tech pointers for each market session lane */}
+                {visibleSessions.map((session, index) => {
+                  const isPreActive = isSessionActiveNow(session, currentTime, "pre");
+                  const isRegularActive = isSessionActiveNow(session, currentTime, "regular");
+                  const isPostActive = isSessionActiveNow(session, currentTime, "post");
+                  const isAnyActive = isPreActive || isRegularActive || isPostActive;
+                  const pointerColor = session.color;
+
+                  return (
+                    <div
+                      key={`now-segment-${session.id}`}
+                      className="absolute left-1/2 -translate-x-1/2"
+                      style={{
+                        top: `calc(${index * laneHeightPercent}% + 8px)`,
+                        height: `calc(${laneHeightPercent}% - 16px)`,
+                        width: 24,
+                      }}
+                    >
+                      {/* Top dot */}
+                      <div
+                        className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
+                        style={{
+                          width: 6,
+                          height: 6,
+                          backgroundColor: pointerColor,
+                          boxShadow: isAnyActive ? `0 0 6px ${pointerColor}` : undefined,
+                        }}
+                      />
+
+                      {/* Top bracket pointing down (below dot) */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 7 }}>
+                        <svg width="14" height="8" viewBox="0 0 14 8">
+                          <path
+                            d="M0 0 L0 3 L7 8 L14 3 L14 0"
+                            fill="none"
+                            stroke={pointerColor}
+                            strokeWidth={isAnyActive ? 2 : 1.5}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            style={{ filter: isAnyActive ? `drop-shadow(0 0 3px ${pointerColor})` : undefined }}
+                          />
+                        </svg>
+                      </div>
+
+                      {/* Connecting line */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2"
+                        style={{
+                          top: 18,
+                          bottom: 18,
+                          width: isAnyActive ? 2 : 1,
+                          background: `linear-gradient(180deg, ${pointerColor} 0%, ${pointerColor}30 50%, ${pointerColor} 100%)`,
+                          borderRadius: 1,
+                        }}
+                      />
+
+                      {/* Bottom bracket pointing up (above dot) */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 7 }}>
+                        <svg width="14" height="8" viewBox="0 0 14 8">
+                          <path
+                            d="M0 8 L0 5 L7 0 L14 5 L14 8"
+                            fill="none"
+                            stroke={pointerColor}
+                            strokeWidth={isAnyActive ? 2 : 1.5}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            style={{ filter: isAnyActive ? `drop-shadow(0 0 3px ${pointerColor})` : undefined }}
+                          />
+                        </svg>
+                      </div>
+
+                      {/* Bottom dot */}
+                      <div
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full"
+                        style={{
+                          width: 6,
+                          height: 6,
+                          backgroundColor: pointerColor,
+                          boxShadow: isAnyActive ? `0 0 6px ${pointerColor}` : undefined,
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+
+                {/* Tech pointers for Events lane */}
+                {showEventsCard && (() => {
+                  const eventsColor = "#64748b";
+                  return (
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2"
+                      style={{
+                        top: `calc(${marketLaneCount * laneHeightPercent}% + 8px)`,
+                        height: `calc(${laneHeightPercent}% - 16px)`,
+                        width: 24,
+                      }}
+                    >
+                      {/* Top dot */}
+                      <div
+                        className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
+                        style={{ width: 6, height: 6, backgroundColor: eventsColor }}
+                      />
+                      {/* Top bracket pointing down */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 7 }}>
+                        <svg width="14" height="8" viewBox="0 0 14 8">
+                          <path d="M0 0 L0 3 L7 8 L14 3 L14 0" fill="none" stroke={eventsColor} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      {/* Connecting line */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2"
+                        style={{
+                          top: 18,
+                          bottom: 18,
+                          width: 1,
+                          background: `linear-gradient(180deg, ${eventsColor} 0%, ${eventsColor}30 50%, ${eventsColor} 100%)`,
+                          borderRadius: 1,
+                        }}
+                      />
+                      {/* Bottom bracket pointing up */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 7 }}>
+                        <svg width="14" height="8" viewBox="0 0 14 8">
+                          <path d="M0 8 L0 5 L7 0 L14 5 L14 8" fill="none" stroke={eventsColor} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      {/* Bottom dot */}
+                      <div
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full"
+                        style={{ width: 6, height: 6, backgroundColor: eventsColor }}
+                      />
+                    </div>
+                  );
+                })()}
+
+                {/* Tech pointers for Custom lane */}
+                {showCustomCard && (() => {
+                  const customColor = "#a855f7";
+                  const customLaneIndex = marketLaneCount + (showEventsCard ? 1 : 0);
+                  return (
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2"
+                      style={{
+                        top: `calc(${customLaneIndex * laneHeightPercent}% + 8px)`,
+                        height: `calc(${laneHeightPercent}% - 16px)`,
+                        width: 24,
+                      }}
+                    >
+                      {/* Top dot */}
+                      <div
+                        className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
+                        style={{ width: 6, height: 6, backgroundColor: customColor }}
+                      />
+                      {/* Top bracket pointing down */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 7 }}>
+                        <svg width="14" height="8" viewBox="0 0 14 8">
+                          <path d="M0 0 L0 3 L7 8 L14 3 L14 0" fill="none" stroke={customColor} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      {/* Connecting line */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2"
+                        style={{
+                          top: 18,
+                          bottom: 18,
+                          width: 1,
+                          background: `linear-gradient(180deg, ${customColor} 0%, ${customColor}30 50%, ${customColor} 100%)`,
+                          borderRadius: 1,
+                        }}
+                      />
+                      {/* Bottom bracket pointing up */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 7 }}>
+                        <svg width="14" height="8" viewBox="0 0 14 8">
+                          <path d="M0 8 L0 5 L7 0 L14 5 L14 8" fill="none" stroke={customColor} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      {/* Bottom dot */}
+                      <div
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full"
+                        style={{ width: 6, height: 6, backgroundColor: customColor }}
+                      />
+                    </div>
+                  );
+                })()}
+              </div>
+            );
+          })()}
         </div>
 
       </div>
@@ -3271,32 +3638,32 @@ export default function DashboardPage() {
                 />
               )}
 
-              {/* Color picker (for sessions) */}
-              {modalMode === "session" && (
-                <div>
-                  <label className="block text-sm font-medium text-muted mb-2">
-                    Color
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {COLOR_OPTIONS.map((color) => (
-                      <button
-                        key={color.value}
-                        onClick={() => setFormColor(color.value)}
-                        className={`w-8 h-8 rounded-full transition-all ${
-                          formColor === color.value
-                            ? "ring-2 ring-offset-2 ring-offset-card scale-110"
-                            : "hover:scale-105"
-                        }`}
-                        style={{
-                          backgroundColor: color.value,
-                          boxShadow: formColor === color.value ? `0 0 0 2px var(--card), 0 0 0 4px ${color.value}` : undefined,
-                        }}
-                        title={color.name}
-                      />
-                    ))}
-                  </div>
+              {/* Color picker */}
+              <div>
+                <label className="block text-sm font-medium text-muted mb-2">
+                  Color
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {COLOR_OPTIONS.map((color) => (
+                    <button
+                      key={color.value}
+                      onClick={() => setFormColor(color.value)}
+                      className={`w-8 h-8 rounded-full transition-all ${
+                        formColor === color.value
+                          ? "ring-2 ring-offset-2 ring-offset-card scale-110"
+                          : "hover:scale-105"
+                      }`}
+                      style={{
+                        backgroundColor: color.value,
+                        boxShadow: formColor === color.value
+                          ? `0 0 0 2px var(--card), 0 0 0 4px ${color.value}`
+                          : undefined,
+                      }}
+                      title={color.name}
+                    />
+                  ))}
                 </div>
-              )}
+              </div>
 
               {/* Recurring toggle */}
               <div>

@@ -291,7 +291,7 @@ html {
     transform: translateX(-100%);
   }
   100% {
-    transform: translateX(100%);
+    transform: translateX(200%);
   }
 }
 
@@ -310,5 +310,44 @@ html {
   }
   50% {
     box-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+  }
+}
+
+/* Subtle pulse animation for active cards */
+@keyframes pulse-subtle {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+/* General pulse animation for progress markers */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Arrow marker animation for session progress */
+@keyframes arrow-pulse {
+  0%, 100% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 12px currentColor);
   }
 }
