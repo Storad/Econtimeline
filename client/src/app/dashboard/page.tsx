@@ -770,6 +770,9 @@ export default function DashboardPage() {
   // Expanded card state
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
+  // Market session alerts state
+  const [marketAlerts, setMarketAlerts] = useState<Set<string>>(new Set());
+
   // Economic Events Filter State
   const [eventsFilterExpanded, setEventsFilterExpanded] = useState(false);
   const [filterImpacts, setFilterImpacts] = useState<Set<string>>(new Set(["high", "medium", "low"]));
@@ -1420,12 +1423,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Sidebar Header Label */}
-        <div className="absolute top-0 left-0 w-60 h-10 border-b border-r border-border bg-card/80 backdrop-blur-sm flex items-center justify-center z-10">
+        <div className="absolute top-0 left-0 w-60 h-10 border-b border-r border-border bg-background flex items-center justify-center z-10">
           <span className="text-xs font-semibold text-muted uppercase tracking-wider">Market Overview</span>
         </div>
 
         {/* Time Scale / Ruler - starts after sidebar */}
-        <div className="absolute top-0 left-60 right-0 h-10 border-b border-border bg-card/80 backdrop-blur-sm flex items-end z-10 overflow-hidden">
+        <div className="absolute top-0 left-60 right-0 h-10 border-b border-border bg-background flex items-end z-10 overflow-hidden">
           {(() => {
             const timelineWidth = containerWidth - 240; // Subtract sidebar width
             const markers: React.ReactNode[] = [];
@@ -1472,7 +1475,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Unified Left Sidebar - Below Time Scale */}
-        <div className="absolute top-10 left-0 bottom-0 w-60 bg-card/20 border-r border-border/30 flex flex-col p-1.5 gap-1 overflow-y-auto overflow-x-visible">
+        <div className="absolute top-10 left-0 bottom-0 w-60 bg-background border-r border-border flex flex-col p-1.5 gap-1 overflow-y-auto overflow-x-visible">
           {/* Market Session Cards */}
           {MARKET_SESSIONS.filter(s => visibleMarkets.has(s.id)).map((session) => {
               const isPreActive = isSessionActiveNow(session, currentTime, "pre");
@@ -1686,6 +1689,49 @@ export default function DashboardPage() {
                             {getTimeUntilOpenNow(session, currentTime)}
                           </div>
                         )}
+                      </div>
+
+                      {/* Alerts Toggle */}
+                      <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMarketAlerts(prev => {
+                              const next = new Set(prev);
+                              if (next.has(session.id)) {
+                                next.delete(session.id);
+                              } else {
+                                next.add(session.id);
+                              }
+                              return next;
+                            });
+                          }}
+                          className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors"
+                          style={{
+                            backgroundColor: marketAlerts.has(session.id) ? `${session.color}25` : 'rgba(255,255,255,0.05)',
+                            border: `1px solid ${marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.1)'}`,
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Bell className="w-3 h-3" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.5)' }} />
+                            <span className="text-[10px]" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.6)' }}>
+                              Open/Close Alerts
+                            </span>
+                          </div>
+                          <div
+                            className="w-8 h-4 rounded-full p-0.5 transition-colors"
+                            style={{
+                              backgroundColor: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.2)',
+                            }}
+                          >
+                            <div
+                              className="w-3 h-3 rounded-full bg-white transition-transform"
+                              style={{
+                                transform: marketAlerts.has(session.id) ? 'translateX(16px)' : 'translateX(0)',
+                              }}
+                            />
+                          </div>
+                        </button>
                       </div>
                     </div>
                   )}
@@ -2068,43 +2114,6 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* Animated sparkline */}
-                  <div className="flex items-center justify-between">
-                    <svg className="w-full h-4" viewBox="0 0 120 16" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="custom-spark" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#A855F7" stopOpacity="0.2" />
-                          <stop offset="50%" stopColor="#A855F7" stopOpacity="0.6" />
-                          <stop offset="100%" stopColor="#A855F7" stopOpacity="1" />
-                        </linearGradient>
-                      </defs>
-                      <path fill="none" stroke="url(#custom-spark)" strokeWidth="1.5" strokeLinecap="round">
-                        <animate
-                          attributeName="d"
-                          dur="5s"
-                          repeatCount="indefinite"
-                          values="M0,8 Q15,12 30,8 T60,10 T90,6 T120,8;
-                                  M0,10 Q15,6 30,10 T60,6 T90,12 T120,7;
-                                  M0,6 Q15,10 30,6 T60,12 T90,8 T120,10;
-                                  M0,8 Q15,12 30,8 T60,10 T90,6 T120,8"
-                          calcMode="spline"
-                          keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-                        />
-                      </path>
-                      <circle r="2" fill="#A855F7">
-                        <animate attributeName="cx" values="120;120;120;120" dur="5s" repeatCount="indefinite" />
-                        <animate
-                          attributeName="cy"
-                          dur="5s"
-                          repeatCount="indefinite"
-                          values="8;7;10;8"
-                          calcMode="spline"
-                          keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-                        />
-                        <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
-                      </circle>
-                    </svg>
-                  </div>
                 </div>
               )}
 
