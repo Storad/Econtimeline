@@ -1762,7 +1762,6 @@ export default function DashboardPage() {
                     boxShadow: isAnyActive
                         ? `0 0 20px ${session.color}40, 0 0 40px ${session.color}20, 0 8px 32px ${session.color}30, inset 0 1px 0 ${session.color}30`
                         : `0 2px 8px ${session.color}10, inset 0 1px 0 ${session.color}10`,
-                    ringColor: isExpanded ? session.color : 'transparent',
                   }}
                   onClick={(e) => {
                     if (isExpanded) {
