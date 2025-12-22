@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-21T11:17:19.769Z",
+  "lastUpdated": "2025-12-22T11:18:54.205Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,54 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-09-22",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-09-22",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-09-23",
       "time": "08:30",
@@ -14125,6 +14077,32 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-22",
+      "time": "10:00",
+      "title": "Existing Home Sales",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "nar",
+      "sourceUrl": "https://www.nar.realtor/research-and-statistics/housing-statistics/existing-home-sales",
+      "description": "Monthly count of existing home sales from the National Association of Realtors.",
+      "whyItMatters": "Key indicator of housing market health. Represents ~90% of all home sales.",
+      "frequency": "Monthly (around 3rd-4th week)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "REITs"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
