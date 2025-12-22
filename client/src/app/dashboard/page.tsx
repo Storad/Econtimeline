@@ -802,6 +802,7 @@ export default function DashboardPage() {
   const [filterCurrency, setFilterCurrency] = useState("All");
   const [showPastEvents, setShowPastEvents] = useState(true);
   const [showEventsListModal, setShowEventsListModal] = useState(false);
+  const [showCustomManageModal, setShowCustomManageModal] = useState(false);
 
   // Custom Sessions & Alerts Card State
   
@@ -2106,90 +2107,58 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            {/* Action buttons */}
-            <div className="px-3 pb-2 flex gap-2">
+            {/* Compact summary view */}
+            <div className="px-3 pb-2 space-y-1.5">
+              {/* Active session indicator */}
+              {activeSession && (
+                <div className="flex items-center gap-2 px-2 py-1 rounded bg-purple-500/10 border border-purple-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: activeSession.color }} />
+                  <span className="text-[10px] text-white/80 truncate flex-1">{activeSession.name}</span>
+                  <span className="text-[9px] font-mono text-purple-400">{Math.round(sessionProgress)}%</span>
+                </div>
+              )}
+
+              {/* Next alert indicator */}
+              {nextAlert && (
+                <div className="flex items-center gap-2 px-2 py-1 rounded bg-orange-500/10 border border-orange-500/20">
+                  <Bell className="w-3 h-3 text-orange-400" />
+                  <span className="text-[10px] text-white/80 truncate flex-1">{nextAlert.name}</span>
+                  <span className="text-[9px] font-mono text-orange-400">{formatMinutes(nextAlert.minutesUntil)}</span>
+                </div>
+              )}
+
+              {/* Item counts */}
+              <div className="flex items-center justify-between text-[9px] text-white/50 px-1">
+                <span>{customSessions.length} session{customSessions.length !== 1 ? 's' : ''}, {customAlerts.length} alert{customAlerts.length !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+
+            {/* Action buttons - compact row */}
+            <div className="px-3 pb-2 flex gap-1.5">
               <button
                 onClick={() => openNewSessionModal()}
-                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[9px] rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 transition-colors"
               >
-                <Plus className="w-3 h-3" />
+                <Plus className="w-2.5 h-2.5" />
                 Session
               </button>
               <button
                 onClick={() => openNewAlertModal()}
-                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[9px] rounded bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 transition-colors"
               >
-                <Bell className="w-3 h-3" />
+                <Plus className="w-2.5 h-2.5" />
                 Alert
               </button>
+              {(customSessions.length > 0 || customAlerts.length > 0) && (
+                <button
+                  onClick={() => setShowCustomManageModal(true)}
+                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[9px] rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors"
+                >
+                  <Settings className="w-2.5 h-2.5" />
+                  Manage
+                </button>
+              )}
             </div>
-
-            {/* Sessions list */}
-            {customSessions.length > 0 && (
-              <div className="px-3 pb-2">
-                <div className="space-y-1">
-                  {customSessions.map((session) => {
-                    const isActive = session.id === activeSession?.id;
-                    const progress = isActive ? getSessionProgress(session) : 0;
-                    return (
-                      <button
-                        key={session.id}
-                        onClick={() => editSession(session)}
-                        className={`w-full flex flex-col gap-1 px-2 py-1.5 rounded border transition-colors text-left ${
-                          isActive ? 'border-purple-500/50 bg-purple-500/10' : 'border-white/10 hover:bg-white/10'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${isActive ? 'animate-pulse' : ''}`} style={{ backgroundColor: session.color }} />
-                            <span className="text-[11px] text-white/90 truncate max-w-[100px]">{session.name}</span>
-                            {isActive && <span className="text-[8px] text-purple-400 font-bold">LIVE</span>}
-                          </div>
-                          <span className="text-[9px] text-white/50 font-mono">{session.startTime}-{session.endTime}</span>
-                        </div>
-                        {isActive && (
-                          <div className="h-1 rounded-full overflow-hidden bg-white/10 w-full">
-                            <div
-                              className="h-full rounded-full"
-                              style={{ width: `${progress}%`, backgroundColor: session.color }}
-                            />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Alerts list */}
-            {customAlerts.length > 0 && (
-              <div className="px-3 pb-2">
-                <div className="space-y-1">
-                  {customAlerts.map((alert) => {
-                    const alertInfo = upcomingAlerts.find(a => a.id === alert.id);
-                    return (
-                      <button
-                        key={alert.id}
-                        onClick={() => editAlert(alert)}
-                        className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-orange-500/20 hover:bg-orange-500/10 transition-colors text-left"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Bell className="w-3 h-3 text-orange-400" />
-                          <span className="text-[11px] text-white/90 truncate max-w-[100px]">{alert.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[9px] text-orange-400/70 font-mono">{alert.time}</span>
-                          {alertInfo && (
-                            <span className="text-[8px] text-orange-400/50">in {formatMinutes(alertInfo.minutesUntil)}</span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
             );
           })()}
@@ -4067,6 +4036,135 @@ export default function DashboardPage() {
               </div>
               <button
                 onClick={() => setShowEventsListModal(false)}
+                className="px-4 py-1.5 text-sm font-medium rounded-lg border border-border hover:bg-card-hover transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Sessions & Alerts Manage Modal */}
+      {showCustomManageModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowCustomManageModal(false)}
+        >
+          <div
+            className="bg-card border border-purple-500/30 rounded-xl shadow-2xl w-full max-w-md mx-4 max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-purple-500/20 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <Settings className="w-5 h-5 text-purple-400" />
+                <div>
+                  <h2 className="text-lg font-semibold text-purple-400">Custom Items</h2>
+                  <p className="text-xs text-muted">
+                    {customSessions.length} session{customSessions.length !== 1 ? 's' : ''}, {customAlerts.length} alert{customAlerts.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCustomManageModal(false)}
+                className="p-1 rounded hover:bg-card-hover transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Sessions List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {customSessions.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold text-purple-400 mb-2 uppercase tracking-wider">Sessions</h3>
+                  <div className="space-y-2">
+                    {customSessions.map((session) => (
+                      <button
+                        key={session.id}
+                        onClick={() => { setShowCustomManageModal(false); editSession(session); }}
+                        className="w-full flex items-center justify-between p-3 rounded-lg border border-purple-500/20 hover:bg-purple-500/10 transition-colors text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: session.color }} />
+                          <div>
+                            <div className="text-sm font-medium">{session.name}</div>
+                            <div className="text-xs text-muted font-mono">{session.startTime} - {session.endTime}</div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted">
+                          {session.recurring ? (
+                            <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">Recurring</span>
+                          ) : (
+                            <span className="px-1.5 py-0.5 rounded bg-white/10 text-white/50">One-time</span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {customAlerts.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wider">Alerts</h3>
+                  <div className="space-y-2">
+                    {customAlerts.map((alert) => (
+                      <button
+                        key={alert.id}
+                        onClick={() => { setShowCustomManageModal(false); editAlert(alert); }}
+                        className="w-full flex items-center justify-between p-3 rounded-lg border border-orange-500/20 hover:bg-orange-500/10 transition-colors text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Bell className="w-4 h-4 text-orange-400" />
+                          <div>
+                            <div className="text-sm font-medium">{alert.name}</div>
+                            <div className="text-xs text-muted font-mono">{alert.time}</div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted">
+                          {alert.recurring ? (
+                            <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400">Recurring</span>
+                          ) : (
+                            <span className="px-1.5 py-0.5 rounded bg-white/10 text-white/50">One-time</span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {customSessions.length === 0 && customAlerts.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Settings className="w-12 h-12 text-purple-500/30 mb-3" />
+                  <p className="text-muted">No custom items yet</p>
+                  <p className="text-xs text-muted/60 mt-1">Add sessions or alerts to track your schedule</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-purple-500/20 bg-card/50 flex-shrink-0">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setShowCustomManageModal(false); openNewSessionModal(); }}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 transition-colors flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  Session
+                </button>
+                <button
+                  onClick={() => { setShowCustomManageModal(false); openNewAlertModal(); }}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 transition-colors flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  Alert
+                </button>
+              </div>
+              <button
+                onClick={() => setShowCustomManageModal(false)}
                 className="px-4 py-1.5 text-sm font-medium rounded-lg border border-border hover:bg-card-hover transition-colors"
               >
                 Close
