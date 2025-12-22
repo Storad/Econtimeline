@@ -1034,7 +1034,7 @@ export default function DashboardPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen]);
 
-  // Play market bell sound using Web Audio API and announce with speech
+  // Play NYSE-style market bell sound using Web Audio API and announce with speech
   const playAlertSound = useCallback((type: 'open' | 'close', marketName: string, sessionType: string | null) => {
     try {
       if (!audioContextRef.current) {
@@ -1042,13 +1042,20 @@ export default function DashboardPage() {
       }
       const ctx = audioContextRef.current;
 
-      // Function to create a single bell ring
+      // NYSE bell is tuned to D4 (293.66 Hz) with a D-sharp overtone (311.13 Hz)
+      // This creates the characteristic "warble" of the brass bell
       const ringBell = (startTime: number) => {
-        // Bell sound uses multiple harmonics for a metallic tone
-        const frequencies = [880, 1760, 2640, 3520]; // Harmonics of A5
-        const gains = [0.5, 0.3, 0.15, 0.1]; // Decreasing volume for each harmonic
+        // Brass bell frequencies - D4 fundamental with D# overtone and harmonics
+        const bellTones = [
+          { freq: 293.66, gain: 0.4, decay: 1.8 },   // D4 - fundamental
+          { freq: 311.13, gain: 0.35, decay: 1.6 },  // D#4 - characteristic overtone (creates warble)
+          { freq: 587.33, gain: 0.25, decay: 1.4 },  // D5 - 2nd harmonic
+          { freq: 622.25, gain: 0.2, decay: 1.2 },   // D#5 - overtone harmonic
+          { freq: 880.00, gain: 0.15, decay: 1.0 },  // A5 - adds brightness
+          { freq: 1174.66, gain: 0.1, decay: 0.8 },  // D6 - shimmer
+        ];
 
-        frequencies.forEach((freq, i) => {
+        bellTones.forEach(({ freq, gain, decay }) => {
           const osc = ctx.createOscillator();
           const gainNode = ctx.createGain();
 
@@ -1058,33 +1065,43 @@ export default function DashboardPage() {
           osc.frequency.setValueAtTime(freq, startTime);
           osc.type = 'sine';
 
-          // Sharp attack, long decay like a bell
+          // Sharp attack, long natural decay like a brass bell
           gainNode.gain.setValueAtTime(0, startTime);
-          gainNode.gain.linearRampToValueAtTime(gains[i] * 0.4, startTime + 0.01);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+          gainNode.gain.linearRampToValueAtTime(gain * 0.5, startTime + 0.005); // Very fast attack
+          gainNode.gain.exponentialRampToValueAtTime(gain * 0.3, startTime + 0.05); // Quick initial drop
+          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + decay); // Long decay
 
           osc.start(startTime);
-          osc.stop(startTime + 0.8);
+          osc.stop(startTime + decay + 0.1);
         });
 
-        // Add a subtle low thump for the bell strike
-        const thump = ctx.createOscillator();
-        const thumpGain = ctx.createGain();
-        thump.connect(thumpGain);
-        thumpGain.connect(ctx.destination);
-        thump.frequency.setValueAtTime(150, startTime);
-        thump.type = 'sine';
-        thumpGain.gain.setValueAtTime(0.2, startTime);
-        thumpGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.1);
-        thump.start(startTime);
-        thump.stop(startTime + 0.1);
+        // Add metallic strike transient for brass character
+        const strike = ctx.createOscillator();
+        const strikeGain = ctx.createGain();
+        const strikeFilter = ctx.createBiquadFilter();
+
+        strike.connect(strikeFilter);
+        strikeFilter.connect(strikeGain);
+        strikeGain.connect(ctx.destination);
+
+        strike.type = 'square';
+        strike.frequency.setValueAtTime(293.66, startTime);
+        strikeFilter.type = 'bandpass';
+        strikeFilter.frequency.setValueAtTime(800, startTime);
+        strikeFilter.Q.setValueAtTime(2, startTime);
+
+        strikeGain.gain.setValueAtTime(0.15, startTime);
+        strikeGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.08);
+
+        strike.start(startTime);
+        strike.stop(startTime + 0.1);
       };
 
-      // Ring the bell 3 times
+      // Ring the bell 3 times at brisk tempo (like NYSE)
       const now = ctx.currentTime;
       ringBell(now);
-      ringBell(now + 0.5);
-      ringBell(now + 1.0);
+      ringBell(now + 0.4);  // Brisk tempo
+      ringBell(now + 0.8);
 
       // Text-to-speech announcement (after bells finish)
       if ('speechSynthesis' in window) {
