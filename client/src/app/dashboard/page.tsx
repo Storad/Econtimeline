@@ -3337,9 +3337,6 @@ export default function DashboardPage() {
                     style={{
                       color: isPast ? `${alertColor}60` : alertColor,
                       textShadow: isPast ? 'none' : `0 0 6px ${alertColor}80`,
-                      maxWidth: 60,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
                     }}
                   >
                     {alert.name}
