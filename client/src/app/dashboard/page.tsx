@@ -759,30 +759,52 @@ export default function DashboardPage() {
   const [modalMode, setModalMode] = useState<"session" | "alert">("session");
   const [editingItem, setEditingItem] = useState<CustomSession | CustomAlert | null>(null);
 
-  // Tooltip state for market sessions
-  const [hoveredSession, setHoveredSession] = useState<{
-    session: MarketSession;
-    type: "pre" | "regular" | "post" | "card";
-    x: number;
-    y: number;
-  } | null>(null);
-
   // Expanded card state
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [popoverPosition, setPopoverPosition] = useState<{ top: number; left: number; alignBottom?: boolean } | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    if (!expandedCard) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // Check if click is inside the popover
+      if (popoverRef.current && popoverRef.current.contains(target)) {
+        return;
+      }
+
+      // Check if click is on a market session card (has data-market-card attribute)
+      if (target.closest('[data-market-card]')) {
+        return;
+      }
+
+      // Click was outside, close the popover
+      setExpandedCard(null);
+      setPopoverPosition(null);
+    };
+
+    // Use mousedown for immediate response
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [expandedCard]);
 
   // Market session alerts state
   const [marketAlerts, setMarketAlerts] = useState<Set<string>>(new Set());
+  const prevMarketStates = useRef<Map<string, { isOpen: boolean; sessionType: string | null }>>(new Map());
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Economic Events Filter State
-  const [eventsFilterExpanded, setEventsFilterExpanded] = useState(false);
-  const [filterImpacts, setFilterImpacts] = useState<Set<string>>(new Set(["high", "medium", "low"]));
+    const [filterImpacts, setFilterImpacts] = useState<Set<string>>(new Set(["high", "medium", "low"]));
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterCurrency, setFilterCurrency] = useState("All");
   const [showPastEvents, setShowPastEvents] = useState(true);
+  const [showEventsListModal, setShowEventsListModal] = useState(false);
 
   // Custom Sessions & Alerts Card State
-  const [customCardExpanded, setCustomCardExpanded] = useState(false);
-
+  
   // Custom lane tooltip state (for empty lane hover)
   const [showCustomLaneTooltip, setShowCustomLaneTooltip] = useState(false);
   const [customLaneTooltipPos, setCustomLaneTooltipPos] = useState({ x: 0, y: 0 });
@@ -805,6 +827,70 @@ export default function DashboardPage() {
   const [showEventsCard, setShowEventsCard] = useState(true);
   const [showCustomCard, setShowCustomCard] = useState(true);
   const [activeMarketsOnly, setActiveMarketsOnly] = useState(false);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+
+  // Load preferences from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedPrefs = localStorage.getItem('econtimeline-preferences');
+      if (savedPrefs) {
+        const prefs = JSON.parse(savedPrefs);
+
+        if (prefs.visibleMarkets) {
+          setVisibleMarkets(new Set(prefs.visibleMarkets));
+        }
+        if (prefs.marketAlerts) {
+          setMarketAlerts(new Set(prefs.marketAlerts));
+        }
+        if (typeof prefs.showEventsCard === 'boolean') {
+          setShowEventsCard(prefs.showEventsCard);
+        }
+        if (typeof prefs.showCustomCard === 'boolean') {
+          setShowCustomCard(prefs.showCustomCard);
+        }
+        if (typeof prefs.activeMarketsOnly === 'boolean') {
+          setActiveMarketsOnly(prefs.activeMarketsOnly);
+        }
+        if (typeof prefs.showPastEvents === 'boolean') {
+          setShowPastEvents(prefs.showPastEvents);
+        }
+        if (prefs.filterImpacts) {
+          setFilterImpacts(new Set(prefs.filterImpacts));
+        }
+        if (prefs.filterCategory) {
+          setFilterCategory(prefs.filterCategory);
+        }
+        if (prefs.filterCurrency) {
+          setFilterCurrency(prefs.filterCurrency);
+        }
+      }
+    } catch (e) {
+      console.log('Failed to load preferences:', e);
+    }
+    setPreferencesLoaded(true);
+  }, []);
+
+  // Save preferences to localStorage when they change
+  useEffect(() => {
+    if (!preferencesLoaded) return; // Don't save until initial load is complete
+
+    try {
+      const prefs = {
+        visibleMarkets: Array.from(visibleMarkets),
+        marketAlerts: Array.from(marketAlerts),
+        showEventsCard,
+        showCustomCard,
+        activeMarketsOnly,
+        showPastEvents,
+        filterImpacts: Array.from(filterImpacts),
+        filterCategory,
+        filterCurrency,
+      };
+      localStorage.setItem('econtimeline-preferences', JSON.stringify(prefs));
+    } catch (e) {
+      console.log('Failed to save preferences:', e);
+    }
+  }, [preferencesLoaded, visibleMarkets, marketAlerts, showEventsCard, showCustomCard, activeMarketsOnly, showPastEvents, filterImpacts, filterCategory, filterCurrency]);
 
   // Toggle individual market visibility
   const toggleMarket = (marketId: string) => {
@@ -947,6 +1033,163 @@ export default function DashboardPage() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen]);
+
+  // Play market bell sound using Web Audio API and announce with speech
+  const playAlertSound = useCallback((type: 'open' | 'close', marketName: string, sessionType: string | null) => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      }
+      const ctx = audioContextRef.current;
+
+      // Function to create a single bell ring
+      const ringBell = (startTime: number) => {
+        // Bell sound uses multiple harmonics for a metallic tone
+        const frequencies = [880, 1760, 2640, 3520]; // Harmonics of A5
+        const gains = [0.5, 0.3, 0.15, 0.1]; // Decreasing volume for each harmonic
+
+        frequencies.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          osc.frequency.setValueAtTime(freq, startTime);
+          osc.type = 'sine';
+
+          // Sharp attack, long decay like a bell
+          gainNode.gain.setValueAtTime(0, startTime);
+          gainNode.gain.linearRampToValueAtTime(gains[i] * 0.4, startTime + 0.01);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+
+          osc.start(startTime);
+          osc.stop(startTime + 0.8);
+        });
+
+        // Add a subtle low thump for the bell strike
+        const thump = ctx.createOscillator();
+        const thumpGain = ctx.createGain();
+        thump.connect(thumpGain);
+        thumpGain.connect(ctx.destination);
+        thump.frequency.setValueAtTime(150, startTime);
+        thump.type = 'sine';
+        thumpGain.gain.setValueAtTime(0.2, startTime);
+        thumpGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.1);
+        thump.start(startTime);
+        thump.stop(startTime + 0.1);
+      };
+
+      // Ring the bell 3 times
+      const now = ctx.currentTime;
+      ringBell(now);
+      ringBell(now + 0.5);
+      ringBell(now + 1.0);
+
+      // Text-to-speech announcement (after bells finish)
+      if ('speechSynthesis' in window) {
+        setTimeout(() => {
+          // Build the announcement message
+          let message = marketName;
+          if (type === 'open') {
+            if (sessionType === 'pre') {
+              message += ' Pre-market Open';
+            } else if (sessionType === 'post') {
+              message += ' After Hours Open';
+            } else {
+              message += ' Market Open';
+            }
+          } else {
+            message += ' Market Closed';
+          }
+
+          // Cancel any ongoing speech
+          window.speechSynthesis.cancel();
+
+          // Create and speak the announcement
+          const utterance = new SpeechSynthesisUtterance(message);
+
+          // Try to find a professional male voice
+          const voices = window.speechSynthesis.getVoices();
+          const preferredVoices = [
+            'Microsoft David',
+            'Microsoft Mark',
+            'Google US English Male',
+            'Daniel',
+            'James',
+            'Alex',
+            'Google UK English Male',
+          ];
+
+          let selectedVoice = null;
+          // First try to find a preferred voice
+          for (const preferred of preferredVoices) {
+            selectedVoice = voices.find(v => v.name.includes(preferred));
+            if (selectedVoice) break;
+          }
+          // Fallback: find any English male voice
+          if (!selectedVoice) {
+            selectedVoice = voices.find(v =>
+              v.lang.startsWith('en') &&
+              (v.name.toLowerCase().includes('male') ||
+               v.name.includes('David') ||
+               v.name.includes('Mark') ||
+               v.name.includes('Daniel'))
+            );
+          }
+
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+          }
+
+          utterance.rate = 0.95;
+          utterance.pitch = 0.9;
+          utterance.volume = 0.8;
+          window.speechSynthesis.speak(utterance);
+        }, 1500); // Wait for bells to finish
+      }
+    } catch (e) {
+      console.log('Audio not supported');
+    }
+  }, []);
+
+  // Market session alert detection
+  useEffect(() => {
+    if (marketAlerts.size === 0) return;
+
+    MARKET_SESSIONS.forEach(session => {
+      if (!marketAlerts.has(session.id)) return;
+
+      const isPreActive = isSessionActiveNow(session, currentTime, "pre");
+      const isRegularActive = isSessionActiveNow(session, currentTime, "regular");
+      const isPostActive = isSessionActiveNow(session, currentTime, "post");
+      const isOpen = isPreActive || isRegularActive || isPostActive;
+      const currentSessionType = isRegularActive ? "regular" : isPreActive ? "pre" : isPostActive ? "post" : null;
+
+      const prevState = prevMarketStates.current.get(session.id);
+
+      if (prevState !== undefined) {
+        // Detect market open (was closed, now open)
+        if (!prevState.isOpen && isOpen) {
+          playAlertSound('open', session.name, currentSessionType);
+          console.log(`🔔 ${session.name} OPENED (${currentSessionType})`);
+        }
+        // Detect market close (was open, now closed)
+        else if (prevState.isOpen && !isOpen) {
+          playAlertSound('close', session.name, null);
+          console.log(`🔔 ${session.name} CLOSED`);
+        }
+        // Detect session type change (e.g., pre-market to regular)
+        else if (prevState.sessionType !== currentSessionType && currentSessionType !== null && prevState.sessionType !== null) {
+          playAlertSound('open', session.name, currentSessionType);
+          console.log(`🔔 ${session.name} transitioned to ${currentSessionType}`);
+        }
+      }
+
+      // Update previous state
+      prevMarketStates.current.set(session.id, { isOpen, sessionType: currentSessionType });
+    });
+  }, [currentTime, marketAlerts, playAlertSound]);
 
   // Mouse handlers for dragging
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -1179,6 +1422,22 @@ export default function DashboardPage() {
 
     // Past events filter
     if (!showPastEvents && eventDateTime < currentTime) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Filter events for today's full day (for the modal)
+  const todayStr = currentTime.toISOString().split('T')[0]; // YYYY-MM-DD format
+  const todaysEvents = events.filter((event) => {
+    // Check if event is today
+    if (event.date !== todayStr) {
+      return false;
+    }
+
+    // Impact filter only
+    if (!filterImpacts.has(event.impact)) {
       return false;
     }
 
@@ -1491,7 +1750,8 @@ export default function DashboardPage() {
               return (
                 <div
                   key={`info-${session.id}`}
-                  className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${isExpanded ? 'relative z-50' : ''} ${isAnyActive && !isExpanded ? 'animate-pulse-subtle' : ''}`}
+                  data-market-card
+                  className={`relative rounded-xl cursor-pointer transition-all duration-200 overflow-visible ${isAnyActive ? 'animate-pulse-subtle' : ''} ${isExpanded ? 'ring-2' : ''}`}
                   style={{
                     flex: '1 1 0',
                     minHeight: 0,
@@ -1499,14 +1759,42 @@ export default function DashboardPage() {
                       ? `linear-gradient(135deg, ${session.color}35 0%, ${session.color}15 50%, ${session.color}25 100%)`
                       : `linear-gradient(135deg, ${session.color}15 0%, ${session.color}08 100%)`,
                     border: `2px solid ${session.color}${isAnyActive ? "70" : "30"}`,
-                    boxShadow: isExpanded
-                      ? `0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px ${session.color}40`
-                      : isAnyActive
+                    boxShadow: isAnyActive
                         ? `0 0 20px ${session.color}40, 0 0 40px ${session.color}20, 0 8px 32px ${session.color}30, inset 0 1px 0 ${session.color}30`
                         : `0 2px 8px ${session.color}10, inset 0 1px 0 ${session.color}10`,
+                    ringColor: isExpanded ? session.color : 'transparent',
                   }}
-                  onClick={() => setExpandedCard(isExpanded ? null : session.id)}
+                  onClick={(e) => {
+                    if (isExpanded) {
+                      setExpandedCard(null);
+                      setPopoverPosition(null);
+                    } else {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const popoverHeight = 280; // Approximate popover height
+                      const wouldOverflow = rect.top + popoverHeight > window.innerHeight;
+
+                      setPopoverPosition({
+                        top: wouldOverflow ? rect.bottom : rect.top,
+                        left: rect.right + 8,
+                        alignBottom: wouldOverflow
+                      });
+                      setExpandedCard(session.id);
+                    }
+                  }}
                 >
+                  {/* Alert badge - corner indicator */}
+                  {marketAlerts.has(session.id) && (
+                    <div
+                      className="absolute -top-1 -right-1 z-10 flex items-center justify-center w-5 h-5 rounded-full"
+                      style={{
+                        backgroundColor: session.color,
+                        boxShadow: `0 0 8px ${session.color}80`,
+                      }}
+                    >
+                      <Bell className="w-3 h-3 text-black" />
+                    </div>
+                  )}
+
                   {/* Header row */}
                   <div className="px-2.5 py-1.5 flex items-center justify-between relative">
                     <div className="flex items-center gap-1.5">
@@ -1543,20 +1831,19 @@ export default function DashboardPage() {
                       </span>
                       <span className="text-[10px] text-muted">{getTimezoneAbbr(session.timezone)}</span>
                       <svg
-                        className={`w-3 h-3 transition-transform flex-shrink-0 ${isExpanded ? "rotate-180" : ""}`}
-                        style={{ color: `${session.color}60` }}
+                        className={`w-3 h-3 transition-transform flex-shrink-0 ${isExpanded ? "rotate-90" : ""}`}
+                        style={{ color: isExpanded ? session.color : `${session.color}60` }}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
                   </div>
 
                   {/* Progress/countdown row - compact view */}
-                  {!isExpanded && (
-                    <div className="px-2.5 pb-2 relative">
+                  <div className="px-2.5 pb-2 relative">
                       {isAnyActive ? (
                         <div className="space-y-1">
                           {/* Progress bar with time remaining */}
@@ -1622,357 +1909,94 @@ export default function DashboardPage() {
                         </div>
                       )}
                     </div>
-                  )}
 
-                  {/* Expanded View */}
-                  {isExpanded && (
-                    <div className="px-3 pb-2">
-                      <div className="space-y-1 text-[10px]">
-                        {session.preMarket && (
-                          <div className="flex justify-between">
-                            <span style={{ color: isPreActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
-                              {session.id === "tokyo" ? "Morning" : session.id === "sydney" ? "Pre-Open" : "Pre-Market"}
-                            </span>
-                            <span className="font-mono" style={{ color: isPreActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
-                              {formatLocalHour(session.preMarket.start)} - {formatLocalHour(session.preMarket.end)}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex justify-between">
-                          <span style={{ color: isRegularActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
-                            {session.id === "tokyo" ? "Afternoon" : "Regular"}
-                          </span>
-                          <span className="font-mono" style={{ color: isRegularActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
-                            {formatLocalHour(session.regular.start)} - {formatLocalHour(session.regular.end)}
-                          </span>
-                        </div>
-                        {session.postMarket && (
-                          <div className="flex justify-between">
-                            <span style={{ color: isPostActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
-                              Post-Market
-                            </span>
-                            <span className="font-mono" style={{ color: isPostActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
-                              {formatLocalHour(session.postMarket.start)} - {formatLocalHour(session.postMarket.end)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
-                        {isAnyActive ? (
-                          <>
-                            <div className="flex justify-between text-[10px] mb-1">
-                              <span style={{ color: session.color }}>
-                                {isRegularActive
-                                  ? getTimeRemainingNow(session, currentTime, "regular")
-                                  : isPreActive
-                                  ? getTimeRemainingNow(session, currentTime, "pre")
-                                  : getTimeRemainingNow(session, currentTime, "post")}
-                              </span>
-                              <span className="font-mono font-bold" style={{ color: session.color }}>
-                                {Math.round(progress)}%
-                              </span>
-                            </div>
-                            <div
-                              className="h-[3px] rounded-full overflow-hidden"
-                              style={{ backgroundColor: `${session.color}25` }}
-                            >
-                              <div
-                                className="h-full rounded-full transition-all duration-1000"
-                                style={{ width: `${progress}%`, backgroundColor: session.color }}
-                              />
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.7)" }}>
-                            {getTimeUntilOpenNow(session, currentTime)}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Alerts Toggle */}
-                      <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMarketAlerts(prev => {
-                              const next = new Set(prev);
-                              if (next.has(session.id)) {
-                                next.delete(session.id);
-                              } else {
-                                next.add(session.id);
-                              }
-                              return next;
-                            });
-                          }}
-                          className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors"
-                          style={{
-                            backgroundColor: marketAlerts.has(session.id) ? `${session.color}25` : 'rgba(255,255,255,0.05)',
-                            border: `1px solid ${marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.1)'}`,
-                          }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Bell className="w-3 h-3" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.5)' }} />
-                            <span className="text-[10px]" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.6)' }}>
-                              Open/Close Alerts
-                            </span>
-                          </div>
-                          <div
-                            className="w-8 h-4 rounded-full p-0.5 transition-colors"
-                            style={{
-                              backgroundColor: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.2)',
-                            }}
-                          >
-                            <div
-                              className="w-3 h-3 rounded-full bg-white transition-transform"
-                              style={{
-                                transform: marketAlerts.has(session.id) ? 'translateX(16px)' : 'translateX(0)',
-                              }}
-                            />
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
 
           {/* Economic Events Filter Card */}
           {showEventsCard && (() => {
-            // Calculate next upcoming event and event stats
-            const upcomingEvents = filteredVisibleEvents
-              .filter(e => new Date(`${e.date}T${e.time || "00:00"}:00`) > currentTime)
-              .sort((a, b) => new Date(`${a.date}T${a.time || "00:00"}:00`).getTime() - new Date(`${b.date}T${b.time || "00:00"}:00`).getTime());
-            const nextEvent = upcomingEvents[0];
-            const nextEventTime = nextEvent ? new Date(`${nextEvent.date}T${nextEvent.time || "00:00"}:00`) : null;
-            const timeToNextEvent = nextEventTime ? nextEventTime.getTime() - currentTime.getTime() : null;
-
             // Check for high-impact event within the next hour
-            const highImpactSoon = upcomingEvents.some(e => {
+            const highImpactSoon = filteredVisibleEvents.some(e => {
               if (e.impact !== "high") return false;
               const eventTime = new Date(`${e.date}T${e.time || "00:00"}:00`);
-              return eventTime.getTime() - currentTime.getTime() < 60 * 60 * 1000; // 1 hour
+              const timeDiff = eventTime.getTime() - currentTime.getTime();
+              return timeDiff > 0 && timeDiff < 60 * 60 * 1000; // Within next hour
             });
-
-            // Impact distribution stats
-            const highCount = filteredVisibleEvents.filter(e => e.impact === "high").length;
-            const mediumCount = filteredVisibleEvents.filter(e => e.impact === "medium").length;
-            const lowCount = filteredVisibleEvents.filter(e => e.impact === "low").length;
-            const totalCount = filteredVisibleEvents.length || 1;
-
-            // Format countdown
-            const formatCountdown = (ms: number) => {
-              const hours = Math.floor(ms / (1000 * 60 * 60));
-              const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-              if (hours > 0) return `${hours}h ${minutes}m`;
-              return `${minutes}m`;
-            };
 
             return (
           <div
-            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${eventsFilterExpanded ? 'relative z-50' : ''} ${highImpactSoon && !eventsFilterExpanded ? 'animate-pulse-subtle' : ''}`}
+            className={`rounded-xl transition-all duration-200 overflow-hidden ${highImpactSoon ? 'animate-pulse-subtle' : ''}`}
             style={{
               flex: '1 1 0',
               minHeight: 0,
               background: 'linear-gradient(180deg, rgba(148, 163, 184, 0.15) 0%, rgba(148, 163, 184, 0.08) 100%)',
               border: highImpactSoon ? '2px solid rgba(239, 68, 68, 0.6)' : '2px solid rgba(148, 163, 184, 0.3)',
-              boxShadow: eventsFilterExpanded
-                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(148, 163, 184, 0.35)'
-                  : highImpactSoon
-                    ? '0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.15), 0 2px 8px rgba(148, 163, 184, 0.1)'
-                    : '0 2px 8px rgba(148, 163, 184, 0.1)',
-              }}
-              onClick={() => setEventsFilterExpanded(!eventsFilterExpanded)}
-            >
-              {/* Header */}
-              <div className="px-3 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Calendar className="w-4 h-4 text-slate-400" />
-                    {highImpactSoon && (
-                      <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-ping" />
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-slate-300">Events</span>
+              boxShadow: highImpactSoon
+                ? '0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.15), 0 2px 8px rgba(148, 163, 184, 0.1)'
+                : '0 2px 8px rgba(148, 163, 184, 0.1)',
+            }}
+          >
+            {/* Header */}
+            <div className="px-3 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Calendar className="w-4 h-4 text-slate-400" />
                   {highImpactSoon && (
-                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-red-500/20 text-red-400 rounded border border-red-500/30 animate-pulse">
-                      HIGH IMPACT
-                    </span>
+                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-ping" />
                   )}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-muted">
-                    {filteredVisibleEvents.length} events
+                <span className="text-sm font-semibold text-slate-300">Events</span>
+                {highImpactSoon && (
+                  <span className="px-1.5 py-0.5 text-[8px] font-bold bg-red-500/20 text-red-400 rounded border border-red-500/30 animate-pulse">
+                    HIGH IMPACT
                   </span>
-                  <ChevronDown className={`w-3 h-3 transition-transform text-slate-400/60 ${eventsFilterExpanded ? "rotate-180" : ""}`} />
-                </div>
+                )}
               </div>
+              <span className="text-[10px] text-muted">
+                {todaysEvents.length} today
+              </span>
+            </div>
 
-              {/* Enhanced collapsed view */}
-              {!eventsFilterExpanded && (
-                <div className="px-3 pb-2 space-y-2">
-                  {/* No events message */}
-                  {filteredVisibleEvents.length === 0 ? (
-                    <div className="flex items-center justify-center py-2">
-                      <span className="text-[10px] text-white/40 italic">
-                        No events in next {HOURS_IN_FUTURE} hours
-                      </span>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Next event countdown */}
-                      {nextEvent && timeToNextEvent && (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <div
-                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                              style={{
-                                backgroundColor: nextEvent.impact === "high" ? "#EF4444" : nextEvent.impact === "medium" ? "#F59E0B" : "#10B981"
-                              }}
-                            />
-                            <span className="text-[10px] text-white/80 truncate">{nextEvent.title}</span>
-                          </div>
-                          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                            <Clock className="w-3 h-3 text-slate-400" />
-                            <span className="text-[10px] font-mono font-bold text-slate-300">
-                              {formatCountdown(timeToNextEvent)}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Impact distribution bar */}
-                      <div className="space-y-1">
-                        <div className="flex h-1.5 rounded-full overflow-hidden bg-white/5">
-                          {highCount > 0 && (
-                            <div
-                              className="h-full bg-red-500 transition-all duration-500"
-                              style={{ width: `${(highCount / totalCount) * 100}%` }}
-                            />
-                          )}
-                          {mediumCount > 0 && (
-                            <div
-                              className="h-full bg-yellow-500 transition-all duration-500"
-                              style={{ width: `${(mediumCount / totalCount) * 100}%` }}
-                            />
-                          )}
-                          {lowCount > 0 && (
-                            <div
-                              className="h-full bg-emerald-500 transition-all duration-500"
-                              style={{ width: `${(lowCount / totalCount) * 100}%` }}
-                            />
-                          )}
-                        </div>
-                        <div className="flex justify-between text-[8px] text-white/50">
-                          <div className="flex gap-2">
-                            {highCount > 0 && <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />{highCount}</span>}
-                            {mediumCount > 0 && <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />{mediumCount}</span>}
-                            {lowCount > 0 && <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{lowCount}</span>}
-                          </div>
-                          {filterCategory !== "All" && (
-                            <span className="text-slate-400">{filterCategory}</span>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Expanded filter controls */}
-              {eventsFilterExpanded && (
-                <div className="px-3 pb-3 space-y-3">
-                  {/* Impact Level Multi-select */}
-                  <div>
-                    <label className="block text-[10px] text-white/70 mb-1.5">Impact Level</label>
-                    <div className="flex gap-1">
-                      {(["high", "medium", "low"] as const).map((impact) => {
-                        const isSelected = filterImpacts.has(impact);
-                        const colors = { high: "#EF4444", medium: "#F59E0B", low: "#10B981" };
-                        return (
-                          <button
-                            key={impact}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newSet = new Set(filterImpacts);
-                              if (isSelected) newSet.delete(impact);
-                              else newSet.add(impact);
-                              setFilterImpacts(newSet);
-                            }}
-                            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded border transition-colors ${
-                              isSelected
-                                ? "bg-white/10 border-white/30"
-                                : "bg-transparent border-white/10 opacity-40"
-                            }`}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors[impact] }} />
-                            {impact.charAt(0).toUpperCase() + impact.slice(1)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Category Dropdown */}
-                  <div>
-                    <label className="block text-[10px] text-white/70 mb-1.5">Category</label>
-                    <select
-                      value={filterCategory}
-                      onChange={(e) => { e.stopPropagation(); setFilterCategory(e.target.value); }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-full px-2 py-1.5 text-[11px] bg-black/30 border border-white/20 rounded text-white appearance-none cursor-pointer"
+            {/* Impact Level Filter */}
+            <div className="px-3 pb-2">
+              <div className="flex gap-1">
+                {(["high", "medium", "low"] as const).map((impact) => {
+                  const isSelected = filterImpacts.has(impact);
+                  const colors = { high: "#EF4444", medium: "#F59E0B", low: "#10B981" };
+                  return (
+                    <button
+                      key={impact}
+                      onClick={() => {
+                        const newSet = new Set(filterImpacts);
+                        if (isSelected) newSet.delete(impact);
+                        else newSet.add(impact);
+                        setFilterImpacts(newSet);
+                      }}
+                      className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded border transition-colors ${
+                        isSelected
+                          ? "bg-white/10 border-white/30"
+                          : "bg-transparent border-white/10 opacity-40"
+                      }`}
                     >
-                      {EVENT_CATEGORIES.map(cat => (
-                        <option key={cat.value} value={cat.value} className="bg-gray-900">{cat.label}</option>
-                      ))}
-                    </select>
-                  </div>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors[impact] }} />
+                      {impact.charAt(0).toUpperCase() + impact.slice(1)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                  {/* Currency Dropdown */}
-                  <div>
-                    <label className="block text-[10px] text-white/70 mb-1.5">Currency</label>
-                    <select
-                      value={filterCurrency}
-                      onChange={(e) => { e.stopPropagation(); setFilterCurrency(e.target.value); }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-full px-2 py-1.5 text-[11px] bg-black/30 border border-white/20 rounded text-white appearance-none cursor-pointer"
-                    >
-                      {CURRENCY_OPTIONS.map(curr => (
-                        <option key={curr} value={curr} className="bg-gray-900">{curr}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Show Past Events Toggle */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setShowPastEvents(!showPastEvents); }}
-                    className={`w-full flex items-center justify-between px-2 py-1.5 rounded border transition-colors ${
-                      showPastEvents ? "bg-white/10 border-white/30" : "bg-transparent border-white/10"
-                    }`}
-                  >
-                    <span className="text-[10px] text-white/80">Show Past Events</span>
-                    <div className={`w-8 h-4 rounded-full transition-colors relative ${showPastEvents ? "bg-red-400" : "bg-gray-600"}`}>
-                      <div className={`w-3 h-3 rounded-full bg-white shadow absolute top-0.5 transition-all ${showPastEvents ? "left-[18px]" : "left-0.5"}`} />
-                    </div>
-                  </button>
-
-                  {/* Reset Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFilterImpacts(new Set(["high", "medium", "low"]));
-                      setFilterCategory("All");
-                      setFilterCurrency("All");
-                      setShowPastEvents(true);
-                    }}
-                    className="w-full text-[10px] text-red-400 hover:text-red-300 py-1 border border-red-400/30 rounded hover:bg-red-400/10 transition-colors"
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-              )}
+            {/* View Today's Events Button */}
+            <div className="px-3 pb-3">
+              <button
+                onClick={() => setShowEventsListModal(true)}
+                className="w-full flex items-center justify-center gap-2 text-[11px] font-medium text-slate-300 py-2 border border-slate-400/30 rounded hover:bg-slate-400/10 transition-colors"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                View Today's Events
+              </button>
+            </div>
           </div>
             );
           })()}
@@ -2034,191 +2058,263 @@ export default function DashboardPage() {
 
             return (
           <div
-            className={`rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${customCardExpanded ? 'relative z-50' : ''} ${hasActiveSession && !customCardExpanded ? 'animate-pulse-subtle' : ''}`}
+            className={`rounded-xl transition-all duration-200 overflow-hidden ${hasActiveSession ? 'animate-pulse-subtle' : ''}`}
             style={{
               flex: '1 1 0',
               minHeight: 0,
               background: 'linear-gradient(180deg, rgba(168, 85, 247, 0.2) 0%, rgba(168, 85, 247, 0.1) 100%)',
               border: hasActiveSession ? '2px solid rgba(168, 85, 247, 0.7)' : '2px solid rgba(168, 85, 247, 0.35)',
-              boxShadow: customCardExpanded
-                  ? '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(168, 85, 247, 0.4)'
-                  : hasActiveSession
-                    ? '0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2), 0 2px 8px rgba(168, 85, 247, 0.15)'
-                    : '0 2px 8px rgba(168, 85, 247, 0.15)',
-              }}
-              onClick={() => setCustomCardExpanded(!customCardExpanded)}
-            >
-              {/* Header */}
-              <div className="px-3 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Settings className="w-4 h-4 text-purple-400" style={hasActiveSession ? { animation: 'spin 8s linear infinite' } : undefined} />
-                    {hasActiveSession && (
-                      <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-purple-500 rounded-full animate-ping" />
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-purple-400">Custom</span>
+              boxShadow: hasActiveSession
+                ? '0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2), 0 2px 8px rgba(168, 85, 247, 0.15)'
+                : '0 2px 8px rgba(168, 85, 247, 0.15)',
+            }}
+          >
+            {/* Header */}
+            <div className="px-3 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Settings className="w-4 h-4 text-purple-400" style={hasActiveSession ? { animation: 'spin 8s linear infinite' } : undefined} />
                   {hasActiveSession && (
-                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-purple-500/20 text-purple-300 rounded border border-purple-500/30">
-                      ACTIVE
-                    </span>
+                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-purple-500 rounded-full animate-ping" />
                   )}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-muted">
-                    {customSessions.length + customAlerts.length} items
+                <span className="text-sm font-semibold text-purple-400">Custom</span>
+                {hasActiveSession && (
+                  <span className="px-1.5 py-0.5 text-[8px] font-bold bg-purple-500/20 text-purple-300 rounded border border-purple-500/30">
+                    ACTIVE
                   </span>
-                  <ChevronDown className={`w-3 h-3 transition-transform text-purple-400/60 ${customCardExpanded ? "rotate-180" : ""}`} />
-                </div>
+                )}
               </div>
+              <span className="text-[10px] text-muted">
+                {customSessions.length + customAlerts.length} items
+              </span>
+            </div>
 
-              {/* Enhanced collapsed view with active session and next alert */}
-              {!customCardExpanded && (customSessions.length > 0 || customAlerts.length > 0) && (
-                <div className="px-3 pb-2 space-y-2">
-                  {/* Active session with progress */}
-                  {activeSession && (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: activeSession.color }} />
-                          <span className="text-[10px] text-white/80 truncate">{activeSession.name}</span>
+            {/* Action buttons */}
+            <div className="px-3 pb-2 flex gap-2">
+              <button
+                onClick={() => openNewSessionModal()}
+                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                Session
+              </button>
+              <button
+                onClick={() => openNewAlertModal()}
+                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 transition-colors"
+              >
+                <Bell className="w-3 h-3" />
+                Alert
+              </button>
+            </div>
+
+            {/* Sessions list */}
+            {customSessions.length > 0 && (
+              <div className="px-3 pb-2">
+                <div className="space-y-1">
+                  {customSessions.map((session) => {
+                    const isActive = session.id === activeSession?.id;
+                    const progress = isActive ? getSessionProgress(session) : 0;
+                    return (
+                      <button
+                        key={session.id}
+                        onClick={() => editSession(session)}
+                        className={`w-full flex flex-col gap-1 px-2 py-1.5 rounded border transition-colors text-left ${
+                          isActive ? 'border-purple-500/50 bg-purple-500/10' : 'border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${isActive ? 'animate-pulse' : ''}`} style={{ backgroundColor: session.color }} />
+                            <span className="text-[11px] text-white/90 truncate max-w-[100px]">{session.name}</span>
+                            {isActive && <span className="text-[8px] text-purple-400 font-bold">LIVE</span>}
+                          </div>
+                          <span className="text-[9px] text-white/50 font-mono">{session.startTime}-{session.endTime}</span>
                         </div>
-                        <span className="text-[10px] font-mono font-bold text-purple-300">{Math.round(sessionProgress)}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden bg-purple-500/20">
-                        <div
-                          className="h-full rounded-full transition-all duration-1000"
-                          style={{
-                            width: `${sessionProgress}%`,
-                            background: `linear-gradient(90deg, ${activeSession.color}80 0%, ${activeSession.color} 100%)`,
-                            boxShadow: `0 0 8px ${activeSession.color}80`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Next alert countdown */}
-                  {nextAlert && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Bell className="w-3 h-3 text-orange-400" />
-                        <span className="text-[10px] text-white/80 truncate">{nextAlert.name}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-orange-400/60" />
-                        <span className="text-[10px] font-mono font-bold text-orange-400">
-                          {formatMinutes(nextAlert.minutesUntil)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
+                        {isActive && (
+                          <div className="h-1 rounded-full overflow-hidden bg-white/10 w-full">
+                            <div
+                              className="h-full rounded-full"
+                              style={{ width: `${progress}%`, backgroundColor: session.color }}
+                            />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-
-              {/* Action buttons - always visible */}
-              <div className="px-3 pb-2 flex gap-2">
-                <button
-                  onClick={(e) => { e.stopPropagation(); openNewSessionModal(); }}
-                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 transition-colors"
-                >
-                  <Plus className="w-3 h-3" />
-                  Session
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); openNewAlertModal(); }}
-                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] rounded bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 transition-colors"
-                >
-                  <Bell className="w-3 h-3" />
-                  Alert
-                </button>
               </div>
+            )}
 
-              {/* Expanded list of custom items */}
-              {customCardExpanded && (
-                <div className="px-3 pb-3 space-y-2 max-h-[200px] overflow-y-auto">
-                  {/* Sessions list */}
-                  {customSessions.length > 0 && (
-                    <div>
-                      <label className="block text-[10px] text-white/70 mb-1.5">Sessions</label>
-                      <div className="space-y-1">
-                        {customSessions.map((session) => {
-                          const isActive = session.id === activeSession?.id;
-                          const progress = isActive ? getSessionProgress(session) : 0;
-                          return (
-                            <button
-                              key={session.id}
-                              onClick={(e) => { e.stopPropagation(); editSession(session); }}
-                              className={`w-full flex flex-col gap-1 px-2 py-1.5 rounded border transition-colors text-left ${
-                                isActive ? 'border-purple-500/50 bg-purple-500/10' : 'border-white/10 hover:bg-white/10'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-2">
-                                  <span className={`w-2 h-2 rounded-full ${isActive ? 'animate-pulse' : ''}`} style={{ backgroundColor: session.color }} />
-                                  <span className="text-[11px] text-white/90 truncate max-w-[100px]">{session.name}</span>
-                                  {isActive && <span className="text-[8px] text-purple-400 font-bold">LIVE</span>}
-                                </div>
-                                <span className="text-[9px] text-white/50 font-mono">{session.startTime}-{session.endTime}</span>
-                              </div>
-                              {isActive && (
-                                <div className="h-1 rounded-full overflow-hidden bg-white/10 w-full">
-                                  <div
-                                    className="h-full rounded-full"
-                                    style={{ width: `${progress}%`, backgroundColor: session.color }}
-                                  />
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Alerts list */}
-                  {customAlerts.length > 0 && (
-                    <div>
-                      <label className="block text-[10px] text-white/70 mb-1.5">Alerts</label>
-                      <div className="space-y-1">
-                        {customAlerts.map((alert) => {
-                          const alertInfo = upcomingAlerts.find(a => a.id === alert.id);
-                          return (
-                            <button
-                              key={alert.id}
-                              onClick={(e) => { e.stopPropagation(); editAlert(alert); }}
-                              className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-orange-500/20 hover:bg-orange-500/10 transition-colors text-left"
-                            >
-                              <div className="flex items-center gap-2">
-                                <Bell className="w-3 h-3 text-orange-400" />
-                                <span className="text-[11px] text-white/90 truncate max-w-[100px]">{alert.name}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[9px] text-orange-400/70 font-mono">{alert.time}</span>
-                                {alertInfo && (
-                                  <span className="text-[8px] text-orange-400/50">in {formatMinutes(alertInfo.minutesUntil)}</span>
-                                )}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Empty state in expanded view */}
-                  {customSessions.length === 0 && customAlerts.length === 0 && (
-                    <div className="text-center py-3">
-                      <span className="text-[10px] text-white/50">No custom items yet</span>
-                    </div>
-                  )}
+            {/* Alerts list */}
+            {customAlerts.length > 0 && (
+              <div className="px-3 pb-2">
+                <div className="space-y-1">
+                  {customAlerts.map((alert) => {
+                    const alertInfo = upcomingAlerts.find(a => a.id === alert.id);
+                    return (
+                      <button
+                        key={alert.id}
+                        onClick={() => editAlert(alert)}
+                        className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-orange-500/20 hover:bg-orange-500/10 transition-colors text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Bell className="w-3 h-3 text-orange-400" />
+                          <span className="text-[11px] text-white/90 truncate max-w-[100px]">{alert.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] text-orange-400/70 font-mono">{alert.time}</span>
+                          {alertInfo && (
+                            <span className="text-[8px] text-orange-400/50">in {formatMinutes(alertInfo.minutesUntil)}</span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
+            )}
           </div>
             );
           })()}
         </div>
+
+        {/* Market Session Popover - renders outside sidebar to avoid clipping */}
+        {expandedCard && popoverPosition && MARKET_SESSIONS.find(s => s.id === expandedCard) && (() => {
+          const session = MARKET_SESSIONS.find(s => s.id === expandedCard)!;
+
+          const isPreActive = isSessionActiveNow(session, currentTime, "pre");
+          const isRegularActive = isSessionActiveNow(session, currentTime, "regular");
+          const isPostActive = isSessionActiveNow(session, currentTime, "post");
+          const isAnyActive = isPreActive || isRegularActive || isPostActive;
+          const currentSessionType = isRegularActive ? "regular" : isPreActive ? "pre" : isPostActive ? "post" : null;
+          const progress = currentSessionType ? getSessionProgressNow(session, currentTime, currentSessionType) : 0;
+
+          return (
+            <div
+              ref={popoverRef}
+              className="fixed z-50 animate-in slide-in-from-left-2 fade-in duration-200"
+              style={{
+                left: popoverPosition.left,
+                top: popoverPosition.top,
+                width: '220px',
+                transform: popoverPosition.alignBottom ? 'translateY(-100%)' : 'none',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Arrow pointing left */}
+              <div
+                className={`absolute left-0 -translate-x-full ${popoverPosition.alignBottom ? 'bottom-4' : 'top-4'}`}
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderTop: '6px solid transparent',
+                  borderBottom: '6px solid transparent',
+                  borderRight: `6px solid ${session.color}40`,
+                }}
+              />
+              <div
+                className="rounded-xl p-3"
+                style={{
+                  background: `linear-gradient(135deg, ${session.color}20 0%, rgba(0,0,0,0.95) 100%)`,
+                  border: `1px solid ${session.color}40`,
+                  boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${session.color}20`,
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                {/* Header */}
+                <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: `1px solid ${session.color}30` }}>
+                  <span className="text-sm font-bold" style={{ color: session.color }}>{session.name}</span>
+                  <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                    style={{
+                      backgroundColor: isAnyActive ? session.color : `${session.color}20`,
+                      color: isAnyActive ? '#000' : `${session.color}90`,
+                    }}
+                  >
+                    {isRegularActive ? "LIVE" : isPreActive ? "PRE" : isPostActive ? "POST" : "CLOSED"}
+                  </span>
+                </div>
+
+                {/* Session Times */}
+                <div className="space-y-1.5 text-[10px]">
+                  {session.preMarket && (
+                    <div className="flex justify-between">
+                      <span style={{ color: isPreActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
+                        {session.id === "tokyo" ? "Morning" : session.id === "sydney" ? "Pre-Open" : "Pre-Market"}
+                      </span>
+                      <span className="font-mono" style={{ color: isPreActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
+                        {formatLocalHour(session.preMarket.start)} - {formatLocalHour(session.preMarket.end)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span style={{ color: isRegularActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
+                      {session.id === "tokyo" ? "Afternoon" : "Regular"}
+                    </span>
+                    <span className="font-mono" style={{ color: isRegularActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
+                      {formatLocalHour(session.regular.start)} - {formatLocalHour(session.regular.end)}
+                    </span>
+                  </div>
+                  {session.postMarket && (
+                    <div className="flex justify-between">
+                      <span style={{ color: isPostActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
+                        Post-Market
+                      </span>
+                      <span className="font-mono" style={{ color: isPostActive ? "#ffffff" : "rgba(255,255,255,0.6)" }}>
+                        {formatLocalHour(session.postMarket.start)} - {formatLocalHour(session.postMarket.end)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+
+                {/* Alerts Toggle */}
+                <div className="mt-3 pt-2" style={{ borderTop: `1px solid ${session.color}20` }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMarketAlerts(prev => {
+                        const next = new Set(prev);
+                        if (next.has(session.id)) {
+                          next.delete(session.id);
+                        } else {
+                          next.add(session.id);
+                        }
+                        return next;
+                      });
+                    }}
+                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors hover:brightness-110"
+                    style={{
+                      backgroundColor: marketAlerts.has(session.id) ? `${session.color}25` : 'rgba(255,255,255,0.05)',
+                      border: `1px solid ${marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.1)'}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-3 h-3" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.5)' }} />
+                      <span className="text-[10px]" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.6)' }}>
+                        Open/Close Alerts
+                      </span>
+                    </div>
+                    <div
+                      className="w-8 h-4 rounded-full p-0.5 transition-colors"
+                      style={{
+                        backgroundColor: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.2)',
+                      }}
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full bg-white transition-transform duration-200"
+                        style={{
+                          transform: marketAlerts.has(session.id) ? 'translateX(16px)' : 'translateX(0)',
+                        }}
+                      />
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Unified Right Timeline Area - Below Time Scale */}
         <div className="absolute top-10 left-60 right-0 bottom-0 flex flex-col overflow-hidden">
@@ -2233,6 +2329,20 @@ export default function DashboardPage() {
                 key={session.id}
                 className="flex-1 relative min-h-0 border-b border-border/20 overflow-hidden"
               >
+                {/* Alert indicator on timeline lane */}
+                {marketAlerts.has(session.id) && (
+                  <div
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full"
+                    style={{
+                      backgroundColor: `${session.color}30`,
+                      border: `1px solid ${session.color}`,
+                      boxShadow: `0 0 10px ${session.color}50`,
+                    }}
+                  >
+                    <Bell className="w-3.5 h-3.5" style={{ color: session.color }} />
+                    <span className="text-[10px] font-bold" style={{ color: session.color }}>ALERTS ON</span>
+                  </div>
+                )}
 
                 {/* Session Bars - render for visible time range */}
                 {(() => {
@@ -2315,9 +2425,6 @@ export default function DashboardPage() {
                                 : `linear-gradient(90deg, ${session.color}10 0%, ${session.color}06 100%)`,
                               border: `1px dashed ${session.color}${barIsActive ? "50" : "25"}`,
                             }}
-                            onMouseEnter={(e) => setHoveredSession({ session, type: "pre", x: e.clientX, y: e.clientY })}
-                            onMouseLeave={() => setHoveredSession(null)}
-                            onMouseMove={(e) => setHoveredSession({ session, type: "pre", x: e.clientX, y: e.clientY })}
                           >
                             {/* Progress fill - dims the passed portion (left of NOW) */}
                             {barIsActive && (
@@ -2416,26 +2523,31 @@ export default function DashboardPage() {
                       // Calculate where the clipped area starts relative to full session (for positioning markers)
                       const clipStartOffset = clippedStartX - regularStartX; // How much of the start is cut off
 
+                      // Check if session start is visible (accent line will be shown)
+                      const startIsVisible = regularStartX >= 0 && regularStartX <= timelineWidth;
+                      // Offset the bar to connect with accent line when start is visible
+                      const barLeftOffset = startIsVisible ? 2 : 0;
+
                       elements.push(
                         <div
                           key={`${session.id}-regular-${dayOffset}`}
-                          className="absolute rounded-lg cursor-pointer transition-all duration-300 hover:brightness-110 hover:z-10 overflow-hidden"
+                          className={`absolute cursor-pointer transition-all duration-300 hover:brightness-110 hover:z-10 overflow-hidden ${startIsVisible ? 'rounded-r-lg' : 'rounded-lg'}`}
                           style={{
-                            left: clippedStartX,
-                            width: clippedWidth,
+                            left: clippedStartX + barLeftOffset,
+                            width: clippedWidth - barLeftOffset,
                             height: "calc(100% - 8px)",
                             top: 4,
                             background: barIsActive
                               ? `linear-gradient(135deg, ${activeColor}35 0%, ${activeColor}20 50%, ${activeColor}30 100%)`
                               : `linear-gradient(135deg, ${session.color}18 0%, ${session.color}12 100%)`,
-                            border: `1px solid ${barIsActive ? activeColor : session.color}${barIsActive ? "70" : "30"}`,
+                            borderTop: `1px solid ${barIsActive ? activeColor : session.color}${barIsActive ? "70" : "30"}`,
+                            borderRight: `1px solid ${barIsActive ? activeColor : session.color}${barIsActive ? "70" : "30"}`,
+                            borderBottom: `1px solid ${barIsActive ? activeColor : session.color}${barIsActive ? "70" : "30"}`,
+                            borderLeft: startIsVisible ? 'none' : `1px solid ${barIsActive ? activeColor : session.color}${barIsActive ? "70" : "30"}`,
                             boxShadow: barIsActive
                               ? `0 0 20px ${activeColor}40, inset 0 1px 0 ${activeColor}30`
                               : `inset 0 1px 0 ${session.color}15`,
                           }}
-                          onMouseEnter={(e) => setHoveredSession({ session, type: "regular", x: e.clientX, y: e.clientY })}
-                          onMouseLeave={() => setHoveredSession(null)}
-                          onMouseMove={(e) => setHoveredSession({ session, type: "regular", x: e.clientX, y: e.clientY })}
                         >
                           {/* Shimmer effect for active sessions */}
                           {barIsActive && (
@@ -2458,14 +2570,6 @@ export default function DashboardPage() {
                               }}
                             />
                           )}
-                          {/* Left accent bar */}
-                          <div
-                            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
-                            style={{
-                              backgroundColor: barIsActive ? activeColor : session.color,
-                              boxShadow: barIsActive ? `0 0 8px ${activeColor}` : 'none',
-                            }}
-                          />
                           {/* Progress tick markers at 10%, 20%, 30%, etc. - positioned relative to FULL session */}
                           {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => {
                             // Calculate marker position relative to the clipped view
@@ -2548,6 +2652,25 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       );
+
+                      // Session start accent line - centered on session start time
+                      if (regularStartX >= 0 && regularStartX <= timelineWidth) {
+                        elements.push(
+                          <div
+                            key={`${session.id}-regular-start-line-${dayOffset}`}
+                            className="absolute pointer-events-none"
+                            style={{
+                              left: regularStartX - 2, // Center the 4px line
+                              width: 4,
+                              height: "calc(100% - 8px)",
+                              top: 4,
+                              backgroundColor: barIsActive ? activeColor : session.color,
+                              borderRadius: 2,
+                              boxShadow: barIsActive ? `0 0 8px ${activeColor}` : 'none',
+                            }}
+                          />
+                        );
+                      }
                     }
 
                     // Post-market (US only)
@@ -2586,9 +2709,6 @@ export default function DashboardPage() {
                                 : `linear-gradient(90deg, ${session.color}10 0%, ${session.color}06 100%)`,
                               border: `1px dashed ${session.color}${barIsActive ? "50" : "25"}`,
                             }}
-                            onMouseEnter={(e) => setHoveredSession({ session, type: "post", x: e.clientX, y: e.clientY })}
-                            onMouseLeave={() => setHoveredSession(null)}
-                            onMouseMove={(e) => setHoveredSession({ session, type: "post", x: e.clientX, y: e.clientY })}
                           >
                             {/* Progress fill - dims the passed portion (left of NOW) */}
                             {barIsActive && (
@@ -2663,132 +2783,99 @@ export default function DashboardPage() {
                     }
                   }
 
+                  // Add alert transition markers if alerts are enabled for this market
+                  if (marketAlerts.has(session.id)) {
+                    const today = new Date(currentTime);
+                    const tzDateStr = today.toLocaleDateString("en-CA", { timeZone: session.timezone });
+                    const [year, month, day] = tzDateStr.split("-").map(Number);
+                    const baseDate = new Date(year, month - 1, day);
+
+                    // Skip weekends
+                    const dayOfWeek = getDayOfWeekInTimezone(baseDate, session.timezone);
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                      // Collect all transition times for this market
+                      const transitions: { time: Date; label: string; type: 'open' | 'close' }[] = [];
+
+                      if (session.preMarket) {
+                        const preStart = getSessionDateTime(baseDate, session.preMarket.start, session.timezone, currentTime);
+                        transitions.push({ time: preStart, label: 'PRE OPEN', type: 'open' });
+                      }
+
+                      const regularStart = getSessionDateTime(baseDate, session.regular.start, session.timezone, currentTime);
+                      transitions.push({ time: regularStart, label: 'OPEN', type: 'open' });
+
+                      if (session.postMarket) {
+                        const postStart = getSessionDateTime(baseDate, session.postMarket.start, session.timezone, currentTime);
+                        const postEnd = getSessionDateTime(baseDate, session.postMarket.end, session.timezone, currentTime);
+                        transitions.push({ time: postStart, label: 'POST OPEN', type: 'open' });
+                        transitions.push({ time: postEnd, label: 'CLOSE', type: 'close' });
+                      } else {
+                        const regularEnd = getSessionDateTime(baseDate, session.regular.end, session.timezone, currentTime);
+                        transitions.push({ time: regularEnd, label: 'CLOSE', type: 'close' });
+                      }
+
+                      // Render transition markers
+                      transitions.forEach((transition, idx) => {
+                        const xPos = getTimePosition(transition.time, currentTime, timelineWidth) + scrollOffset;
+
+                        // Only render if visible
+                        if (xPos >= -30 && xPos <= timelineWidth + 30) {
+                          const isPast = currentTime > transition.time;
+
+                          const isOpen = transition.type === 'open';
+
+                          elements.push(
+                            <div
+                              key={`${session.id}-alert-${idx}`}
+                              className="absolute z-30 pointer-events-none"
+                              style={{
+                                left: xPos,
+                                top: '50%',
+                                transform: 'translate(-50%, -50%)',
+                              }}
+                            >
+                              {/* Bell icon - centered on xPos */}
+                              <div
+                                className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
+                                style={{
+                                  width: 18,
+                                  height: 18,
+                                  backgroundColor: isPast ? undefined : session.color,
+                                  border: `1px solid ${isPast ? session.color + '40' : session.color}`,
+                                  boxShadow: isPast ? 'none' : `0 0 10px ${session.color}80`,
+                                }}
+                              >
+                                <Bell
+                                  className="w-2.5 h-2.5"
+                                  style={{ color: isPast ? `${session.color}60` : '#0f172a' }}
+                                />
+                              </div>
+                              {/* Label - positioned left for opens, right for closes */}
+                              <span
+                                className={`absolute text-[8px] font-bold tracking-wider whitespace-nowrap px-1 rounded ${isPast ? 'bg-background' : ''}`}
+                                style={{
+                                  top: '50%',
+                                  transform: 'translateY(-50%)',
+                                  left: isOpen ? undefined : 'calc(100% + 4px)',
+                                  right: isOpen ? 'calc(100% + 4px)' : undefined,
+                                  color: isPast ? `${session.color}60` : session.color,
+                                  textShadow: isPast ? 'none' : `0 0 6px ${session.color}80`,
+                                }}
+                              >
+                                {transition.label}
+                              </span>
+                            </div>
+                          );
+                        }
+                      });
+                    }
+                  }
+
                   return elements;
                 })()}
               </div>
             );
           })}
-
-        {/* Session Tooltip */}
-        {hoveredSession && (
-          <div
-            className="fixed z-50 pointer-events-none"
-            style={{
-              left: Math.min(hoveredSession.x + 12, window.innerWidth - 280),
-              top: hoveredSession.y + 12,
-            }}
-          >
-            <div
-              className="bg-card border-2 rounded-lg shadow-2xl p-3 min-w-[250px] max-w-[280px]"
-              style={{ borderColor: hoveredSession.session.color }}
-            >
-              {/* Header */}
-              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: hoveredSession.session.color }}
-                />
-                <div>
-                  <span className="font-bold text-sm">{hoveredSession.session.name}</span>
-                  <div className="text-[10px] text-muted">{getTimezoneAbbr(hoveredSession.session.timezone)} Time Zone</div>
-                </div>
-              </div>
-
-              {/* Current time in market's timezone */}
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-muted">{getTimezoneAbbr(hoveredSession.session.timezone)} Time</span>
-                <span className="text-sm font-mono font-bold" style={{ color: hoveredSession.session.color }}>
-                  {getTimeInTimezone(hoveredSession.session.timezone)}
-                </span>
-              </div>
-
-              {/* All sessions for this market */}
-              <div className="space-y-1.5 text-xs">
-                {hoveredSession.session.preMarket && (
-                  <div className={`flex justify-between p-1.5 rounded ${hoveredSession.type === "pre" ? "bg-card-hover" : ""}`}>
-                    <span className={isSessionActiveNow(hoveredSession.session, currentTime, "pre") ? "text-foreground font-medium" : "text-muted"}>
-                      {hoveredSession.session.id === "tokyo" ? "Morning Session" : hoveredSession.session.id === "sydney" ? "Pre-Open" : "Pre-Market"}
-                    </span>
-                    <span className="font-mono" style={{ color: isSessionActiveNow(hoveredSession.session, currentTime, "pre") ? hoveredSession.session.color : undefined }}>
-                      {formatLocalHour(hoveredSession.session.preMarket.start)} - {formatLocalHour(hoveredSession.session.preMarket.end)}
-                    </span>
-                  </div>
-                )}
-                <div className={`flex justify-between p-1.5 rounded ${hoveredSession.type === "regular" ? "bg-card-hover" : ""}`}>
-                  <span className={isSessionActiveNow(hoveredSession.session, currentTime, "regular") ? "text-foreground font-medium" : "text-muted"}>
-                    {hoveredSession.session.id === "tokyo" ? "Afternoon Session" : "Regular Hours"}
-                  </span>
-                  <span className="font-mono" style={{ color: isSessionActiveNow(hoveredSession.session, currentTime, "regular") ? hoveredSession.session.color : undefined }}>
-                    {formatLocalHour(hoveredSession.session.regular.start)} - {formatLocalHour(hoveredSession.session.regular.end)}
-                  </span>
-                </div>
-                {hoveredSession.session.postMarket && (
-                  <div className={`flex justify-between p-1.5 rounded ${hoveredSession.type === "post" ? "bg-card-hover" : ""}`}>
-                    <span className={isSessionActiveNow(hoveredSession.session, currentTime, "post") ? "text-foreground font-medium" : "text-muted"}>
-                      Post-Market
-                    </span>
-                    <span className="font-mono" style={{ color: isSessionActiveNow(hoveredSession.session, currentTime, "post") ? hoveredSession.session.color : undefined }}>
-                      {formatLocalHour(hoveredSession.session.postMarket.start)} - {formatLocalHour(hoveredSession.session.postMarket.end)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Progress section (if any session active) */}
-              {(isSessionActiveNow(hoveredSession.session, currentTime, "pre") ||
-                isSessionActiveNow(hoveredSession.session, currentTime, "regular") ||
-                isSessionActiveNow(hoveredSession.session, currentTime, "post")) && (
-                <>
-                  <div className="border-t border-border my-2" />
-                  {(() => {
-                    const activeType = isSessionActiveNow(hoveredSession.session, currentTime, "regular")
-                      ? "regular"
-                      : isSessionActiveNow(hoveredSession.session, currentTime, "pre")
-                      ? "pre"
-                      : "post";
-                    const progress = getSessionProgressNow(hoveredSession.session, currentTime, activeType);
-                    const remaining = getTimeRemainingNow(hoveredSession.session, currentTime, activeType);
-                    const color = hoveredSession.session.color;
-
-                    return (
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted">Session Progress</span>
-                          <span className="font-bold" style={{ color }}>{Math.round(progress)}%</span>
-                        </div>
-                        <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: `${color}20` }}>
-                          <div
-                            className="h-full rounded-full"
-                            style={{ width: `${progress}%`, backgroundColor: color }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-[10px]">
-                          <span className="text-muted">Time Remaining</span>
-                          <span className="font-medium" style={{ color }}>{remaining}</span>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </>
-              )}
-
-              {/* Next open (if closed) */}
-              {!isSessionActiveNow(hoveredSession.session, currentTime, "pre") &&
-               !isSessionActiveNow(hoveredSession.session, currentTime, "regular") &&
-               !isSessionActiveNow(hoveredSession.session, currentTime, "post") && (
-                <>
-                  <div className="border-t border-border my-2" />
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted">Market Status</span>
-                    <span className="font-medium" style={{ color: hoveredSession.session.color }}>
-                      {getTimeUntilOpenNow(hoveredSession.session, currentTime)}
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Custom Session Tooltip */}
         {hoveredCustomSession && (
@@ -3074,8 +3161,9 @@ export default function DashboardPage() {
                 const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
                 const width = endX - startX;
 
-                // Only render if visible
-                if (endX < -100 || startX > timelineWidth) return null;
+                // Widen visibility range for custom sessions - show if any part could be visible
+                // This ensures user-created sessions are more likely to appear
+                if (endX < -timelineWidth || startX > timelineWidth * 2) return null;
 
                 const isActive = currentTime >= sessionStart && currentTime <= sessionEnd;
                 const progress = isActive
@@ -3225,11 +3313,11 @@ export default function DashboardPage() {
               const timelineWidth = containerWidth - 240; // Timeline area width (minus sidebar)
               const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
 
-              // Only render if visible
-              if (xPos < -50 || xPos > timelineWidth) return null;
+              // Widen visibility range for custom alerts
+              if (xPos < -timelineWidth || xPos > timelineWidth * 2) return null;
 
               const isPast = currentTime > alertTime;
-              const alertColor = alert.color || "#94A3B8";
+              const alertColor = alert.color || "#a855f7";
 
               return (
                 <div
@@ -3242,31 +3330,35 @@ export default function DashboardPage() {
                   }}
                   onClick={() => editAlert(alert)}
                 >
-                  {/* Alert marker - centered pill design */}
+                  {/* Bell icon - centered on xPos */}
                   <div
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg relative overflow-hidden"
+                    className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
                     style={{
-                      backgroundColor: alertColor,
-                      boxShadow: isPast ? 'none' : `0 4px 12px ${alertColor}40`,
+                      width: 20,
+                      height: 20,
+                      backgroundColor: isPast ? undefined : alertColor,
+                      border: `2px solid ${isPast ? alertColor + '40' : alertColor}`,
+                      boxShadow: isPast ? 'none' : `0 0 10px ${alertColor}80`,
                     }}
                   >
-                    {/* Dark overlay when past */}
-                    {isPast && (
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{ backgroundColor: 'rgba(15, 23, 42, 0.6)' }}
-                      />
-                    )}
-                    <Bell className="w-3.5 h-3.5 relative z-10" style={{ color: isPast ? "#0f172a80" : "#0f172a" }} />
-                    <div className="flex flex-col relative z-10">
-                      <span className="text-[11px] font-bold leading-tight" style={{ color: isPast ? "#0f172a80" : "#0f172a" }}>
-                        {alert.name}
-                      </span>
-                      <span className="text-[9px] font-mono leading-tight" style={{ color: isPast ? "#0f172a50" : "#0f172a99" }}>
-                        {formatTimeDisplay(alert.time)}
-                      </span>
-                    </div>
+                    <Bell
+                      className="w-3 h-3"
+                      style={{ color: isPast ? `${alertColor}60` : '#0f172a' }}
+                    />
                   </div>
+                  {/* Label - positioned to the right */}
+                  <span
+                    className={`absolute text-[9px] font-bold tracking-wide whitespace-nowrap px-1.5 py-0.5 rounded ${isPast ? 'bg-background' : ''}`}
+                    style={{
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      left: 'calc(100% + 4px)',
+                      color: isPast ? `${alertColor}60` : alertColor,
+                      textShadow: isPast ? 'none' : `0 0 6px ${alertColor}80`,
+                    }}
+                  >
+                    {alert.name}
+                  </span>
                 </div>
               );
             })}
@@ -3305,7 +3397,7 @@ export default function DashboardPage() {
                     todayEnd.setHours(endHour, endMin, 0, 0);
                     const startX = getTimePosition(yesterdayStart, currentTime, timelineWidth) + scrollOffset;
                     const endX = getTimePosition(todayEnd, currentTime, timelineWidth) + scrollOffset;
-                    if (!(endX < -100 || startX > timelineWidth)) {
+                    if (!(endX < -timelineWidth || startX > timelineWidth * 2)) {
                       hasVisibleSession = true;
                       break;
                     }
@@ -3320,7 +3412,7 @@ export default function DashboardPage() {
                     tomorrowEnd.setHours(endHour, endMin, 0, 0);
                     const startX = getTimePosition(todayStart, currentTime, timelineWidth) + scrollOffset;
                     const endX = getTimePosition(tomorrowEnd, currentTime, timelineWidth) + scrollOffset;
-                    if (!(endX < -100 || startX > timelineWidth)) {
+                    if (!(endX < -timelineWidth || startX > timelineWidth * 2)) {
                       hasVisibleSession = true;
                       break;
                     }
@@ -3334,7 +3426,7 @@ export default function DashboardPage() {
                     sessionEnd.setHours(endHour, endMin, 0, 0);
                     const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
                     const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
-                    if (!(endX < -100 || startX > timelineWidth)) {
+                    if (!(endX < -timelineWidth || startX > timelineWidth * 2)) {
                       hasVisibleSession = true;
                       break;
                     }
@@ -3352,7 +3444,7 @@ export default function DashboardPage() {
                   const alertTime = new Date(today);
                   alertTime.setHours(alertHour, alertMin, 0, 0);
                   const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
-                  if (!(xPos < -50 || xPos > timelineWidth)) {
+                  if (!(xPos < -timelineWidth || xPos > timelineWidth * 2)) {
                     hasVisibleAlert = true;
                     break;
                   }
@@ -3441,23 +3533,35 @@ export default function DashboardPage() {
                         </svg>
                       </div>
 
-                      {/* Connecting line */}
+                      {/* Connecting line - between top and bottom arrows */}
                       <div
                         className="absolute left-1/2 -translate-x-1/2"
                         style={{
                           top: 18,
-                          bottom: 18,
+                          bottom: 38,
                           width: isAnyActive ? 2 : 1,
                           background: `linear-gradient(180deg, ${pointerColor} 0%, ${pointerColor}30 50%, ${pointerColor} 100%)`,
                           borderRadius: 1,
                         }}
                       />
 
-                      {/* Bottom bracket pointing up (above dot) */}
-                      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 7 }}>
+                      {/* Bottom dot - matches top dot spacing */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 rounded-full"
+                        style={{
+                          bottom: 29,
+                          width: 6,
+                          height: 6,
+                          backgroundColor: pointerColor,
+                          boxShadow: isAnyActive ? `0 0 6px ${pointerColor}` : undefined,
+                        }}
+                      />
+
+                      {/* Bottom bracket pointing down (matches top bracket) */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 20 }}>
                         <svg width="14" height="8" viewBox="0 0 14 8">
                           <path
-                            d="M0 8 L0 5 L7 0 L14 5 L14 8"
+                            d="M0 0 L0 3 L7 8 L14 3 L14 0"
                             fill="none"
                             stroke={pointerColor}
                             strokeWidth={isAnyActive ? 2 : 1.5}
@@ -3468,14 +3572,16 @@ export default function DashboardPage() {
                         </svg>
                       </div>
 
-                      {/* Bottom dot */}
+                      {/* Line from arrow down towards progress markers */}
                       <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full"
+                        className="absolute left-1/2 -translate-x-1/2"
                         style={{
-                          width: 6,
-                          height: 6,
+                          bottom: 7,
+                          height: 10,
+                          width: isAnyActive ? 2 : 1,
                           backgroundColor: pointerColor,
-                          boxShadow: isAnyActive ? `0 0 6px ${pointerColor}` : undefined,
+                          opacity: 0.6,
+                          borderRadius: 1,
                         }}
                       />
                     </div>
@@ -3535,6 +3641,24 @@ export default function DashboardPage() {
                 {showCustomCard && (() => {
                   const customColor = "#a855f7";
                   const customLaneIndex = marketLaneCount + (showEventsCard ? 1 : 0);
+
+                  // Check if any custom session is currently active
+                  const hasActiveCustomSession = customSessions.some(session => {
+                    const today = new Date(currentTime);
+                    const todayDay = today.getDay();
+                    const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                    if (!isActiveToday) return false;
+
+                    const [startHour, startMin] = session.startTime.split(":").map(Number);
+                    const [endHour, endMin] = session.endTime.split(":").map(Number);
+                    const sessionStart = new Date(today);
+                    sessionStart.setHours(startHour, startMin, 0, 0);
+                    const sessionEnd = new Date(today);
+                    sessionEnd.setHours(endHour, endMin, 0, 0);
+
+                    return currentTime >= sessionStart && currentTime <= sessionEnd;
+                  });
+
                   return (
                     <div
                       className="absolute left-1/2 -translate-x-1/2"
@@ -3547,35 +3671,74 @@ export default function DashboardPage() {
                       {/* Top dot */}
                       <div
                         className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
-                        style={{ width: 6, height: 6, backgroundColor: customColor }}
+                        style={{
+                          width: 6,
+                          height: 6,
+                          backgroundColor: customColor,
+                          boxShadow: hasActiveCustomSession ? `0 0 6px ${customColor}` : undefined,
+                        }}
                       />
                       {/* Top bracket pointing down */}
                       <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 7 }}>
                         <svg width="14" height="8" viewBox="0 0 14 8">
-                          <path d="M0 0 L0 3 L7 8 L14 3 L14 0" fill="none" stroke={customColor} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                          <path
+                            d="M0 0 L0 3 L7 8 L14 3 L14 0"
+                            fill="none"
+                            stroke={customColor}
+                            strokeWidth={hasActiveCustomSession ? 2 : 1.5}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            style={{ filter: hasActiveCustomSession ? `drop-shadow(0 0 3px ${customColor})` : undefined }}
+                          />
                         </svg>
                       </div>
-                      {/* Connecting line */}
+                      {/* Connecting line - between top and bottom arrows */}
                       <div
                         className="absolute left-1/2 -translate-x-1/2"
                         style={{
                           top: 18,
-                          bottom: 18,
-                          width: 1,
+                          bottom: 38,
+                          width: hasActiveCustomSession ? 2 : 1,
                           background: `linear-gradient(180deg, ${customColor} 0%, ${customColor}30 50%, ${customColor} 100%)`,
                           borderRadius: 1,
                         }}
                       />
-                      {/* Bottom bracket pointing up */}
-                      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 7 }}>
+                      {/* Bottom dot - matches top dot spacing */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 rounded-full"
+                        style={{
+                          bottom: 29,
+                          width: 6,
+                          height: 6,
+                          backgroundColor: customColor,
+                          boxShadow: hasActiveCustomSession ? `0 0 6px ${customColor}` : undefined,
+                        }}
+                      />
+                      {/* Bottom bracket pointing down (matches top bracket) */}
+                      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 20 }}>
                         <svg width="14" height="8" viewBox="0 0 14 8">
-                          <path d="M0 8 L0 5 L7 0 L14 5 L14 8" fill="none" stroke={customColor} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                          <path
+                            d="M0 0 L0 3 L7 8 L14 3 L14 0"
+                            fill="none"
+                            stroke={customColor}
+                            strokeWidth={hasActiveCustomSession ? 2 : 1.5}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            style={{ filter: hasActiveCustomSession ? `drop-shadow(0 0 3px ${customColor})` : undefined }}
+                          />
                         </svg>
                       </div>
-                      {/* Bottom dot */}
+                      {/* Line from arrow down towards progress markers */}
                       <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full"
-                        style={{ width: 6, height: 6, backgroundColor: customColor }}
+                        className="absolute left-1/2 -translate-x-1/2"
+                        style={{
+                          bottom: 7,
+                          height: 10,
+                          width: hasActiveCustomSession ? 2 : 1,
+                          backgroundColor: customColor,
+                          opacity: 0.6,
+                          borderRadius: 1,
+                        }}
                       />
                     </div>
                   );
@@ -3741,6 +3904,157 @@ export default function DashboardPage() {
                   {editingItem ? "Save Changes" : "Create"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Events List Modal */}
+      {showEventsListModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowEventsListModal(false)}
+        >
+          <div
+            className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-slate-400" />
+                <div>
+                  <h2 className="text-lg font-semibold">Today's Events</h2>
+                  <p className="text-xs text-muted">
+                    {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowEventsListModal(false)}
+                className="p-1 rounded hover:bg-card-hover transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Events List */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {todaysEvents.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Calendar className="w-12 h-12 text-slate-600 mb-3" />
+                  <p className="text-muted">No events found for today</p>
+                  <p className="text-xs text-muted/60 mt-1">Try adjusting your impact filters</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {todaysEvents
+                    .sort((a, b) => {
+                      const timeA = new Date(`${a.date}T${a.time || "00:00"}:00`).getTime();
+                      const timeB = new Date(`${b.date}T${b.time || "00:00"}:00`).getTime();
+                      return timeA - timeB;
+                    })
+                    .map((event, index) => {
+                      const eventTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
+                      const isPast = eventTime < currentTime;
+                      const impactColor = event.impact === "high" ? "#EF4444" : event.impact === "medium" ? "#F59E0B" : "#10B981";
+
+                      return (
+                        <div
+                          key={index}
+                          className={`p-3 rounded-lg border transition-colors ${
+                            isPast
+                              ? 'bg-white/5 border-white/10 opacity-60'
+                              : 'bg-white/10 border-white/20 hover:bg-white/15'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Impact indicator */}
+                            <div
+                              className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                              style={{ backgroundColor: impactColor }}
+                            />
+
+                            {/* Event details */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-sm">{event.title}</span>
+                                <span
+                                  className="px-1.5 py-0.5 text-[9px] font-bold rounded uppercase"
+                                  style={{
+                                    backgroundColor: `${impactColor}20`,
+                                    color: impactColor,
+                                  }}
+                                >
+                                  {event.impact}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-3 text-xs text-muted">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {event.time || "All Day"}
+                                </span>
+                                <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">
+                                  {event.currency}
+                                </span>
+                                {event.category && (
+                                  <span className="text-[10px] text-white/50">{event.category}</span>
+                                )}
+                              </div>
+
+                              {/* Forecast/Previous if available */}
+                              {(event.forecast || event.previous) && (
+                                <div className="flex gap-4 mt-2 text-[10px]">
+                                  {event.forecast && (
+                                    <span className="text-white/60">
+                                      Forecast: <span className="text-white/80 font-mono">{event.forecast}</span>
+                                    </span>
+                                  )}
+                                  {event.previous && (
+                                    <span className="text-white/60">
+                                      Previous: <span className="text-white/80 font-mono">{event.previous}</span>
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Time until/since */}
+                            <div className="text-right flex-shrink-0">
+                              {isPast ? (
+                                <span className="text-[10px] text-white/40">Past</span>
+                              ) : (
+                                <span className="text-[10px] font-mono text-slate-300">
+                                  {(() => {
+                                    const diff = eventTime.getTime() - currentTime.getTime();
+                                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                    if (hours > 0) return `${hours}h ${minutes}m`;
+                                    return `${minutes}m`;
+                                  })()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-card/50 flex-shrink-0">
+              <div className="text-xs text-muted">
+                {filteredVisibleEvents.length} event{filteredVisibleEvents.length !== 1 ? 's' : ''} total
+              </div>
+              <button
+                onClick={() => setShowEventsListModal(false)}
+                className="px-4 py-1.5 text-sm font-medium rounded-lg border border-border hover:bg-card-hover transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
