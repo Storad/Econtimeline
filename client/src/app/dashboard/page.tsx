@@ -3307,7 +3307,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={alert.id}
-                  className="absolute cursor-pointer z-30"
+                  className="absolute cursor-pointer z-30 flex flex-col items-center"
                   style={{
                     left: xPos,
                     top: '50%',
@@ -3331,15 +3331,15 @@ export default function DashboardPage() {
                       style={{ color: isPast ? `${alertColor}60` : '#0f172a' }}
                     />
                   </div>
-                  {/* Label - positioned to the right */}
+                  {/* Label - positioned below the bell */}
                   <span
-                    className={`absolute text-[9px] font-bold tracking-wide whitespace-nowrap px-1.5 py-0.5 rounded ${isPast ? 'bg-background' : ''}`}
+                    className={`text-[8px] font-bold tracking-wide whitespace-nowrap px-1 py-0.5 rounded mt-1 ${isPast ? 'bg-background' : ''}`}
                     style={{
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      left: 'calc(100% + 4px)',
                       color: isPast ? `${alertColor}60` : alertColor,
                       textShadow: isPast ? 'none' : `0 0 6px ${alertColor}80`,
+                      maxWidth: 60,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
                     {alert.name}
