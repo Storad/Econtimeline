@@ -1155,7 +1155,7 @@ export default function DashboardPage() {
 
   // Market session alert detection
   useEffect(() => {
-    if (marketAlerts.size === 0) return;
+    if (marketAlerts.size === 0 || !currentTime) return;
 
     MARKET_SESSIONS.forEach(session => {
       if (!marketAlerts.has(session.id)) return;
