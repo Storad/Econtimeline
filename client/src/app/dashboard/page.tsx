@@ -55,6 +55,11 @@ interface CustomSession {
   color: string;
   recurring: boolean;
   days?: number[]; // 0-6, Sunday-Saturday
+  openAlert?: boolean;
+  openAlertSound?: string;
+  closeAlert?: boolean;
+  closeAlertSound?: string;
+  note?: string;
 }
 
 interface CustomAlert {
@@ -65,6 +70,7 @@ interface CustomAlert {
   recurring: boolean;
   days?: number[];
   color: string;
+  note?: string;
 }
 
 // ============================================
@@ -583,6 +589,15 @@ const DAY_OPTIONS = [
   { label: "Sat", value: 6 },
 ];
 
+const SOUND_OPTIONS = [
+  { label: "Bell", value: "bell" },
+  { label: "Chime", value: "chime" },
+  { label: "Ding", value: "ding" },
+  { label: "Beep", value: "beep" },
+  { label: "Tone", value: "tone" },
+  { label: "None", value: "none" },
+];
+
 // Time picker helpers
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1); // 1-12
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5); // 0, 5, 10, ... 55
@@ -794,6 +809,7 @@ export default function DashboardPage() {
   // Market session alerts state
   const [marketAlerts, setMarketAlerts] = useState<Set<string>>(new Set());
   const prevMarketStates = useRef<Map<string, { isOpen: boolean; sessionType: string | null }>>(new Map());
+  const prevCustomSessionStates = useRef<Map<string, boolean>>(new Map());
   const audioContextRef = useRef<AudioContext | null>(null);
 
   // Economic Events Filter State
@@ -816,10 +832,19 @@ export default function DashboardPage() {
     session: CustomSession;
     x: number;
     y: number;
-    isActive: boolean;
-    progress: number;
     startTime: Date;
     endTime: Date;
+    isActive: boolean;
+    progress: number;
+  } | null>(null);
+
+  // Custom alert tooltip state
+  const [hoveredCustomAlert, setHoveredCustomAlert] = useState<{
+    alert: CustomAlert;
+    x: number;
+    y: number;
+    alertTime: Date;
+    isPast: boolean;
   } | null>(null);
 
   // Visibility toggles
@@ -931,6 +956,11 @@ export default function DashboardPage() {
   const [formColor, setFormColor] = useState(COLOR_OPTIONS[0].value);
   const [formRecurring, setFormRecurring] = useState(false);
   const [formDays, setFormDays] = useState<number[]>([1, 2, 3, 4, 5]); // Weekdays by default
+  const [formOpenAlert, setFormOpenAlert] = useState(false);
+  const [formOpenAlertSound, setFormOpenAlertSound] = useState("bell");
+  const [formCloseAlert, setFormCloseAlert] = useState(false);
+  const [formCloseAlertSound, setFormCloseAlertSound] = useState("bell");
+  const [formNote, setFormNote] = useState("");
 
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1035,76 +1065,15 @@ export default function DashboardPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen]);
 
-  // Play NYSE-style market bell sound using Web Audio API and announce with speech
+  // Play market bell sound and announce with speech
   const playAlertSound = useCallback((type: 'open' | 'close', marketName: string, sessionType: string | null) => {
     try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      }
-      const ctx = audioContextRef.current;
+      // Play the bell audio file
+      const audio = new Audio('/sounds/bell.mp3');
+      audio.volume = 0.7;
+      audio.play();
 
-      // NYSE bell is tuned to D4 (293.66 Hz) with a D-sharp overtone (311.13 Hz)
-      // This creates the characteristic "warble" of the brass bell
-      const ringBell = (startTime: number) => {
-        // Brass bell frequencies - D4 fundamental with D# overtone and harmonics
-        const bellTones = [
-          { freq: 293.66, gain: 0.4, decay: 1.8 },   // D4 - fundamental
-          { freq: 311.13, gain: 0.35, decay: 1.6 },  // D#4 - characteristic overtone (creates warble)
-          { freq: 587.33, gain: 0.25, decay: 1.4 },  // D5 - 2nd harmonic
-          { freq: 622.25, gain: 0.2, decay: 1.2 },   // D#5 - overtone harmonic
-          { freq: 880.00, gain: 0.15, decay: 1.0 },  // A5 - adds brightness
-          { freq: 1174.66, gain: 0.1, decay: 0.8 },  // D6 - shimmer
-        ];
-
-        bellTones.forEach(({ freq, gain, decay }) => {
-          const osc = ctx.createOscillator();
-          const gainNode = ctx.createGain();
-
-          osc.connect(gainNode);
-          gainNode.connect(ctx.destination);
-
-          osc.frequency.setValueAtTime(freq, startTime);
-          osc.type = 'sine';
-
-          // Sharp attack, long natural decay like a brass bell
-          gainNode.gain.setValueAtTime(0, startTime);
-          gainNode.gain.linearRampToValueAtTime(gain * 0.5, startTime + 0.005); // Very fast attack
-          gainNode.gain.exponentialRampToValueAtTime(gain * 0.3, startTime + 0.05); // Quick initial drop
-          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + decay); // Long decay
-
-          osc.start(startTime);
-          osc.stop(startTime + decay + 0.1);
-        });
-
-        // Add metallic strike transient for brass character
-        const strike = ctx.createOscillator();
-        const strikeGain = ctx.createGain();
-        const strikeFilter = ctx.createBiquadFilter();
-
-        strike.connect(strikeFilter);
-        strikeFilter.connect(strikeGain);
-        strikeGain.connect(ctx.destination);
-
-        strike.type = 'square';
-        strike.frequency.setValueAtTime(293.66, startTime);
-        strikeFilter.type = 'bandpass';
-        strikeFilter.frequency.setValueAtTime(800, startTime);
-        strikeFilter.Q.setValueAtTime(2, startTime);
-
-        strikeGain.gain.setValueAtTime(0.15, startTime);
-        strikeGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.08);
-
-        strike.start(startTime);
-        strike.stop(startTime + 0.1);
-      };
-
-      // Ring the bell 3 times at brisk tempo (like NYSE)
-      const now = ctx.currentTime;
-      ringBell(now);
-      ringBell(now + 0.4);  // Brisk tempo
-      ringBell(now + 0.8);
-
-      // Text-to-speech announcement (after bells finish)
+      // Text-to-speech announcement (after bell finishes)
       if ('speechSynthesis' in window) {
         setTimeout(() => {
           // Build the announcement message
@@ -1164,12 +1133,174 @@ export default function DashboardPage() {
           utterance.pitch = 0.9;
           utterance.volume = 0.8;
           window.speechSynthesis.speak(utterance);
-        }, 1500); // Wait for bells to finish
+        }, 500); // Wait for bell to finish
       }
     } catch (e) {
       console.log('Audio not supported');
     }
   }, []);
+
+  // Play custom sound based on sound type selection
+  const playCustomSound = useCallback((soundType: string, sessionName: string, alertType: 'open' | 'close', skipSpeech = false) => {
+    if (soundType === 'none') return;
+
+    // For bell audio file, play the actual MP3
+    if (soundType === 'bell') {
+      try {
+        const audio = new Audio(`/sounds/bell.mp3`);
+        audio.volume = 0.7;
+        audio.play();
+
+        // Also announce if not skipping speech
+        if (!skipSpeech && window.speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(
+            `${sessionName} ${alertType === 'open' ? 'session open' : 'session closed'}`
+          );
+          utterance.rate = 1.0;
+          utterance.pitch = 1.0;
+          utterance.volume = 0.8;
+          setTimeout(() => window.speechSynthesis.speak(utterance), 500);
+        }
+      } catch (e) {
+        console.log('Audio playback failed:', e);
+      }
+      return;
+    }
+
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      }
+      const ctx = audioContextRef.current;
+      const now = ctx.currentTime;
+
+      if (soundType === 'chime') {
+        // Pleasant chime sound
+        const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5 chord
+        frequencies.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0, now + i * 0.1);
+          gain.gain.linearRampToValueAtTime(0.3, now + i * 0.1 + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 1);
+          osc.start(now + i * 0.1);
+          osc.stop(now + i * 0.1 + 1.1);
+        });
+      } else if (soundType === 'ding') {
+        // Simple ding
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      } else if (soundType === 'beep') {
+        // Double beep
+        [0, 0.15].forEach((delay) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 1000;
+          osc.type = 'square';
+          gain.gain.setValueAtTime(0.2, now + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.1);
+          osc.start(now + delay);
+          osc.stop(now + delay + 0.15);
+        });
+      } else if (soundType === 'tone') {
+        // Low tone
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 440;
+        osc.type = 'triangle';
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.9);
+      }
+
+      // Speech announcement (skip for preview)
+      if (!skipSpeech && 'speechSynthesis' in window) {
+        setTimeout(() => {
+          const text = alertType === 'open'
+            ? `${sessionName} session started`
+            : `${sessionName} session ended`;
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 0.95;
+          utterance.pitch = 0.9;
+          utterance.volume = 0.8;
+          window.speechSynthesis.speak(utterance);
+        }, 500);
+      }
+    } catch (e) {
+      console.log('Audio not supported');
+    }
+  }, [playAlertSound]);
+
+  // Custom session alert detection
+  useEffect(() => {
+    if (customSessions.length === 0 || !currentTime) return;
+
+    const today = new Date(currentTime);
+    const todayDay = today.getDay();
+
+    customSessions.forEach(session => {
+      // Check if session has alerts enabled
+      if (!session.openAlert && !session.closeAlert) return;
+
+      // Check if session is active today
+      const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+      if (!isActiveToday) return;
+
+      // Parse session times
+      const [startHour, startMin] = session.startTime.split(":").map(Number);
+      const [endHour, endMin] = session.endTime.split(":").map(Number);
+
+      const sessionStart = new Date(today);
+      sessionStart.setHours(startHour, startMin, 0, 0);
+
+      const sessionEnd = new Date(today);
+      sessionEnd.setHours(endHour, endMin, 0, 0);
+
+      // Handle overnight sessions
+      if (endHour < startHour || (endHour === startHour && endMin < startMin)) {
+        if (currentTime.getHours() < endHour || (currentTime.getHours() === endHour && currentTime.getMinutes() < endMin)) {
+          sessionStart.setDate(sessionStart.getDate() - 1);
+        } else {
+          sessionEnd.setDate(sessionEnd.getDate() + 1);
+        }
+      }
+
+      const isActive = currentTime >= sessionStart && currentTime <= sessionEnd;
+      const prevState = prevCustomSessionStates.current.get(session.id);
+
+      if (prevState !== undefined) {
+        // Detect session start
+        if (!prevState && isActive && session.openAlert) {
+          playCustomSound(session.openAlertSound || 'bell', session.name, 'open');
+          console.log(`🔔 Custom session "${session.name}" STARTED`);
+        }
+        // Detect session end
+        else if (prevState && !isActive && session.closeAlert) {
+          playCustomSound(session.closeAlertSound || 'bell', session.name, 'close');
+          console.log(`🔔 Custom session "${session.name}" ENDED`);
+        }
+      }
+
+      prevCustomSessionStates.current.set(session.id, isActive);
+    });
+  }, [currentTime, customSessions, playCustomSound]);
 
   // Market session alert detection
   useEffect(() => {
@@ -1251,6 +1382,11 @@ export default function DashboardPage() {
     setFormColor(COLOR_OPTIONS[0].value);
     setFormRecurring(false);
     setFormDays([1, 2, 3, 4, 5]);
+    setFormOpenAlert(false);
+    setFormOpenAlertSound("bell");
+    setFormCloseAlert(false);
+    setFormCloseAlertSound("bell");
+    setFormNote("");
     setShowModal(true);
   }, []);
 
@@ -1263,6 +1399,7 @@ export default function DashboardPage() {
     setFormColor("#94A3B8"); // Gray for alerts
     setFormRecurring(false);
     setFormDays([1, 2, 3, 4, 5]);
+    setFormNote("");
     setShowModal(true);
   }, []);
 
@@ -1276,6 +1413,11 @@ export default function DashboardPage() {
     setFormColor(session.color);
     setFormRecurring(session.recurring);
     setFormDays(session.days || [1, 2, 3, 4, 5]);
+    setFormOpenAlert(session.openAlert || false);
+    setFormOpenAlertSound(session.openAlertSound || "bell");
+    setFormCloseAlert(session.closeAlert || false);
+    setFormCloseAlertSound(session.closeAlertSound || "bell");
+    setFormNote(session.note || "");
     setShowModal(true);
   }, []);
 
@@ -1288,6 +1430,7 @@ export default function DashboardPage() {
     setFormColor(alert.color || "#F97316");
     setFormRecurring(alert.recurring);
     setFormDays(alert.days || [1, 2, 3, 4, 5]);
+    setFormNote(alert.note || "");
     setShowModal(true);
   }, []);
 
@@ -1311,6 +1454,11 @@ export default function DashboardPage() {
         color: formColor,
         recurring: formRecurring,
         days: formRecurring ? formDays : undefined,
+        openAlert: formOpenAlert,
+        openAlertSound: formOpenAlert ? formOpenAlertSound : undefined,
+        closeAlert: formCloseAlert,
+        closeAlertSound: formCloseAlert ? formCloseAlertSound : undefined,
+        note: formNote.trim() || undefined,
       };
 
       if (editingItem) {
@@ -1329,6 +1477,7 @@ export default function DashboardPage() {
         recurring: formRecurring,
         days: formRecurring ? formDays : undefined,
         color: formColor,
+        note: formNote.trim() || undefined,
       };
 
       if (editingItem) {
@@ -1341,7 +1490,7 @@ export default function DashboardPage() {
     }
 
     setShowModal(false);
-  }, [modalMode, editingItem, formName, formStartTime, formEndTime, formAlertTime, formColor, formRecurring, formDays]);
+  }, [modalMode, editingItem, formName, formStartTime, formEndTime, formAlertTime, formColor, formRecurring, formDays, formOpenAlert, formOpenAlertSound, formCloseAlert, formCloseAlertSound, formNote]);
 
   // Delete session or alert
   const handleDelete = useCallback(() => {
@@ -2090,10 +2239,7 @@ export default function DashboardPage() {
             <div className="px-3 py-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <Settings className="w-4 h-4 text-purple-400" style={hasActiveSession ? { animation: 'spin 8s linear infinite' } : undefined} />
-                  {hasActiveSession && (
-                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-purple-500 rounded-full animate-ping" />
-                  )}
+                  <Settings className="w-4 h-4 text-purple-400" />
                 </div>
                 <span className="text-sm font-semibold text-purple-400">Custom</span>
                 {hasActiveSession && (
@@ -2107,33 +2253,7 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            {/* Compact summary view */}
-            <div className="px-3 pb-2 space-y-1.5">
-              {/* Active session indicator */}
-              {activeSession && (
-                <div className="flex items-center gap-2 px-2 py-1 rounded bg-purple-500/10 border border-purple-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: activeSession.color }} />
-                  <span className="text-[10px] text-white/80 truncate flex-1">{activeSession.name}</span>
-                  <span className="text-[9px] font-mono text-purple-400">{Math.round(sessionProgress)}%</span>
-                </div>
-              )}
-
-              {/* Next alert indicator */}
-              {nextAlert && (
-                <div className="flex items-center gap-2 px-2 py-1 rounded bg-orange-500/10 border border-orange-500/20">
-                  <Bell className="w-3 h-3 text-orange-400" />
-                  <span className="text-[10px] text-white/80 truncate flex-1">{nextAlert.name}</span>
-                  <span className="text-[9px] font-mono text-orange-400">{formatMinutes(nextAlert.minutesUntil)}</span>
-                </div>
-              )}
-
-              {/* Item counts */}
-              <div className="flex items-center justify-between text-[9px] text-white/50 px-1">
-                <span>{customSessions.length} session{customSessions.length !== 1 ? 's' : ''}, {customAlerts.length} alert{customAlerts.length !== 1 ? 's' : ''}</span>
-              </div>
-            </div>
-
-            {/* Action buttons - compact row */}
+            {/* Action buttons */}
             <div className="px-3 pb-2 flex gap-1.5">
               <button
                 onClick={() => openNewSessionModal()}
@@ -2149,15 +2269,13 @@ export default function DashboardPage() {
                 <Plus className="w-2.5 h-2.5" />
                 Alert
               </button>
-              {(customSessions.length > 0 || customAlerts.length > 0) && (
-                <button
-                  onClick={() => setShowCustomManageModal(true)}
-                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[9px] rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors"
-                >
-                  <Settings className="w-2.5 h-2.5" />
-                  Manage
-                </button>
-              )}
+              <button
+                onClick={() => setShowCustomManageModal(true)}
+                className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-[9px] rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors"
+              >
+                <Settings className="w-2.5 h-2.5" />
+                Manage
+              </button>
             </div>
           </div>
             );
@@ -2863,98 +2981,167 @@ export default function DashboardPage() {
           })}
 
         {/* Custom Session Tooltip */}
-        {hoveredCustomSession && (
-          <div
-            className="fixed z-50 pointer-events-none"
-            style={{
-              left: Math.min(hoveredCustomSession.x + 12, window.innerWidth - 280),
-              top: hoveredCustomSession.y + 12,
-            }}
-          >
+        {hoveredCustomSession && (() => {
+          const color = hoveredCustomSession.session.color;
+          const isActive = hoveredCustomSession.isActive;
+
+          return (
             <div
-              className="bg-card border-2 rounded-lg shadow-2xl p-3 min-w-[220px] max-w-[260px]"
-              style={{ borderColor: hoveredCustomSession.session.color }}
+              className="fixed z-50 pointer-events-none animate-in fade-in duration-150"
+              style={{
+                left: Math.min(Math.max(12, hoveredCustomSession.x + 12), window.innerWidth - 240),
+                top: Math.min(hoveredCustomSession.y + 12, window.innerHeight - 280),
+              }}
             >
-              {/* Header */}
-              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: hoveredCustomSession.session.color }}
-                />
-                <div>
-                  <span className="font-bold text-sm">{hoveredCustomSession.session.name}</span>
-                  <div className="text-[10px] text-muted">Custom Session</div>
-                </div>
-              </div>
-
-              {/* Time range */}
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-muted">Time</span>
-                <span className="text-sm font-mono font-bold" style={{ color: hoveredCustomSession.session.color }}>
-                  {hoveredCustomSession.session.startTime} - {hoveredCustomSession.session.endTime}
-                </span>
-              </div>
-
-              {/* Recurring info */}
-              {hoveredCustomSession.session.recurring && hoveredCustomSession.session.days && (
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-muted">Repeats</span>
-                  <span className="text-xs font-medium">
-                    {hoveredCustomSession.session.days.map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]).join(', ')}
+              <div
+                className="rounded-xl p-3"
+                style={{
+                  width: 200,
+                  background: `linear-gradient(135deg, ${color}20 0%, rgba(0,0,0,0.95) 100%)`,
+                  border: `1px solid ${color}40`,
+                  boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${color}20`,
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                {/* Header */}
+                <div className="flex items-center gap-2 mb-2 pb-2" style={{ borderBottom: `1px solid ${color}30` }}>
+                  <span className="text-sm font-bold" style={{ color }}>{hoveredCustomSession.session.name}</span>
+                  <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                    style={{
+                      backgroundColor: isActive ? color : `${color}20`,
+                      color: isActive ? '#000' : `${color}90`,
+                    }}
+                  >
+                    {isActive ? "ACTIVE" : currentTime < hoveredCustomSession.startTime ? "SOON" : "ENDED"}
                   </span>
                 </div>
-              )}
 
-              {/* Progress section (if active) */}
-              {hoveredCustomSession.isActive && (
-                <>
-                  <div className="border-t border-border my-2" />
-                  {(() => {
-                    const progress = hoveredCustomSession.progress;
-                    const remaining = hoveredCustomSession.endTime.getTime() - currentTime.getTime();
-                    const hours = Math.floor(remaining / (1000 * 60 * 60));
-                    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-                    const color = hoveredCustomSession.session.color;
+                {/* Time range */}
+                <div className="flex justify-between items-center text-[10px] mb-1">
+                  <span style={{ color: 'rgba(255,255,255,0.6)' }}>Time</span>
+                  <span className="font-mono" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                    {hoveredCustomSession.session.startTime} - {hoveredCustomSession.session.endTime}
+                  </span>
+                </div>
 
-                    return (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted">Progress</span>
-                          <span className="font-bold" style={{ color }}>{Math.round(progress)}%</span>
-                        </div>
-                        <div className="h-1.5 rounded-full bg-card-hover overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all"
-                            style={{ width: `${progress}%`, backgroundColor: color }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted">Remaining</span>
-                          <span className="font-medium" style={{ color }}>
-                            {hours > 0 ? `${hours}h ` : ''}{minutes}m
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </>
-              )}
-
-              {/* Status when not active */}
-              {!hoveredCustomSession.isActive && (
-                <>
-                  <div className="border-t border-border my-2" />
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted">Status</span>
-                    <span className="font-medium" style={{ color: hoveredCustomSession.session.color }}>
-                      {currentTime < hoveredCustomSession.startTime ? 'Upcoming' : 'Ended'}
+                {/* Recurring info */}
+                {hoveredCustomSession.session.recurring && hoveredCustomSession.session.days && (
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Repeats</span>
+                    <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                      {hoveredCustomSession.session.days.map(d => ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][d]).join(' ')}
                     </span>
                   </div>
-                </>
-              )}
+                )}
+
+                {/* Progress section (if active) */}
+                {isActive && (() => {
+                  const progress = hoveredCustomSession.progress;
+                  const remaining = hoveredCustomSession.endTime.getTime() - currentTime.getTime();
+                  const hours = Math.floor(remaining / (1000 * 60 * 60));
+                  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+
+                  return (
+                    <div className="mt-2 pt-2 space-y-1.5" style={{ borderTop: `1px solid ${color}20` }}>
+                      <div className="flex justify-between text-[10px]">
+                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>Progress</span>
+                        <span className="font-bold" style={{ color }}>{Math.round(progress)}%</span>
+                      </div>
+                      <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: `${color}20` }}>
+                        <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: color }} />
+                      </div>
+                      <div className="flex justify-between text-[10px]">
+                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>Remaining</span>
+                        <span style={{ color: 'rgba(255,255,255,0.9)' }}>{hours > 0 ? `${hours}h ` : ''}{minutes}m</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Note */}
+                {hoveredCustomSession.session.note && (
+                  <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${color}20` }}>
+                    <div className="text-[10px]">
+                      <span style={{ color: 'rgba(255,255,255,0.6)' }} className="block mb-1">Note</span>
+                      <p style={{ color: 'rgba(255,255,255,0.9)' }} className="whitespace-pre-wrap">{hoveredCustomSession.session.note}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
+
+        {/* Custom Alert Tooltip */}
+        {hoveredCustomAlert && (() => {
+          const color = hoveredCustomAlert.alert.color || "#a855f7";
+          const isPast = hoveredCustomAlert.isPast;
+
+          return (
+            <div
+              className="fixed z-50 pointer-events-none animate-in fade-in duration-150"
+              style={{
+                left: Math.min(Math.max(12, hoveredCustomAlert.x + 12), window.innerWidth - 200),
+                top: Math.min(hoveredCustomAlert.y + 12, window.innerHeight - 220),
+              }}
+            >
+              <div
+                className="rounded-xl p-3"
+                style={{
+                  width: 180,
+                  background: `linear-gradient(135deg, ${color}20 0%, rgba(0,0,0,0.95) 100%)`,
+                  border: `1px solid ${color}40`,
+                  boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${color}20`,
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                {/* Header */}
+                <div className="flex items-center gap-2 mb-2 pb-2" style={{ borderBottom: `1px solid ${color}30` }}>
+                  <Bell className="w-3.5 h-3.5" style={{ color }} />
+                  <span className="text-sm font-bold" style={{ color }}>{hoveredCustomAlert.alert.name}</span>
+                  <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto"
+                    style={{
+                      backgroundColor: isPast ? `${color}20` : color,
+                      color: isPast ? `${color}90` : '#000',
+                    }}
+                  >
+                    {isPast ? "DONE" : "SOON"}
+                  </span>
+                </div>
+
+                {/* Time */}
+                <div className="flex justify-between items-center text-[10px] mb-1">
+                  <span style={{ color: 'rgba(255,255,255,0.6)' }}>Time</span>
+                  <span className="font-mono" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                    {hoveredCustomAlert.alert.time}
+                  </span>
+                </div>
+
+                {/* Recurring info */}
+                {hoveredCustomAlert.alert.recurring && hoveredCustomAlert.alert.days && (
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Repeats</span>
+                    <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                      {hoveredCustomAlert.alert.days.map(d => ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][d]).join(' ')}
+                    </span>
+                  </div>
+                )}
+
+                {/* Note */}
+                {hoveredCustomAlert.alert.note && (
+                  <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${color}20` }}>
+                    <div className="text-[10px]">
+                      <span style={{ color: 'rgba(255,255,255,0.6)' }} className="block mb-1">Note</span>
+                      <p style={{ color: 'rgba(255,255,255,0.9)' }} className="whitespace-pre-wrap">{hoveredCustomAlert.alert.note}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
           {/* Economic Events Timeline - Middle Third */}
           {showEventsCard && (
@@ -3090,260 +3277,492 @@ export default function DashboardPage() {
                 </div>
               </div>
             )}
-            {/* Custom Sessions */}
-            {customSessions.flatMap((session) => {
+            {/* Custom Sessions - Pre-calculate overlaps for row stacking */}
+            {(() => {
               const today = new Date(currentTime);
               const todayDay = today.getDay();
-              const yesterdayDay = (todayDay + 6) % 7; // Previous day (0-6)
-
-              // Calculate session bar position
-              const [startHour, startMin] = session.startTime.split(":").map(Number);
-              const [endHour, endMin] = session.endTime.split(":").map(Number);
-
+              const yesterdayDay = (todayDay + 6) % 7;
               const timelineWidth = containerWidth - 240;
-              const sessionsToRender: { start: Date; end: Date; key: string }[] = [];
 
-              // Check if this is an overnight session (end time is before start time)
-              const isOvernight = endHour < startHour || (endHour === startHour && endMin < startMin);
+              // Build list of all session instances with their positions
+              type SessionInstance = {
+                session: typeof customSessions[0];
+                start: Date;
+                end: Date;
+                startX: number;
+                endX: number;
+                key: string;
+                row: number;
+              };
 
-              if (isOvernight) {
-                // For overnight sessions, check each instance separately based on start day
-                // 1. Yesterday's start to today's end - check if yesterday was an active day
-                const isYesterdayActive = !session.recurring || (session.days?.includes(yesterdayDay) ?? false);
-                if (isYesterdayActive) {
-                  const yesterdayStart = new Date(today);
-                  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-                  yesterdayStart.setHours(startHour, startMin, 0, 0);
-                  const todayEnd = new Date(today);
-                  todayEnd.setHours(endHour, endMin, 0, 0);
-                  sessionsToRender.push({ start: yesterdayStart, end: todayEnd, key: `${session.id}-yesterday` });
+              const allInstances: SessionInstance[] = [];
+
+              customSessions.forEach((session) => {
+                const [startHour, startMin] = session.startTime.split(":").map(Number);
+                const [endHour, endMin] = session.endTime.split(":").map(Number);
+                const isOvernight = endHour < startHour || (endHour === startHour && endMin < startMin);
+
+                if (isOvernight) {
+                  // Yesterday→Today instance
+                  const isYesterdayActive = !session.recurring || (session.days?.includes(yesterdayDay) ?? false);
+                  if (isYesterdayActive) {
+                    const yesterdayStart = new Date(today);
+                    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+                    yesterdayStart.setHours(startHour, startMin, 0, 0);
+                    const todayEnd = new Date(today);
+                    todayEnd.setHours(endHour, endMin, 0, 0);
+                    const startX = getTimePosition(yesterdayStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(todayEnd, currentTime, timelineWidth) + scrollOffset;
+                    if (!(endX < -timelineWidth || startX > timelineWidth * 2)) {
+                      allInstances.push({ session, start: yesterdayStart, end: todayEnd, startX, endX, key: `${session.id}-yesterday`, row: 0 });
+                    }
+                  }
+                  // Today→Tomorrow instance
+                  const isTodayActive = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                  if (isTodayActive) {
+                    const todayStart = new Date(today);
+                    todayStart.setHours(startHour, startMin, 0, 0);
+                    const tomorrowEnd = new Date(today);
+                    tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
+                    tomorrowEnd.setHours(endHour, endMin, 0, 0);
+                    const startX = getTimePosition(todayStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(tomorrowEnd, currentTime, timelineWidth) + scrollOffset;
+                    if (!(endX < -timelineWidth || startX > timelineWidth * 2)) {
+                      allInstances.push({ session, start: todayStart, end: tomorrowEnd, startX, endX, key: `${session.id}-today`, row: 0 });
+                    }
+                  }
+                } else {
+                  // Regular same-day session
+                  const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                  if (isActiveToday) {
+                    const sessionStart = new Date(today);
+                    sessionStart.setHours(startHour, startMin, 0, 0);
+                    const sessionEnd = new Date(today);
+                    sessionEnd.setHours(endHour, endMin, 0, 0);
+                    const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
+                    if (!(endX < -timelineWidth || startX > timelineWidth * 2)) {
+                      allInstances.push({ session, start: sessionStart, end: sessionEnd, startX, endX, key: session.id, row: 0 });
+                    }
+                  }
                 }
+              });
 
-                // 2. Today's start to tomorrow's end - check if today is an active day
-                const isTodayActive = !session.recurring || (session.days?.includes(todayDay) ?? false);
-                if (isTodayActive) {
-                  const todayStart = new Date(today);
-                  todayStart.setHours(startHour, startMin, 0, 0);
-                  const tomorrowEnd = new Date(today);
-                  tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
-                  tomorrowEnd.setHours(endHour, endMin, 0, 0);
-                  sessionsToRender.push({ start: todayStart, end: tomorrowEnd, key: `${session.id}-today` });
+              // Sort by start position
+              allInstances.sort((a, b) => a.startX - b.startX);
+
+              // Assign rows using greedy algorithm - track end position for each row
+              const rowEndPositions: number[] = [];
+              allInstances.forEach((instance) => {
+                // Find first row where this session doesn't overlap
+                let assignedRow = 0;
+                for (let r = 0; r < rowEndPositions.length; r++) {
+                  if (instance.startX >= rowEndPositions[r]) {
+                    assignedRow = r;
+                    break;
+                  }
+                  assignedRow = r + 1;
                 }
-              } else {
-                // Regular same-day session - check if today is active
-                const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
-                if (isActiveToday) {
-                  const sessionStart = new Date(today);
-                  sessionStart.setHours(startHour, startMin, 0, 0);
-                  const sessionEnd = new Date(today);
-                  sessionEnd.setHours(endHour, endMin, 0, 0);
-                  sessionsToRender.push({ start: sessionStart, end: sessionEnd, key: session.id });
-                }
-              }
+                instance.row = assignedRow;
+                // Update or add row end position (add small gap between sessions)
+                const barWidth = Math.max(80, instance.endX - instance.startX);
+                rowEndPositions[assignedRow] = Math.max(0, instance.startX) + barWidth + 4;
+              });
 
-              return sessionsToRender.map(({ start: sessionStart, end: sessionEnd, key }) => {
-                const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
-                const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
-                const width = endX - startX;
+              const totalRows = Math.max(1, rowEndPositions.length);
 
-                // Widen visibility range for custom sessions - show if any part could be visible
-                // This ensures user-created sessions are more likely to appear
-                if (endX < -timelineWidth || startX > timelineWidth * 2) return null;
-
+              return allInstances.map((inst) => {
+                const { session, start: sessionStart, end: sessionEnd, startX, endX, key, row } = inst;
+                // Calculate the clipped width - when session starts before visible area, use clipped start
+                const clippedStartX = Math.max(0, startX);
+                const clippedEndX = Math.min(timelineWidth, endX);
+                const width = clippedEndX - clippedStartX;
                 const isActive = currentTime >= sessionStart && currentTime <= sessionEnd;
                 const progress = isActive
                   ? ((currentTime.getTime() - sessionStart.getTime()) / (sessionEnd.getTime() - sessionStart.getTime())) * 100
                   : 0;
 
-              return (
-                <div
-                  key={key}
-                  className="absolute cursor-pointer group z-10"
-                  style={{
-                    left: Math.max(0, startX),
-                    top: 4,
-                    bottom: 4,
-                    width: Math.max(80, Math.min(width, timelineWidth - Math.max(0, startX))),
-                  }}
-                  onClick={() => editSession(session)}
-                  onMouseEnter={(e) => {
-                    setHoveredCustomSession({
-                      session,
-                      x: e.clientX,
-                      y: e.clientY,
-                      isActive,
-                      progress,
-                      startTime: sessionStart,
-                      endTime: sessionEnd,
-                    });
-                  }}
-                  onMouseMove={(e) => {
-                    if (hoveredCustomSession?.session.id === session.id) {
-                      setHoveredCustomSession(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
-                    }
-                  }}
-                  onMouseLeave={() => setHoveredCustomSession(null)}
-                >
-                  {/* Session bar - fills lane height */}
-                  {(() => {
-                    // Calculate clipped dimensions for tick markers
-                    const clippedStartX = Math.max(0, startX);
-                    const clippedEndX = Math.min(timelineWidth, endX);
-                    const clippedWidth = clippedEndX - clippedStartX;
-                    const fullSessionWidth = endX - startX;
-                    const clipStartOffset = clippedStartX - startX;
+                // Calculate vertical position based on row
+                const rowHeight = 100 / totalRows;
+                const topPercent = row * rowHeight;
+                const heightPercent = rowHeight;
 
-                    // Check if session has completely ended
-                    const sessionEnded = currentTime.getTime() > sessionEnd.getTime();
+                return (
+                  <div
+                    key={key}
+                    className="absolute cursor-pointer group z-10"
+                    style={{
+                      left: clippedStartX,
+                      top: `calc(${topPercent}% + 2px)`,
+                      height: `calc(${heightPercent}% - 4px)`,
+                      width: Math.max(80, width),
+                    }}
+                    onClick={() => editSession(session)}
+                    onMouseEnter={(e) => {
+                      setHoveredCustomSession({
+                        session,
+                        x: e.clientX,
+                        y: e.clientY,
+                        startTime: sessionStart,
+                        endTime: sessionEnd,
+                        isActive,
+                        progress,
+                      });
+                    }}
+                    onMouseMove={(e) => {
+                      setHoveredCustomSession((prev) =>
+                        prev ? { ...prev, x: e.clientX, y: e.clientY } : null
+                      );
+                    }}
+                    onMouseLeave={() => setHoveredCustomSession(null)}
+                  >
+                    {/* Session bar */}
+                    {(() => {
+                      const fullSessionWidth = endX - startX;
+                      const clipStartOffset = clippedStartX - startX;
+                      const sessionEnded = currentTime.getTime() > sessionEnd.getTime();
 
-                    return (
-                      <div
-                        className="h-full rounded-lg overflow-hidden transition-all group-hover:brightness-110"
-                        style={{
-                          backgroundColor: `${session.color}20`,
-                          border: `1px solid ${session.color}${isActive ? "60" : "40"}`,
-                          boxShadow: isActive ? `0 0 12px ${session.color}40` : undefined,
-                        }}
-                      >
-                        {/* Progress dim overlay - dims passed portion */}
-                        {isActive && (
-                          <div
-                            className="absolute inset-y-0 left-0 transition-all"
-                            style={{
-                              width: `${progress}%`,
-                              background: `linear-gradient(90deg, rgba(15,23,42,0.5) 0%, rgba(15,23,42,0.4) 90%, transparent 100%)`,
-                            }}
-                          />
-                        )}
-                        {/* Left accent bar */}
+                      return (
                         <div
-                          className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
-                          style={{ backgroundColor: session.color }}
-                        />
-                        {/* Progress tick markers */}
-                        {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => {
-                          const markerPosInFull = fullSessionWidth * (percent / 100);
-                          const markerPosInClipped = markerPosInFull - clipStartOffset;
-                          if (markerPosInClipped < 0 || markerPosInClipped > clippedWidth) return null;
-
-                          const isPassed = (isActive && progress >= percent) || sessionEnded;
-
-                          return (
-                            <div
-                              key={percent}
-                              className="absolute bottom-0 flex flex-col items-center pointer-events-none"
-                              style={{
-                                left: markerPosInClipped,
-                                transform: 'translateX(-50%)',
-                              }}
-                            >
-                              <span
-                                className="text-[9px] font-mono font-semibold"
-                                style={{
-                                  color: isPassed ? `${session.color}40` : session.color,
-                                }}
-                              >
-                                {percent}
-                              </span>
-                              <div
-                                style={{
-                                  width: 2,
-                                  height: 6,
-                                  backgroundColor: isPassed ? `${session.color}30` : session.color,
-                                  borderRadius: 1,
-                                }}
-                              />
-                            </div>
-                          );
-                        })}
-                        {/* Session info - centered */}
-                        <div className="absolute inset-0 flex items-center justify-center gap-2 px-3">
+                          className="h-full rounded-lg overflow-hidden transition-all group-hover:brightness-110"
+                          style={{
+                            backgroundColor: `${session.color}20`,
+                            border: `1px solid ${session.color}${isActive ? "60" : "40"}`,
+                            boxShadow: isActive ? `0 0 12px ${session.color}40` : undefined,
+                          }}
+                        >
                           {isActive && (
-                            <div className="relative">
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: session.color }} />
-                              <div className="absolute inset-0 w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: session.color, opacity: 0.5 }} />
-                            </div>
+                            <div
+                              className="absolute inset-y-0 left-0 transition-all"
+                              style={{
+                                width: `${progress}%`,
+                                background: `linear-gradient(90deg, rgba(15,23,42,0.5) 0%, rgba(15,23,42,0.4) 90%, transparent 100%)`,
+                              }}
+                            />
                           )}
-                          <span className="text-[10px] font-bold uppercase tracking-wide truncate" style={{ color: session.color }}>
-                            {session.name}
-                          </span>
-                          {isActive && width > 120 && (
-                            <span className="text-[10px] font-mono" style={{ color: session.color }}>
-                              {Math.round(progress)}%
+                          <div
+                            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+                            style={{ backgroundColor: session.color }}
+                          />
+                          {/* Only show tick markers if row is tall enough */}
+                          {heightPercent > 30 && [10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => {
+                            const markerPosInFull = fullSessionWidth * (percent / 100);
+                            const markerPosInClipped = markerPosInFull - clipStartOffset;
+                            if (markerPosInClipped < 0 || markerPosInClipped > width) return null;
+                            const isPassed = (isActive && progress >= percent) || sessionEnded;
+                            return (
+                              <div
+                                key={percent}
+                                className="absolute bottom-0 flex flex-col items-center pointer-events-none"
+                                style={{ left: markerPosInClipped, transform: 'translateX(-50%)' }}
+                              >
+                                <span className="text-[9px] font-mono font-semibold" style={{ color: isPassed ? `${session.color}40` : session.color }}>
+                                  {percent}
+                                </span>
+                                <div style={{ width: 2, height: 6, backgroundColor: isPassed ? `${session.color}30` : session.color, borderRadius: 1 }} />
+                              </div>
+                            );
+                          })}
+                          <div className="absolute inset-0 flex items-center justify-center gap-2 px-3">
+                            {isActive && (
+                              <div className="relative">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: session.color }} />
+                                <div className="absolute inset-0 w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: session.color, opacity: 0.5 }} />
+                              </div>
+                            )}
+                            <span className="text-[10px] font-bold uppercase tracking-wide truncate" style={{ color: session.color }}>
+                              {session.name}
                             </span>
-                          )}
+                            {isActive && width > 120 && (
+                              <span className="text-[10px] font-mono" style={{ color: session.color }}>
+                                {Math.round(progress)}%
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              );
-            });
-            })}
+                      );
+                    })()}
+                  </div>
+                );
+              });
+            })()}
 
-            {/* Custom Alerts */}
-            {customAlerts.map((alert) => {
+            {/* Custom Session Open/Close Alert Indicators */}
+            {(() => {
               const today = new Date(currentTime);
               const todayDay = today.getDay();
+              const yesterdayDay = (todayDay + 6) % 7;
+              const timelineWidth = containerWidth - 240;
 
-              // Check if alert is active today
-              const isActiveToday = !alert.recurring || (alert.days?.includes(todayDay) ?? false);
-              if (!isActiveToday) return null;
+              const sessionAlertElements: React.ReactNode[] = [];
 
-              // Calculate alert position
-              const [alertHour, alertMin] = alert.time.split(":").map(Number);
-              const alertTime = new Date(today);
-              alertTime.setHours(alertHour, alertMin, 0, 0);
+              customSessions.forEach((session) => {
+                // Only show if session has alerts enabled
+                if (!session.openAlert && !session.closeAlert) return;
 
-              const timelineWidth = containerWidth - 240; // Timeline area width (minus sidebar)
-              const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
+                const [startHour, startMin] = session.startTime.split(":").map(Number);
+                const [endHour, endMin] = session.endTime.split(":").map(Number);
+                const isOvernight = endHour < startHour || (endHour === startHour && endMin < startMin);
 
-              // Widen visibility range for custom alerts
-              if (xPos < -timelineWidth || xPos > timelineWidth * 2) return null;
+                // Determine which day(s) the session is active
+                const instances: { start: Date; end: Date; keyPrefix: string }[] = [];
 
-              const isPast = currentTime > alertTime;
-              const alertColor = alert.color || "#a855f7";
+                if (isOvernight) {
+                  // Yesterday→Today
+                  const isYesterdayActive = !session.recurring || (session.days?.includes(yesterdayDay) ?? false);
+                  if (isYesterdayActive) {
+                    const yesterdayStart = new Date(today);
+                    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+                    yesterdayStart.setHours(startHour, startMin, 0, 0);
+                    const todayEnd = new Date(today);
+                    todayEnd.setHours(endHour, endMin, 0, 0);
+                    instances.push({ start: yesterdayStart, end: todayEnd, keyPrefix: `${session.id}-yesterday` });
+                  }
+                  // Today→Tomorrow
+                  const isTodayActive = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                  if (isTodayActive) {
+                    const todayStart = new Date(today);
+                    todayStart.setHours(startHour, startMin, 0, 0);
+                    const tomorrowEnd = new Date(today);
+                    tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
+                    tomorrowEnd.setHours(endHour, endMin, 0, 0);
+                    instances.push({ start: todayStart, end: tomorrowEnd, keyPrefix: `${session.id}-today` });
+                  }
+                } else {
+                  // Regular same-day session
+                  const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
+                  if (isActiveToday) {
+                    const sessionStart = new Date(today);
+                    sessionStart.setHours(startHour, startMin, 0, 0);
+                    const sessionEnd = new Date(today);
+                    sessionEnd.setHours(endHour, endMin, 0, 0);
+                    instances.push({ start: sessionStart, end: sessionEnd, keyPrefix: session.id });
+                  }
+                }
 
-              return (
-                <div
-                  key={alert.id}
-                  className="absolute cursor-pointer z-30 flex flex-col items-center"
-                  style={{
-                    left: xPos,
-                    top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                  onClick={() => editAlert(alert)}
-                >
-                  {/* Bell icon - centered on xPos */}
+                instances.forEach(({ start, end, keyPrefix }) => {
+                  // Open alert
+                  if (session.openAlert) {
+                    const xPos = getTimePosition(start, currentTime, timelineWidth) + scrollOffset;
+                    if (xPos >= -30 && xPos <= timelineWidth + 30) {
+                      const isPast = currentTime > start;
+                      sessionAlertElements.push(
+                        <div
+                          key={`${keyPrefix}-open-alert`}
+                          className="absolute z-30 pointer-events-none"
+                          style={{
+                            left: xPos,
+                            top: '50%',
+                            transform: 'translate(-50%, -50%)',
+                          }}
+                        >
+                          <div
+                            className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
+                            style={{
+                              width: 18,
+                              height: 18,
+                              backgroundColor: isPast ? undefined : session.color,
+                              border: `1px solid ${isPast ? session.color + '40' : session.color}`,
+                              boxShadow: isPast ? 'none' : `0 0 10px ${session.color}80`,
+                            }}
+                          >
+                            <Bell
+                              className="w-2.5 h-2.5"
+                              style={{ color: isPast ? `${session.color}60` : '#0f172a' }}
+                            />
+                          </div>
+                          <span
+                            className={`absolute text-[8px] font-bold tracking-wider whitespace-nowrap px-1 rounded ${isPast ? 'bg-background' : ''}`}
+                            style={{
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              right: 'calc(100% + 4px)',
+                              color: isPast ? `${session.color}60` : session.color,
+                              textShadow: isPast ? 'none' : `0 0 6px ${session.color}80`,
+                            }}
+                          >
+                            OPEN
+                          </span>
+                        </div>
+                      );
+                    }
+                  }
+
+                  // Close alert
+                  if (session.closeAlert) {
+                    const xPos = getTimePosition(end, currentTime, timelineWidth) + scrollOffset;
+                    if (xPos >= -30 && xPos <= timelineWidth + 30) {
+                      const isPast = currentTime > end;
+                      sessionAlertElements.push(
+                        <div
+                          key={`${keyPrefix}-close-alert`}
+                          className="absolute z-30 pointer-events-none"
+                          style={{
+                            left: xPos,
+                            top: '50%',
+                            transform: 'translate(-50%, -50%)',
+                          }}
+                        >
+                          <div
+                            className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
+                            style={{
+                              width: 18,
+                              height: 18,
+                              backgroundColor: isPast ? undefined : session.color,
+                              border: `1px solid ${isPast ? session.color + '40' : session.color}`,
+                              boxShadow: isPast ? 'none' : `0 0 10px ${session.color}80`,
+                            }}
+                          >
+                            <Bell
+                              className="w-2.5 h-2.5"
+                              style={{ color: isPast ? `${session.color}60` : '#0f172a' }}
+                            />
+                          </div>
+                          <span
+                            className={`absolute text-[8px] font-bold tracking-wider whitespace-nowrap px-1 rounded ${isPast ? 'bg-background' : ''}`}
+                            style={{
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              left: 'calc(100% + 4px)',
+                              color: isPast ? `${session.color}60` : session.color,
+                              textShadow: isPast ? 'none' : `0 0 6px ${session.color}80`,
+                            }}
+                          >
+                            CLOSE
+                          </span>
+                        </div>
+                      );
+                    }
+                  }
+                });
+              });
+
+              return sessionAlertElements;
+            })()}
+
+            {/* Custom Alerts - Pre-calculate overlaps for staggering */}
+            {(() => {
+              const today = new Date(currentTime);
+              const todayDay = today.getDay();
+              const timelineWidth = containerWidth - 240;
+
+              // Build list of all visible alerts with their positions
+              type AlertInstance = {
+                alert: typeof customAlerts[0];
+                xPos: number;
+                alertTime: Date;
+                isPast: boolean;
+                staggerIndex: number;
+              };
+
+              const visibleAlerts: AlertInstance[] = [];
+
+              customAlerts.forEach((alert) => {
+                const isActiveToday = !alert.recurring || (alert.days?.includes(todayDay) ?? false);
+                if (!isActiveToday) return;
+
+                const [alertHour, alertMin] = alert.time.split(":").map(Number);
+                const alertTime = new Date(today);
+                alertTime.setHours(alertHour, alertMin, 0, 0);
+
+                const xPos = getTimePosition(alertTime, currentTime, timelineWidth) + scrollOffset;
+                if (xPos < -timelineWidth || xPos > timelineWidth * 2) return;
+
+                const isPast = currentTime > alertTime;
+                visibleAlerts.push({ alert, xPos, alertTime, isPast, staggerIndex: 0 });
+              });
+
+              // Sort by x position
+              visibleAlerts.sort((a, b) => a.xPos - b.xPos);
+
+              // Assign stagger indices for overlapping alerts
+              const OVERLAP_THRESHOLD = 60;
+              for (let i = 0; i < visibleAlerts.length; i++) {
+                const current = visibleAlerts[i];
+                let maxStaggerInRange = -1;
+                for (let j = i - 1; j >= 0; j--) {
+                  const prev = visibleAlerts[j];
+                  if (current.xPos - prev.xPos > OVERLAP_THRESHOLD) break;
+                  maxStaggerInRange = Math.max(maxStaggerInRange, prev.staggerIndex);
+                }
+                current.staggerIndex = maxStaggerInRange + 1;
+              }
+
+              return visibleAlerts.map((inst) => {
+                const { alert, xPos, alertTime, isPast, staggerIndex } = inst;
+                const alertColor = alert.color || "#a855f7";
+
+                // Vertical offset for overlapping alerts - alternate up/down from center
+                let yOffset = 0;
+                if (staggerIndex > 0) {
+                  const level = Math.ceil(staggerIndex / 2);
+                  const direction = staggerIndex % 2 === 1 ? -1 : 1; // odd = up, even = down
+                  yOffset = direction * level * 26; // 26px vertical spacing
+                }
+
+                return (
                   <div
-                    className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
+                    key={alert.id}
+                    className="absolute z-30 cursor-pointer group flex flex-col items-center"
                     style={{
-                      width: 20,
-                      height: 20,
-                      backgroundColor: isPast ? undefined : alertColor,
-                      border: `2px solid ${isPast ? alertColor + '40' : alertColor}`,
-                      boxShadow: isPast ? 'none' : `0 0 10px ${alertColor}80`,
+                      left: xPos,
+                      top: `calc(50% + ${yOffset}px)`,
+                      transform: 'translate(-50%, -50%)',
                     }}
+                    onClick={() => editAlert(alert)}
+                    onMouseEnter={(e) => {
+                      setHoveredCustomAlert({
+                        alert,
+                        x: e.clientX,
+                        y: e.clientY,
+                        alertTime,
+                        isPast,
+                      });
+                    }}
+                    onMouseMove={(e) => {
+                      setHoveredCustomAlert((prev) =>
+                        prev ? { ...prev, x: e.clientX, y: e.clientY } : null
+                      );
+                    }}
+                    onMouseLeave={() => setHoveredCustomAlert(null)}
                   >
-                    <Bell
-                      className="w-3 h-3"
-                      style={{ color: isPast ? `${alertColor}60` : '#0f172a' }}
+                    {/* Compact horizontal pill - icon and label inline */}
+                    <div
+                      className="flex items-center gap-1 px-2 py-1 rounded-full transition-all group-hover:scale-105"
+                      style={{
+                        backgroundColor: isPast ? '#334155' : alertColor,
+                        border: `1.5px solid ${isPast ? alertColor + '60' : alertColor}`,
+                        boxShadow: isPast
+                          ? '0 1px 3px rgba(0,0,0,0.3)'
+                          : `0 0 12px ${alertColor}40, 0 2px 6px rgba(0,0,0,0.25)`,
+                      }}
+                    >
+                      <Bell
+                        className="w-3 h-3 flex-shrink-0"
+                        style={{ color: isPast ? `${alertColor}90` : '#0f172a' }}
+                      />
+                      <span
+                        className="text-[8px] font-semibold whitespace-nowrap"
+                        style={{ color: isPast ? `${alertColor}` : '#0f172a' }}
+                      >
+                        {alert.name}
+                      </span>
+                    </div>
+                    {/* Arrow pointing down to exact time */}
+                    <div
+                      style={{
+                        width: 0,
+                        height: 0,
+                        borderLeft: '5px solid transparent',
+                        borderRight: '5px solid transparent',
+                        borderTop: `6px solid ${isPast ? '#334155' : alertColor}`,
+                        marginTop: -1,
+                      }}
                     />
                   </div>
-                  {/* Label - positioned below the bell */}
-                  <span
-                    className={`text-[8px] font-bold tracking-wide whitespace-nowrap px-1 py-0.5 rounded mt-1 ${isPast ? 'bg-background' : ''}`}
-                    style={{
-                      color: isPast ? `${alertColor}60` : alertColor,
-                      textShadow: isPast ? 'none' : `0 0 6px ${alertColor}80`,
-                    }}
-                  >
-                    {alert.name}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
 
             {/* Empty state for timeline area */}
             {customSessions.length === 0 && customAlerts.length === 0 && (
@@ -3756,107 +4175,145 @@ export default function DashboardPage() {
 
             {/* Modal Body */}
             <div className="p-4 space-y-4">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-muted mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder={modalMode === "session" ? "e.g., Morning Routine" : "e.g., Market Open"}
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors"
-                />
+              {/* Name and Color in one row */}
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-muted mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder={modalMode === "session" ? "e.g., Morning Routine" : "e.g., Reminder"}
+                    className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted mb-1">
+                    Color
+                  </label>
+                  <div className="flex gap-1">
+                    {COLOR_OPTIONS.slice(0, 6).map((color) => (
+                      <button
+                        key={color.value}
+                        onClick={() => setFormColor(color.value)}
+                        className={`w-7 h-7 rounded-full transition-all ${
+                          formColor === color.value ? "ring-2 ring-offset-1 ring-offset-card" : "hover:scale-110"
+                        }`}
+                        style={{ backgroundColor: color.value }}
+                        title={color.name}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Time inputs */}
               {modalMode === "session" ? (
-                <div className="grid grid-cols-2 gap-6">
-                  <TimePicker
-                    label="Start Time"
-                    value={formStartTime}
-                    onChange={setFormStartTime}
-                  />
-                  <TimePicker
-                    label="End Time"
-                    value={formEndTime}
-                    onChange={setFormEndTime}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <TimePicker label="Start" value={formStartTime} onChange={setFormStartTime} />
+                  <TimePicker label="End" value={formEndTime} onChange={setFormEndTime} />
                 </div>
               ) : (
-                <TimePicker
-                  label="Alert Time"
-                  value={formAlertTime}
-                  onChange={setFormAlertTime}
-                />
+                <TimePicker label="Time" value={formAlertTime} onChange={setFormAlertTime} />
               )}
 
-              {/* Color picker */}
-              <div>
-                <label className="block text-sm font-medium text-muted mb-2">
-                  Color
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {COLOR_OPTIONS.map((color) => (
+              {/* Recurring toggle */}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formRecurring}
+                  onChange={(e) => setFormRecurring(e.target.checked)}
+                  className="w-4 h-4 rounded border-border accent-accent"
+                />
+                <span className="text-sm">Repeat on specific days</span>
+              </label>
+
+              {/* Day selection - only show when recurring */}
+              {formRecurring && (
+                <div className="flex gap-1">
+                  {DAY_OPTIONS.map((day) => (
                     <button
-                      key={color.value}
-                      onClick={() => setFormColor(color.value)}
-                      className={`w-8 h-8 rounded-full transition-all ${
-                        formColor === color.value
-                          ? "ring-2 ring-offset-2 ring-offset-card scale-110"
-                          : "hover:scale-105"
+                      key={day.value}
+                      onClick={() => toggleDay(day.value)}
+                      className={`flex-1 py-1.5 rounded text-xs font-medium transition-colors ${
+                        formDays.includes(day.value)
+                          ? "bg-accent text-white"
+                          : "bg-background border border-border text-muted hover:text-foreground"
                       }`}
-                      style={{
-                        backgroundColor: color.value,
-                        boxShadow: formColor === color.value
-                          ? `0 0 0 2px var(--card), 0 0 0 4px ${color.value}`
-                          : undefined,
-                      }}
-                      title={color.name}
-                    />
+                    >
+                      {day.label}
+                    </button>
                   ))}
                 </div>
-              </div>
+              )}
 
-              {/* Recurring toggle */}
-              <div>
-                <label className="flex items-center gap-3 cursor-pointer">
+              {/* Session Alerts Toggle - only for sessions */}
+              {modalMode === "session" && (
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formRecurring}
-                    onChange={(e) => setFormRecurring(e.target.checked)}
+                    checked={formOpenAlert || formCloseAlert}
+                    onChange={(e) => {
+                      setFormOpenAlert(e.target.checked);
+                      setFormCloseAlert(e.target.checked);
+                    }}
                     className="w-4 h-4 rounded border-border accent-accent"
                   />
-                  <span className="text-sm font-medium">
-                    Repeat on specific days
-                  </span>
+                  <span className="text-sm">Enable open/close alerts</span>
                 </label>
-              </div>
+              )}
 
-              {/* Day selection */}
-              {formRecurring && (
-                <div>
-                  <label className="block text-sm font-medium text-muted mb-2">
-                    Repeat on
-                  </label>
-                  <div className="flex gap-1">
-                    {DAY_OPTIONS.map((day) => (
-                      <button
-                        key={day.value}
-                        onClick={() => toggleDay(day.value)}
-                        className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
-                          formDays.includes(day.value)
-                            ? "bg-accent text-white"
-                            : "bg-background border border-border text-muted hover:text-foreground"
-                        }`}
-                      >
-                        {day.label}
-                      </button>
-                    ))}
+              {/* Alert Sound Options - only show when alerts enabled */}
+              {modalMode === "session" && (formOpenAlert || formCloseAlert) && (
+                <div className="flex gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted">Open:</span>
+                    <select
+                      value={formOpenAlertSound}
+                      onChange={(e) => {
+                        setFormOpenAlertSound(e.target.value);
+                        playCustomSound(e.target.value, 'Preview', 'open', true);
+                      }}
+                      className="px-2 py-1 text-xs rounded-lg bg-background border border-border focus:border-accent outline-none"
+                    >
+                      {SOUND_OPTIONS.map((sound) => (
+                        <option key={sound.value} value={sound.value}>{sound.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted">Close:</span>
+                    <select
+                      value={formCloseAlertSound}
+                      onChange={(e) => {
+                        setFormCloseAlertSound(e.target.value);
+                        playCustomSound(e.target.value, 'Preview', 'close', true);
+                      }}
+                      className="px-2 py-1 text-xs rounded-lg bg-background border border-border focus:border-accent outline-none"
+                    >
+                      {SOUND_OPTIONS.map((sound) => (
+                        <option key={sound.value} value={sound.value}>{sound.label}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               )}
+
+              {/* Note */}
+              <div>
+                <label className="block text-sm font-medium text-muted mb-1">
+                  Note <span className="text-muted/50 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  value={formNote}
+                  onChange={(e) => setFormNote(e.target.value)}
+                  placeholder="Add a note that appears on hover..."
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors resize-none text-sm"
+                />
+              </div>
             </div>
 
             {/* Modal Footer */}
