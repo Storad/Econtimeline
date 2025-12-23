@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-22T21:56:50.917Z",
+  "lastUpdated": "2025-12-23T11:19:30.131Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -113,11 +113,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.109Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-24",
@@ -147,11 +144,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.356Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-24",
@@ -181,11 +175,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.578Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-24",
@@ -267,11 +258,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.940Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-25",
@@ -302,11 +290,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-25",
@@ -336,11 +321,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-25",
@@ -423,11 +405,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-26",
@@ -458,11 +437,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.535Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-26",
@@ -633,11 +609,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "7.7M",
-      "previous": "7.7M",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.496Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-09-30",
@@ -1287,11 +1260,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.861Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-15",
@@ -1574,11 +1544,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.728Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-24",
@@ -1609,11 +1576,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.535Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-24",
@@ -2557,11 +2521,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.861Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-17",
@@ -2640,11 +2601,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-18",
@@ -2695,11 +2653,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.816Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-19",
@@ -2780,11 +2735,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:45.511Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-20",
@@ -2840,11 +2792,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-20",
@@ -2901,11 +2850,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.535Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-21",
@@ -2962,11 +2908,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.243Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-24",
@@ -3070,11 +3013,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.237Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-25",
@@ -3104,11 +3044,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.361Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-25",
@@ -3279,11 +3216,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-26",
@@ -3313,11 +3247,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-26",
@@ -3713,11 +3644,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.243Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-03",
@@ -3874,11 +3802,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-04",
@@ -3908,11 +3833,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-04",
@@ -3970,11 +3892,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-05",
@@ -4079,11 +3998,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "7.7M",
-      "previous": "7.7M",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.496Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-09",
@@ -4311,11 +4227,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.816Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-11",
@@ -4345,11 +4258,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-11",
@@ -4455,11 +4365,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.861Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-15",
@@ -4539,11 +4446,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:45.511Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -4574,11 +4478,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.237Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -4681,11 +4582,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.728Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-18",
@@ -4741,11 +4639,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-18",
@@ -4802,11 +4697,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.535Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-19",
@@ -4910,11 +4802,41 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.940Z"
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2025-12-23",
+      "time": "08:30",
+      "title": "Core PCE Price Index m/m",
+      "impact": "high",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=54",
+      "fredReleaseId": 54,
+      "description": "Personal Consumption Expenditures Price Index excluding food and energy. Fed's preferred inflation measure.",
+      "whyItMatters": "THE inflation measure the Fed targets. More important than CPI for Fed policy.",
+      "frequency": "Monthly (last week)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, bonds bearish, stocks mixed",
+        "lowerThanExpected": "USD bearish, bonds bullish, stocks mixed"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds",
+        "US stocks",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "latestValue": "+0.2%",
+      "priorValue": "+0.2%",
+      "latestDate": "2025-09-01",
+      "priorDate": "2025-08-01",
+      "fredSeriesId": "PCEPILFE",
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4945,11 +4867,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4980,11 +4899,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.109Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -5014,11 +4930,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.356Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -5049,11 +4962,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.243Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -5083,11 +4993,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.578Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -5187,11 +5094,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-24",
@@ -5508,11 +5412,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-31",
@@ -5910,11 +5811,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -5944,11 +5842,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "7.7M",
-      "previous": "7.7M",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.496Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -6004,11 +5899,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.816Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -6090,11 +5982,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -6205,11 +6094,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:45.511Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -6338,11 +6224,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.728Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -6394,11 +6277,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.361Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-14",
@@ -6531,11 +6411,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.237Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -6591,11 +6468,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.861Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -6625,11 +6499,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -6734,11 +6605,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.243Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-19",
@@ -6887,11 +6755,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.940Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -6921,11 +6786,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -6982,11 +6844,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.535Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-23",
@@ -7165,11 +7024,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.109Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -7199,11 +7055,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.356Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -7255,11 +7108,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.578Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -7338,11 +7188,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-28",
@@ -7471,11 +7318,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.940Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -7507,11 +7351,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -7567,11 +7408,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -7649,11 +7487,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.361Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-30",
@@ -7879,11 +7714,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-04",
@@ -8014,11 +7846,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.816Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -8074,11 +7903,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -8136,11 +7962,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:45.511Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-06",
@@ -8345,11 +8168,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.728Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-11",
@@ -8508,11 +8328,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.361Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-12",
@@ -8542,11 +8359,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-12",
@@ -8699,11 +8513,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.237Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-17",
@@ -8733,11 +8544,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.861Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-17",
@@ -8838,11 +8646,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.243Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -8947,11 +8752,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-19",
@@ -9008,11 +8810,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.535Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -9234,11 +9033,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.109Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-25",
@@ -9268,11 +9064,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.356Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-25",
@@ -9302,11 +9095,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.578Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-25",
@@ -9388,11 +9178,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.940Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -9424,11 +9211,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -9459,11 +9243,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -9493,11 +9274,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -9921,11 +9699,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -9954,11 +9729,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.816Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -10014,11 +9786,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -10076,11 +9845,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:45.511Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-06",
@@ -10208,11 +9974,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.728Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-11",
@@ -10345,11 +10108,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.361Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -10379,11 +10139,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -10466,11 +10223,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.237Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -10500,11 +10254,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.861Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -10535,11 +10286,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.243Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -10812,11 +10560,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-19",
@@ -10947,11 +10692,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.109Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -10981,11 +10723,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.356Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -11015,11 +10754,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.578Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -11119,11 +10855,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-25",
@@ -11230,11 +10963,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-26",
@@ -11336,11 +11066,8 @@
       "latestDate": "2025-04-01",
       "priorDate": "2025-01-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "3.8%",
-      "previous": "-0.6%",
-      "actualDate": "2025-04-01",
-      "previousDate": "2025-01-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.940Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-27",
@@ -11372,11 +11099,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.717Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-27",
@@ -11407,11 +11131,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.535Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-30",
@@ -11712,11 +11433,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "DGORDER",
-      "actual": "+0.5%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.589Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -11745,11 +11463,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:50.816Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -11779,11 +11494,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -11841,11 +11553,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:45.511Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-03",
@@ -12144,11 +11853,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -12231,11 +11937,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-22T21:56:46.728Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-10",
@@ -12363,11 +12066,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:47.361Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-14",
@@ -12419,11 +12119,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.861Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-15",
@@ -12506,11 +12203,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-22T21:56:48.237Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -12566,11 +12260,8 @@
       "latestDate": "2025-12-13",
       "priorDate": "2025-12-06",
       "fredSeriesId": "ICSA",
-      "actual": "224000K",
-      "previous": "237000K",
-      "actualDate": "2025-12-13",
-      "previousDate": "2025-12-06",
-      "dataUpdatedAt": "2025-12-22T21:56:46.149Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -12601,11 +12292,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-22T21:56:49.243Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -12774,6 +12462,131 @@
         "USD"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-23",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1307K",
+      "priorValue": "1429K",
+      "latestDate": "2025-08-01",
+      "priorDate": "2025-07-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-23",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1330K",
+      "priorValue": "1362K",
+      "latestDate": "2025-08-01",
+      "priorDate": "2025-07-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-23",
+      "time": "08:30",
+      "title": "Unemployment Claims",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=180",
+      "fredReleaseId": 180,
+      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
+      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bearish, stocks bearish",
+        "lowerThanExpected": "USD bullish, stocks bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "224000K",
+      "priorValue": "237000K",
+      "latestDate": "2025-12-13",
+      "priorDate": "2025-12-06",
+      "fredSeriesId": "ICSA",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-23",
+      "time": "10:00",
+      "title": "New Home Sales",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
+      "fredReleaseId": 97,
+      "description": "Number of newly constructed homes sold during the month.",
+      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
+      "frequency": "Monthly (around 25th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "800K",
+      "priorValue": "664K",
+      "latestDate": "2025-08-01",
+      "priorDate": "2025-07-01",
+      "fredSeriesId": "HSN1F",
       "actual": null,
       "previous": null
     },
@@ -14452,6 +14265,28 @@
       "previous": null
     },
     {
+      "date": "2026-06-23",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-07-03",
       "time": "13:00",
       "title": "Early Close (1:00 PM ET)",
@@ -14611,6 +14446,5 @@
       "actual": null,
       "previous": null
     }
-  ],
-  "dataRefreshedAt": "2025-12-22T21:56:50.917Z"
+  ]
 }
