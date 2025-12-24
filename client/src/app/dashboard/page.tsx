@@ -12,6 +12,8 @@ import {
   Settings,
   Filter,
   ChevronDown,
+  ChevronUp,
+  ChevronRight,
   Eye,
   EyeOff,
   TrendingUp,
@@ -808,6 +810,10 @@ export default function DashboardPage() {
 
   // Market session alerts state
   const [marketAlerts, setMarketAlerts] = useState<Set<string>>(new Set());
+  const [marketAlertSounds, setMarketAlertSounds] = useState<Record<string, { open: string; close: string }>>({});
+  const [alertVoice, setAlertVoice] = useState<string>('default');
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [showMarketAlertsModal, setShowMarketAlertsModal] = useState(false);
   const prevMarketStates = useRef<Map<string, { isOpen: boolean; sessionType: string | null }>>(new Map());
   const prevCustomSessionStates = useRef<Map<string, boolean>>(new Map());
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -818,6 +824,28 @@ export default function DashboardPage() {
   const [filterCurrency, setFilterCurrency] = useState("All");
   const [showPastEvents, setShowPastEvents] = useState(true);
   const [showEventsListModal, setShowEventsListModal] = useState(false);
+
+  // Event group expansion and detail state
+  const [expandedEventTime, setExpandedEventTime] = useState<string | null>(null); // Time key for expanded group
+  const [selectedEventDetail, setSelectedEventDetail] = useState<CalendarEvent | null>(null); // Event detail view
+  const eventGroupRef = useRef<HTMLDivElement>(null);
+
+  // Close expanded events when clicking outside
+  useEffect(() => {
+    if (!expandedEventTime && !selectedEventDetail) return;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      const clickedInGroup = eventGroupRef.current?.contains(target);
+
+      if (!clickedInGroup) {
+        setExpandedEventTime(null);
+        setSelectedEventDetail(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [expandedEventTime, selectedEventDetail]);
+
   const [showCustomManageModal, setShowCustomManageModal] = useState(false);
 
   // Custom Sessions & Alerts Card State
@@ -868,6 +896,23 @@ export default function DashboardPage() {
         if (prefs.marketAlerts) {
           setMarketAlerts(new Set(prefs.marketAlerts));
         }
+        if (prefs.marketAlertSounds) {
+          // Handle migration from old format (string) to new format ({ open, close })
+          const sounds: Record<string, { open: string; close: string }> = {};
+          for (const [key, value] of Object.entries(prefs.marketAlertSounds)) {
+            if (typeof value === 'string') {
+              // Old format - use same sound for both
+              sounds[key] = { open: value, close: value };
+            } else if (value && typeof value === 'object') {
+              // New format
+              sounds[key] = value as { open: string; close: string };
+            }
+          }
+          setMarketAlertSounds(sounds);
+        }
+        if (prefs.alertVoice) {
+          setAlertVoice(prefs.alertVoice);
+        }
         if (typeof prefs.showEventsCard === 'boolean') {
           setShowEventsCard(prefs.showEventsCard);
         }
@@ -904,6 +949,8 @@ export default function DashboardPage() {
       const prefs = {
         visibleMarkets: Array.from(visibleMarkets),
         marketAlerts: Array.from(marketAlerts),
+        marketAlertSounds,
+        alertVoice,
         showEventsCard,
         showCustomCard,
         activeMarketsOnly,
@@ -916,7 +963,7 @@ export default function DashboardPage() {
     } catch (e) {
       console.log('Failed to save preferences:', e);
     }
-  }, [preferencesLoaded, visibleMarkets, marketAlerts, showEventsCard, showCustomCard, activeMarketsOnly, showPastEvents, filterImpacts, filterCategory, filterCurrency]);
+  }, [preferencesLoaded, visibleMarkets, marketAlerts, marketAlertSounds, alertVoice, showEventsCard, showCustomCard, activeMarketsOnly, showPastEvents, filterImpacts, filterCategory, filterCurrency]);
 
   // Toggle individual market visibility
   const toggleMarket = (marketId: string) => {
@@ -972,6 +1019,42 @@ export default function DashboardPage() {
     setCurrentTime(new Date());
     lastTimeRef.current = Date.now();
     setIsMounted(true);
+  }, []);
+
+  // Load available speech synthesis voices
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      // Filter to English voices and sort: US male first, then US, then other English
+      const englishVoices = voices
+        .filter(v => v.lang.startsWith('en'))
+        .sort((a, b) => {
+          // US English first
+          const aIsUS = a.lang === 'en-US';
+          const bIsUS = b.lang === 'en-US';
+          if (aIsUS && !bIsUS) return -1;
+          if (!aIsUS && bIsUS) return 1;
+
+          // Male voices first (common male voice name patterns)
+          const maleNames = ['David', 'Mark', 'James', 'Guy', 'Eric', 'Christopher', 'Daniel', 'Alex'];
+          const aIsMale = maleNames.some(n => a.name.includes(n));
+          const bIsMale = maleNames.some(n => b.name.includes(n));
+          if (aIsMale && !bIsMale) return -1;
+          if (!aIsMale && bIsMale) return 1;
+
+          return a.name.localeCompare(b.name);
+        });
+      setAvailableVoices(englishVoices);
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
   }, []);
 
   // Auto-update visible markets when in "active only" mode
@@ -1053,6 +1136,26 @@ export default function DashboardPage() {
     };
   }, [isMounted]);
 
+  // Cleanup on unmount - cancel speech, close audio context, clear timeouts
+  useEffect(() => {
+    return () => {
+      // Cancel any ongoing speech synthesis
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      // Close audio context
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      // Clear any pending hover timeout
+      if (customLaneHoverTimeout.current) {
+        clearTimeout(customLaneHoverTimeout.current);
+        customLaneHoverTimeout.current = null;
+      }
+    };
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1065,80 +1168,135 @@ export default function DashboardPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen]);
 
-  // Play market bell sound and announce with speech
-  const playAlertSound = useCallback((type: 'open' | 'close', marketName: string, sessionType: string | null) => {
-    try {
-      // Play the bell audio file
-      const audio = new Audio('/sounds/bell.mp3');
-      audio.volume = 0.7;
-      audio.play();
+  // Play market alert sound with configurable sound type and announce with speech
+  const playAlertSound = useCallback((type: 'open' | 'close', marketName: string, sessionType: string | null, soundType: string = 'bell') => {
+    if (soundType === 'none') return;
 
-      // Text-to-speech announcement (after bell finishes)
+    const speakAnnouncement = () => {
       if ('speechSynthesis' in window) {
-        setTimeout(() => {
-          // Build the announcement message
-          let message = marketName;
-          if (type === 'open') {
-            if (sessionType === 'pre') {
-              message += ' Pre-market Open';
-            } else if (sessionType === 'post') {
-              message += ' After Hours Open';
-            } else {
-              message += ' Market Open';
-            }
+        // Build the announcement message
+        let message = marketName;
+        if (type === 'open') {
+          if (sessionType === 'pre') {
+            message += ' Pre-market Open';
+          } else if (sessionType === 'post') {
+            message += ' After Hours Open';
           } else {
-            message += ' Market Closed';
+            message += ' Market Open';
           }
+        } else {
+          message += ' Market Closed';
+        }
 
-          // Cancel any ongoing speech
-          window.speechSynthesis.cancel();
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
 
-          // Create and speak the announcement
-          const utterance = new SpeechSynthesisUtterance(message);
+        // Create and speak the announcement
+        const utterance = new SpeechSynthesisUtterance(message);
 
-          // Try to find a professional male voice
-          const voices = window.speechSynthesis.getVoices();
-          const preferredVoices = [
-            'Microsoft David',
-            'Microsoft Mark',
-            'Google US English Male',
-            'Daniel',
-            'James',
-            'Alex',
-            'Google UK English Male',
-          ];
+        // Use selected voice or find a default
+        const voices = window.speechSynthesis.getVoices();
+        let selectedVoice: SpeechSynthesisVoice | null = null;
 
-          let selectedVoice = null;
-          // First try to find a preferred voice
-          for (const preferred of preferredVoices) {
-            selectedVoice = voices.find(v => v.name.includes(preferred));
-            if (selectedVoice) break;
-          }
-          // Fallback: find any English male voice
-          if (!selectedVoice) {
-            selectedVoice = voices.find(v =>
-              v.lang.startsWith('en') &&
-              (v.name.toLowerCase().includes('male') ||
-               v.name.includes('David') ||
-               v.name.includes('Mark') ||
-               v.name.includes('Daniel'))
-            );
-          }
+        if (alertVoice && alertVoice !== 'default') {
+          selectedVoice = voices.find(v => v.name === alertVoice) || null;
+        }
 
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-          }
+        // Fallback to first English voice if no voice selected
+        if (!selectedVoice) {
+          selectedVoice = voices.find(v => v.lang.startsWith('en')) || null;
+        }
 
-          utterance.rate = 0.95;
-          utterance.pitch = 0.9;
-          utterance.volume = 0.8;
-          window.speechSynthesis.speak(utterance);
-        }, 500); // Wait for bell to finish
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+
+        utterance.rate = 0.95;
+        utterance.pitch = 0.9;
+        utterance.volume = 0.8;
+        window.speechSynthesis.speak(utterance);
       }
+    };
+
+    try {
+      // Play bell audio file
+      if (soundType === 'bell') {
+        const audio = new Audio('/sounds/bell.mp3');
+        audio.volume = 0.7;
+        audio.play();
+        setTimeout(speakAnnouncement, 500);
+        return;
+      }
+
+      // For synthesized sounds, use Web Audio API
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      }
+      const ctx = audioContextRef.current;
+      const now = ctx.currentTime;
+
+      if (soundType === 'chime') {
+        // Pleasant chime sound
+        const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5 chord
+        frequencies.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0, now + i * 0.1);
+          gain.gain.linearRampToValueAtTime(0.3, now + i * 0.1 + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 1);
+          osc.start(now + i * 0.1);
+          osc.stop(now + i * 0.1 + 1.1);
+        });
+      } else if (soundType === 'ding') {
+        // Simple ding
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      } else if (soundType === 'beep') {
+        // Double beep
+        [0, 0.15].forEach((delay) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 1000;
+          osc.type = 'square';
+          gain.gain.setValueAtTime(0.2, now + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.1);
+          osc.start(now + delay);
+          osc.stop(now + delay + 0.15);
+        });
+      } else if (soundType === 'tone') {
+        // Low tone
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 440;
+        osc.type = 'triangle';
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.9);
+      }
+
+      // Speech announcement after sound
+      setTimeout(speakAnnouncement, 500);
     } catch (e) {
       console.log('Audio not supported');
     }
-  }, []);
+  }, [alertVoice]);
 
   // Play custom sound based on sound type selection
   const playCustomSound = useCallback((soundType: string, sessionName: string, alertType: 'open' | 'close', skipSpeech = false) => {
@@ -1316,21 +1474,22 @@ export default function DashboardPage() {
       const currentSessionType = isRegularActive ? "regular" : isPreActive ? "pre" : isPostActive ? "post" : null;
 
       const prevState = prevMarketStates.current.get(session.id);
+      const sounds = marketAlertSounds[session.id] || { open: 'bell', close: 'bell' };
 
       if (prevState !== undefined) {
         // Detect market open (was closed, now open)
         if (!prevState.isOpen && isOpen) {
-          playAlertSound('open', session.name, currentSessionType);
+          playAlertSound('open', session.name, currentSessionType, sounds.open);
           console.log(`🔔 ${session.name} OPENED (${currentSessionType})`);
         }
         // Detect market close (was open, now closed)
         else if (prevState.isOpen && !isOpen) {
-          playAlertSound('close', session.name, null);
+          playAlertSound('close', session.name, null, sounds.close);
           console.log(`🔔 ${session.name} CLOSED`);
         }
         // Detect session type change (e.g., pre-market to regular)
         else if (prevState.sessionType !== currentSessionType && currentSessionType !== null && prevState.sessionType !== null) {
-          playAlertSound('open', session.name, currentSessionType);
+          playAlertSound('open', session.name, currentSessionType, sounds.open);
           console.log(`🔔 ${session.name} transitioned to ${currentSessionType}`);
         }
       }
@@ -1338,7 +1497,7 @@ export default function DashboardPage() {
       // Update previous state
       prevMarketStates.current.set(session.id, { isOpen, sessionType: currentSessionType });
     });
-  }, [currentTime, marketAlerts, playAlertSound]);
+  }, [currentTime, marketAlerts, marketAlertSounds, playAlertSound]);
 
   // Mouse handlers for dragging
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -1564,36 +1723,68 @@ export default function DashboardPage() {
   const currentHourUTC = currentTime.getUTCHours() + currentTime.getUTCMinutes() / 60;
 
   // Filter events by visibility and user-selected filters
-  const filteredVisibleEvents = events.filter((event) => {
-    const eventDateTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
+  const filteredVisibleEvents = (() => {
+    const realEvents = events.filter((event) => {
+      const eventDateTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
 
-    // Time window check
-    if (eventDateTime < visibleStartTime || eventDateTime > visibleEndTime) {
-      return false;
-    }
+      // Time window check
+      if (eventDateTime < visibleStartTime || eventDateTime > visibleEndTime) {
+        return false;
+      }
 
-    // Impact filter
-    if (!filterImpacts.has(event.impact)) {
-      return false;
-    }
+      // Impact filter
+      if (!filterImpacts.has(event.impact)) {
+        return false;
+      }
 
-    // Category filter
-    if (filterCategory !== "All" && event.category !== filterCategory) {
-      return false;
-    }
+      // Category filter
+      if (filterCategory !== "All" && event.category !== filterCategory) {
+        return false;
+      }
 
-    // Currency filter
-    if (filterCurrency !== "All" && event.currency !== filterCurrency) {
-      return false;
-    }
+      // Currency filter
+      if (filterCurrency !== "All" && event.currency !== filterCurrency) {
+        return false;
+      }
 
-    // Past events filter
-    if (!showPastEvents && eventDateTime < currentTime) {
-      return false;
-    }
+      // Past events filter
+      if (!showPastEvents && eventDateTime < currentTime) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+
+    // MOCK EVENTS - Remove after testing
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const getTimeStr = (offsetMin: number) => {
+      const d = new Date(now.getTime() + offsetMin * 60000);
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    const getDateStr = (offsetMin: number) => {
+      const d = new Date(now.getTime() + offsetMin * 60000);
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    };
+
+    const mockEvents: CalendarEvent[] = [
+      { date: getDateStr(10), time: getTimeStr(10), title: "GDP Growth Rate QoQ", impact: "high", currency: "USD", category: "GDP", forecast: "2.1%", previous: "1.9%" },
+      { date: getDateStr(10), time: getTimeStr(10), title: "Unemployment Rate", impact: "high", currency: "USD", category: "Employment", forecast: "3.7%", previous: "3.8%" },
+      { date: getDateStr(12), time: getTimeStr(12), title: "Core CPI MoM", impact: "high", currency: "USD", category: "Inflation", forecast: "0.3%", previous: "0.2%" },
+      { date: getDateStr(30), time: getTimeStr(30), title: "Retail Sales MoM", impact: "medium", currency: "USD", category: "Consumer", forecast: "0.4%", previous: "0.6%" },
+      { date: getDateStr(30), time: getTimeStr(30), title: "Industrial Production", impact: "medium", currency: "EUR", category: "Production", forecast: "0.2%", previous: "-0.1%" },
+      { date: getDateStr(45), time: getTimeStr(45), title: "Fed Interest Rate Decision", impact: "high", currency: "USD", category: "Central Bank", forecast: "5.50%", previous: "5.25%" },
+      { date: getDateStr(60), time: getTimeStr(60), title: "Consumer Confidence", impact: "medium", currency: "USD", category: "Consumer", forecast: "102.5", previous: "100.3" },
+      { date: getDateStr(60), time: getTimeStr(60), title: "Housing Starts", impact: "low", currency: "USD", category: "Housing", forecast: "1.42M", previous: "1.38M" },
+      { date: getDateStr(60), time: getTimeStr(60), title: "Building Permits", impact: "low", currency: "USD", category: "Housing", forecast: "1.50M", previous: "1.47M" },
+      { date: getDateStr(90), time: getTimeStr(90), title: "FOMC Press Conference", impact: "high", currency: "USD", category: "Central Bank", forecast: "-", previous: "-" },
+    ];
+
+    console.log("MOCK EVENTS:", mockEvents);
+    console.log("Total events:", [...realEvents, ...mockEvents].length);
+
+    return [...realEvents, ...mockEvents];
+  })();
 
   // Filter events for today's full day (for the modal)
   const todayStr = currentTime.toISOString().split('T')[0]; // YYYY-MM-DD format
@@ -1664,6 +1855,19 @@ export default function DashboardPage() {
               <span className="text-sm font-medium">Reset to Live</span>
             </button>
           )}
+
+          {/* Market Alerts Settings */}
+          <button
+            onClick={() => setShowMarketAlertsModal(true)}
+            className={`p-2 rounded-lg transition-colors ${
+              marketAlerts.size > 0
+                ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'
+                : 'hover:bg-card-hover text-muted hover:text-white/70'
+            }`}
+            title="Market Session Alerts"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
 
           {/* Visibility Toggles */}
           <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-card/50 border border-border/50">
@@ -2370,50 +2574,6 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
-
-
-                {/* Alerts Toggle */}
-                <div className="mt-3 pt-2" style={{ borderTop: `1px solid ${session.color}20` }}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMarketAlerts(prev => {
-                        const next = new Set(prev);
-                        if (next.has(session.id)) {
-                          next.delete(session.id);
-                        } else {
-                          next.add(session.id);
-                        }
-                        return next;
-                      });
-                    }}
-                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors hover:brightness-110"
-                    style={{
-                      backgroundColor: marketAlerts.has(session.id) ? `${session.color}25` : 'rgba(255,255,255,0.05)',
-                      border: `1px solid ${marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.1)'}`,
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Bell className="w-3 h-3" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.5)' }} />
-                      <span className="text-[10px]" style={{ color: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.6)' }}>
-                        Open/Close Alerts
-                      </span>
-                    </div>
-                    <div
-                      className="w-8 h-4 rounded-full p-0.5 transition-colors"
-                      style={{
-                        backgroundColor: marketAlerts.has(session.id) ? session.color : 'rgba(255,255,255,0.2)',
-                      }}
-                    >
-                      <div
-                        className="w-3 h-3 rounded-full bg-white transition-transform duration-200"
-                        style={{
-                          transform: marketAlerts.has(session.id) ? 'translateX(16px)' : 'translateX(0)',
-                        }}
-                      />
-                    </div>
-                  </button>
-                </div>
               </div>
             </div>
           );
@@ -2432,21 +2592,6 @@ export default function DashboardPage() {
                 key={session.id}
                 className="flex-1 relative min-h-0 border-b border-border/20 overflow-hidden"
               >
-                {/* Alert indicator on timeline lane */}
-                {marketAlerts.has(session.id) && (
-                  <div
-                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full"
-                    style={{
-                      backgroundColor: `${session.color}30`,
-                      border: `1px solid ${session.color}`,
-                      boxShadow: `0 0 10px ${session.color}50`,
-                    }}
-                  >
-                    <Bell className="w-3.5 h-3.5" style={{ color: session.color }} />
-                    <span className="text-[10px] font-bold" style={{ color: session.color }}>ALERTS ON</span>
-                  </div>
-                )}
-
                 {/* Session Bars - render for visible time range */}
                 {(() => {
                   const elements: React.ReactNode[] = [];
@@ -3145,7 +3290,13 @@ export default function DashboardPage() {
 
           {/* Economic Events Timeline - Middle Third */}
           {showEventsCard && (
-          <div className="flex-1 relative min-h-0 border-b border-border/20 overflow-hidden">
+          <div
+            className="flex-1 relative min-h-0 border-b border-border/20"
+            style={{
+              overflow: 'visible',
+              zIndex: (expandedEventTime || selectedEventDetail) ? 50 : 1,
+            }}
+          >
             {/* Empty state when no events */}
             {filteredVisibleEvents.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -3155,86 +3306,345 @@ export default function DashboardPage() {
                 </div>
               </div>
             )}
-            {filteredVisibleEvents.map((event, index) => {
-              const eventTime = new Date(`${event.date}T${event.time || "00:00"}:00`);
+            {(() => {
               const timelineWidth = containerWidth - 240;
-              const xPos = getTimePosition(eventTime, currentTime, timelineWidth) + scrollOffset;
 
-              if (xPos < -100 || xPos > timelineWidth) return null;
+              // Group events by their time
+              const eventsByTime = new Map<string, typeof filteredVisibleEvents>();
+              filteredVisibleEvents.forEach(event => {
+                const timeKey = `${event.date}-${event.time || "00:00"}`;
+                if (!eventsByTime.has(timeKey)) {
+                  eventsByTime.set(timeKey, []);
+                }
+                eventsByTime.get(timeKey)!.push(event);
+              });
 
-              // Stagger vertically based on index to avoid overlap
-              const yOffset = 20 + (index % 3) * 90;
-              const isPast = eventTime < currentTime;
+              // Convert to array and calculate positions
+              const groupedEvents = Array.from(eventsByTime.entries()).map(([timeKey, events]) => {
+                const firstEvent = events[0];
+                const eventTime = new Date(`${firstEvent.date}T${firstEvent.time || "00:00"}:00`);
+                const xPos = getTimePosition(eventTime, currentTime, timelineWidth) + scrollOffset;
+                const isPast = eventTime < currentTime;
+                // Get highest impact in group
+                const highestImpact = events.reduce((highest, e) => {
+                  const order = { high: 3, medium: 2, low: 1 };
+                  return order[e.impact as keyof typeof order] > order[highest as keyof typeof order] ? e.impact : highest;
+                }, events[0].impact);
+                return { timeKey, events, xPos, isPast, highestImpact, time: firstEvent.time || "00:00" };
+              }).filter(g => g.xPos >= -100 && g.xPos <= timelineWidth + 100);
 
-              return (
-                <div
-                  key={`${event.date}-${event.time}-${event.title}`}
-                  className="absolute flex flex-col items-center transition-opacity"
-                  style={{
-                    left: xPos,
-                    top: yOffset,
-                    opacity: isPast ? 0.35 : 1,
-                  }}
-                >
-                  {/* Marker line */}
+              // Sort by x position for row assignment
+              groupedEvents.sort((a, b) => a.xPos - b.xPos);
+
+              // Assign rows to avoid overlaps - use full height
+              const chipWidth = 140;
+              const minGap = 12;
+              const chipHeight = 28;
+              const verticalPadding = 12; // Top and bottom padding
+              const maxRows = 4; // Maximum number of rows
+              type GroupWithRow = typeof groupedEvents[0] & { row: number };
+              const positionedGroups: GroupWithRow[] = [];
+
+              groupedEvents.forEach(group => {
+                let row = 0;
+                let foundRow = false;
+                while (!foundRow && row < maxRows) {
+                  const hasOverlap = positionedGroups.some(pg => {
+                    if (pg.row !== row) return false;
+                    return Math.abs(group.xPos - pg.xPos) < chipWidth + minGap;
+                  });
+                  if (!hasOverlap) foundRow = true;
+                  else row++;
+                }
+                positionedGroups.push({ ...group, row });
+              });
+
+              // Calculate actual number of rows used
+              const usedRows = Math.max(1, ...positionedGroups.map(g => g.row + 1));
+
+              return positionedGroups.map(({ timeKey, events, xPos, isPast, highestImpact, time, row }) => {
+                const impactColor = IMPACT_COLORS[highestImpact];
+                const isExpanded = expandedEventTime === timeKey;
+                const isSingleEvent = events.length === 1;
+
+                // Calculate percentage-based positioning to fill the lane
+                // Chips are distributed evenly across the lane height
+                const rowHeight = (100 - verticalPadding * 2 / 100 * 100) / usedRows;
+                const topPercent = verticalPadding / 100 * 100 + row * rowHeight + rowHeight / 2;
+
+                const isAnyExpanded = isExpanded || (isSingleEvent && selectedEventDetail?.title === events[0].title && selectedEventDetail?.time === events[0].time);
+
+                return (
                   <div
-                    className="w-0.5 h-4"
-                    style={{ backgroundColor: IMPACT_COLORS[event.impact] }}
-                  />
-
-                  {/* Event Card */}
-                  <div
-                    className="w-44 rounded-lg border shadow-lg p-2 transition-all"
-                    style={{
-                      backgroundColor: `${IMPACT_COLORS[event.impact]}10`,
-                      borderColor: `${IMPACT_COLORS[event.impact]}40`,
-                    }}
+                    key={timeKey}
+                    className="absolute h-full"
+                    style={{ left: xPos, top: 0, opacity: isPast ? 0.5 : 1, zIndex: isAnyExpanded ? 100 : 10 }}
                   >
-                    {/* Impact dot and time */}
-                    <div className="flex items-center gap-2 mb-1">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: IMPACT_COLORS[event.impact] }}
-                      />
-                      <span className="text-xs text-muted font-mono">
-                        {event.time}
-                      </span>
-                      {isPast && event.actual && (
-                        <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                          Released
-                        </span>
+                    {/* Event chip - inline expandable */}
+                    <div
+                      ref={isExpanded ? eventGroupRef : undefined}
+                      className="absolute"
+                      style={{
+                        left: 0,
+                        top: `${topPercent}%`,
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: isAnyExpanded ? 100 : 10,
+                      }}
+                    >
+                      {/* Single Event - Inline Expandable */}
+                      {isSingleEvent && (() => {
+                        const event = events[0];
+                        const eventImpactColor = IMPACT_COLORS[event.impact];
+                        const isEventExpanded = selectedEventDetail?.title === event.title && selectedEventDetail?.time === event.time;
+
+                        return (
+                          <div
+                            className="cursor-pointer transition-all duration-300 ease-out"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isEventExpanded) {
+                                setSelectedEventDetail(null);
+                              } else {
+                                setSelectedEventDetail(event);
+                              }
+                            }}
+                          >
+                            {/* Arrow pointing up to timeline */}
+                            <div
+                              className="absolute left-1/2 -translate-x-1/2"
+                              style={{
+                                top: -6,
+                                width: 0,
+                                height: 0,
+                                borderLeft: '6px solid transparent',
+                                borderRight: '6px solid transparent',
+                                borderBottom: `6px solid ${eventImpactColor}`,
+                              }}
+                            />
+
+                            <div
+                              className="rounded-xl transition-all duration-300"
+                              style={{
+                                backgroundColor: '#0d1117',
+                                border: `1px solid ${eventImpactColor}`,
+                                boxShadow: isEventExpanded
+                                  ? `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${eventImpactColor}30`
+                                  : `0 4px 16px rgba(0,0,0,0.4)`,
+                                minWidth: isEventExpanded ? '280px' : 'auto',
+                              }}
+                            >
+                              {/* Header row */}
+                              <div className="flex items-center gap-2 px-3 py-2">
+                                <div
+                                  className="w-2 h-2 rounded-full flex-shrink-0"
+                                  style={{ backgroundColor: eventImpactColor, boxShadow: `0 0 6px ${eventImpactColor}` }}
+                                />
+                                <span className={`text-xs font-medium text-white ${isEventExpanded ? '' : 'max-w-[120px] truncate'}`}>
+                                  {event.title}
+                                </span>
+                                {isEventExpanded && (
+                                  <ChevronUp className="w-3.5 h-3.5 text-white/50 ml-auto" />
+                                )}
+                              </div>
+
+                              {/* Expanded data */}
+                              {isEventExpanded && (
+                                <div className="px-3 pb-3 pt-1 border-t" style={{ borderColor: `${eventImpactColor}30` }}>
+                                  <div className="flex items-center gap-1.5 mb-2 text-[10px] text-white/50">
+                                    <span>{event.time}</span>
+                                    <span>•</span>
+                                    <span>{event.currency}</span>
+                                    {event.category && (
+                                      <>
+                                        <span>•</span>
+                                        <span>{event.category}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <div className="flex-1 text-center p-2 rounded-lg" style={{ backgroundColor: '#1a1f2e' }}>
+                                      <div className="text-[9px] text-white/50 uppercase mb-0.5">Prev</div>
+                                      <div className="text-sm font-semibold text-white/80">{event.previous || "-"}</div>
+                                    </div>
+                                    <div className="flex-1 text-center p-2 rounded-lg" style={{ backgroundColor: `${eventImpactColor}25` }}>
+                                      <div className="text-[9px] uppercase mb-0.5" style={{ color: eventImpactColor }}>Fcst</div>
+                                      <div className="text-sm font-semibold" style={{ color: eventImpactColor }}>{event.forecast || "-"}</div>
+                                    </div>
+                                    <div className="flex-1 text-center p-2 rounded-lg" style={{ backgroundColor: '#1a1f2e' }}>
+                                      <div className="text-[9px] text-white/50 uppercase mb-0.5">Actual</div>
+                                      <div className="text-sm font-semibold text-white">{event.actual || "—"}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Arrow pointing down to timeline */}
+                            <div
+                              className="absolute left-1/2 -translate-x-1/2"
+                              style={{
+                                bottom: -6,
+                                width: 0,
+                                height: 0,
+                                borderLeft: '6px solid transparent',
+                                borderRight: '6px solid transparent',
+                                borderTop: `6px solid ${eventImpactColor}`,
+                              }}
+                            />
+                          </div>
+                        );
+                      })()}
+
+                      {/* Multiple Events - Expandable List */}
+                      {!isSingleEvent && (
+                        <div
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedEventTime(isExpanded ? null : timeKey);
+                            if (isExpanded) setSelectedEventDetail(null);
+                          }}
+                        >
+                          {/* Arrow pointing up to timeline */}
+                          <div
+                            className="absolute left-1/2 -translate-x-1/2"
+                            style={{
+                              top: -6,
+                              width: 0,
+                              height: 0,
+                              borderLeft: '6px solid transparent',
+                              borderRight: '6px solid transparent',
+                              borderBottom: `6px solid ${impactColor}`,
+                            }}
+                          />
+
+                          <div
+                            className="rounded-xl transition-all duration-300"
+                            style={{
+                              backgroundColor: '#0d1117',
+                              border: `1px solid ${impactColor}`,
+                              boxShadow: isExpanded
+                                ? `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${impactColor}30`
+                                : `0 4px 16px rgba(0,0,0,0.4)`,
+                              minWidth: isExpanded ? '300px' : 'auto',
+                            }}
+                          >
+                            {/* Header */}
+                            <div className="flex items-center gap-2 px-3 py-2">
+                              <div
+                                className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-md text-xs font-bold"
+                                style={{
+                                  backgroundColor: impactColor,
+                                  color: '#000',
+                                  boxShadow: `0 0 10px ${impactColor}80`,
+                                }}
+                              >
+                                {events.length}
+                              </div>
+                              <span className="text-xs font-medium text-white">
+                                {time} Releases
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-3.5 h-3.5 text-white/50 ml-auto" />
+                              ) : (
+                                <ChevronDown className="w-3.5 h-3.5 text-white/50 ml-auto" />
+                              )}
+                            </div>
+
+                            {/* Expanded list */}
+                            {isExpanded && (
+                              <div className="border-t" style={{ borderColor: `${impactColor}30` }}>
+                                {events.map((event, idx) => {
+                                  const eventImpactColor = IMPACT_COLORS[event.impact];
+                                  const isEventExpanded = selectedEventDetail?.title === event.title && selectedEventDetail?.time === event.time;
+
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="border-b last:border-b-0 transition-colors"
+                                      style={{ borderColor: '#1a1f2e' }}
+                                    >
+                                      {/* Event row */}
+                                      <div
+                                        className="px-3 py-2.5 cursor-pointer flex items-center gap-2.5 transition-colors"
+                                        style={{ backgroundColor: isEventExpanded ? '#1a1f2e' : 'transparent' }}
+                                        onMouseEnter={(e) => { if (!isEventExpanded) e.currentTarget.style.backgroundColor = '#151922'; }}
+                                        onMouseLeave={(e) => { if (!isEventExpanded) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (isEventExpanded) {
+                                            setSelectedEventDetail(null);
+                                          } else {
+                                            setSelectedEventDetail(event);
+                                          }
+                                        }}
+                                      >
+                                        <div
+                                          className="w-2 h-2 rounded-full flex-shrink-0"
+                                          style={{ backgroundColor: eventImpactColor, boxShadow: `0 0 4px ${eventImpactColor}` }}
+                                        />
+                                        <span className="text-xs text-white flex-1">{event.title}</span>
+                                        {isEventExpanded ? (
+                                          <ChevronUp className="w-3 h-3 text-white/50" />
+                                        ) : (
+                                          <ChevronRight className="w-3 h-3 text-white/50" />
+                                        )}
+                                      </div>
+
+                                      {/* Inline expanded data */}
+                                      {isEventExpanded && (
+                                        <div className="px-3 pb-3" style={{ backgroundColor: '#1a1f2e' }}>
+                                          <div className="flex items-center gap-1.5 mb-2 text-[10px] text-white/50">
+                                            <span>{event.currency}</span>
+                                            {event.category && (
+                                              <>
+                                                <span>•</span>
+                                                <span>{event.category}</span>
+                                              </>
+                                            )}
+                                          </div>
+                                          <div className="flex gap-2">
+                                            <div className="flex-1 text-center p-1.5 rounded-lg" style={{ backgroundColor: '#0d1117' }}>
+                                              <div className="text-[8px] text-white/50 uppercase">Prev</div>
+                                              <div className="text-xs font-semibold text-white/80">{event.previous || "-"}</div>
+                                            </div>
+                                            <div className="flex-1 text-center p-1.5 rounded-lg" style={{ backgroundColor: `${eventImpactColor}25` }}>
+                                              <div className="text-[8px] uppercase" style={{ color: eventImpactColor }}>Fcst</div>
+                                              <div className="text-xs font-semibold" style={{ color: eventImpactColor }}>{event.forecast || "-"}</div>
+                                            </div>
+                                            <div className="flex-1 text-center p-1.5 rounded-lg" style={{ backgroundColor: '#0d1117' }}>
+                                              <div className="text-[8px] text-white/50 uppercase">Actual</div>
+                                              <div className="text-xs font-semibold text-white">{event.actual || "—"}</div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Arrow pointing down to timeline */}
+                          <div
+                            className="absolute left-1/2 -translate-x-1/2"
+                            style={{
+                              bottom: -6,
+                              width: 0,
+                              height: 0,
+                              borderLeft: '6px solid transparent',
+                              borderRight: '6px solid transparent',
+                              borderTop: `6px solid ${impactColor}`,
+                            }}
+                          />
+                        </div>
                       )}
                     </div>
-
-                    {/* Title */}
-                    <div className="text-xs font-medium text-foreground truncate">
-                      {event.title}
-                    </div>
-
-                    {/* Values */}
-                    {(event.actual || event.forecast || event.previous) && (
-                      <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px]">
-                        {event.actual && (
-                          <span className="text-emerald-400">
-                            Act: {event.actual}
-                          </span>
-                        )}
-                        {event.forecast && (
-                          <span className="text-muted">
-                            Exp: {event.forecast}
-                          </span>
-                        )}
-                        {event.previous && (
-                          <span className="text-muted">
-                            Prev: {event.previous}
-                          </span>
-                        )}
-                      </div>
-                    )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
           )}
 
@@ -4623,6 +5033,183 @@ export default function DashboardPage() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Market Session Alerts Settings Modal */}
+      {showMarketAlertsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div
+            className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <h2 className="text-sm font-semibold">Market Alerts</h2>
+              <button
+                onClick={() => setShowMarketAlertsModal(false)}
+                className="p-1 rounded hover:bg-card-hover transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 space-y-3">
+              {/* Column Headers */}
+              <div className="flex items-center gap-3 px-2.5 text-[10px] text-white/40 uppercase tracking-wider">
+                <div className="min-w-[80px]">Market</div>
+                <div className="flex-1 flex gap-4">
+                  <span className="w-16 text-center">Open</span>
+                  <span className="w-16 text-center">Close</span>
+                </div>
+                <div className="w-8" />
+              </div>
+
+              {/* Market Rows */}
+              {MARKET_SESSIONS.map(session => {
+                const isEnabled = marketAlerts.has(session.id);
+                const sounds = marketAlertSounds[session.id] || { open: 'bell', close: 'bell' };
+
+                return (
+                  <div
+                    key={session.id}
+                    className="flex items-center gap-3 rounded-lg px-2.5 py-2 transition-all"
+                    style={{
+                      backgroundColor: isEnabled ? `${session.color}12` : 'transparent',
+                    }}
+                  >
+                    {/* Market indicator & name */}
+                    <div className="flex items-center gap-2 min-w-[80px]">
+                      <div
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: session.color, opacity: isEnabled ? 1 : 0.4 }}
+                      />
+                      <span className="text-xs font-medium" style={{ color: isEnabled ? session.color : 'rgba(255,255,255,0.4)' }}>
+                        {session.shortName}
+                      </span>
+                    </div>
+
+                    {/* Sound dropdowns */}
+                    <div className="flex-1 flex gap-4">
+                      <select
+                        value={sounds.open}
+                        onChange={(e) => {
+                          const newSound = e.target.value;
+                          setMarketAlertSounds(prev => ({
+                            ...prev,
+                            [session.id]: { ...sounds, open: newSound }
+                          }));
+                          if (newSound !== 'none') {
+                            playAlertSound('open', session.name, null, newSound);
+                          }
+                        }}
+                        disabled={!isEnabled}
+                        className="w-16 text-[10px] rounded px-1.5 py-1 cursor-pointer outline-none disabled:opacity-30 disabled:cursor-not-allowed"
+                        style={{
+                          backgroundColor: isEnabled ? `${session.color}25` : 'rgba(255,255,255,0.05)',
+                          border: `1px solid ${isEnabled ? session.color + '50' : 'rgba(255,255,255,0.1)'}`,
+                          color: isEnabled ? session.color : 'rgba(255,255,255,0.3)',
+                        }}
+                      >
+                        {SOUND_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{opt.label}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={sounds.close}
+                        onChange={(e) => {
+                          const newSound = e.target.value;
+                          setMarketAlertSounds(prev => ({
+                            ...prev,
+                            [session.id]: { ...sounds, close: newSound }
+                          }));
+                          if (newSound !== 'none') {
+                            playAlertSound('close', session.name, null, newSound);
+                          }
+                        }}
+                        disabled={!isEnabled}
+                        className="w-16 text-[10px] rounded px-1.5 py-1 cursor-pointer outline-none disabled:opacity-30 disabled:cursor-not-allowed"
+                        style={{
+                          backgroundColor: isEnabled ? `${session.color}25` : 'rgba(255,255,255,0.05)',
+                          border: `1px solid ${isEnabled ? session.color + '50' : 'rgba(255,255,255,0.1)'}`,
+                          color: isEnabled ? session.color : 'rgba(255,255,255,0.3)',
+                        }}
+                      >
+                        {SOUND_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Toggle */}
+                    <button
+                      onClick={() => {
+                        setMarketAlerts(prev => {
+                          const next = new Set(prev);
+                          if (next.has(session.id)) {
+                            next.delete(session.id);
+                          } else {
+                            next.add(session.id);
+                          }
+                          return next;
+                        });
+                      }}
+                      className="w-8 h-4 rounded-full p-0.5 transition-colors flex-shrink-0"
+                      style={{
+                        backgroundColor: isEnabled ? session.color : 'rgba(255,255,255,0.15)',
+                      }}
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full bg-white transition-transform duration-200"
+                        style={{
+                          transform: isEnabled ? 'translateX(16px)' : 'translateX(0)',
+                        }}
+                      />
+                    </button>
+                  </div>
+                );
+              })}
+
+              {/* Voice Selector */}
+              <div className="pt-3 mt-3 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/50">Announcement Voice</span>
+                  <select
+                    value={alertVoice}
+                    onChange={(e) => {
+                      setAlertVoice(e.target.value);
+                      // Preview the voice
+                      if (e.target.value !== 'default' && 'speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance('Market Open');
+                        const voice = availableVoices.find(v => v.name === e.target.value);
+                        if (voice) utterance.voice = voice;
+                        utterance.rate = 0.95;
+                        utterance.pitch = 0.9;
+                        window.speechSynthesis.speak(utterance);
+                      }
+                    }}
+                    className="text-[11px] rounded px-2 py-1 cursor-pointer outline-none bg-white/5 border border-white/10 text-white/80 max-w-[200px]"
+                  >
+                    <option value="default" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>Default</option>
+                    {availableVoices.map(voice => {
+                      const isUS = voice.lang === 'en-US';
+                      const maleNames = ['David', 'Mark', 'James', 'Guy', 'Eric', 'Christopher', 'Daniel', 'Alex'];
+                      const isMale = maleNames.some(n => voice.name.includes(n));
+                      const shortName = voice.name.replace('Microsoft ', '').replace('Google ', '').replace(' Online (Natural)', '');
+                      const tag = isUS ? (isMale ? '(US Male)' : '(US)') : '';
+                      return (
+                        <option key={voice.name} value={voice.name} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
+                          {shortName} {tag}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
