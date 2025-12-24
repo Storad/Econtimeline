@@ -1,7 +1,7 @@
 "use client";
 
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Settings, Calendar, Clock, BarChart3, Lightbulb } from "lucide-react";
+import { Settings, Calendar, Clock, BarChart3, Lightbulb, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NotificationBell } from "@/components/Strategies/NotificationBell";
@@ -49,6 +49,7 @@ const LogoIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
 const navItems = [
   { name: "Timeline", href: "/dashboard", icon: Clock },
   { name: "Economic Calendar", href: "/dashboard/calendar", icon: Calendar },
+  { name: "Trading", href: "/dashboard/trading", icon: TrendingUp },
   { name: "Strategies", href: "/dashboard/strategies", icon: Lightbulb },
   { name: "Market Breakdown", href: "/dashboard/market", icon: BarChart3 },
 ];
