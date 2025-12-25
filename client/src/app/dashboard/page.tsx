@@ -1013,6 +1013,7 @@ export default function DashboardPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number>(0);
+  const mockEventsBaseTime = useRef<Date>(new Date()); // Fixed time for mock events
 
   // Initialize on client only to avoid hydration mismatch
   useEffect(() => {
@@ -1756,28 +1757,32 @@ export default function DashboardPage() {
     });
 
     // MOCK EVENTS - Remove after testing
-    const now = new Date();
+    // Use fixed base time so events don't shift on every render
+    const baseTime = mockEventsBaseTime.current;
     const pad = (n: number) => n.toString().padStart(2, '0');
     const getTimeStr = (offsetMin: number) => {
-      const d = new Date(now.getTime() + offsetMin * 60000);
+      const d = new Date(baseTime.getTime() + offsetMin * 60000);
       return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
     const getDateStr = (offsetMin: number) => {
-      const d = new Date(now.getTime() + offsetMin * 60000);
+      const d = new Date(baseTime.getTime() + offsetMin * 60000);
       return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     };
 
     const mockEvents: CalendarEvent[] = [
-      { date: getDateStr(10), time: getTimeStr(10), title: "GDP Growth Rate QoQ", impact: "high", currency: "USD", category: "GDP", forecast: "2.1%", previous: "1.9%" },
-      { date: getDateStr(10), time: getTimeStr(10), title: "Unemployment Rate", impact: "high", currency: "USD", category: "Employment", forecast: "3.7%", previous: "3.8%" },
-      { date: getDateStr(12), time: getTimeStr(12), title: "Core CPI MoM", impact: "high", currency: "USD", category: "Inflation", forecast: "0.3%", previous: "0.2%" },
-      { date: getDateStr(30), time: getTimeStr(30), title: "Retail Sales MoM", impact: "medium", currency: "USD", category: "Consumer", forecast: "0.4%", previous: "0.6%" },
-      { date: getDateStr(30), time: getTimeStr(30), title: "Industrial Production", impact: "medium", currency: "EUR", category: "Production", forecast: "0.2%", previous: "-0.1%" },
-      { date: getDateStr(45), time: getTimeStr(45), title: "Fed Interest Rate Decision", impact: "high", currency: "USD", category: "Central Bank", forecast: "5.50%", previous: "5.25%" },
-      { date: getDateStr(60), time: getTimeStr(60), title: "Consumer Confidence", impact: "medium", currency: "USD", category: "Consumer", forecast: "102.5", previous: "100.3" },
-      { date: getDateStr(60), time: getTimeStr(60), title: "Housing Starts", impact: "low", currency: "USD", category: "Housing", forecast: "1.42M", previous: "1.38M" },
-      { date: getDateStr(60), time: getTimeStr(60), title: "Building Permits", impact: "low", currency: "USD", category: "Housing", forecast: "1.50M", previous: "1.47M" },
-      { date: getDateStr(90), time: getTimeStr(90), title: "FOMC Press Conference", impact: "high", currency: "USD", category: "Central Bank", forecast: "-", previous: "-" },
+      // Past events (already passed NOW line)
+      { date: getDateStr(-30), time: getTimeStr(-30), title: "Initial Jobless Claims", impact: "medium", currency: "USD", category: "Employment", forecast: "210K", previous: "215K", actual: "208K" },
+      { date: getDateStr(-15), time: getTimeStr(-15), title: "PPI MoM", impact: "medium", currency: "USD", category: "Inflation", forecast: "0.2%", previous: "0.1%", actual: "0.3%" },
+      { date: getDateStr(-5), time: getTimeStr(-5), title: "EIA Crude Oil Stocks", impact: "low", currency: "USD", category: "Energy", forecast: "-1.2M", previous: "-2.5M", actual: "-0.8M" },
+      // Very close to NOW - watch these flip!
+      { date: getDateStr(1), time: getTimeStr(1), title: "GDP Growth Rate QoQ", impact: "high", currency: "USD", category: "GDP", forecast: "2.1%", previous: "1.9%" },
+      { date: getDateStr(1), time: getTimeStr(1), title: "Unemployment Rate", impact: "high", currency: "USD", category: "Employment", forecast: "3.7%", previous: "3.8%" },
+      { date: getDateStr(2), time: getTimeStr(2), title: "Core CPI MoM", impact: "high", currency: "USD", category: "Inflation", forecast: "0.3%", previous: "0.2%" },
+      // Future events
+      { date: getDateStr(15), time: getTimeStr(15), title: "Retail Sales MoM", impact: "medium", currency: "USD", category: "Consumer", forecast: "0.4%", previous: "0.6%" },
+      { date: getDateStr(30), time: getTimeStr(30), title: "Fed Interest Rate Decision", impact: "high", currency: "USD", category: "Central Bank", forecast: "5.50%", previous: "5.25%" },
+      { date: getDateStr(45), time: getTimeStr(45), title: "Consumer Confidence", impact: "medium", currency: "USD", category: "Consumer", forecast: "102.5", previous: "100.3" },
+      { date: getDateStr(60), time: getTimeStr(60), title: "FOMC Press Conference", impact: "high", currency: "USD", category: "Central Bank", forecast: "-", previous: "-" },
     ];
 
     console.log("MOCK EVENTS:", mockEvents);
@@ -3333,25 +3338,36 @@ export default function DashboardPage() {
                 return { timeKey, events, xPos, isPast, highestImpact, time: firstEvent.time || "00:00" };
               }).filter(g => g.xPos >= -100 && g.xPos <= timelineWidth + 100);
 
-              // Sort by x position for row assignment
-              groupedEvents.sort((a, b) => a.xPos - b.xPos);
+              // Sort by TIME for stable row assignment (not affected by isPast flip)
+              groupedEvents.sort((a, b) => a.timeKey.localeCompare(b.timeKey));
 
-              // Assign rows to avoid overlaps - use full height
-              const chipWidth = 140;
-              const minGap = 12;
-              const chipHeight = 28;
-              const verticalPadding = 12; // Top and bottom padding
-              const maxRows = 4; // Maximum number of rows
+              // Assign rows to avoid overlaps - use 6 rows max
+              const chipWidth = 160; // Increased to account for time display
+              const minGap = 16;
+              const verticalPadding = 8; // Top and bottom padding in percent
+              const maxRows = 6; // Maximum number of rows
               type GroupWithRow = typeof groupedEvents[0] & { row: number };
               const positionedGroups: GroupWithRow[] = [];
+
+              // Use time-based bounds for overlap detection (stable, not affected by isPast)
+              // This ensures row assignment doesn't change when event crosses NOW line
+              const getCardBounds = (xPos: number) => {
+                // Use symmetric bounds around xPos for stable row assignment
+                return { left: xPos - chipWidth / 2, right: xPos + chipWidth / 2 };
+              };
 
               groupedEvents.forEach(group => {
                 let row = 0;
                 let foundRow = false;
+                const groupBounds = getCardBounds(group.xPos);
+
                 while (!foundRow && row < maxRows) {
                   const hasOverlap = positionedGroups.some(pg => {
                     if (pg.row !== row) return false;
-                    return Math.abs(group.xPos - pg.xPos) < chipWidth + minGap;
+                    const pgBounds = getCardBounds(pg.xPos);
+                    // Check if bounds overlap (with gap)
+                    return !(groupBounds.right + minGap < pgBounds.left ||
+                             groupBounds.left - minGap > pgBounds.right);
                   });
                   if (!hasOverlap) foundRow = true;
                   else row++;
@@ -3359,7 +3375,7 @@ export default function DashboardPage() {
                 positionedGroups.push({ ...group, row });
               });
 
-              // Calculate actual number of rows used
+              // Calculate actual number of rows used, then distribute evenly
               const usedRows = Math.max(1, ...positionedGroups.map(g => g.row + 1));
 
               return positionedGroups.map(({ timeKey, events, xPos, isPast, highestImpact, time, row }) => {
@@ -3368,9 +3384,10 @@ export default function DashboardPage() {
                 const isSingleEvent = events.length === 1;
 
                 // Calculate percentage-based positioning to fill the lane
-                // Chips are distributed evenly across the lane height
-                const rowHeight = (100 - verticalPadding * 2 / 100 * 100) / usedRows;
-                const topPercent = verticalPadding / 100 * 100 + row * rowHeight + rowHeight / 2;
+                // Distribute used rows evenly across available height (with padding)
+                const availableHeight = 100 - (verticalPadding * 2);
+                const rowHeight = availableHeight / usedRows;
+                const topPercent = verticalPadding + (row * rowHeight) + (rowHeight / 2);
 
                 const isAnyExpanded = isExpanded || (isSingleEvent && selectedEventDetail?.title === events[0].title && selectedEventDetail?.time === events[0].time);
 
@@ -3378,16 +3395,17 @@ export default function DashboardPage() {
                   <div
                     key={timeKey}
                     className="absolute h-full"
-                    style={{ left: xPos, top: 0, opacity: isPast ? 0.5 : 1, zIndex: isAnyExpanded ? 100 : 10 }}
+                    style={{ left: xPos, top: 0, zIndex: isAnyExpanded ? 100 : 10 }}
                   >
                     {/* Event chip - inline expandable */}
                     <div
                       ref={isExpanded ? eventGroupRef : undefined}
-                      className="absolute"
+                      className="absolute transition-all duration-500 ease-out"
                       style={{
                         left: 0,
                         top: `${topPercent}%`,
-                        transform: 'translate(-50%, -50%)',
+                        transform: isPast ? 'translate(-100%, -50%)' : 'translate(0, -50%)',
+                        opacity: isPast ? 0.5 : 1,
                         zIndex: isAnyExpanded ? 100 : 10,
                       }}
                     >
@@ -3409,50 +3427,35 @@ export default function DashboardPage() {
                               }
                             }}
                           >
-                            {/* Arrow pointing up to timeline */}
                             <div
-                              className="absolute left-1/2 -translate-x-1/2"
+                              className="rounded-lg backdrop-blur-md transition-all duration-300 overflow-hidden"
                               style={{
-                                top: -6,
-                                width: 0,
-                                height: 0,
-                                borderLeft: '6px solid transparent',
-                                borderRight: '6px solid transparent',
-                                borderBottom: `6px solid ${eventImpactColor}`,
-                              }}
-                            />
-
-                            <div
-                              className="rounded-xl transition-all duration-300"
-                              style={{
-                                backgroundColor: '#0d1117',
-                                border: `1px solid ${eventImpactColor}`,
+                                backgroundColor: 'rgba(30, 41, 59, 0.85)',
+                                borderLeft: isPast ? 'none' : `3px solid ${eventImpactColor}`,
+                                borderRight: isPast ? `3px solid ${eventImpactColor}` : 'none',
                                 boxShadow: isEventExpanded
-                                  ? `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${eventImpactColor}30`
-                                  : `0 4px 16px rgba(0,0,0,0.4)`,
-                                minWidth: isEventExpanded ? '280px' : 'auto',
+                                  ? '0 8px 32px rgba(0,0,0,0.4)'
+                                  : '0 2px 8px rgba(0,0,0,0.3)',
+                                minWidth: isEventExpanded ? '260px' : 'auto',
                               }}
                             >
                               {/* Header row */}
                               <div className="flex items-center gap-2 px-3 py-2">
-                                <div
-                                  className="w-2 h-2 rounded-full flex-shrink-0"
-                                  style={{ backgroundColor: eventImpactColor, boxShadow: `0 0 6px ${eventImpactColor}` }}
-                                />
-                                <span className={`text-xs font-medium text-white ${isEventExpanded ? '' : 'max-w-[120px] truncate'}`}>
+                                <span className="text-[10px] font-medium text-white/50 flex-shrink-0">
+                                  {formatTimeDisplay(event.time || "00:00")}
+                                </span>
+                                <span className={`text-xs font-medium text-white/90 ${isEventExpanded ? '' : 'max-w-[100px] truncate'}`}>
                                   {event.title}
                                 </span>
                                 {isEventExpanded && (
-                                  <ChevronUp className="w-3.5 h-3.5 text-white/50 ml-auto" />
+                                  <ChevronUp className="w-3.5 h-3.5 text-white/40 ml-auto" />
                                 )}
                               </div>
 
                               {/* Expanded data */}
                               {isEventExpanded && (
-                                <div className="px-3 pb-3 pt-1 border-t" style={{ borderColor: `${eventImpactColor}30` }}>
+                                <div className="px-3 pb-3 pt-1 border-t border-white/10">
                                   <div className="flex items-center gap-1.5 mb-2 text-[10px] text-white/50">
-                                    <span>{event.time}</span>
-                                    <span>•</span>
                                     <span>{event.currency}</span>
                                     {event.category && (
                                       <>
@@ -3461,99 +3464,82 @@ export default function DashboardPage() {
                                       </>
                                     )}
                                   </div>
-                                  <div className="flex gap-2">
-                                    <div className="flex-1 text-center p-2 rounded-lg" style={{ backgroundColor: '#1a1f2e' }}>
-                                      <div className="text-[9px] text-white/50 uppercase mb-0.5">Prev</div>
-                                      <div className="text-sm font-semibold text-white/80">{event.previous || "-"}</div>
+                                  <div className="flex gap-1.5">
+                                    <div className="flex-1 text-center p-1.5 rounded-md bg-white/5">
+                                      <div className="text-[9px] text-white/40 uppercase mb-0.5">Prev</div>
+                                      <div className="text-xs font-medium text-white/70">{event.previous || "-"}</div>
                                     </div>
-                                    <div className="flex-1 text-center p-2 rounded-lg" style={{ backgroundColor: `${eventImpactColor}25` }}>
-                                      <div className="text-[9px] uppercase mb-0.5" style={{ color: eventImpactColor }}>Fcst</div>
-                                      <div className="text-sm font-semibold" style={{ color: eventImpactColor }}>{event.forecast || "-"}</div>
+                                    <div className="flex-1 text-center p-1.5 rounded-md" style={{ backgroundColor: `${eventImpactColor}15` }}>
+                                      <div className="text-[9px] uppercase mb-0.5" style={{ color: `${eventImpactColor}cc` }}>Fcst</div>
+                                      <div className="text-xs font-medium" style={{ color: eventImpactColor }}>{event.forecast || "-"}</div>
                                     </div>
-                                    <div className="flex-1 text-center p-2 rounded-lg" style={{ backgroundColor: '#1a1f2e' }}>
-                                      <div className="text-[9px] text-white/50 uppercase mb-0.5">Actual</div>
-                                      <div className="text-sm font-semibold text-white">{event.actual || "—"}</div>
+                                    <div className="flex-1 text-center p-1.5 rounded-md bg-white/5">
+                                      <div className="text-[9px] text-white/40 uppercase mb-0.5">Actual</div>
+                                      <div className="text-xs font-medium text-white/90">{event.actual || "—"}</div>
                                     </div>
                                   </div>
                                 </div>
                               )}
                             </div>
-
-                            {/* Arrow pointing down to timeline */}
-                            <div
-                              className="absolute left-1/2 -translate-x-1/2"
-                              style={{
-                                bottom: -6,
-                                width: 0,
-                                height: 0,
-                                borderLeft: '6px solid transparent',
-                                borderRight: '6px solid transparent',
-                                borderTop: `6px solid ${eventImpactColor}`,
-                              }}
-                            />
                           </div>
                         );
                       })()}
 
                       {/* Multiple Events - Expandable List */}
-                      {!isSingleEvent && (
+                      {!isSingleEvent && (() => {
+                        // Show the highest impact event as the primary display
+                        const primaryEvent = events.reduce((highest, e) => {
+                          const order = { high: 3, medium: 2, low: 1 };
+                          return (order[e.impact as keyof typeof order] || 0) > (order[highest.impact as keyof typeof order] || 0) ? e : highest;
+                        }, events[0]);
+                        const primaryImpactColor = IMPACT_COLORS[primaryEvent.impact];
+
+                        return (
                         <div
-                          className="cursor-pointer"
+                          className="cursor-pointer transition-all duration-300 ease-out"
                           onClick={(e) => {
                             e.stopPropagation();
                             setExpandedEventTime(isExpanded ? null : timeKey);
                             if (isExpanded) setSelectedEventDetail(null);
                           }}
                         >
-                          {/* Arrow pointing up to timeline */}
                           <div
-                            className="absolute left-1/2 -translate-x-1/2"
+                            className="rounded-lg backdrop-blur-md transition-all duration-300 overflow-hidden"
                             style={{
-                              top: -6,
-                              width: 0,
-                              height: 0,
-                              borderLeft: '6px solid transparent',
-                              borderRight: '6px solid transparent',
-                              borderBottom: `6px solid ${impactColor}`,
-                            }}
-                          />
-
-                          <div
-                            className="rounded-xl transition-all duration-300"
-                            style={{
-                              backgroundColor: '#0d1117',
-                              border: `1px solid ${impactColor}`,
+                              backgroundColor: 'rgba(30, 41, 59, 0.85)',
+                              borderLeft: isPast ? 'none' : `3px solid ${primaryImpactColor}`,
+                              borderRight: isPast ? `3px solid ${primaryImpactColor}` : 'none',
                               boxShadow: isExpanded
-                                ? `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${impactColor}30`
-                                : `0 4px 16px rgba(0,0,0,0.4)`,
-                              minWidth: isExpanded ? '300px' : 'auto',
+                                ? '0 8px 32px rgba(0,0,0,0.4)'
+                                : '0 2px 8px rgba(0,0,0,0.3)',
+                              minWidth: isExpanded ? '260px' : 'auto',
                             }}
                           >
-                            {/* Header */}
+                            {/* Header - identical structure to single event */}
                             <div className="flex items-center gap-2 px-3 py-2">
-                              <div
-                                className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-md text-xs font-bold"
-                                style={{
-                                  backgroundColor: impactColor,
-                                  color: '#000',
-                                  boxShadow: `0 0 10px ${impactColor}80`,
-                                }}
-                              >
-                                {events.length}
-                              </div>
-                              <span className="text-xs font-medium text-white">
-                                {time} Releases
+                              <span className="text-[10px] font-medium text-white/50 flex-shrink-0">
+                                {formatTimeDisplay(time)}
                               </span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5 text-white/50 ml-auto" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5 text-white/50 ml-auto" />
+                              <span className={`text-xs font-medium text-white/90 ${isExpanded ? '' : 'max-w-[100px] truncate'}`}>
+                                {primaryEvent.title}
+                              </span>
+                              {/* Inline count indicator */}
+                              {!isExpanded && (
+                                <span
+                                  className="text-[10px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded"
+                                  style={{ backgroundColor: `${primaryImpactColor}30`, color: primaryImpactColor }}
+                                >
+                                  {events.length}
+                                </span>
+                              )}
+                              {isExpanded && (
+                                <ChevronUp className="w-3.5 h-3.5 text-white/40 ml-auto" />
                               )}
                             </div>
 
                             {/* Expanded list */}
                             {isExpanded && (
-                              <div className="border-t" style={{ borderColor: `${impactColor}30` }}>
+                              <div className="border-t border-white/10">
                                 {events.map((event, idx) => {
                                   const eventImpactColor = IMPACT_COLORS[event.impact];
                                   const isEventExpanded = selectedEventDetail?.title === event.title && selectedEventDetail?.time === event.time;
@@ -3561,15 +3547,12 @@ export default function DashboardPage() {
                                   return (
                                     <div
                                       key={idx}
-                                      className="border-b last:border-b-0 transition-colors"
-                                      style={{ borderColor: '#1a1f2e' }}
+                                      className="border-b border-white/5 last:border-b-0 transition-colors"
                                     >
                                       {/* Event row */}
                                       <div
-                                        className="px-3 py-2.5 cursor-pointer flex items-center gap-2.5 transition-colors"
-                                        style={{ backgroundColor: isEventExpanded ? '#1a1f2e' : 'transparent' }}
-                                        onMouseEnter={(e) => { if (!isEventExpanded) e.currentTarget.style.backgroundColor = '#151922'; }}
-                                        onMouseLeave={(e) => { if (!isEventExpanded) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                        className="px-3 py-2 cursor-pointer flex items-center gap-2 transition-colors hover:bg-white/5"
+                                        style={{ backgroundColor: isEventExpanded ? 'rgba(255,255,255,0.08)' : 'transparent' }}
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           if (isEventExpanded) {
@@ -3580,20 +3563,20 @@ export default function DashboardPage() {
                                         }}
                                       >
                                         <div
-                                          className="w-2 h-2 rounded-full flex-shrink-0"
-                                          style={{ backgroundColor: eventImpactColor, boxShadow: `0 0 4px ${eventImpactColor}` }}
+                                          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                          style={{ backgroundColor: eventImpactColor }}
                                         />
-                                        <span className="text-xs text-white flex-1">{event.title}</span>
+                                        <span className="text-xs text-white/80 flex-1">{event.title}</span>
                                         {isEventExpanded ? (
-                                          <ChevronUp className="w-3 h-3 text-white/50" />
+                                          <ChevronUp className="w-3 h-3 text-white/40" />
                                         ) : (
-                                          <ChevronRight className="w-3 h-3 text-white/50" />
+                                          <ChevronRight className="w-3 h-3 text-white/40" />
                                         )}
                                       </div>
 
                                       {/* Inline expanded data */}
                                       {isEventExpanded && (
-                                        <div className="px-3 pb-3" style={{ backgroundColor: '#1a1f2e' }}>
+                                        <div className="px-3 pb-2.5 bg-white/5">
                                           <div className="flex items-center gap-1.5 mb-2 text-[10px] text-white/50">
                                             <span>{event.currency}</span>
                                             {event.category && (
@@ -3603,18 +3586,18 @@ export default function DashboardPage() {
                                               </>
                                             )}
                                           </div>
-                                          <div className="flex gap-2">
-                                            <div className="flex-1 text-center p-1.5 rounded-lg" style={{ backgroundColor: '#0d1117' }}>
-                                              <div className="text-[8px] text-white/50 uppercase">Prev</div>
-                                              <div className="text-xs font-semibold text-white/80">{event.previous || "-"}</div>
+                                          <div className="flex gap-1.5">
+                                            <div className="flex-1 text-center p-1.5 rounded-md bg-black/20">
+                                              <div className="text-[8px] text-white/40 uppercase">Prev</div>
+                                              <div className="text-xs font-medium text-white/70">{event.previous || "-"}</div>
                                             </div>
-                                            <div className="flex-1 text-center p-1.5 rounded-lg" style={{ backgroundColor: `${eventImpactColor}25` }}>
-                                              <div className="text-[8px] uppercase" style={{ color: eventImpactColor }}>Fcst</div>
-                                              <div className="text-xs font-semibold" style={{ color: eventImpactColor }}>{event.forecast || "-"}</div>
+                                            <div className="flex-1 text-center p-1.5 rounded-md" style={{ backgroundColor: `${eventImpactColor}15` }}>
+                                              <div className="text-[8px] uppercase" style={{ color: `${eventImpactColor}cc` }}>Fcst</div>
+                                              <div className="text-xs font-medium" style={{ color: eventImpactColor }}>{event.forecast || "-"}</div>
                                             </div>
-                                            <div className="flex-1 text-center p-1.5 rounded-lg" style={{ backgroundColor: '#0d1117' }}>
-                                              <div className="text-[8px] text-white/50 uppercase">Actual</div>
-                                              <div className="text-xs font-semibold text-white">{event.actual || "—"}</div>
+                                            <div className="flex-1 text-center p-1.5 rounded-md bg-black/20">
+                                              <div className="text-[8px] text-white/40 uppercase">Actual</div>
+                                              <div className="text-xs font-medium text-white/90">{event.actual || "—"}</div>
                                             </div>
                                           </div>
                                         </div>
@@ -3625,21 +3608,9 @@ export default function DashboardPage() {
                               </div>
                             )}
                           </div>
-
-                          {/* Arrow pointing down to timeline */}
-                          <div
-                            className="absolute left-1/2 -translate-x-1/2"
-                            style={{
-                              bottom: -6,
-                              width: 0,
-                              height: 0,
-                              borderLeft: '6px solid transparent',
-                              borderRight: '6px solid transparent',
-                              borderTop: `6px solid ${impactColor}`,
-                            }}
-                          />
                         </div>
-                      )}
+                        );
+                      })()}
                     </div>
                   </div>
                 );
@@ -3761,12 +3732,14 @@ export default function DashboardPage() {
               // Sort by start position
               allInstances.sort((a, b) => a.startX - b.startX);
 
-              // Assign rows using greedy algorithm - track end position for each row
+              // Assign rows using greedy algorithm - track end TIME position for each row
+              // Only split into rows if sessions actually overlap in TIME (not visual width)
               const rowEndPositions: number[] = [];
               allInstances.forEach((instance) => {
-                // Find first row where this session doesn't overlap
+                // Find first row where this session doesn't overlap in TIME
                 let assignedRow = 0;
                 for (let r = 0; r < rowEndPositions.length; r++) {
+                  // Use actual endX (time-based) not visual bar width
                   if (instance.startX >= rowEndPositions[r]) {
                     assignedRow = r;
                     break;
@@ -3774,9 +3747,8 @@ export default function DashboardPage() {
                   assignedRow = r + 1;
                 }
                 instance.row = assignedRow;
-                // Update or add row end position (add small gap between sessions)
-                const barWidth = Math.max(80, instance.endX - instance.startX);
-                rowEndPositions[assignedRow] = Math.max(0, instance.startX) + barWidth + 4;
+                // Track actual end position (time-based), not visual bar width
+                rowEndPositions[assignedRow] = instance.endX;
               });
 
               const totalRows = Math.max(1, rowEndPositions.length);
@@ -3904,21 +3876,24 @@ export default function DashboardPage() {
               const yesterdayDay = (todayDay + 6) % 7;
               const timelineWidth = containerWidth - 240;
 
-              const sessionAlertElements: React.ReactNode[] = [];
+              // First, calculate row assignments (same logic as session bars)
+              type SessionInstance = {
+                session: CustomSession;
+                start: Date;
+                end: Date;
+                startX: number;
+                endX: number;
+                keyPrefix: string;
+                row: number;
+              };
+              const allInstances: SessionInstance[] = [];
 
               customSessions.forEach((session) => {
-                // Only show if session has alerts enabled
-                if (!session.openAlert && !session.closeAlert) return;
-
                 const [startHour, startMin] = session.startTime.split(":").map(Number);
                 const [endHour, endMin] = session.endTime.split(":").map(Number);
                 const isOvernight = endHour < startHour || (endHour === startHour && endMin < startMin);
 
-                // Determine which day(s) the session is active
-                const instances: { start: Date; end: Date; keyPrefix: string }[] = [];
-
                 if (isOvernight) {
-                  // Yesterday→Today
                   const isYesterdayActive = !session.recurring || (session.days?.includes(yesterdayDay) ?? false);
                   if (isYesterdayActive) {
                     const yesterdayStart = new Date(today);
@@ -3926,9 +3901,10 @@ export default function DashboardPage() {
                     yesterdayStart.setHours(startHour, startMin, 0, 0);
                     const todayEnd = new Date(today);
                     todayEnd.setHours(endHour, endMin, 0, 0);
-                    instances.push({ start: yesterdayStart, end: todayEnd, keyPrefix: `${session.id}-yesterday` });
+                    const startX = getTimePosition(yesterdayStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(todayEnd, currentTime, timelineWidth) + scrollOffset;
+                    allInstances.push({ session, start: yesterdayStart, end: todayEnd, startX, endX, keyPrefix: `${session.id}-yesterday`, row: 0 });
                   }
-                  // Today→Tomorrow
                   const isTodayActive = !session.recurring || (session.days?.includes(todayDay) ?? false);
                   if (isTodayActive) {
                     const todayStart = new Date(today);
@@ -3936,115 +3912,143 @@ export default function DashboardPage() {
                     const tomorrowEnd = new Date(today);
                     tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
                     tomorrowEnd.setHours(endHour, endMin, 0, 0);
-                    instances.push({ start: todayStart, end: tomorrowEnd, keyPrefix: `${session.id}-today` });
+                    const startX = getTimePosition(todayStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(tomorrowEnd, currentTime, timelineWidth) + scrollOffset;
+                    allInstances.push({ session, start: todayStart, end: tomorrowEnd, startX, endX, keyPrefix: `${session.id}-today`, row: 0 });
                   }
                 } else {
-                  // Regular same-day session
                   const isActiveToday = !session.recurring || (session.days?.includes(todayDay) ?? false);
                   if (isActiveToday) {
                     const sessionStart = new Date(today);
                     sessionStart.setHours(startHour, startMin, 0, 0);
                     const sessionEnd = new Date(today);
                     sessionEnd.setHours(endHour, endMin, 0, 0);
-                    instances.push({ start: sessionStart, end: sessionEnd, keyPrefix: session.id });
+                    const startX = getTimePosition(sessionStart, currentTime, timelineWidth) + scrollOffset;
+                    const endX = getTimePosition(sessionEnd, currentTime, timelineWidth) + scrollOffset;
+                    allInstances.push({ session, start: sessionStart, end: sessionEnd, startX, endX, keyPrefix: session.id, row: 0 });
+                  }
+                }
+              });
+
+              // Sort and assign rows (same logic as session bars)
+              allInstances.sort((a, b) => a.startX - b.startX);
+              const rowEndPositions: number[] = [];
+              allInstances.forEach((instance) => {
+                let assignedRow = 0;
+                for (let r = 0; r < rowEndPositions.length; r++) {
+                  if (instance.startX >= rowEndPositions[r]) {
+                    assignedRow = r;
+                    break;
+                  }
+                  assignedRow = r + 1;
+                }
+                instance.row = assignedRow;
+                rowEndPositions[assignedRow] = instance.endX;
+              });
+
+              const totalRows = Math.max(1, rowEndPositions.length);
+              const sessionAlertElements: React.ReactNode[] = [];
+
+              allInstances.forEach(({ session, start, end, keyPrefix, row }) => {
+                if (!session.openAlert && !session.closeAlert) return;
+
+                // Calculate vertical position based on row (center of the session's row)
+                const rowHeight = 100 / totalRows;
+                const topPercent = row * rowHeight + rowHeight / 2;
+
+                // Open alert
+                if (session.openAlert) {
+                  const xPos = getTimePosition(start, currentTime, timelineWidth) + scrollOffset;
+                  if (xPos >= -30 && xPos <= timelineWidth + 30) {
+                    const isPast = currentTime > start;
+                    sessionAlertElements.push(
+                      <div
+                        key={`${keyPrefix}-open-alert`}
+                        className="absolute z-30 pointer-events-none"
+                        style={{
+                          left: xPos,
+                          top: `${topPercent}%`,
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                      >
+                        <div
+                          className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
+                          style={{
+                            width: 18,
+                            height: 18,
+                            backgroundColor: isPast ? undefined : session.color,
+                            border: `1px solid ${isPast ? session.color + '40' : session.color}`,
+                            boxShadow: isPast ? 'none' : `0 0 10px ${session.color}80`,
+                          }}
+                        >
+                          <Bell
+                            className="w-2.5 h-2.5"
+                            style={{ color: isPast ? `${session.color}60` : '#0f172a' }}
+                          />
+                        </div>
+                        <span
+                          className={`absolute text-[8px] font-bold tracking-wider whitespace-nowrap px-1 rounded ${isPast ? 'bg-background' : ''}`}
+                          style={{
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            right: 'calc(100% + 4px)',
+                            color: isPast ? `${session.color}60` : session.color,
+                            textShadow: isPast ? 'none' : `0 0 6px ${session.color}80`,
+                          }}
+                        >
+                          OPEN
+                        </span>
+                      </div>
+                    );
                   }
                 }
 
-                instances.forEach(({ start, end, keyPrefix }) => {
-                  // Open alert
-                  if (session.openAlert) {
-                    const xPos = getTimePosition(start, currentTime, timelineWidth) + scrollOffset;
-                    if (xPos >= -30 && xPos <= timelineWidth + 30) {
-                      const isPast = currentTime > start;
-                      sessionAlertElements.push(
+                // Close alert
+                if (session.closeAlert) {
+                  const xPos = getTimePosition(end, currentTime, timelineWidth) + scrollOffset;
+                  if (xPos >= -30 && xPos <= timelineWidth + 30) {
+                    const isPast = currentTime > end;
+                    sessionAlertElements.push(
+                      <div
+                        key={`${keyPrefix}-close-alert`}
+                        className="absolute z-30 pointer-events-none"
+                        style={{
+                          left: xPos,
+                          top: `${topPercent}%`,
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                      >
                         <div
-                          key={`${keyPrefix}-open-alert`}
-                          className="absolute z-30 pointer-events-none"
+                          className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
                           style={{
-                            left: xPos,
-                            top: '50%',
-                            transform: 'translate(-50%, -50%)',
+                            width: 18,
+                            height: 18,
+                            backgroundColor: isPast ? undefined : session.color,
+                            border: `1px solid ${isPast ? session.color + '40' : session.color}`,
+                            boxShadow: isPast ? 'none' : `0 0 10px ${session.color}80`,
                           }}
                         >
-                          <div
-                            className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
-                            style={{
-                              width: 18,
-                              height: 18,
-                              backgroundColor: isPast ? undefined : session.color,
-                              border: `1px solid ${isPast ? session.color + '40' : session.color}`,
-                              boxShadow: isPast ? 'none' : `0 0 10px ${session.color}80`,
-                            }}
-                          >
-                            <Bell
-                              className="w-2.5 h-2.5"
-                              style={{ color: isPast ? `${session.color}60` : '#0f172a' }}
-                            />
-                          </div>
-                          <span
-                            className={`absolute text-[8px] font-bold tracking-wider whitespace-nowrap px-1 rounded ${isPast ? 'bg-background' : ''}`}
-                            style={{
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              right: 'calc(100% + 4px)',
-                              color: isPast ? `${session.color}60` : session.color,
-                              textShadow: isPast ? 'none' : `0 0 6px ${session.color}80`,
-                            }}
-                          >
-                            OPEN
-                          </span>
+                          <Bell
+                            className="w-2.5 h-2.5"
+                            style={{ color: isPast ? `${session.color}60` : '#0f172a' }}
+                          />
                         </div>
-                      );
-                    }
-                  }
-
-                  // Close alert
-                  if (session.closeAlert) {
-                    const xPos = getTimePosition(end, currentTime, timelineWidth) + scrollOffset;
-                    if (xPos >= -30 && xPos <= timelineWidth + 30) {
-                      const isPast = currentTime > end;
-                      sessionAlertElements.push(
-                        <div
-                          key={`${keyPrefix}-close-alert`}
-                          className="absolute z-30 pointer-events-none"
+                        <span
+                          className={`absolute text-[8px] font-bold tracking-wider whitespace-nowrap px-1 rounded ${isPast ? 'bg-background' : ''}`}
                           style={{
-                            left: xPos,
                             top: '50%',
-                            transform: 'translate(-50%, -50%)',
+                            transform: 'translateY(-50%)',
+                            left: 'calc(100% + 4px)',
+                            color: isPast ? `${session.color}60` : session.color,
+                            textShadow: isPast ? 'none' : `0 0 6px ${session.color}80`,
                           }}
                         >
-                          <div
-                            className={`flex items-center justify-center rounded-full ${isPast ? 'bg-background' : ''}`}
-                            style={{
-                              width: 18,
-                              height: 18,
-                              backgroundColor: isPast ? undefined : session.color,
-                              border: `1px solid ${isPast ? session.color + '40' : session.color}`,
-                              boxShadow: isPast ? 'none' : `0 0 10px ${session.color}80`,
-                            }}
-                          >
-                            <Bell
-                              className="w-2.5 h-2.5"
-                              style={{ color: isPast ? `${session.color}60` : '#0f172a' }}
-                            />
-                          </div>
-                          <span
-                            className={`absolute text-[8px] font-bold tracking-wider whitespace-nowrap px-1 rounded ${isPast ? 'bg-background' : ''}`}
-                            style={{
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              left: 'calc(100% + 4px)',
-                              color: isPast ? `${session.color}60` : session.color,
-                              textShadow: isPast ? 'none' : `0 0 6px ${session.color}80`,
-                            }}
-                          >
-                            CLOSE
-                          </span>
-                        </div>
-                      );
-                    }
+                          CLOSE
+                        </span>
+                      </div>
+                    );
                   }
-                });
+                }
               });
 
               return sessionAlertElements;
@@ -4842,7 +4846,7 @@ export default function DashboardPage() {
                               <div className="flex items-center gap-3 text-xs text-muted">
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
-                                  {event.time || "All Day"}
+                                  {event.time ? formatTimeDisplay(event.time) : "All Day"}
                                 </span>
                                 <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">
                                   {event.currency}
