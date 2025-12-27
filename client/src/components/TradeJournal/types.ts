@@ -6,6 +6,10 @@ export interface Tag {
   color: string;
 }
 
+export type AssetType = "STOCK" | "FUTURES" | "OPTIONS" | "FOREX" | "CRYPTO";
+export type TradeStatus = "OPEN" | "CLOSED";
+export type OptionType = "CALL" | "PUT";
+
 export interface Trade {
   id: string;
   userId: string;
@@ -21,6 +25,16 @@ export interface Trade {
   tags: Tag[];
   createdAt: string;
   updatedAt: string;
+  // Asset type and status
+  assetType: AssetType;
+  status: TradeStatus;
+  closeDate: string | null;
+  // Options-specific fields
+  optionType: OptionType | null;
+  strikePrice: number | null;
+  expirationDate: string | null;
+  premium: number | null;
+  underlyingTicker: string | null;
 }
 
 export interface TradeFormData {
@@ -33,6 +47,16 @@ export interface TradeFormData {
   pnl: string;
   notes: string;
   tagIds: string[];
+  // Asset type and status
+  assetType: AssetType;
+  status: TradeStatus;
+  closeDate: string;
+  // Options-specific fields
+  optionType: "CALL" | "PUT" | "";
+  strikePrice: string;
+  expirationDate: string;
+  premium: string;
+  underlyingTicker: string;
 }
 
 export interface TradeStats {
@@ -68,4 +92,14 @@ export const DEFAULT_TRADE_FORM: TradeFormData = {
   pnl: "",
   notes: "",
   tagIds: [],
+  // Asset type and status
+  assetType: "STOCK",
+  status: "CLOSED",
+  closeDate: "",
+  // Options-specific fields
+  optionType: "",
+  strikePrice: "",
+  expirationDate: "",
+  premium: "",
+  underlyingTicker: "",
 };

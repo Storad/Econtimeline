@@ -29,7 +29,7 @@ model TradeNote {
 model Trade {
   id         String   @id @default(cuid())
   userId     String   // Clerk user ID
-  date       String   // Format: YYYY-MM-DD
+  date       String   // Format: YYYY-MM-DD (entry date)
   time       String?  // Format: HH:MM (when trade was taken)
   ticker     String   // Symbol (ES, NQ, SPY, AAPL, etc.)
   direction  String   // LONG or SHORT
@@ -38,6 +38,19 @@ model Trade {
   size       Float?   // Number of contracts/shares
   pnl        Float    // Profit/Loss for this trade
   notes      String?  // Trade-specific notes
+
+  // Asset type and trade status
+  assetType  String   @default("STOCK")  // STOCK, FUTURES, OPTIONS, FOREX, CRYPTO
+  status     String   @default("CLOSED") // OPEN, CLOSED
+  closeDate  String?  // Date trade was closed (for swing trades)
+
+  // Options-specific fields (only used when assetType = OPTIONS)
+  optionType       String?  // CALL or PUT
+  strikePrice      Float?   // Strike price
+  expirationDate   String?  // Expiration date (YYYY-MM-DD)
+  premium          Float?   // Premium paid/received
+  underlyingTicker String?  // Underlying symbol (e.g., SPY for SPY options)
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -49,6 +62,7 @@ model Trade {
   @@index([userId])
   @@index([date])
   @@index([userId, date])
+  @@index([status])
 }
 
 model Tag {

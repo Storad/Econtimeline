@@ -67,11 +67,25 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tagIds } = body;
+    const {
+      date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tagIds,
+      // New fields
+      assetType, status, closeDate,
+      // Options fields
+      optionType, strikePrice, expirationDate, premium, underlyingTicker
+    } = body;
 
-    if (!date || !ticker || !direction || pnl === undefined) {
+    // For open trades, P&L is optional. For closed trades, P&L is required.
+    const tradeStatus = status || "CLOSED";
+    if (!date || !ticker || !direction) {
       return NextResponse.json(
-        { error: "Date, ticker, direction, and P&L are required" },
+        { error: "Date, ticker, and direction are required" },
+        { status: 400 }
+      );
+    }
+    if (tradeStatus === "CLOSED" && pnl === undefined) {
+      return NextResponse.json(
+        { error: "P&L is required for closed trades" },
         { status: 400 }
       );
     }
@@ -87,8 +101,18 @@ export async function POST(request: NextRequest) {
         entryPrice: entryPrice || null,
         exitPrice: exitPrice || null,
         size: size || null,
-        pnl,
+        pnl: pnl ?? 0,
         notes: notes || null,
+        // New fields
+        assetType: assetType || "STOCK",
+        status: tradeStatus,
+        closeDate: closeDate || null,
+        // Options fields
+        optionType: optionType || null,
+        strikePrice: strikePrice || null,
+        expirationDate: expirationDate || null,
+        premium: premium || null,
+        underlyingTicker: underlyingTicker || null,
         tags: tagIds?.length
           ? {
               create: tagIds.map((tagId: string) => ({
@@ -131,7 +155,13 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tagIds } = body;
+    const {
+      id, date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tagIds,
+      // New fields
+      assetType, status, closeDate,
+      // Options fields
+      optionType, strikePrice, expirationDate, premium, underlyingTicker
+    } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -172,6 +202,16 @@ export async function PUT(request: NextRequest) {
           size: size !== undefined ? size : existingTrade.size,
           pnl: pnl !== undefined ? pnl : existingTrade.pnl,
           notes: notes !== undefined ? notes : existingTrade.notes,
+          // New fields
+          assetType: assetType !== undefined ? assetType : existingTrade.assetType,
+          status: status !== undefined ? status : existingTrade.status,
+          closeDate: closeDate !== undefined ? closeDate : existingTrade.closeDate,
+          // Options fields
+          optionType: optionType !== undefined ? optionType : existingTrade.optionType,
+          strikePrice: strikePrice !== undefined ? strikePrice : existingTrade.strikePrice,
+          expirationDate: expirationDate !== undefined ? expirationDate : existingTrade.expirationDate,
+          premium: premium !== undefined ? premium : existingTrade.premium,
+          underlyingTicker: underlyingTicker !== undefined ? underlyingTicker : existingTrade.underlyingTicker,
           tags: tagIds?.length
             ? {
                 create: tagIds.map((tagId: string) => ({

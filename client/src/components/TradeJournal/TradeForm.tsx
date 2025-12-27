@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   X,
   TrendingUp,
@@ -13,8 +13,11 @@ import {
   RefreshCw,
   Tag as TagIcon,
   Plus,
+  BarChart3,
+  CircleDot,
+  Calendar,
 } from "lucide-react";
-import { Tag, Trade, TradeFormData, DEFAULT_TRADE_FORM } from "./types";
+import { Tag, Trade, TradeFormData, DEFAULT_TRADE_FORM, AssetType, TradeStatus } from "./types";
 
 interface TradeFormProps {
   date: string;
@@ -25,6 +28,16 @@ interface TradeFormProps {
   onCreateTag: (name: string, color: string) => Promise<Tag | null>;
 }
 
+const ASSET_TYPES: { value: AssetType; label: string; icon: string }[] = [
+  { value: "STOCK", label: "Stock", icon: "S" },
+  { value: "FUTURES", label: "Futures", icon: "F" },
+  { value: "OPTIONS", label: "Options", icon: "O" },
+  { value: "FOREX", label: "Forex", icon: "FX" },
+  { value: "CRYPTO", label: "Crypto", icon: "C" },
+];
+
+const LAST_ASSET_TYPE_KEY = "lastAssetType";
+
 export default function TradeForm({
   date,
   tags,
@@ -33,6 +46,17 @@ export default function TradeForm({
   onCancel,
   onCreateTag,
 }: TradeFormProps) {
+  // Get last used asset type from localStorage
+  const getLastAssetType = (): AssetType => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(LAST_ASSET_TYPE_KEY);
+      if (saved && ASSET_TYPES.some(t => t.value === saved)) {
+        return saved as AssetType;
+      }
+    }
+    return "STOCK";
+  };
+
   const [formData, setFormData] = useState<TradeFormData>(() => {
     if (editingTrade) {
       return {
@@ -45,9 +69,22 @@ export default function TradeForm({
         pnl: editingTrade.pnl.toString(),
         notes: editingTrade.notes || "",
         tagIds: editingTrade.tags.map((t) => t.id),
+        // New fields
+        assetType: editingTrade.assetType || "STOCK",
+        status: editingTrade.status || "CLOSED",
+        closeDate: editingTrade.closeDate || "",
+        // Options fields
+        optionType: editingTrade.optionType || "",
+        strikePrice: editingTrade.strikePrice?.toString() || "",
+        expirationDate: editingTrade.expirationDate || "",
+        premium: editingTrade.premium?.toString() || "",
+        underlyingTicker: editingTrade.underlyingTicker || "",
       };
     }
-    return DEFAULT_TRADE_FORM;
+    return {
+      ...DEFAULT_TRADE_FORM,
+      assetType: getLastAssetType(),
+    };
   });
 
   const [saving, setSaving] = useState(false);
@@ -55,13 +92,33 @@ export default function TradeForm({
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#6b7280");
 
+  // Save asset type to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && !editingTrade) {
+      localStorage.setItem(LAST_ASSET_TYPE_KEY, formData.assetType);
+    }
+  }, [formData.assetType, editingTrade]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.ticker || !formData.pnl) return;
+    // For options, ticker is derived from underlying
+    const effectiveTicker = formData.assetType === "OPTIONS"
+      ? formData.underlyingTicker
+      : formData.ticker;
+
+    // Validate required fields
+    if (!effectiveTicker) return;
+    // P&L only required for closed trades
+    if (formData.status === "CLOSED" && !formData.pnl) return;
 
     setSaving(true);
     try {
-      await onSave(formData);
+      await onSave({
+        ...formData,
+        ticker: effectiveTicker,
+        // If closing today, set closeDate to current date
+        closeDate: formData.status === "CLOSED" && !formData.closeDate ? date : formData.closeDate,
+      });
     } finally {
       setSaving(false);
     }
@@ -102,6 +159,19 @@ export default function TradeForm({
     });
   };
 
+  const isOptions = formData.assetType === "OPTIONS";
+
+  // Determine if form can be submitted
+  const canSubmit = () => {
+    if (isOptions) {
+      if (!formData.underlyingTicker || !formData.optionType) return false;
+    } else {
+      if (!formData.ticker) return false;
+    }
+    if (formData.status === "CLOSED" && !formData.pnl) return false;
+    return true;
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
       {/* Header */}
@@ -123,63 +193,278 @@ export default function TradeForm({
 
       {/* Form Content */}
       <div className="p-5 space-y-4 overflow-y-auto flex-1">
-        {/* Row 1: Ticker & Direction */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-              <Hash className="w-4 h-4" />
-              Ticker
-            </label>
-            <input
-              type="text"
-              value={formData.ticker}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  ticker: e.target.value.toUpperCase(),
-                }))
-              }
-              placeholder="ES, NQ, SPY..."
-              className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
-              required
-            />
+        {/* Asset Type Selector */}
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+            <BarChart3 className="w-4 h-4" />
+            Asset Type
+          </label>
+          <div className="flex gap-1.5">
+            {ASSET_TYPES.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, assetType: type.value }))}
+                className={`flex-1 px-2 py-2 text-xs rounded-lg border transition-all ${
+                  formData.assetType === type.value
+                    ? "bg-accent/20 border-accent text-accent"
+                    : "bg-card border-border text-muted hover:border-accent/50"
+                }`}
+              >
+                <div className="font-bold">{type.icon}</div>
+                <div className="text-[10px] mt-0.5">{type.label}</div>
+              </button>
+            ))}
           </div>
+        </div>
+
+        {/* Trade Status Toggle */}
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+            <CircleDot className="w-4 h-4" />
+            Trade Status
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, status: "CLOSED" }))}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
+                formData.status === "CLOSED"
+                  ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                  : "bg-card border-border text-muted hover:border-emerald-500/50"
+              }`}
+            >
+              Closed Trade
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, status: "OPEN" }))}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
+                formData.status === "OPEN"
+                  ? "bg-amber-500/20 border-amber-500 text-amber-400"
+                  : "bg-card border-border text-muted hover:border-amber-500/50"
+              }`}
+            >
+              Open Trade
+            </button>
+          </div>
+          {formData.status === "OPEN" && (
+            <p className="text-xs text-amber-400 mt-2">
+              Open trades won&apos;t count toward your stats until closed.
+            </p>
+          )}
+        </div>
+
+        {/* Options-specific fields */}
+        {isOptions && (
+          <>
+            {/* Option Type (Call/Put) */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                Option Type
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, optionType: "CALL" }))}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
+                    formData.optionType === "CALL"
+                      ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                      : "bg-card border-border text-muted hover:border-emerald-500/50"
+                  }`}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Call
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, optionType: "PUT" }))}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
+                    formData.optionType === "PUT"
+                      ? "bg-red-500/20 border-red-500 text-red-400"
+                      : "bg-card border-border text-muted hover:border-red-500/50"
+                  }`}
+                >
+                  <TrendingDown className="w-4 h-4" />
+                  Put
+                </button>
+              </div>
+            </div>
+
+            {/* Underlying Ticker & Strike */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                  <Hash className="w-4 h-4" />
+                  Underlying
+                </label>
+                <input
+                  type="text"
+                  value={formData.underlyingTicker}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      underlyingTicker: e.target.value.toUpperCase(),
+                    }))
+                  }
+                  placeholder="SPY, AAPL..."
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
+                  required
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                  Strike Price
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.strikePrice}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, strikePrice: e.target.value }))
+                  }
+                  placeholder="0.00"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
+                />
+              </div>
+            </div>
+
+            {/* Expiration & Premium */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                  <Calendar className="w-4 h-4" />
+                  Expiration
+                </label>
+                <input
+                  type="date"
+                  value={formData.expirationDate}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, expirationDate: e.target.value }))
+                  }
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                  <DollarSign className="w-4 h-4" />
+                  Premium
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.premium}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, premium: e.target.value }))
+                  }
+                  placeholder="0.00"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Standard fields for non-options */}
+        {!isOptions && (
+          <>
+            {/* Row 1: Ticker & Direction */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                  <Hash className="w-4 h-4" />
+                  Ticker
+                </label>
+                <input
+                  type="text"
+                  value={formData.ticker}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ticker: e.target.value.toUpperCase(),
+                    }))
+                  }
+                  placeholder={
+                    formData.assetType === "FUTURES" ? "ES, NQ, CL..." :
+                    formData.assetType === "FOREX" ? "EUR/USD, GBP/JPY..." :
+                    formData.assetType === "CRYPTO" ? "BTC, ETH, SOL..." :
+                    "SPY, AAPL, MSFT..."
+                  }
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
+                  required
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
+                  Direction
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, direction: "LONG" }))
+                    }
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
+                      formData.direction === "LONG"
+                        ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                        : "bg-card border-border text-muted hover:border-emerald-500/50"
+                    }`}
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    Long
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, direction: "SHORT" }))
+                    }
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
+                      formData.direction === "SHORT"
+                        ? "bg-red-500/20 border-red-500 text-red-400"
+                        : "bg-card border-border text-muted hover:border-red-500/50"
+                    }`}
+                  >
+                    <TrendingDown className="w-4 h-4" />
+                    Short
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Direction for Options */}
+        {isOptions && (
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-              Direction
+              Position
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, direction: "LONG" }))
-                }
+                onClick={() => setFormData((prev) => ({ ...prev, direction: "LONG" }))}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
                   formData.direction === "LONG"
                     ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
                     : "bg-card border-border text-muted hover:border-emerald-500/50"
                 }`}
               >
-                <TrendingUp className="w-4 h-4" />
-                Long
+                Buy (Long)
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, direction: "SHORT" }))
-                }
+                onClick={() => setFormData((prev) => ({ ...prev, direction: "SHORT" }))}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
                   formData.direction === "SHORT"
                     ? "bg-red-500/20 border-red-500 text-red-400"
                     : "bg-card border-border text-muted hover:border-red-500/50"
                 }`}
               >
-                <TrendingDown className="w-4 h-4" />
-                Short
+                Sell (Short)
               </button>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Row 2: Entry & Exit Price */}
         <div className="grid grid-cols-2 gap-3">
@@ -219,7 +504,7 @@ export default function TradeForm({
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-              Size
+              {isOptions ? "Contracts" : "Size"}
             </label>
             <input
               type="number"
@@ -249,7 +534,7 @@ export default function TradeForm({
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
               <DollarSign className="w-4 h-4" />
-              P&L
+              P&L {formData.status === "OPEN" && <span className="text-amber-400 text-xs">(optional)</span>}
             </label>
             <input
               type="number"
@@ -258,9 +543,9 @@ export default function TradeForm({
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, pnl: e.target.value }))
               }
-              placeholder="+/- 0.00"
+              placeholder={formData.status === "OPEN" ? "Unrealized" : "+/- 0.00"}
               className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
-              required
+              required={formData.status === "CLOSED"}
             />
           </div>
         </div>
@@ -440,7 +725,7 @@ export default function TradeForm({
         </button>
         <button
           type="submit"
-          disabled={saving || !formData.ticker || !formData.pnl}
+          disabled={saving || !canSubmit()}
           className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors text-sm font-medium disabled:opacity-50"
         >
           {saving ? (
@@ -448,7 +733,7 @@ export default function TradeForm({
           ) : (
             <Save className="w-4 h-4" />
           )}
-          {editingTrade ? "Update" : "Save Trade"}
+          {editingTrade ? "Update" : formData.status === "OPEN" ? "Log Open Trade" : "Save Trade"}
         </button>
       </div>
     </form>

@@ -82,9 +82,19 @@ export function useTradeJournal() {
             entryPrice: formData.entryPrice ? parseFloat(formData.entryPrice) : null,
             exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : null,
             size: formData.size ? parseFloat(formData.size) : null,
-            pnl: parseFloat(formData.pnl),
+            pnl: formData.pnl ? parseFloat(formData.pnl) : 0,
             notes: formData.notes || null,
             tagIds: formData.tagIds,
+            // New fields
+            assetType: formData.assetType,
+            status: formData.status,
+            closeDate: formData.closeDate || null,
+            // Options fields
+            optionType: formData.optionType || null,
+            strikePrice: formData.strikePrice ? parseFloat(formData.strikePrice) : null,
+            expirationDate: formData.expirationDate || null,
+            premium: formData.premium ? parseFloat(formData.premium) : null,
+            underlyingTicker: formData.underlyingTicker || null,
           }),
         });
 
@@ -119,9 +129,19 @@ export function useTradeJournal() {
             entryPrice: formData.entryPrice ? parseFloat(formData.entryPrice) : null,
             exitPrice: formData.exitPrice ? parseFloat(formData.exitPrice) : null,
             size: formData.size ? parseFloat(formData.size) : null,
-            pnl: parseFloat(formData.pnl),
+            pnl: formData.pnl ? parseFloat(formData.pnl) : 0,
             notes: formData.notes || null,
             tagIds: formData.tagIds,
+            // New fields
+            assetType: formData.assetType,
+            status: formData.status,
+            closeDate: formData.closeDate || null,
+            // Options fields
+            optionType: formData.optionType || null,
+            strikePrice: formData.strikePrice ? parseFloat(formData.strikePrice) : null,
+            expirationDate: formData.expirationDate || null,
+            premium: formData.premium ? parseFloat(formData.premium) : null,
+            underlyingTicker: formData.underlyingTicker || null,
           }),
         });
 
@@ -137,6 +157,40 @@ export function useTradeJournal() {
         return null;
       } catch (error) {
         console.error("Failed to update trade:", error);
+        return null;
+      }
+    },
+    [fetchStats, statsPeriod]
+  );
+
+  // Close an open trade
+  const closeTrade = useCallback(
+    async (id: string, closeDate: string, exitPrice: number | null, pnl: number): Promise<Trade | null> => {
+      try {
+        const response = await fetch("/api/trades", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id,
+            status: "CLOSED",
+            closeDate,
+            exitPrice,
+            pnl,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.trade) {
+          setTrades((prev) =>
+            prev.map((t) => (t.id === id ? data.trade : t))
+          );
+          // Refresh stats
+          fetchStats(statsPeriod);
+          return data.trade;
+        }
+        return null;
+      } catch (error) {
+        console.error("Failed to close trade:", error);
         return null;
       }
     },
@@ -269,6 +323,7 @@ export function useTradeJournal() {
     createTrade,
     updateTrade,
     deleteTrade,
+    closeTrade,
     createTag,
     deleteTag,
     fetchTradesForDate,

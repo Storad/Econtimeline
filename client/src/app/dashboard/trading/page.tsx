@@ -25,6 +25,7 @@ import {
   X,
   Check,
   HelpCircle,
+  Tag as TagIcon,
 } from "lucide-react";
 import { useTradeJournal } from "@/hooks/useTradeJournal";
 import { Trade } from "@/components/TradeJournal/types";
@@ -685,12 +686,24 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
 };
 
 export default function TradingPage() {
-  const { trades, loading } = useTradeJournal();
+  const { trades, tags, loading, closeTrade } = useTradeJournal();
   const [showGoalSettings, setShowGoalSettings] = useState(false);
   const [goals, setGoals] = useState<TradingGoals>({ yearlyPnlGoal: 0, monthlyPnlGoal: 0 });
   const [goalInput, setGoalInput] = useState({ yearly: "", monthly: "" });
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [showRecentTrades, setShowRecentTrades] = useState(false);
+  const [showOpenTrades, setShowOpenTrades] = useState(true);
+  const [closingTrade, setClosingTrade] = useState<Trade | null>(null);
+  const [closeTradeForm, setCloseTradeForm] = useState({ exitPrice: "", pnl: "", closeDate: "" });
+
+  // Equity curve filters
+  const [equityPeriod, setEquityPeriod] = useState<"all" | "ytd" | "mtd" | "wtd" | "daily">("all");
+  const [equityTagFilter, setEquityTagFilter] = useState<string[]>([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
+
+  // Filter trades: open vs closed
+  const openTrades = useMemo(() => trades.filter(t => t.status === "OPEN"), [trades]);
+  const closedTrades = useMemo(() => trades.filter(t => t.status !== "OPEN"), [trades]);
 
   // Load goals from localStorage
   useEffect(() => {
@@ -716,9 +729,9 @@ export default function TradingPage() {
     setShowGoalSettings(false);
   };
 
-  // Calculate all trading statistics
+  // Calculate all trading statistics (only from CLOSED trades)
   const tradingStats = useMemo(() => {
-    if (!trades.length) return null;
+    if (!closedTrades.length) return null;
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -726,32 +739,32 @@ export default function TradingPage() {
     const lastYear = currentYear - 1;
 
     // Sort trades by date
-    const sortedTrades = [...trades].sort((a, b) => {
+    const sortedTrades = [...closedTrades].sort((a, b) => {
       if (a.date !== b.date) return a.date.localeCompare(b.date);
       if (a.time && b.time) return a.time.localeCompare(b.time);
       return 0;
     });
 
     // All-time stats
-    const allTimePnl = trades.reduce((sum, t) => sum + t.pnl, 0);
-    const allTimeTrades = trades.length;
+    const allTimePnl = closedTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const allTimeTrades = closedTrades.length;
 
     // YTD stats
-    const ytdTrades = trades.filter((t) => {
+    const ytdTrades = closedTrades.filter((t) => {
       const [y] = t.date.split("-").map(Number);
       return y === currentYear;
     });
     const ytdPnl = ytdTrades.reduce((sum, t) => sum + t.pnl, 0);
 
     // Last year stats (for YoY comparison)
-    const lastYearTrades = trades.filter((t) => {
+    const lastYearTrades = closedTrades.filter((t) => {
       const [y] = t.date.split("-").map(Number);
       return y === lastYear;
     });
     const lastYearPnl = lastYearTrades.reduce((sum, t) => sum + t.pnl, 0);
 
     // MTD stats
-    const mtdTrades = trades.filter((t) => {
+    const mtdTrades = closedTrades.filter((t) => {
       const [y, m] = t.date.split("-").map(Number);
       return y === currentYear && m === currentMonth + 1;
     });
@@ -761,7 +774,7 @@ export default function TradingPage() {
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
-    const wtdTrades = trades.filter((t) => {
+    const wtdTrades = closedTrades.filter((t) => {
       const [y, m, d] = t.date.split("-").map(Number);
       const tradeDate = new Date(y, m - 1, d);
       return tradeDate >= startOfWeek;
@@ -770,7 +783,7 @@ export default function TradingPage() {
 
     // Calculate streaks
     const tradesByDate: Record<string, number> = {};
-    trades.forEach((t) => {
+    closedTrades.forEach((t) => {
       tradesByDate[t.date] = (tradesByDate[t.date] || 0) + t.pnl;
     });
 
@@ -991,6 +1004,76 @@ export default function TradingPage() {
       tradingDaysRemaining: TRADING_DAYS_PER_YEAR - tradingDaysElapsed,
     };
   }, [tradingStats, goals]);
+
+  // Filtered equity curve based on period and tags
+  const filteredEquityCurve = useMemo(() => {
+    if (!tradingStats) return [];
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const today = now.toISOString().split("T")[0];
+
+    // First filter by tags if any selected
+    let filteredTrades = closedTrades;
+    if (equityTagFilter.length > 0) {
+      filteredTrades = closedTrades.filter(trade =>
+        trade.tags.some(tag => equityTagFilter.includes(tag.id))
+      );
+    }
+
+    // Then filter by time period
+    if (equityPeriod !== "all") {
+      filteredTrades = filteredTrades.filter(trade => {
+        const [y, m, d] = trade.date.split("-").map(Number);
+        const tradeDate = new Date(y, m - 1, d);
+
+        switch (equityPeriod) {
+          case "ytd":
+            return y === currentYear;
+          case "mtd":
+            return y === currentYear && m === currentMonth + 1;
+          case "wtd":
+            return tradeDate >= startOfWeek;
+          case "daily":
+            return trade.date === today;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Build equity curve from filtered trades
+    const sortedTrades = [...filteredTrades].sort((a, b) => a.date.localeCompare(b.date));
+    const dailyPnl: Record<string, number> = {};
+    sortedTrades.forEach(t => {
+      dailyPnl[t.date] = (dailyPnl[t.date] || 0) + t.pnl;
+    });
+
+    const curve: { date: string; pnl: number; cumulative: number; drawdown: number; drawdownPercent: number }[] = [];
+    let cumulative = 0;
+    let peak = 0;
+
+    Object.keys(dailyPnl).sort().forEach(date => {
+      cumulative += dailyPnl[date];
+      peak = Math.max(peak, cumulative);
+      const drawdown = peak - cumulative;
+      const drawdownPercent = peak > 0 ? (drawdown / peak) * 100 : 0;
+
+      curve.push({
+        date,
+        pnl: dailyPnl[date],
+        cumulative,
+        drawdown,
+        drawdownPercent,
+      });
+    });
+
+    return curve;
+  }, [tradingStats, closedTrades, equityPeriod, equityTagFilter]);
 
   const getConsistencyGrade = (score: number) => {
     if (score >= 90) return { grade: "A+", color: "text-emerald-400" };
@@ -1223,6 +1306,154 @@ export default function TradingPage() {
         </div>
       </div>
 
+      {/* OPEN TRADES SECTION */}
+      {openTrades.length > 0 && (
+        <div className="glass rounded-xl border border-amber-500/30 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setShowOpenTrades(!showOpenTrades)}
+              className="flex items-center gap-2 text-sm font-semibold hover:text-accent transition-colors"
+            >
+              <div className="p-1.5 rounded-lg bg-amber-500/20">
+                <Clock className="w-4 h-4 text-amber-400" />
+              </div>
+              Open Positions ({openTrades.length})
+              {showOpenTrades ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            <span className="text-xs text-amber-400">Not included in stats until closed</span>
+          </div>
+
+          {showOpenTrades && (
+            <div className="space-y-2">
+              {openTrades.map((trade) => (
+                <div
+                  key={trade.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-amber-500/5 border border-amber-500/20"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent/20 text-accent">
+                      {trade.assetType || "STOCK"}
+                    </span>
+                    <span className="font-bold">{trade.ticker}</span>
+                    <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                      trade.direction === "LONG"
+                        ? "bg-emerald-500/20 text-emerald-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}>
+                      {trade.direction === "LONG" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {trade.direction}
+                    </span>
+                    <span className="text-xs text-muted">Opened {trade.date}</span>
+                    {trade.entryPrice && (
+                      <span className="text-xs text-muted">@ ${trade.entryPrice.toFixed(2)}</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setClosingTrade(trade);
+                      setCloseTradeForm({
+                        exitPrice: "",
+                        pnl: "",
+                        closeDate: new Date().toISOString().split("T")[0],
+                      });
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors text-xs font-medium"
+                  >
+                    <Check className="w-3 h-3" />
+                    Close Trade
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Close Trade Modal */}
+      {closingTrade && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass rounded-2xl border border-border/50 p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">Close Trade</h3>
+              <button onClick={() => setClosingTrade(null)} className="p-2 hover:bg-card-hover rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="mb-4 p-3 rounded-lg bg-card border border-border">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-accent/20 text-accent">{closingTrade.assetType}</span>
+                <span className="font-bold">{closingTrade.ticker}</span>
+                <span className={`text-xs ${closingTrade.direction === "LONG" ? "text-emerald-400" : "text-red-400"}`}>
+                  {closingTrade.direction}
+                </span>
+              </div>
+              <div className="text-xs text-muted">
+                Entry: {closingTrade.entryPrice ? `$${closingTrade.entryPrice.toFixed(2)}` : "N/A"} |
+                Size: {closingTrade.size || "N/A"}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-muted block mb-1">Close Date</label>
+                <input
+                  type="date"
+                  value={closeTradeForm.closeDate}
+                  onChange={(e) => setCloseTradeForm(prev => ({ ...prev, closeDate: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted block mb-1">Exit Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={closeTradeForm.exitPrice}
+                  onChange={(e) => setCloseTradeForm(prev => ({ ...prev, exitPrice: e.target.value }))}
+                  placeholder="0.00"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted block mb-1">Final P&L</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={closeTradeForm.pnl}
+                  onChange={(e) => setCloseTradeForm(prev => ({ ...prev, pnl: e.target.value }))}
+                  placeholder="+/- 0.00"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => setClosingTrade(null)}
+                className="px-4 py-2 text-sm text-muted hover:text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!closeTradeForm.pnl || !closeTradeForm.closeDate) return;
+                  await closeTrade(
+                    closingTrade.id,
+                    closeTradeForm.closeDate,
+                    closeTradeForm.exitPrice ? parseFloat(closeTradeForm.exitPrice) : null,
+                    parseFloat(closeTradeForm.pnl)
+                  );
+                  setClosingTrade(null);
+                }}
+                disabled={!closeTradeForm.pnl || !closeTradeForm.closeDate}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 text-sm font-medium"
+              >
+                <Check className="w-4 h-4" />
+                Close Trade
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* COMPACT SUMMARY BAR */}
       <div className="glass rounded-xl p-3 border border-border/50">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1274,20 +1505,100 @@ export default function TradingPage() {
                 tip: "A smooth upward curve indicates consistent, disciplined trading."
               }} />
             </h3>
-            <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-1 bg-emerald-500 rounded"></div>
-                <span className="text-muted">Equity</span>
+            <div className="flex items-center gap-3">
+              {/* Period Filter */}
+              <div className="flex items-center gap-1 bg-card rounded-lg p-1">
+                {[
+                  { value: "all", label: "All" },
+                  { value: "ytd", label: "YTD" },
+                  { value: "mtd", label: "MTD" },
+                  { value: "wtd", label: "WTD" },
+                ].map((period) => (
+                  <button
+                    key={period.value}
+                    onClick={() => setEquityPeriod(period.value as typeof equityPeriod)}
+                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                      equityPeriod === period.value
+                        ? "bg-accent text-white"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {period.label}
+                  </button>
+                ))}
               </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-1 bg-red-500/50 rounded"></div>
-                <span className="text-muted">Drawdown</span>
+
+              {/* Tag Filter */}
+              {tags.length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowTagDropdown(!showTagDropdown)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border transition-colors ${
+                      equityTagFilter.length > 0
+                        ? "bg-accent/20 border-accent text-accent"
+                        : "bg-card border-border text-muted hover:border-accent/50"
+                    }`}
+                  >
+                    <TagIcon className="w-3 h-3" />
+                    {equityTagFilter.length > 0 ? `${equityTagFilter.length} Tags` : "Filter by Tag"}
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                  {showTagDropdown && (
+                    <div className="absolute right-0 mt-1 w-48 bg-card border border-border rounded-lg shadow-xl z-20 py-1">
+                      {equityTagFilter.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setEquityTagFilter([]);
+                            setShowTagDropdown(false);
+                          }}
+                          className="w-full px-3 py-1.5 text-xs text-left text-red-400 hover:bg-card-hover"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                      {tags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          onClick={() => {
+                            setEquityTagFilter((prev) =>
+                              prev.includes(tag.id)
+                                ? prev.filter((id) => id !== tag.id)
+                                : [...prev, tag.id]
+                            );
+                          }}
+                          className="w-full px-3 py-1.5 text-xs text-left hover:bg-card-hover flex items-center gap-2"
+                        >
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: tag.color }}
+                          />
+                          <span className="flex-1">{tag.name}</span>
+                          {equityTagFilter.includes(tag.id) && (
+                            <Check className="w-3 h-3 text-accent" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Legend */}
+              <div className="flex items-center gap-4 text-xs border-l border-border pl-3">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-1 bg-emerald-500 rounded"></div>
+                  <span className="text-muted">Equity</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-1 bg-red-500/50 rounded"></div>
+                  <span className="text-muted">Drawdown</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Chart */}
-          <EquityCurveChart data={tradingStats.equityCurve} />
+          <EquityCurveChart data={filteredEquityCurve.length > 0 ? filteredEquityCurve : tradingStats.equityCurve} />
 
           {/* Drawdown Stats */}
           <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">

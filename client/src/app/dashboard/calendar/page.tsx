@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { useTradeJournal } from "@/hooks/useTradeJournal";
 import { Trade, Tag, TradeFormData, DEFAULT_TRADE_FORM } from "@/components/TradeJournal/types";
+import TradeForm from "@/components/TradeJournal/TradeForm";
 
 interface EconomicEvent {
   id: string;
@@ -136,16 +137,17 @@ export default function EconomicCalendarPage() {
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [deletingAllNotes, setDeletingAllNotes] = useState(false);
   const [showMonthSummary, setShowMonthSummary] = useState(false);
+  const [showYtdSummary, setShowYtdSummary] = useState(false);
   const [showDeleteAllTradesConfirm, setShowDeleteAllTradesConfirm] = useState(false);
   const [deletingAllTrades, setDeletingAllTrades] = useState(false);
   const [showWeekSummary, setShowWeekSummary] = useState<{ show: boolean; saturdayDate: Date | null }>({ show: false, saturdayDate: null });
   const [hoveredTrade, setHoveredTrade] = useState<{ index: number; x: number; y: number; trade: any } | null>(null);
-  const [showProfitFactorTooltip, setShowProfitFactorTooltip] = useState<'weekly' | 'monthly' | null>(null);
-  const [showBreakevenTooltip, setShowBreakevenTooltip] = useState<'weekly' | 'monthly' | null>(null);
-  const [showRiskRewardTooltip, setShowRiskRewardTooltip] = useState<'weekly' | 'monthly' | null>(null);
-  const [showExpectancyTooltip, setShowExpectancyTooltip] = useState<'weekly' | 'monthly' | null>(null);
-  const [showAvgTradeTooltip, setShowAvgTradeTooltip] = useState<'weekly' | 'monthly' | null>(null);
-  const [showAvgDayTooltip, setShowAvgDayTooltip] = useState<'weekly' | 'monthly' | null>(null);
+  const [showProfitFactorTooltip, setShowProfitFactorTooltip] = useState<'weekly' | 'monthly' | 'ytd' | null>(null);
+  const [showBreakevenTooltip, setShowBreakevenTooltip] = useState<'weekly' | 'monthly' | 'ytd' | null>(null);
+  const [showRiskRewardTooltip, setShowRiskRewardTooltip] = useState<'weekly' | 'monthly' | 'ytd' | null>(null);
+  const [showExpectancyTooltip, setShowExpectancyTooltip] = useState<'weekly' | 'monthly' | 'ytd' | null>(null);
+  const [showAvgTradeTooltip, setShowAvgTradeTooltip] = useState<'weekly' | 'monthly' | 'ytd' | null>(null);
+  const [showAvgDayTooltip, setShowAvgDayTooltip] = useState<'weekly' | 'monthly' | 'ytd' | null>(null);
 
   // Generic confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -322,6 +324,17 @@ export default function EconomicCalendarPage() {
     setShowNoteModal(true);
   };
 
+  // Get last used asset type from localStorage
+  const getLastAssetType = () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("lastAssetType");
+      if (saved && ["STOCK", "FUTURES", "OPTIONS", "FOREX", "CRYPTO"].includes(saved)) {
+        return saved as "STOCK" | "FUTURES" | "OPTIONS" | "FOREX" | "CRYPTO";
+      }
+    }
+    return "STOCK" as const;
+  };
+
   // Trade Journal Functions
   const openTradeForm = (trade?: Trade) => {
     if (trade) {
@@ -336,16 +349,34 @@ export default function EconomicCalendarPage() {
         pnl: trade.pnl.toString(),
         notes: trade.notes || "",
         tagIds: trade.tags.map((t) => t.id),
+        // New fields
+        assetType: trade.assetType || "STOCK",
+        status: trade.status || "CLOSED",
+        closeDate: trade.closeDate || "",
+        optionType: trade.optionType || "",
+        strikePrice: trade.strikePrice?.toString() || "",
+        expirationDate: trade.expirationDate || "",
+        premium: trade.premium?.toString() || "",
+        underlyingTicker: trade.underlyingTicker || "",
       });
     } else {
       setEditingTrade(null);
-      setTradeFormData(DEFAULT_TRADE_FORM);
+      setTradeFormData({
+        ...DEFAULT_TRADE_FORM,
+        assetType: getLastAssetType(),
+      });
     }
     setShowTradeForm(true);
   };
 
   const handleSaveTrade = async () => {
-    if (!selectedDay || !tradeFormData.ticker || !tradeFormData.pnl) return;
+    // For options, check underlying ticker; otherwise check regular ticker
+    const effectiveTicker = tradeFormData.assetType === "OPTIONS"
+      ? tradeFormData.underlyingTicker
+      : tradeFormData.ticker;
+    // P&L only required for closed trades
+    const pnlRequired = tradeFormData.status === "CLOSED";
+    if (!selectedDay || !effectiveTicker || (pnlRequired && !tradeFormData.pnl)) return;
 
     setSavingTrade(true);
     try {
@@ -618,7 +649,7 @@ export default function EconomicCalendarPage() {
     return { todayTotal: todayEvents.length, todayHigh, todayMedium, weekHigh };
   }, [events]);
 
-  // Calculate weekly and monthly P&L summaries
+  // Calculate weekly, monthly, and YTD P&L summaries
   const pnlSummary = useMemo(() => {
     const now = new Date();
 
@@ -639,16 +670,24 @@ export default function EconomicCalendarPage() {
     const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
 
+    // Year to date (based on displayed month's year)
+    const ytdYear = currentMonth.getFullYear();
+    const startOfYear = new Date(ytdYear, 0, 1);
+    const endOfYear = new Date(ytdYear, 11, 31);
+
     let currentWeekPnL = 0;
     let currentWeekTrades = 0;
     let lastWeekPnL = 0;
     let lastWeekTrades = 0;
     let monthlyPnL = 0;
     let monthlyTrades = 0;
+    let ytdPnL = 0;
+    let ytdTrades = 0;
 
     const currentWeekDays = new Set<string>();
     const lastWeekDays = new Set<string>();
     const monthlyDaysSet = new Set<string>();
+    const ytdDaysSet = new Set<string>();
 
     // Use the new trade journal data
     trades.forEach((trade) => {
@@ -675,6 +714,13 @@ export default function EconomicCalendarPage() {
         monthlyTrades++;
         monthlyDaysSet.add(trade.date);
       }
+
+      // Check if in YTD (same year as displayed month)
+      if (tradeDate >= startOfYear && tradeDate <= endOfYear) {
+        ytdPnL += trade.pnl;
+        ytdTrades++;
+        ytdDaysSet.add(trade.date);
+      }
     });
 
     // Use current week if it has data, otherwise show last week
@@ -692,6 +738,10 @@ export default function EconomicCalendarPage() {
       monthlyPnL,
       monthlyTrades,
       monthlyDays: monthlyDaysSet.size,
+      ytdPnL,
+      ytdTrades,
+      ytdDays: ytdDaysSet.size,
+      ytdYear,
     };
   }, [trades, currentMonth]);
 
@@ -815,6 +865,151 @@ export default function EconomicCalendarPage() {
       winningTrades: winningTrades.length,
       losingTrades: losingTradesArr.length,
       tradingDays: dailyData.length,
+    };
+  }, [trades, currentMonth]);
+
+  // Detailed YTD breakdown for charts (based on displayed month's year)
+  const ytdBreakdown = useMemo(() => {
+    const ytdYear = currentMonth.getFullYear();
+
+    // Get all trades in this year, sorted by date and time
+    const periodTrades = trades
+      .filter((trade) => {
+        const [y] = trade.date.split("-").map(Number);
+        return y === ytdYear;
+      })
+      .sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        if (a.time && b.time) return a.time.localeCompare(b.time);
+        return 0;
+      });
+
+    // Group trades by date for daily stats
+    const tradesByDate: Record<string, { pnl: number; trades: number }> = {};
+    periodTrades.forEach((trade) => {
+      if (!tradesByDate[trade.date]) {
+        tradesByDate[trade.date] = { pnl: 0, trades: 0 };
+      }
+      tradesByDate[trade.date].pnl += trade.pnl;
+      tradesByDate[trade.date].trades++;
+    });
+
+    // Group trades by month for monthly breakdown
+    const tradesByMonth: Record<number, { pnl: number; trades: number; days: Set<string> }> = {};
+    periodTrades.forEach((trade) => {
+      const [, m] = trade.date.split("-").map(Number);
+      if (!tradesByMonth[m]) {
+        tradesByMonth[m] = { pnl: 0, trades: 0, days: new Set() };
+      }
+      tradesByMonth[m].pnl += trade.pnl;
+      tradesByMonth[m].trades++;
+      tradesByMonth[m].days.add(trade.date);
+    });
+
+    const monthlyData: { month: number; monthName: string; pnl: number; trades: number; days: number }[] = [];
+    for (let m = 1; m <= 12; m++) {
+      const monthData = tradesByMonth[m];
+      if (monthData && monthData.trades > 0) {
+        monthlyData.push({
+          month: m,
+          monthName: new Date(ytdYear, m - 1, 1).toLocaleDateString("en-US", { month: "short" }),
+          pnl: monthData.pnl,
+          trades: monthData.trades,
+          days: monthData.days.size,
+        });
+      }
+    }
+
+    let winDays = 0;
+    let lossDays = 0;
+    let bestDay = { pnl: 0, date: "" };
+    let worstDay = { pnl: 0, date: "" };
+
+    Object.entries(tradesByDate).forEach(([dateKey, dayData]) => {
+      if (dayData.trades > 0) {
+        const pnl = dayData.pnl;
+        if (pnl > 0) winDays++;
+        else if (pnl < 0) lossDays++;
+        if (pnl > bestDay.pnl) bestDay = { pnl, date: dateKey };
+        if (pnl < worstDay.pnl) worstDay = { pnl, date: dateKey };
+      }
+    });
+
+    // Calculate trade-level statistics
+    const winningTrades = periodTrades.filter(t => t.pnl > 0);
+    const losingTradesArr = periodTrades.filter(t => t.pnl < 0);
+    const totalPnL = periodTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const totalTrades = periodTrades.length;
+    const tradingDays = Object.keys(tradesByDate).length;
+
+    const grossProfit = winningTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const grossLoss = Math.abs(losingTradesArr.reduce((sum, t) => sum + t.pnl, 0));
+
+    const tradeWinRate = totalTrades > 0 ? (winningTrades.length / totalTrades) * 100 : 0;
+    const dayWinRate = (winDays + lossDays) > 0 ? (winDays / (winDays + lossDays)) * 100 : 0;
+    const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : 0;
+    const avgWin = winningTrades.length > 0 ? grossProfit / winningTrades.length : 0;
+    const avgLoss = losingTradesArr.length > 0 ? grossLoss / losingTradesArr.length : 0;
+
+    const largestWin = winningTrades.length > 0
+      ? winningTrades.reduce((max, t) => t.pnl > max.pnl ? t : max, winningTrades[0])
+      : null;
+    const largestLoss = losingTradesArr.length > 0
+      ? losingTradesArr.reduce((min, t) => t.pnl < min.pnl ? t : min, losingTradesArr[0])
+      : null;
+
+    // Calculate cumulative P&L data using individual trades
+    let cumulative = 0;
+    const tradeByTradeData = periodTrades.map((trade, index) => {
+      cumulative += trade.pnl;
+      return {
+        index,
+        ticker: trade.ticker,
+        pnl: trade.pnl,
+        cumulative,
+        date: trade.date,
+        time: trade.time,
+        direction: trade.direction,
+      };
+    });
+
+    const avgPnLPerDay = tradingDays > 0 ? totalPnL / tradingDays : 0;
+    const avgTradesPerDay = tradingDays > 0 ? totalTrades / tradingDays : 0;
+
+    // Best and worst months
+    const bestMonth = monthlyData.length > 0
+      ? monthlyData.reduce((max, m) => m.pnl > max.pnl ? m : max, monthlyData[0])
+      : null;
+    const worstMonth = monthlyData.length > 0
+      ? monthlyData.reduce((min, m) => m.pnl < min.pnl ? m : min, monthlyData[0])
+      : null;
+
+    return {
+      year: ytdYear,
+      monthlyData,
+      tradeByTradeData,
+      periodTrades,
+      winDays,
+      lossDays,
+      bestDay,
+      worstDay,
+      bestMonth,
+      worstMonth,
+      totalPnL,
+      totalTrades,
+      avgPnLPerDay,
+      avgTradesPerDay,
+      dayWinRate,
+      tradeWinRate,
+      profitFactor,
+      avgWin,
+      avgLoss,
+      largestWin,
+      largestLoss,
+      winningTrades: winningTrades.length,
+      losingTrades: losingTradesArr.length,
+      tradingDays,
+      tradingMonths: monthlyData.length,
     };
   }, [trades, currentMonth]);
 
@@ -1050,6 +1245,26 @@ export default function EconomicCalendarPage() {
     });
     return grouped;
   }, [filteredEvents]);
+
+  // Group ALL events by date (unfiltered by impacts) - for 10-day window
+  const allEventsByDate = useMemo(() => {
+    const grouped: Record<string, EconomicEvent[]> = {};
+    // Only filter by showHolidays, not by impact toggles
+    const tenDayEvents = events.filter((event) => {
+      const isHolidayEvent = event.impact === "holiday" || event.impact === "early_close";
+      return showHolidays || !isHolidayEvent;
+    });
+    tenDayEvents.forEach((event) => {
+      if (!grouped[event.date]) {
+        grouped[event.date] = [];
+      }
+      grouped[event.date].push(event);
+    });
+    Object.keys(grouped).forEach((date) => {
+      grouped[date].sort((a, b) => a.time.localeCompare(b.time));
+    });
+    return grouped;
+  }, [events, showHolidays]);
 
   // Get 10-day window (3 days back, today, 6 days forward)
   const tenDayWindow = useMemo(() => {
@@ -1531,8 +1746,14 @@ export default function EconomicCalendarPage() {
         <div className="grid grid-cols-10 gap-2">
           {tenDayWindow.map((date, dayIndex) => {
             const dateKey = formatDateKey(date);
-            const dayEvents = eventsByDate[dateKey] || [];
-            const highestImpact = getHighestImpact(dateKey);
+            // Use allEventsByDate for 10-day window (unaffected by events toggle)
+            const dayEvents = allEventsByDate[dateKey] || [];
+            // Compute highest impact from unfiltered events
+            const highestImpact = dayEvents.length > 0
+              ? (dayEvents.some(e => e.impact === "high") ? "high"
+                : dayEvents.some(e => e.impact === "medium") ? "medium"
+                : dayEvents.some(e => e.impact === "low") ? "low" : null)
+              : null;
             const isCurrentDay = isToday(date);
             const isPastDay = isPast(date) && !isCurrentDay;
             const isHighlighted = highlightedDay === dateKey;
@@ -1667,13 +1888,9 @@ export default function EconomicCalendarPage() {
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          {/* Center: Month Title + Monthly P&L Summary */}
-          <div className="flex items-center gap-6">
-            <h2 className="text-sm font-semibold">
-              {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-            </h2>
-
-            {/* Monthly P&L - Clickable */}
+          {/* Center: Monthly P&L + Month Title + YTD P&L */}
+          <div className="flex items-center gap-4">
+            {/* Monthly P&L - Left of month title */}
             {showNotes && (pnlSummary.monthlyDays > 0 || pnlSummary.monthlyTrades > 0) && (
               <button
                 onClick={() => setShowMonthSummary(true)}
@@ -1687,12 +1904,29 @@ export default function EconomicCalendarPage() {
                 <span className="font-bold">
                   {pnlSummary.monthlyPnL >= 0 ? "+" : ""}${pnlSummary.monthlyPnL.toFixed(0)}
                 </span>
-                {pnlSummary.monthlyTrades > 0 && (
-                  <span className="text-muted text-[10px]">
-                    ({pnlSummary.monthlyTrades} trades)
-                  </span>
-                )}
-                <BarChart3 className="w-3 h-3 ml-1 opacity-60" />
+                <BarChart3 className="w-3 h-3 opacity-60" />
+              </button>
+            )}
+
+            <h2 className="text-sm font-semibold">
+              {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+            </h2>
+
+            {/* YTD P&L - Right of month title */}
+            {showNotes && (pnlSummary.ytdDays > 0 || pnlSummary.ytdTrades > 0) && (
+              <button
+                onClick={() => setShowYtdSummary(true)}
+                className={`flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium border transition-all hover:scale-105 cursor-pointer ${
+                  pnlSummary.ytdPnL >= 0
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                    : "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                }`}
+              >
+                <span className="text-muted text-[10px] uppercase tracking-wider">YTD:</span>
+                <span className="font-bold">
+                  {pnlSummary.ytdPnL >= 0 ? "+" : ""}${pnlSummary.ytdPnL.toFixed(0)}
+                </span>
+                <BarChart3 className="w-3 h-3 opacity-60" />
               </button>
             )}
           </div>
@@ -2331,14 +2565,20 @@ export default function EconomicCalendarPage() {
                         <div
                           key={trade.id}
                           className={`p-3 rounded-lg border transition-all ${
-                            trade.pnl >= 0
-                              ? "bg-emerald-500/5 border-emerald-500/20"
-                              : "bg-red-500/5 border-red-500/20"
+                            trade.status === "OPEN"
+                              ? "bg-amber-500/5 border-amber-500/30"
+                              : trade.pnl >= 0
+                                ? "bg-emerald-500/5 border-emerald-500/20"
+                                : "bg-red-500/5 border-red-500/20"
                           }`}
                         >
                           {/* Top Row */}
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
+                              {/* Asset Type Badge */}
+                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent/20 text-accent">
+                                {trade.assetType || "STOCK"}
+                              </span>
                               <span className="font-bold text-foreground">{trade.ticker}</span>
                               <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
                                 trade.direction === "LONG"
@@ -2348,9 +2588,19 @@ export default function EconomicCalendarPage() {
                                 {trade.direction === "LONG" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                 {trade.direction}
                               </span>
+                              {/* Open Trade Badge */}
+                              {trade.status === "OPEN" && (
+                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
+                                  OPEN
+                                </span>
+                              )}
                             </div>
-                            <span className={`font-bold ${trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                              {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
+                            <span className={`font-bold ${
+                              trade.status === "OPEN"
+                                ? "text-amber-400"
+                                : trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"
+                            }`}>
+                              {trade.status === "OPEN" ? "Open" : `${trade.pnl >= 0 ? "+" : ""}$${trade.pnl.toFixed(2)}`}
                             </span>
                           </div>
 
@@ -2428,307 +2678,32 @@ export default function EconomicCalendarPage() {
           </div>
 
           {/* Trade Entry Form - appears to the right */}
-          {showTradeForm && (
+          {showTradeForm && selectedDay && (
             <div
               className="w-full max-w-md max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in ml-4"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Form Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
-                <div>
-                  <h3 className="font-bold text-lg">{editingTrade ? "Edit Trade" : "Log Trade"}</h3>
-                  <p className="text-xs text-muted">{selectedDay}</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowTradeForm(false);
-                    setEditingTrade(null);
-                    setTradeFormData(DEFAULT_TRADE_FORM);
-                  }}
-                  className="p-2 rounded-lg hover:bg-card-hover transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Form Content */}
-              <div className="p-5 space-y-4 overflow-y-auto flex-1">
-                {/* Ticker & Direction */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-                      <Hash className="w-4 h-4" />
-                      Ticker
-                    </label>
-                    <input
-                      type="text"
-                      value={tradeFormData.ticker}
-                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, ticker: e.target.value.toUpperCase() }))}
-                      placeholder="ES, NQ, SPY..."
-                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted mb-2 block">Direction</label>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setTradeFormData((prev) => ({ ...prev, direction: "LONG" }))}
-                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg border transition-all text-sm ${
-                          tradeFormData.direction === "LONG"
-                            ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                            : "bg-card border-border text-muted hover:border-emerald-500/50"
-                        }`}
-                      >
-                        <TrendingUp className="w-4 h-4" />
-                        Long
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTradeFormData((prev) => ({ ...prev, direction: "SHORT" }))}
-                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg border transition-all text-sm ${
-                          tradeFormData.direction === "SHORT"
-                            ? "bg-red-500/20 border-red-500 text-red-400"
-                            : "bg-card border-border text-muted hover:border-red-500/50"
-                        }`}
-                      >
-                        <TrendingDown className="w-4 h-4" />
-                        Short
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Entry & Exit */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium text-muted mb-2 block">Entry Price</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={tradeFormData.entryPrice}
-                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, entryPrice: e.target.value }))}
-                      placeholder="0.00"
-                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted mb-2 block">Exit Price</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={tradeFormData.exitPrice}
-                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, exitPrice: e.target.value }))}
-                      placeholder="0.00"
-                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    />
-                  </div>
-                </div>
-
-                {/* Size, Duration, P&L */}
-                <div className="grid grid-cols-3 gap-3 items-end">
-                  <div>
-                    <label className="text-sm font-medium text-muted mb-2 block">Size</label>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={tradeFormData.size}
-                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, size: e.target.value }))}
-                      placeholder="Qty"
-                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted mb-2 block">Duration</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={(() => {
-                          const [h, m] = (tradeFormData.time || "00:00").split(":").map(Number);
-                          const total = h * 60 + m;
-                          return total > 0 ? String(total) : "";
-                        })()}
-                        onChange={(e) => {
-                          const mins = parseInt(e.target.value.replace(/\D/g, "")) || 0;
-                          const hours = Math.floor(mins / 60);
-                          const minutes = mins % 60;
-                          setTradeFormData((prev) => ({
-                            ...prev,
-                            time: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
-                          }));
-                        }}
-                        placeholder="mins"
-                        className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 pr-16"
-                      />
-                      {(() => {
-                        const [h, m] = (tradeFormData.time || "00:00").split(":").map(Number);
-                        const total = h * 60 + m;
-                        if (total >= 60) {
-                          return (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
-                              {h}h{m > 0 ? ` ${m}m` : ""}
-                            </span>
-                          );
-                        }
-                        return null;
-                      })()}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted mb-2 block">P&L</label>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={tradeFormData.pnl}
-                      onChange={(e) => setTradeFormData((prev) => ({ ...prev, pnl: e.target.value }))}
-                      placeholder="+/-"
-                      className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    />
-                  </div>
-                </div>
-
-                {/* Tags */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-                    <TagIcon className="w-4 h-4" />
-                    Tags
-                  </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {tags.map((tag) => (
-                      <div key={tag.id} className="relative group">
-                        <button
-                          type="button"
-                          onClick={() => toggleTag(tag.id)}
-                          className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
-                            tradeFormData.tagIds.includes(tag.id)
-                              ? "border-transparent"
-                              : "border-border bg-card hover:border-border/80"
-                          } ${tag.type === "CUSTOM" ? "pr-5" : ""}`}
-                          style={
-                            tradeFormData.tagIds.includes(tag.id)
-                              ? { backgroundColor: tag.color + "30", color: tag.color, borderColor: tag.color }
-                              : {}
-                          }
-                        >
-                          {tag.name}
-                        </button>
-                        {tag.type === "CUSTOM" && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setConfirmModal({
-                                show: true,
-                                title: "Delete Tag?",
-                                message: `Are you sure you want to delete the "${tag.name}" tag? This will remove it from all trades.`,
-                                confirmText: "Delete",
-                                onConfirm: async () => {
-                                  await deleteTag(tag.id);
-                                  setTradeFormData((prev) => ({
-                                    ...prev,
-                                    tagIds: prev.tagIds.filter((id) => id !== tag.id),
-                                  }));
-                                  setConfirmModal((prev) => ({ ...prev, show: false }));
-                                },
-                              });
-                            }}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 w-3.5 h-3.5 flex items-center justify-center rounded-full bg-red-500/20 text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/40 transition-all"
-                          >
-                            <X className="w-2.5 h-2.5" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {/* Add Custom Tag */}
-                  {showNewTagInput ? (
-                    <div className="mt-2 space-y-2">
-                      <div className="flex items-center gap-2">
-                        {/* Color options */}
-                        {[
-                          "#ef4444", // red
-                          "#f97316", // orange
-                          "#eab308", // yellow
-                          "#22c55e", // green
-                          "#3b82f6", // blue
-                          "#6366f1", // indigo
-                          "#a855f7", // violet
-                          "#ffffff", // white
-                        ].map((color) => (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => setNewTagColor(color)}
-                            className={`w-6 h-6 rounded-full border-2 transition-all ${
-                              newTagColor === color ? "border-accent scale-110" : "border-border hover:border-muted"
-                            }`}
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={newTagName}
-                          onChange={(e) => setNewTagName(e.target.value)}
-                          placeholder="Tag name"
-                          className="flex-1 px-3 py-1.5 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
-                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCreateTag(); } }}
-                        />
-                        <button onClick={handleCreateTag} className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent/90">Add</button>
-                        <button onClick={() => setShowNewTagInput(false)} className="p-1.5 text-muted hover:text-foreground"><X className="w-4 h-4" /></button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowNewTagInput(true)}
-                      className="flex items-center gap-1.5 mt-2 text-xs text-accent hover:text-accent-light transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add custom tag
-                    </button>
-                  )}
-                </div>
-
-                {/* Notes */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-                    <FileText className="w-4 h-4" />
-                    Notes
-                  </label>
-                  <textarea
-                    value={tradeFormData.notes}
-                    onChange={(e) => setTradeFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Trade reasoning, lessons..."
-                    rows={2}
-                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
-                  />
-                </div>
-              </div>
-
-              {/* Form Footer */}
-              <div className="px-5 py-4 border-t border-border/50 bg-card/50 flex items-center justify-end gap-2">
-                <button
-                  onClick={() => {
-                    setShowTradeForm(false);
-                    setEditingTrade(null);
-                    setTradeFormData(DEFAULT_TRADE_FORM);
-                  }}
-                  className="px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveTrade}
-                  disabled={savingTrade || !tradeFormData.ticker || !tradeFormData.pnl}
-                  className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors text-sm font-medium disabled:opacity-50"
-                >
-                  {savingTrade ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  {editingTrade ? "Update" : "Save Trade"}
-                </button>
-              </div>
+              <TradeForm
+                date={selectedDay}
+                tags={tags}
+                editingTrade={editingTrade}
+                onSave={async (formData) => {
+                  if (editingTrade) {
+                    await updateTrade(editingTrade.id, formData);
+                  } else {
+                    await createTrade(selectedDay, formData);
+                  }
+                  setShowTradeForm(false);
+                  setEditingTrade(null);
+                  setTradeFormData(DEFAULT_TRADE_FORM);
+                }}
+                onCancel={() => {
+                  setShowTradeForm(false);
+                  setEditingTrade(null);
+                  setTradeFormData(DEFAULT_TRADE_FORM);
+                }}
+                onCreateTag={createTag}
+              />
             </div>
           )}
 
@@ -3367,6 +3342,521 @@ export default function EconomicCalendarPage() {
                                 {monthlyBreakdown.tradeWinRate >= ((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100)
                                   ? `✓ Above breakeven by ${(monthlyBreakdown.tradeWinRate - ((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100)).toFixed(0)}%`
                                   : `✗ Below breakeven by ${(((monthlyBreakdown.avgLoss / (monthlyBreakdown.avgWin + monthlyBreakdown.avgLoss)) * 100) - monthlyBreakdown.tradeWinRate).toFixed(0)}%`}
+                              </div>
+                            </div>
+                            <div className="absolute right-4 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* YTD Summary Modal */}
+      {showYtdSummary && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowYtdSummary(false)}
+        >
+          <div
+            className="w-full max-w-2xl glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden animate-slide-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <BarChart3 className="w-5 h-5 text-accent-light" />
+                <h3 className="text-lg font-bold">
+                  {ytdBreakdown.year} Year-to-Date Summary
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowYtdSummary(false)}
+                className="p-1.5 rounded-lg hover:bg-card-hover transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
+              {ytdBreakdown.tradingDays === 0 ? (
+                <div className="text-center py-8 text-muted">
+                  <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>No trading data for {ytdBreakdown.year}</p>
+                  <p className="text-xs mt-1">Add trades to see your YTD breakdown</p>
+                </div>
+              ) : (
+                <>
+                  {/* Hero Stats */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Total P&L - Large */}
+                    <div className={`p-4 rounded-xl border-2 ${ytdBreakdown.totalPnL >= 0 ? "bg-emerald-500/10 border-emerald-500/40" : "bg-red-500/10 border-red-500/40"}`}>
+                      <div className="text-xs text-muted uppercase tracking-wider mb-1">Total P&L</div>
+                      <div className={`text-3xl font-bold ${ytdBreakdown.totalPnL >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {ytdBreakdown.totalPnL >= 0 ? "+" : ""}${ytdBreakdown.totalPnL.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-muted mt-1">{ytdBreakdown.totalTrades} trades over {ytdBreakdown.tradingDays} days</div>
+                    </div>
+
+                    {/* Win Rate with breakdown */}
+                    <div className={`p-4 rounded-xl border ${ytdBreakdown.tradeWinRate >= 50 ? "bg-emerald-500/5 border-emerald-500/30" : "bg-red-500/5 border-red-500/30"}`}>
+                      <div className="text-xs text-muted uppercase tracking-wider mb-1">Win Rate</div>
+                      <div className={`text-3xl font-bold ${ytdBreakdown.tradeWinRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
+                        {ytdBreakdown.tradeWinRate.toFixed(0)}%
+                      </div>
+                      <div className="text-xs mt-1">
+                        <span className="text-emerald-400">{ytdBreakdown.winningTrades}W</span>
+                        <span className="text-muted mx-1">/</span>
+                        <span className="text-red-400">{ytdBreakdown.losingTrades}L</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Secondary Stats */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div
+                      className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                      onMouseEnter={() => setShowProfitFactorTooltip('ytd')}
+                      onMouseLeave={() => setShowProfitFactorTooltip(null)}
+                    >
+                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                        Profit Factor
+                        <Info className="w-3 h-3 text-muted/50" />
+                      </div>
+                      <div className={`text-xl font-bold ${ytdBreakdown.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>
+                        {ytdBreakdown.profitFactor === Infinity ? "∞" : ytdBreakdown.profitFactor.toFixed(2)}
+                      </div>
+                      {showProfitFactorTooltip === 'ytd' && (
+                        <div className="absolute top-full left-0 mt-2 z-50 pointer-events-none">
+                          <div className="absolute left-4 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                          <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                            <div className="text-sm font-semibold text-foreground mb-1 text-left">Profit Factor</div>
+                            <div className="text-[11px] text-muted mb-3 text-left">Gross Profit ÷ Gross Loss</div>
+                            <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                              <span className="text-emerald-400 font-medium">${(ytdBreakdown.avgWin * ytdBreakdown.winningTrades).toFixed(0)}</span>
+                              <span className="text-muted/70">÷</span>
+                              <span className="text-red-400 font-medium">${(ytdBreakdown.avgLoss * ytdBreakdown.losingTrades).toFixed(0)}</span>
+                              <span className="text-muted/70">=</span>
+                              <span className={`font-bold text-lg ${ytdBreakdown.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>
+                                {ytdBreakdown.profitFactor === Infinity ? "∞" : ytdBreakdown.profitFactor.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div
+                      className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                      onMouseEnter={() => setShowAvgTradeTooltip('ytd')}
+                      onMouseLeave={() => setShowAvgTradeTooltip(null)}
+                    >
+                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                        Avg / Trade
+                        <Info className="w-3 h-3 text-muted/50" />
+                      </div>
+                      <div className={`text-xl font-bold ${(ytdBreakdown.totalPnL / ytdBreakdown.totalTrades) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {(ytdBreakdown.totalPnL / ytdBreakdown.totalTrades) >= 0 ? "+" : ""}${(ytdBreakdown.totalPnL / ytdBreakdown.totalTrades).toFixed(0)}
+                      </div>
+                      {showAvgTradeTooltip === 'ytd' && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 pointer-events-none">
+                          <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                          <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                            <div className="text-sm font-semibold text-foreground mb-1">Average Per Trade</div>
+                            <div className="text-[11px] text-muted mb-3">Your average profit or loss on each trade.</div>
+                            <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                              <span className={`font-medium ${ytdBreakdown.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${ytdBreakdown.totalPnL.toFixed(0)}</span>
+                              <span className="text-muted/70">÷</span>
+                              <span className="text-muted font-medium">{ytdBreakdown.totalTrades} trades</span>
+                              <span className="text-muted/70">=</span>
+                              <span className={`font-bold text-lg ${(ytdBreakdown.totalPnL / ytdBreakdown.totalTrades) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                ${(ytdBreakdown.totalPnL / ytdBreakdown.totalTrades).toFixed(0)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div
+                      className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                      onMouseEnter={() => setShowAvgDayTooltip('ytd')}
+                      onMouseLeave={() => setShowAvgDayTooltip(null)}
+                    >
+                      <div className="text-[10px] text-muted uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                        Avg / Day
+                        <Info className="w-3 h-3 text-muted/50" />
+                      </div>
+                      <div className={`text-xl font-bold ${ytdBreakdown.avgPnLPerDay >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {ytdBreakdown.avgPnLPerDay >= 0 ? "+" : ""}${ytdBreakdown.avgPnLPerDay.toFixed(0)}
+                      </div>
+                      {showAvgDayTooltip === 'ytd' && (
+                        <div className="absolute top-full right-0 mt-2 z-50 pointer-events-none">
+                          <div className="absolute right-4 -top-1.5 w-3 h-3 bg-slate-900 border-l-2 border-t-2 border-accent/50 rotate-45"></div>
+                          <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[220px]">
+                            <div className="text-sm font-semibold text-foreground mb-1 text-left">Average Per Day</div>
+                            <div className="text-[11px] text-muted mb-3 text-left">Your average daily P&L on trading days.</div>
+                            <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                              <span className={`font-medium ${ytdBreakdown.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>${ytdBreakdown.totalPnL.toFixed(0)}</span>
+                              <span className="text-muted/70">÷</span>
+                              <span className="text-muted font-medium">{ytdBreakdown.tradingDays} days</span>
+                              <span className="text-muted/70">=</span>
+                              <span className={`font-bold text-lg ${ytdBreakdown.avgPnLPerDay >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                ${ytdBreakdown.avgPnLPerDay.toFixed(0)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Monthly Breakdown Histogram Chart */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold">Monthly Breakdown</h4>
+                      <span className="text-xs text-muted">{ytdBreakdown.tradingMonths} months with trades</span>
+                    </div>
+                    <div className="relative bg-card rounded-xl border border-border p-4">
+                      {(() => {
+                        // Build full 12-month data with zeros for missing months
+                        const fullYearData = Array.from({ length: 12 }, (_, i) => {
+                          const monthNum = i + 1;
+                          const found = ytdBreakdown.monthlyData.find(m => m.month === monthNum);
+                          return {
+                            month: monthNum,
+                            monthName: new Date(ytdBreakdown.year, i, 1).toLocaleDateString("en-US", { month: "short" }),
+                            pnl: found?.pnl ?? 0,
+                            trades: found?.trades ?? 0,
+                          };
+                        });
+
+                        const allPnls = fullYearData.map(m => m.pnl);
+                        const maxVal = Math.max(...allPnls, 0);
+                        const minVal = Math.min(...allPnls, 0);
+                        // Round up to nearest $250 for clean grid lines
+                        const rawAbsMax = Math.max(Math.abs(maxVal), Math.abs(minVal), 250);
+                        const absMax = Math.ceil(rawAbsMax / 250) * 250;
+
+                        const formatValue = (val: number) => {
+                          if (Math.abs(val) >= 1000) return `${val >= 0 ? '' : '-'}$${(Math.abs(val) / 1000).toFixed(Math.abs(val) % 1000 === 0 ? 0 : 1)}k`;
+                          if (val === 0) return '$0';
+                          return `${val >= 0 ? '' : '-'}$${Math.abs(val).toFixed(0)}`;
+                        };
+
+                        // Grid lines at fixed percentages with $250-rounded values
+                        const gridLines = [
+                          { label: formatValue(absMax), y: 0, value: absMax },
+                          { label: formatValue(absMax / 2), y: 25, value: absMax / 2 },
+                          { label: '$0', y: 50, value: 0 },
+                          { label: formatValue(-absMax / 2), y: 75, value: -absMax / 2 },
+                          { label: formatValue(-absMax), y: 100, value: -absMax },
+                        ];
+
+                        return (
+                          <div className="flex">
+                            {/* Y-axis labels */}
+                            <div className="w-12 flex-shrink-0 relative" style={{ height: '160px' }}>
+                              {gridLines.map((line, i) => (
+                                <span
+                                  key={i}
+                                  className="absolute right-2 text-[9px] text-muted -translate-y-1/2"
+                                  style={{ top: `${line.y}%` }}
+                                >
+                                  {line.label}
+                                </span>
+                              ))}
+                            </div>
+
+                            {/* Chart area */}
+                            <div className="flex-1 flex flex-col">
+                              {/* Grid and bars container */}
+                              <div className="relative" style={{ height: '160px' }}>
+                                {/* Grid lines */}
+                                {gridLines.map((line, i) => (
+                                  <div
+                                    key={i}
+                                    className={`absolute left-0 right-0 border-t ${i === 2 ? 'border-muted/50 border-dashed' : 'border-border/30'}`}
+                                    style={{ top: `${line.y}%` }}
+                                  />
+                                ))}
+
+                                {/* Bars */}
+                                <div className="absolute inset-0 flex justify-around items-center px-2">
+                                  {fullYearData.map((month) => {
+                                    // Calculate bar height as percentage of half the chart (since zero is at 50%)
+                                    const barHeightPercent = (Math.abs(month.pnl) / absMax) * 50;
+                                    const isPositive = month.pnl >= 0;
+                                    const hasData = month.trades > 0;
+
+                                    return (
+                                      <div key={month.month} className="relative h-full flex-1 mx-0.5 group">
+                                        {/* Positive bar - grows upward from 50% */}
+                                        {isPositive && hasData && month.pnl !== 0 && (
+                                          <>
+                                            <div
+                                              className="absolute left-1/2 -translate-x-1/2 bg-emerald-500 rounded-t-sm group-hover:bg-emerald-400 transition-colors cursor-pointer"
+                                              style={{
+                                                width: '70%',
+                                                maxWidth: '24px',
+                                                height: `${barHeightPercent}%`,
+                                                bottom: '50%',
+                                              }}
+                                            />
+                                            {/* Tooltip */}
+                                            <div className="absolute left-1/2 -translate-x-1/2 bottom-[52%] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
+                                              style={{ bottom: `${50 + barHeightPercent + 2}%` }}>
+                                              <div className="bg-slate-900 border border-emerald-500/50 rounded-lg px-2 py-1 shadow-lg whitespace-nowrap">
+                                                <div className="text-[10px] text-muted">{month.monthName}</div>
+                                                <div className="text-sm font-bold text-emerald-400">+${month.pnl.toFixed(0)}</div>
+                                                <div className="text-[9px] text-muted">{month.trades} trade{month.trades !== 1 ? 's' : ''}</div>
+                                              </div>
+                                            </div>
+                                          </>
+                                        )}
+                                        {/* Negative bar - grows downward from 50% */}
+                                        {!isPositive && hasData && month.pnl !== 0 && (
+                                          <>
+                                            <div
+                                              className="absolute left-1/2 -translate-x-1/2 bg-red-500 rounded-b-sm group-hover:bg-red-400 transition-colors cursor-pointer"
+                                              style={{
+                                                width: '70%',
+                                                maxWidth: '24px',
+                                                height: `${barHeightPercent}%`,
+                                                top: '50%',
+                                              }}
+                                            />
+                                            {/* Tooltip */}
+                                            <div className="absolute left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
+                                              style={{ top: `${50 + barHeightPercent + 2}%` }}>
+                                              <div className="bg-slate-900 border border-red-500/50 rounded-lg px-2 py-1 shadow-lg whitespace-nowrap">
+                                                <div className="text-[10px] text-muted">{month.monthName}</div>
+                                                <div className="text-sm font-bold text-red-400">-${Math.abs(month.pnl).toFixed(0)}</div>
+                                                <div className="text-[9px] text-muted">{month.trades} trade{month.trades !== 1 ? 's' : ''}</div>
+                                              </div>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              {/* X-axis labels */}
+                              <div className="flex justify-around px-2 mt-2">
+                                {fullYearData.map((month) => (
+                                  <span
+                                    key={month.month}
+                                    className={`text-[9px] flex-1 text-center mx-0.5 ${month.trades > 0 ? 'text-muted' : 'text-muted/30'}`}
+                                  >
+                                    {month.monthName}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Performance Metrics */}
+                  <div className="space-y-3">
+                    {/* Top Row - Winners & Losers */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted">Avg Win</span>
+                          <span className="text-sm font-bold text-emerald-400">+${ytdBreakdown.avgWin.toFixed(0)}</span>
+                        </div>
+                        {ytdBreakdown.largestWin && (
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-emerald-500/10">
+                            <span className="text-xs text-muted">Best Trade</span>
+                            <span className="text-sm font-medium text-emerald-400">+${ytdBreakdown.largestWin.pnl.toFixed(0)}</span>
+                          </div>
+                        )}
+                        {ytdBreakdown.bestMonth && (
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-emerald-500/10">
+                            <span className="text-xs text-muted">Best Month</span>
+                            <span className="text-sm font-medium text-emerald-400">{ytdBreakdown.bestMonth.monthName}: +${ytdBreakdown.bestMonth.pnl.toFixed(0)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted">Avg Loss</span>
+                          <span className="text-sm font-bold text-red-400">-${ytdBreakdown.avgLoss.toFixed(0)}</span>
+                        </div>
+                        {ytdBreakdown.largestLoss && (
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-red-500/10">
+                            <span className="text-xs text-muted">Worst Trade</span>
+                            <span className="text-sm font-medium text-red-400">${ytdBreakdown.largestLoss.pnl.toFixed(0)}</span>
+                          </div>
+                        )}
+                        {ytdBreakdown.worstMonth && (
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-red-500/10">
+                            <span className="text-xs text-muted">Worst Month</span>
+                            <span className="text-sm font-medium text-red-400">{ytdBreakdown.worstMonth.monthName}: ${ytdBreakdown.worstMonth.pnl.toFixed(0)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bottom Row - Key Ratios */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                        onMouseEnter={() => setShowRiskRewardTooltip('ytd')}
+                        onMouseLeave={() => setShowRiskRewardTooltip(null)}
+                      >
+                        <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                          Risk/Reward
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        <div className={`text-lg font-bold ${ytdBreakdown.avgLoss > 0 ? (ytdBreakdown.avgWin / ytdBreakdown.avgLoss >= 1 ? 'text-emerald-400' : 'text-red-400') : 'text-muted'}`}>
+                          {ytdBreakdown.avgLoss > 0 ? `1:${(ytdBreakdown.avgWin / ytdBreakdown.avgLoss).toFixed(2)}` : 'N/A'}
+                        </div>
+                        <div className="text-[10px] text-muted mt-1">Avg Win ÷ Avg Loss</div>
+                        {showRiskRewardTooltip === 'ytd' && (
+                          <div className="absolute bottom-full left-0 mb-2 z-50 pointer-events-none">
+                            <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[240px]">
+                              <div className="text-sm font-semibold text-foreground mb-1 text-left">Risk/Reward Ratio</div>
+                              <div className="text-[11px] text-muted mb-3 text-left">How much you win on average compared to how much you lose. Higher is better.</div>
+                              <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 mb-3">
+                                <span className="text-emerald-400 font-medium">${ytdBreakdown.avgWin.toFixed(0)}</span>
+                                <span className="text-muted/70">÷</span>
+                                <span className="text-red-400 font-medium">${ytdBreakdown.avgLoss.toFixed(0)}</span>
+                                <span className="text-muted/70">=</span>
+                                <span className={`font-bold text-lg ${ytdBreakdown.avgLoss > 0 ? (ytdBreakdown.avgWin / ytdBreakdown.avgLoss >= 1 ? 'text-emerald-400' : 'text-red-400') : 'text-muted'}`}>
+                                  {ytdBreakdown.avgLoss > 0 ? (ytdBreakdown.avgWin / ytdBreakdown.avgLoss).toFixed(2) : 'N/A'}
+                                </span>
+                              </div>
+                              <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${ytdBreakdown.avgLoss > 0 && ytdBreakdown.avgWin / ytdBreakdown.avgLoss >= 2 ? "text-emerald-400/80" : ytdBreakdown.avgLoss > 0 && ytdBreakdown.avgWin / ytdBreakdown.avgLoss >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                {ytdBreakdown.avgLoss > 0 && ytdBreakdown.avgWin / ytdBreakdown.avgLoss >= 2 ? "✓ Excellent! Wins are 2x+ your losses" :
+                                 ytdBreakdown.avgLoss > 0 && ytdBreakdown.avgWin / ytdBreakdown.avgLoss >= 1.5 ? "✓ Good ratio, wins exceed losses" :
+                                 ytdBreakdown.avgLoss > 0 && ytdBreakdown.avgWin / ytdBreakdown.avgLoss >= 1 ? "○ Balanced, but aim higher" :
+                                 "✗ Losses exceed wins - tighten stops"}
+                              </div>
+                            </div>
+                            <div className="absolute left-4 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border text-center relative cursor-help"
+                        onMouseEnter={() => setShowExpectancyTooltip('ytd')}
+                        onMouseLeave={() => setShowExpectancyTooltip(null)}
+                      >
+                        <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                          Expectancy
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        {(() => {
+                          const winRate = ytdBreakdown.tradeWinRate / 100;
+                          const expectancy = (winRate * ytdBreakdown.avgWin) - ((1 - winRate) * ytdBreakdown.avgLoss);
+                          return (
+                            <>
+                              <div className={`text-lg font-bold ${expectancy >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {expectancy >= 0 ? '+' : ''}${expectancy.toFixed(0)}
+                              </div>
+                              <div className="text-[10px] text-muted mt-1">Expected $ per trade</div>
+                              {showExpectancyTooltip === 'ytd' && (
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
+                                  <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[280px]">
+                                    <div className="text-sm font-semibold text-foreground mb-1 text-left">Expectancy</div>
+                                    <div className="text-[11px] text-muted mb-3 text-left">The average amount you can expect to win (or lose) per trade over time.</div>
+                                    <div className="text-[11px] bg-slate-800/50 rounded-lg px-3 py-2 mb-3 text-left">
+                                      <div className="text-muted mb-1">Formula:</div>
+                                      <div className="font-mono text-xs">
+                                        (<span className="text-emerald-400">{ytdBreakdown.tradeWinRate.toFixed(0)}%</span> × <span className="text-emerald-400">${ytdBreakdown.avgWin.toFixed(0)}</span>) − (<span className="text-red-400">{(100 - ytdBreakdown.tradeWinRate).toFixed(0)}%</span> × <span className="text-red-400">${ytdBreakdown.avgLoss.toFixed(0)}</span>)
+                                      </div>
+                                      <div className="mt-2 pt-2 border-t border-white/10">
+                                        <span className="text-muted">=</span> <span className={`font-bold ${expectancy >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{expectancy >= 0 ? '+' : ''}${expectancy.toFixed(2)}</span> <span className="text-muted">per trade</span>
+                                      </div>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${expectancy >= 50 ? "text-emerald-400/80" : expectancy >= 0 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {expectancy >= 50 ? "✓ Strong edge! Keep trading this strategy" :
+                                       expectancy >= 20 ? "✓ Positive expectancy, stay consistent" :
+                                       expectancy >= 0 ? "○ Slightly profitable, room to improve" :
+                                       "✗ Negative expectancy - review your strategy"}
+                                    </div>
+                                  </div>
+                                  <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                      <div
+                        className="p-3 rounded-xl bg-card border border-border relative cursor-help text-center"
+                        onMouseEnter={() => setShowBreakevenTooltip('ytd')}
+                        onMouseLeave={() => setShowBreakevenTooltip(null)}
+                      >
+                        <div className="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+                          Breakeven Rate
+                          <Info className="w-3 h-3 text-muted/50" />
+                        </div>
+                        <div className="text-lg font-bold text-foreground">
+                          {ytdBreakdown.avgWin + ytdBreakdown.avgLoss > 0
+                            ? `${((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                            : 'N/A'}
+                        </div>
+                        <div className="text-[10px] text-muted mt-1">Min win rate to profit</div>
+                        {showBreakevenTooltip === 'ytd' && (
+                          <div className="absolute bottom-full right-0 mb-2 z-50 pointer-events-none">
+                            <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[260px]">
+                              <div className="text-sm font-semibold text-foreground mb-1 text-left">Breakeven Win Rate</div>
+                              <div className="text-[11px] text-muted mb-3 text-left">The minimum win rate needed to break even given your average win and loss sizes.</div>
+                              <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 mb-3">
+                                <span className="text-red-400 font-medium">${ytdBreakdown.avgLoss.toFixed(0)}</span>
+                                <span className="text-muted/70">÷</span>
+                                <span className="text-muted font-medium">(${ytdBreakdown.avgWin.toFixed(0)} + ${ytdBreakdown.avgLoss.toFixed(0)})</span>
+                                <span className="text-muted/70">=</span>
+                                <span className="font-bold text-lg text-foreground">
+                                  {ytdBreakdown.avgWin + ytdBreakdown.avgLoss > 0
+                                    ? `${((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                                    : 'N/A'}
+                                </span>
+                              </div>
+                              {/* Visual comparison bar */}
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="text-muted">Your Win Rate</span>
+                                  <span className={ytdBreakdown.tradeWinRate >= ((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100) ? 'text-emerald-400' : 'text-red-400'}>
+                                    {ytdBreakdown.tradeWinRate.toFixed(0)}%
+                                  </span>
+                                </div>
+                                <div className="h-2 bg-slate-800 rounded-full overflow-hidden relative">
+                                  {/* Breakeven marker */}
+                                  <div
+                                    className="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10"
+                                    style={{ left: `${Math.min((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100, 100)}%` }}
+                                  />
+                                  {/* Win rate fill */}
+                                  <div
+                                    className={`h-full rounded-full ${ytdBreakdown.tradeWinRate >= ((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100) ? 'bg-emerald-500' : 'bg-red-500'}`}
+                                    style={{ width: `${Math.min(ytdBreakdown.tradeWinRate, 100)}%` }}
+                                  />
+                                </div>
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="text-muted">Breakeven</span>
+                                  <span className="text-yellow-400">
+                                    {ytdBreakdown.avgWin + ytdBreakdown.avgLoss > 0
+                                      ? `${((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100).toFixed(0)}%`
+                                      : 'N/A'}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 text-left ${ytdBreakdown.tradeWinRate >= ((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100) ? "text-emerald-400/80" : "text-red-400/80"}`}>
+                                {ytdBreakdown.tradeWinRate >= ((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100)
+                                  ? `✓ Above breakeven by ${(ytdBreakdown.tradeWinRate - ((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100)).toFixed(0)}%`
+                                  : `✗ Below breakeven by ${(((ytdBreakdown.avgLoss / (ytdBreakdown.avgWin + ytdBreakdown.avgLoss)) * 100) - ytdBreakdown.tradeWinRate).toFixed(0)}%`}
                               </div>
                             </div>
                             <div className="absolute right-4 -bottom-1.5 w-3 h-3 bg-slate-900 border-r-2 border-b-2 border-accent/50 rotate-45"></div>
