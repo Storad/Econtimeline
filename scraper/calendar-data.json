@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-27T11:17:09.501Z",
+  "lastUpdated": "2025-12-28T11:18:18.037Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -13929,6 +13929,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-28",
+      "time": "10:00",
+      "title": "Pending Home Sales m/m",
+      "impact": "medium",
+      "category": "housing",
+      "source": "nar",
+      "sourceUrl": "https://www.nar.realtor/research-and-statistics/housing-statistics/pending-home-sales",
+      "description": "Monthly index of home sales contracts signed but not yet closed.",
+      "whyItMatters": "Leading indicator for existing home sales (typically close 1-2 months later).",
+      "frequency": "Monthly (last week)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
