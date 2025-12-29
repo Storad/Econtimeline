@@ -263,27 +263,119 @@ export function useTradeJournal() {
   }, []);
 
   // Get trades by date (from local state)
+  // Returns trades for display on a specific date:
+  // - Open trades that started on this date (pending)
+  // - Day trades (closed on same day as opened)
+  // - Swing trades show on BOTH entry date AND close date
   const getTradesByDate = useCallback(
     (date: string): Trade[] => {
-      return trades.filter((t) => t.date === date);
+      return trades.filter((t) => {
+        // Open/pending trades show on entry date
+        if (t.status === "OPEN" && t.date === date) return true;
+
+        // Closed trades
+        if (t.status === "CLOSED") {
+          const closeDate = t.closeDate || t.date;
+          const isSwingTrade = closeDate !== t.date;
+
+          if (isSwingTrade) {
+            // Swing trades show on BOTH entry date and close date
+            return t.date === date || closeDate === date;
+          } else {
+            // Day trades show on entry/close date (same day)
+            return t.date === date;
+          }
+        }
+
+        return false;
+      });
     },
     [trades]
   );
 
-  // Get daily P&L summary
+  // Get daily P&L summary (only closed trades, using closeDate if available)
   const getDailyPnL = useCallback(
     (date: string): number => {
       return trades
-        .filter((t) => t.date === date)
+        .filter((t) => {
+          if (t.status !== "CLOSED") return false;
+          // Use closeDate if available, otherwise fall back to entry date
+          const pnlDate = t.closeDate || t.date;
+          return pnlDate === date;
+        })
         .reduce((sum, t) => sum + t.pnl, 0);
     },
     [trades]
   );
 
-  // Get trade count for date
+  // Check if date has open trades (open trades show on entry date)
+  const hasOpenTrades = useCallback(
+    (date: string): boolean => {
+      return trades.some((t) => t.date === date && t.status === "OPEN");
+    },
+    [trades]
+  );
+
+  // Get count of open trades for date (open trades show on entry date)
+  const getOpenTradeCount = useCallback(
+    (date: string): number => {
+      return trades.filter((t) => t.date === date && t.status === "OPEN").length;
+    },
+    [trades]
+  );
+
+  // Get count of closed trades for date (closed trades show on close date)
+  const getClosedTradeCount = useCallback(
+    (date: string): number => {
+      return trades.filter((t) => {
+        if (t.status !== "CLOSED") return false;
+        const pnlDate = t.closeDate || t.date;
+        return pnlDate === date;
+      }).length;
+    },
+    [trades]
+  );
+
+  // Get trade count for date (open trades on entry date, closed trades on close date)
   const getTradeCount = useCallback(
     (date: string): number => {
-      return trades.filter((t) => t.date === date).length;
+      const openCount = trades.filter((t) => t.date === date && t.status === "OPEN").length;
+      const closedCount = trades.filter((t) => {
+        if (t.status !== "CLOSED") return false;
+        const pnlDate = t.closeDate || t.date;
+        return pnlDate === date;
+      }).length;
+      return openCount + closedCount;
+    },
+    [trades]
+  );
+
+  // Get swing trades that were OPENED on this date (for showing "Trade opened" indicator)
+  // Only includes trades where entry date differs from close date (multi-day trades)
+  const getClosedTradesOpenedOnDate = useCallback(
+    (date: string): Trade[] => {
+      return trades.filter((t) => {
+        if (t.status !== "CLOSED") return false;
+        if (t.date !== date) return false;
+        // Only swing trades: entry date differs from close date
+        const closeDate = t.closeDate || t.date;
+        return closeDate !== t.date;
+      });
+    },
+    [trades]
+  );
+
+  // Get swing trades that were CLOSED on this date (for showing P&L with reference to open date)
+  // Only includes trades where entry date differs from close date (multi-day trades)
+  const getTradesClosedOnDate = useCallback(
+    (date: string): Trade[] => {
+      return trades.filter((t) => {
+        if (t.status !== "CLOSED") return false;
+        const closeDate = t.closeDate || t.date;
+        if (closeDate !== date) return false;
+        // Only swing trades: entry date differs from close date
+        return closeDate !== t.date;
+      });
     },
     [trades]
   );
@@ -333,5 +425,10 @@ export function useTradeJournal() {
     getTradesByDate,
     getDailyPnL,
     getTradeCount,
+    hasOpenTrades,
+    getOpenTradeCount,
+    getClosedTradeCount,
+    getClosedTradesOpenedOnDate,
+    getTradesClosedOnDate,
   };
 }

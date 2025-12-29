@@ -2,21 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 
-// Default system tags
+// Default system tags - colors match preset palette
 const DEFAULT_TAGS = [
   // Setup tags
   { name: "Breakout", type: "SETUP", color: "#3b82f6" },
   { name: "Reversal", type: "SETUP", color: "#8b5cf6" },
   { name: "Trend", type: "SETUP", color: "#06b6d4" },
-  { name: "Scalp", type: "SETUP", color: "#f59e0b" },
+  { name: "Scalp", type: "SETUP", color: "#f97316" },
   { name: "News Play", type: "SETUP", color: "#ef4444" },
-  { name: "Range", type: "SETUP", color: "#10b981" },
+  { name: "Range", type: "SETUP", color: "#22c55e" },
   { name: "Fade", type: "SETUP", color: "#ec4899" },
   // Emotion tags
   { name: "Confident", type: "EMOTION", color: "#22c55e" },
-  { name: "Disciplined", type: "EMOTION", color: "#14b8a6" },
-  { name: "FOMO", type: "EMOTION", color: "#f43f5e" },
-  { name: "Revenge", type: "EMOTION", color: "#dc2626" },
+  { name: "Disciplined", type: "EMOTION", color: "#06b6d4" },
+  { name: "FOMO", type: "EMOTION", color: "#ef4444" },
+  { name: "Revenge", type: "EMOTION", color: "#ef4444" },
   { name: "Anxious", type: "EMOTION", color: "#f97316" },
   { name: "Impatient", type: "EMOTION", color: "#eab308" },
 ];

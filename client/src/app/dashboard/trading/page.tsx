@@ -695,6 +695,11 @@ export default function TradingPage() {
   const [showOpenTrades, setShowOpenTrades] = useState(true);
   const [closingTrade, setClosingTrade] = useState<Trade | null>(null);
   const [closeTradeForm, setCloseTradeForm] = useState({ exitPrice: "", pnl: "", closeDate: "" });
+  const [showCloseDatePicker, setShowCloseDatePicker] = useState(false);
+  const [closeDateMonth, setCloseDateMonth] = useState("");
+  const [closeDateDay, setCloseDateDay] = useState("");
+  const [closeDateYear, setCloseDateYear] = useState("");
+  const closeDatePickerRef = useRef<HTMLDivElement>(null);
 
   // Equity curve filters
   const [equityPeriod, setEquityPeriod] = useState<"all" | "ytd" | "mtd" | "wtd" | "daily">("all");
@@ -727,6 +732,36 @@ export default function TradingPage() {
     setGoals(newGoals);
     localStorage.setItem("tradingGoals", JSON.stringify(newGoals));
     setShowGoalSettings(false);
+  };
+
+  // Close date picker click outside handler
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (closeDatePickerRef.current && !closeDatePickerRef.current.contains(e.target as Node)) {
+        setShowCloseDatePicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Update close date from picker inputs
+  const updateCloseDate = (month: string, day: string, year: string) => {
+    setCloseDateMonth(month);
+    setCloseDateDay(day);
+    setCloseDateYear(year);
+    if (month && day && year && month.length <= 2 && day.length <= 2 && year.length === 4) {
+      const m = month.padStart(2, "0");
+      const d = day.padStart(2, "0");
+      setCloseTradeForm(prev => ({ ...prev, closeDate: `${year}-${m}-${d}` }));
+    }
+  };
+
+  // Format close date for display
+  const formatCloseDateDisplay = (dateStr: string) => {
+    if (!dateStr) return "";
+    const [y, m, d] = dateStr.split("-");
+    return `${m}/${d}/${y}`;
   };
 
   // Calculate all trading statistics (only from CLOSED trades)
@@ -1111,6 +1146,168 @@ export default function TradingPage() {
 
   return (
     <div className="h-full overflow-y-auto space-y-6 pb-6">
+      {/* EQUITY CURVE - Full Width Top Section */}
+      <div className="glass rounded-xl border border-border/50 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-accent-light" />
+              Equity Curve
+              <InfoTip content={{
+                title: "Equity Curve Chart",
+                description: "Visual representation of your cumulative P&L over time.",
+                details: [
+                  { label: "Green line", value: "Your equity growth", color: "text-emerald-400" },
+                  { label: "Red area", value: "Drawdown periods", color: "text-red-400" }
+                ],
+                tip: "A smooth upward curve indicates consistent, disciplined trading."
+              }} />
+            </h3>
+            <div className="flex items-center gap-3">
+              {/* Period Filter */}
+              <div className="flex items-center gap-1 bg-card rounded-lg p-1">
+                {[
+                  { value: "all", label: "All" },
+                  { value: "ytd", label: "YTD" },
+                  { value: "mtd", label: "MTD" },
+                  { value: "wtd", label: "WTD" },
+                ].map((period) => (
+                  <button
+                    key={period.value}
+                    onClick={() => setEquityPeriod(period.value as typeof equityPeriod)}
+                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                      equityPeriod === period.value
+                        ? "bg-accent text-white"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {period.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tag Filter */}
+              {tags.length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowTagDropdown(!showTagDropdown)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border transition-colors ${
+                      equityTagFilter.length > 0
+                        ? "bg-accent/20 border-accent text-accent"
+                        : "bg-card border-border text-muted hover:border-accent/50"
+                    }`}
+                  >
+                    <TagIcon className="w-3 h-3" />
+                    {equityTagFilter.length > 0 ? `${equityTagFilter.length} Tags` : "Filter by Tag"}
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                  {showTagDropdown && (
+                    <div className="absolute right-0 mt-1 w-48 bg-card border border-border rounded-lg shadow-xl z-20 py-1">
+                      {equityTagFilter.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setEquityTagFilter([]);
+                            setShowTagDropdown(false);
+                          }}
+                          className="w-full px-3 py-1.5 text-xs text-left text-red-400 hover:bg-card-hover"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                      {tags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          onClick={() => {
+                            setEquityTagFilter((prev) =>
+                              prev.includes(tag.id)
+                                ? prev.filter((id) => id !== tag.id)
+                                : [...prev, tag.id]
+                            );
+                          }}
+                          className="w-full px-3 py-1.5 text-xs text-left hover:bg-card-hover flex items-center gap-2"
+                        >
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: tag.color }}
+                          />
+                          <span className="flex-1">{tag.name}</span>
+                          {equityTagFilter.includes(tag.id) && (
+                            <Check className="w-3 h-3 text-accent" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Legend */}
+              <div className="flex items-center gap-4 text-xs border-l border-border pl-3">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-1 bg-emerald-500 rounded"></div>
+                  <span className="text-muted">Equity</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-1 bg-red-500/50 rounded"></div>
+                  <span className="text-muted">Drawdown</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Chart */}
+          <EquityCurveChart data={filteredEquityCurve.length > 0 ? filteredEquityCurve : tradingStats.equityCurve} />
+
+          {/* Drawdown Stats */}
+          <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">
+            <div>
+              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
+                Max Drawdown
+                <InfoTip content={{
+                  title: "Maximum Drawdown",
+                  description: "The largest peak-to-trough decline in your equity - your worst losing streak from a high point.",
+                  details: [
+                    { label: "Pro target", value: "< 20%", color: "text-emerald-400" },
+                    { label: "Warning zone", value: "> 30%", color: "text-yellow-400" },
+                    { label: "Danger zone", value: "> 50%", color: "text-red-400" }
+                  ],
+                  tip: "Lower is better - this measures your worst-case loss scenario."
+                }} />
+              </div>
+              <div className="text-lg font-bold text-red-400">
+                -${tradingStats.maxDrawdown.toFixed(0)} <span className="text-sm">({tradingStats.maxDrawdownPercent.toFixed(1)}%)</span>
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
+                Current Drawdown
+                <InfoTip content={{
+                  title: "Current Drawdown",
+                  description: "How far below your peak equity you currently are.",
+                  details: [
+                    { label: "At Peak", value: "No drawdown", color: "text-emerald-400" },
+                    { label: "In Drawdown", value: "Below your high", color: "text-red-400" }
+                  ],
+                  tip: "Shows how much you need to recover to reach a new all-time high."
+                }} />
+              </div>
+              <div className={`text-lg font-bold ${tradingStats.currentDrawdown > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                {tradingStats.currentDrawdown > 0 ? `-$${tradingStats.currentDrawdown.toFixed(0)}` : "At Peak"}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
+                Peak Equity
+                <InfoTip content={{
+                  title: "Peak Equity (High Water Mark)",
+                  description: "The highest cumulative P&L you've ever reached - your all-time high.",
+                  tip: "New profits push this higher. Losses create drawdown measured from this level."
+                }} />
+              </div>
+              <div className="text-lg font-bold text-emerald-400">${tradingStats.peak.toFixed(0)}</div>
+            </div>
+          </div>
+        </div>
+
       {/* GOALS & PROGRESS HERO SECTION */}
       <div className="relative rounded-2xl overflow-hidden border border-border/50">
         {/* Gradient background */}
@@ -1351,15 +1548,19 @@ export default function TradingPage() {
                   <button
                     onClick={() => {
                       setClosingTrade(trade);
+                      const today = new Date();
+                      const todayStr = today.toISOString().split("T")[0];
                       setCloseTradeForm({
                         exitPrice: "",
                         pnl: "",
-                        closeDate: new Date().toISOString().split("T")[0],
+                        closeDate: todayStr,
                       });
+                      setCloseDateMonth((today.getMonth() + 1).toString());
+                      setCloseDateDay(today.getDate().toString());
+                      setCloseDateYear(today.getFullYear().toString());
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors text-xs font-medium"
+                    className="px-3 py-1.5 rounded-lg bg-accent/20 text-accent hover:bg-accent/30 transition-colors text-xs font-medium"
                   >
-                    <Check className="w-3 h-3" />
                     Close Trade
                   </button>
                 </div>
@@ -1393,35 +1594,84 @@ export default function TradingPage() {
               </div>
             </div>
             <div className="space-y-3">
-              <div>
+              <div className="relative" ref={closeDatePickerRef}>
                 <label className="text-sm text-muted block mb-1">Close Date</label>
-                <input
-                  type="date"
-                  value={closeTradeForm.closeDate}
-                  onChange={(e) => setCloseTradeForm(prev => ({ ...prev, closeDate: e.target.value }))}
-                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg"
-                />
+                <button
+                  type="button"
+                  onClick={() => setShowCloseDatePicker(!showCloseDatePicker)}
+                  className={`w-full px-4 py-2.5 bg-card border border-border rounded-lg text-left text-sm ${!closeTradeForm.closeDate ? "text-muted" : ""}`}
+                >
+                  {formatCloseDateDisplay(closeTradeForm.closeDate) || "Select date"}
+                </button>
+                {showCloseDatePicker && (
+                  <div className="absolute top-full left-0 mt-1 p-2 bg-card border border-border rounded-lg shadow-xl z-50">
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={closeDateMonth}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+                          updateCloseDate(val, closeDateDay, closeDateYear);
+                        }}
+                        placeholder="MM"
+                        className="w-10 px-1 py-1.5 bg-background border border-border rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
+                      />
+                      <span className="text-sm">/</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={closeDateDay}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+                          updateCloseDate(closeDateMonth, val, closeDateYear);
+                        }}
+                        placeholder="DD"
+                        className="w-10 px-1 py-1.5 bg-background border border-border rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
+                      />
+                      <span className="text-sm">/</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={closeDateYear}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                          updateCloseDate(closeDateMonth, closeDateDay, val);
+                        }}
+                        placeholder="YYYY"
+                        className="w-14 px-1 py-1.5 bg-background border border-border rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCloseDatePicker(false)}
+                        className="ml-1 px-2 py-1.5 bg-accent text-white text-xs rounded hover:bg-accent/90"
+                      >
+                        OK
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-sm text-muted block mb-1">Exit Price</label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={closeTradeForm.exitPrice}
                   onChange={(e) => setCloseTradeForm(prev => ({ ...prev, exitPrice: e.target.value }))}
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-sm"
                 />
               </div>
               <div>
-                <label className="text-sm text-muted block mb-1">Final P&L</label>
+                <label className="text-sm text-muted block mb-1">P&L</label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={closeTradeForm.pnl}
                   onChange={(e) => setCloseTradeForm(prev => ({ ...prev, pnl: e.target.value }))}
                   placeholder="+/- 0.00"
-                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-sm"
                 />
               </div>
             </div>
@@ -1488,168 +1738,6 @@ export default function TradingPage() {
           </div>
         </div>
       </div>
-
-      {/* EQUITY CURVE - Full Width Secondary Section */}
-      <div className="glass rounded-xl border border-border/50 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-accent-light" />
-              Equity Curve
-              <InfoTip content={{
-                title: "Equity Curve Chart",
-                description: "Visual representation of your cumulative P&L over time.",
-                details: [
-                  { label: "Green line", value: "Your equity growth", color: "text-emerald-400" },
-                  { label: "Red area", value: "Drawdown periods", color: "text-red-400" }
-                ],
-                tip: "A smooth upward curve indicates consistent, disciplined trading."
-              }} />
-            </h3>
-            <div className="flex items-center gap-3">
-              {/* Period Filter */}
-              <div className="flex items-center gap-1 bg-card rounded-lg p-1">
-                {[
-                  { value: "all", label: "All" },
-                  { value: "ytd", label: "YTD" },
-                  { value: "mtd", label: "MTD" },
-                  { value: "wtd", label: "WTD" },
-                ].map((period) => (
-                  <button
-                    key={period.value}
-                    onClick={() => setEquityPeriod(period.value as typeof equityPeriod)}
-                    className={`px-2 py-1 text-xs rounded transition-colors ${
-                      equityPeriod === period.value
-                        ? "bg-accent text-white"
-                        : "text-muted hover:text-foreground"
-                    }`}
-                  >
-                    {period.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Tag Filter */}
-              {tags.length > 0 && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowTagDropdown(!showTagDropdown)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border transition-colors ${
-                      equityTagFilter.length > 0
-                        ? "bg-accent/20 border-accent text-accent"
-                        : "bg-card border-border text-muted hover:border-accent/50"
-                    }`}
-                  >
-                    <TagIcon className="w-3 h-3" />
-                    {equityTagFilter.length > 0 ? `${equityTagFilter.length} Tags` : "Filter by Tag"}
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                  {showTagDropdown && (
-                    <div className="absolute right-0 mt-1 w-48 bg-card border border-border rounded-lg shadow-xl z-20 py-1">
-                      {equityTagFilter.length > 0 && (
-                        <button
-                          onClick={() => {
-                            setEquityTagFilter([]);
-                            setShowTagDropdown(false);
-                          }}
-                          className="w-full px-3 py-1.5 text-xs text-left text-red-400 hover:bg-card-hover"
-                        >
-                          Clear All
-                        </button>
-                      )}
-                      {tags.map((tag) => (
-                        <button
-                          key={tag.id}
-                          onClick={() => {
-                            setEquityTagFilter((prev) =>
-                              prev.includes(tag.id)
-                                ? prev.filter((id) => id !== tag.id)
-                                : [...prev, tag.id]
-                            );
-                          }}
-                          className="w-full px-3 py-1.5 text-xs text-left hover:bg-card-hover flex items-center gap-2"
-                        >
-                          <div
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: tag.color }}
-                          />
-                          <span className="flex-1">{tag.name}</span>
-                          {equityTagFilter.includes(tag.id) && (
-                            <Check className="w-3 h-3 text-accent" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Legend */}
-              <div className="flex items-center gap-4 text-xs border-l border-border pl-3">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-1 bg-emerald-500 rounded"></div>
-                  <span className="text-muted">Equity</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-1 bg-red-500/50 rounded"></div>
-                  <span className="text-muted">Drawdown</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Chart */}
-          <EquityCurveChart data={filteredEquityCurve.length > 0 ? filteredEquityCurve : tradingStats.equityCurve} />
-
-          {/* Drawdown Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">
-            <div>
-              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
-                Max Drawdown
-                <InfoTip content={{
-                  title: "Maximum Drawdown",
-                  description: "The largest peak-to-trough decline in your equity - your worst losing streak from a high point.",
-                  details: [
-                    { label: "Pro target", value: "< 20%", color: "text-emerald-400" },
-                    { label: "Warning zone", value: "> 30%", color: "text-yellow-400" },
-                    { label: "Danger zone", value: "> 50%", color: "text-red-400" }
-                  ],
-                  tip: "Lower is better - this measures your worst-case loss scenario."
-                }} />
-              </div>
-              <div className="text-lg font-bold text-red-400">
-                -${tradingStats.maxDrawdown.toFixed(0)} <span className="text-sm">({tradingStats.maxDrawdownPercent.toFixed(1)}%)</span>
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
-                Current Drawdown
-                <InfoTip content={{
-                  title: "Current Drawdown",
-                  description: "How far below your peak equity you currently are.",
-                  details: [
-                    { label: "At Peak", value: "No drawdown", color: "text-emerald-400" },
-                    { label: "In Drawdown", value: "Below your high", color: "text-red-400" }
-                  ],
-                  tip: "Shows how much you need to recover to reach a new all-time high."
-                }} />
-              </div>
-              <div className={`text-lg font-bold ${tradingStats.currentDrawdown > 0 ? "text-red-400" : "text-emerald-400"}`}>
-                {tradingStats.currentDrawdown > 0 ? `-$${tradingStats.currentDrawdown.toFixed(0)}` : "At Peak"}
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
-                Peak Equity
-                <InfoTip content={{
-                  title: "Peak Equity (High Water Mark)",
-                  description: "The highest cumulative P&L you've ever reached - your all-time high.",
-                  tip: "New profits push this higher. Losses create drawdown measured from this level."
-                }} />
-              </div>
-              <div className="text-lg font-bold text-emerald-400">${tradingStats.peak.toFixed(0)}</div>
-            </div>
-          </div>
-        </div>
 
       {/* SUPPORTING METRICS - 3 Column Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

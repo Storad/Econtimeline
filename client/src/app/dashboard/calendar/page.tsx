@@ -188,12 +188,17 @@ export default function EconomicCalendarPage() {
     createTrade,
     updateTrade,
     deleteTrade,
+    closeTrade,
     createTag,
     deleteTag,
     changeStatsPeriod,
     getTradesByDate,
     getDailyPnL,
-    getTradeCount,
+    hasOpenTrades,
+    getOpenTradeCount,
+    getClosedTradeCount,
+    getClosedTradesOpenedOnDate,
+    getTradesClosedOnDate,
   } = useTradeJournal();
 
   const [showTradeForm, setShowTradeForm] = useState(false);
@@ -204,6 +209,19 @@ export default function EconomicCalendarPage() {
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#6b7280");
   const [modalTab, setModalTab] = useState<"events" | "trades">("events");
+
+  // Close trade state
+  const [showOpenTradesList, setShowOpenTradesList] = useState(false);
+  const [closingTrade, setClosingTrade] = useState<Trade | null>(null);
+  const [closeTradeForm, setCloseTradeForm] = useState({ exitPrice: "", pnl: "", closeDate: "" });
+  const [showCloseDatePicker, setShowCloseDatePicker] = useState(false);
+  const [closeDateMonth, setCloseDateMonth] = useState("");
+  const [closeDateDay, setCloseDateDay] = useState("");
+  const [closeDateYear, setCloseDateYear] = useState("");
+  const closeDatePickerRef = useRef<HTMLDivElement>(null);
+
+  // Get all open trades
+  const openTrades = useMemo(() => trades.filter(t => t.status === "OPEN"), [trades]);
 
   // Fetch trade notes
   const fetchTradeNotes = async () => {
@@ -1037,25 +1055,32 @@ export default function EconomicCalendarPage() {
     let weekTrades = 0;
     let weekDays = 0;
 
-    // Use the new trade journal data
+    // Use the new trade journal data - P&L counts on CLOSE date, not entry date
     trades.forEach((trade) => {
-      const [y, m, d] = trade.date.split("-").map(Number);
-      const tradeDate = new Date(y, m - 1, d);
+      // Only count closed trades for P&L
+      if (trade.status !== "CLOSED") return;
+
+      // Use closeDate for P&L attribution, fall back to entry date for day trades
+      const pnlDateStr = trade.closeDate || trade.date;
+      const [y, m, d] = pnlDateStr.split("-").map(Number);
+      const pnlDate = new Date(y, m - 1, d);
 
       // Only count trades within the effective range (week bounded by month)
-      if (tradeDate >= effectiveStart && tradeDate <= effectiveEnd) {
+      if (pnlDate >= effectiveStart && pnlDate <= effectiveEnd) {
         weekPnL += trade.pnl;
         weekTrades++;
       }
     });
 
-    // Count unique days with trades
+    // Count unique days with closed trades (using close date)
     const daysWithTrades = new Set<string>();
     trades.forEach((trade) => {
-      const [y, m, d] = trade.date.split("-").map(Number);
-      const tradeDate = new Date(y, m - 1, d);
-      if (tradeDate >= effectiveStart && tradeDate <= effectiveEnd) {
-        daysWithTrades.add(trade.date);
+      if (trade.status !== "CLOSED") return;
+      const pnlDateStr = trade.closeDate || trade.date;
+      const [y, m, d] = pnlDateStr.split("-").map(Number);
+      const pnlDate = new Date(y, m - 1, d);
+      if (pnlDate >= effectiveStart && pnlDate <= effectiveEnd) {
+        daysWithTrades.add(pnlDateStr);
       }
     });
     weekDays = daysWithTrades.size;
@@ -1393,6 +1418,54 @@ export default function EconomicCalendarPage() {
     setHighlightedDay(dateKey);
     setShowModal(true);
   };
+
+  // Close trade helpers
+  const updateCloseDate = (month: string, day: string, year: string) => {
+    setCloseDateMonth(month);
+    setCloseDateDay(day);
+    setCloseDateYear(year);
+    if (month.length === 2 && day.length === 2 && year.length === 4) {
+      const m = parseInt(month);
+      const d = parseInt(day);
+      const y = parseInt(year);
+      if (m >= 1 && m <= 12 && d >= 1 && d <= 31 && y >= 2020 && y <= 2100) {
+        setCloseTradeForm(prev => ({
+          ...prev,
+          closeDate: `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+        }));
+      }
+    }
+  };
+
+  const formatCloseDateDisplay = (dateStr: string) => {
+    if (!dateStr) return "";
+    const [y, m, d] = dateStr.split("-");
+    return `${m}/${d}/${y}`;
+  };
+
+  const openCloseTrade = (trade: Trade) => {
+    setClosingTrade(trade);
+    setShowOpenTradesList(false);
+    // Pre-fill with selected day or today
+    const today = new Date();
+    const dateToUse = selectedDay || formatDateKey(today);
+    const [y, m, d] = dateToUse.split("-");
+    setCloseDateMonth(m);
+    setCloseDateDay(d);
+    setCloseDateYear(y);
+    setCloseTradeForm({ exitPrice: "", pnl: "", closeDate: dateToUse });
+  };
+
+  // Click outside handler for close date picker
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (closeDatePickerRef.current && !closeDatePickerRef.current.contains(event.target as Node)) {
+        setShowCloseDatePicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Handle clicking on the next high-impact countdown box
   const handleCountdownClick = () => {
@@ -1982,11 +2055,19 @@ export default function EconomicCalendarPage() {
 
             // Trade journal data for this day
             const dayPnL = getDailyPnL(dateKey);
-            const dayTradeCount = getTradeCount(dateKey);
-            const hasPnL = dayTradeCount > 0;
+            const dayHasOpenTrades = hasOpenTrades(dateKey);
+            const openCount = getOpenTradeCount(dateKey);
+            const closedCount = getClosedTradeCount(dateKey);
+            const closedTradesOpenedToday = getClosedTradesOpenedOnDate(dateKey);
+            const tradesClosedToday = getTradesClosedOnDate(dateKey);
+            const dayTradeCount = openCount + closedCount + closedTradesOpenedToday.length;
+            const hasPnL = closedCount > 0; // Only count closed trades for P&L
             const hasTrades = dayTradeCount > 0;
-            const isProfit = hasPnL && dayPnL >= 0;
+            const hasOnlyOpenTrades = dayHasOpenTrades && closedCount === 0 && closedTradesOpenedToday.length === 0;
+            const hasTradesOpenedToday = closedTradesOpenedToday.length > 0;
+            const isProfit = hasPnL && dayPnL > 0;
             const isLoss = hasPnL && dayPnL < 0;
+            const isBreakeven = hasPnL && dayPnL === 0;
 
             // Check if this is a Saturday (day 6) - show weekly totals
             const isSaturday = date.getDay() === 6;
@@ -2008,10 +2089,14 @@ export default function EconomicCalendarPage() {
                   className={`p-1.5 rounded-lg text-left transition-all duration-200 group relative hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10 hover:shadow-md ${
                     isHighlighted
                       ? "bg-accent/15 ring-2 ring-accent/40 shadow-lg shadow-accent/20"
+                      : showNotes && hasOnlyOpenTrades
+                      ? "bg-amber-500/20 ring-1 ring-amber-500/30 shadow-md shadow-amber-500/10"
                       : showNotes && isProfit
                       ? "bg-emerald-500/20 ring-1 ring-emerald-500/30 shadow-md shadow-emerald-500/10"
                       : showNotes && isLoss
                       ? "bg-red-500/20 ring-1 ring-red-500/30 shadow-md shadow-red-500/10"
+                      : showNotes && hasTradesOpenedToday && !hasPnL
+                      ? "bg-blue-500/20 ring-1 ring-blue-500/30 shadow-md shadow-blue-500/10"
                       : (isMarketClosed || isEarlyClose) && showHolidays
                       ? "bg-gray-500/15 ring-1 ring-gray-500/30 shadow-sm hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                       : "bg-card/50 ring-1 ring-border/50"
@@ -2052,16 +2137,35 @@ export default function EconomicCalendarPage() {
                       </div>
 
                       {/* Trade P&L Display */}
+                      {showNotes && hasOnlyOpenTrades && (
+                        <div className="text-sm font-bold mt-0.5 text-amber-400">
+                          Pending
+                        </div>
+                      )}
                       {showNotes && hasPnL && (
-                        <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
+                        <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : isLoss ? "text-red-400" : "text-muted"}`}>
                           {formatPnL(dayPnL)}
                         </div>
                       )}
+                      {showNotes && hasTradesOpenedToday && !hasPnL && !hasOnlyOpenTrades && (
+                        <div className="text-sm font-bold mt-0.5 text-blue-400">
+                          Opened
+                        </div>
+                      )}
 
-                      {/* Trades count */}
+                      {/* Trade details */}
                       {showNotes && hasTrades && (
-                        <div className="text-xs text-muted">
-                          {dayTradeCount} Trade{dayTradeCount !== 1 ? "s" : ""}
+                        <div className="text-xs text-muted space-y-0.5">
+                          {/* Show swing trades closed today with their entry dates */}
+                          {tradesClosedToday.length > 0 && tradesClosedToday.map((trade, idx) => (
+                            <div key={idx} className="truncate">
+                              From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </div>
+                          ))}
+                          {/* Show count summary */}
+                          {closedCount > 0 && <div>{closedCount} Trade{closedCount !== 1 ? "s" : ""}</div>}
+                          {openCount > 0 && <div>{openCount} Open</div>}
+                          {hasTradesOpenedToday && <div>{closedTradesOpenedToday.length} Opened</div>}
                         </div>
                       )}
                     </button>
@@ -2118,10 +2222,14 @@ export default function EconomicCalendarPage() {
                 className={`p-2 rounded-lg text-left transition-all duration-200 flex flex-col group relative ${
                   isHighlighted
                     ? "bg-accent/15 ring-2 ring-accent/40 shadow-lg shadow-accent/20"
+                    : showNotes && hasOnlyOpenTrades
+                    ? "bg-amber-500/20 ring-1 ring-amber-500/30 shadow-md shadow-amber-500/10 hover:shadow-lg hover:shadow-amber-500/20 hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : showNotes && isProfit
                     ? "bg-emerald-500/20 ring-1 ring-emerald-500/30 shadow-md shadow-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : showNotes && isLoss
                     ? "bg-red-500/20 ring-1 ring-red-500/30 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
+                    : showNotes && hasTradesOpenedToday && !hasPnL
+                    ? "bg-blue-500/20 ring-1 ring-blue-500/30 shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : (isMarketClosed || isEarlyClose) && showHolidays
                     ? "bg-gray-500/15 ring-1 ring-gray-500/30 shadow-sm hover:scale-[1.02] hover:-translate-y-0.5 hover:z-10"
                     : isCurrentDay
@@ -2171,16 +2279,35 @@ export default function EconomicCalendarPage() {
                 </div>
 
                 {/* Trade P&L Display */}
+                {showNotes && hasOnlyOpenTrades && (
+                  <div className="text-sm font-bold mt-0.5 text-amber-400">
+                    Pending
+                  </div>
+                )}
                 {showNotes && hasPnL && (
-                  <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : "text-red-400"}`}>
+                  <div className={`text-sm font-bold mt-0.5 ${isProfit ? "text-emerald-400" : isLoss ? "text-red-400" : "text-muted"}`}>
                     {formatPnL(dayPnL)}
                   </div>
                 )}
+                {showNotes && hasTradesOpenedToday && !hasPnL && !hasOnlyOpenTrades && (
+                  <div className="text-sm font-bold mt-0.5 text-blue-400">
+                    Opened
+                  </div>
+                )}
 
-                {/* Trades count */}
+                {/* Trade details */}
                 {showNotes && hasTrades && (
-                  <div className="text-xs text-muted">
-                    {dayTradeCount} Trade{dayTradeCount !== 1 ? "s" : ""}
+                  <div className="text-xs text-muted space-y-0.5">
+                    {/* Show swing trades closed today with their entry dates */}
+                    {tradesClosedToday.length > 0 && tradesClosedToday.map((trade, idx) => (
+                      <div key={idx} className="truncate">
+                        From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
+                    ))}
+                    {/* Show count summary */}
+                    {closedCount > 0 && <div>{closedCount} Trade{closedCount !== 1 ? "s" : ""}</div>}
+                    {openCount > 0 && <div>{openCount} Open</div>}
+                    {hasTradesOpenedToday && <div>{closedTradesOpenedToday.length} Opened</div>}
                   </div>
                 )}
 
@@ -2278,12 +2405,44 @@ export default function EconomicCalendarPage() {
             setShowModal(false);
             setHighlightedDay(null);
             setExpandedEventId(null);
+            setShowOpenTradesList(false);
           }}
         >
-          <div
-            className="w-full max-w-lg max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in"
-            onClick={(e) => e.stopPropagation()}
-          >
+          {/* Trade Entry Form - Full screen when open */}
+          {showTradeForm ? (
+            <div
+              className="w-full max-w-3xl max-h-[85vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <TradeForm
+                date={selectedDay}
+                tags={tags}
+                editingTrade={editingTrade}
+                onSave={async (formData) => {
+                  if (editingTrade) {
+                    await updateTrade(editingTrade.id, formData);
+                  } else {
+                    await createTrade(selectedDay, formData);
+                  }
+                  setShowTradeForm(false);
+                  setEditingTrade(null);
+                  setTradeFormData(DEFAULT_TRADE_FORM);
+                }}
+                onCancel={() => {
+                  setShowTradeForm(false);
+                  setEditingTrade(null);
+                  setTradeFormData(DEFAULT_TRADE_FORM);
+                }}
+                onCreateTag={createTag}
+                onDeleteTag={deleteTag}
+              />
+            </div>
+          ) : (
+          <div className="relative animate-slide-in" onClick={(e) => e.stopPropagation()}>
+            {/* Main Modal */}
+            <div
+              className="w-[32rem] max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col"
+            >
             {/* Panel Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
               <div>
@@ -2315,6 +2474,7 @@ export default function EconomicCalendarPage() {
                   setHighlightedDay(null);
                   setShowNoteModal(false);
                   setShowTradeForm(false);
+                  setShowOpenTradesList(false);
                   setModalTab("events");
                 }}
                 className="p-2 rounded-lg hover:bg-card-hover transition-colors"
@@ -2532,14 +2692,34 @@ export default function EconomicCalendarPage() {
               {/* Trades Tab */}
               {modalTab === "trades" && (
                 <div className="p-4">
-                  {/* Add Trade Button */}
-                  <button
-                    onClick={() => openTradeForm()}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-accent/20 text-accent-light border border-accent/30 rounded-lg hover:bg-accent/30 transition-colors text-sm font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Log Trade
-                  </button>
+                  {/* Trade Action Buttons */}
+                  <div className={`grid gap-2 mb-4 ${openTrades.length > 0 ? "grid-cols-2" : "grid-cols-1"}`}>
+                    {/* Add Trade Button */}
+                    <button
+                      onClick={() => openTradeForm()}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-accent/20 text-accent-light border border-accent/30 rounded-lg hover:bg-accent/30 transition-colors text-sm font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Log Trade
+                    </button>
+
+                    {/* Close Trade Button - Only shows when there are open trades */}
+                    {openTrades.length > 0 && (
+                      <button
+                        onClick={() => setShowOpenTradesList(!showOpenTradesList)}
+                        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${
+                          showOpenTradesList
+                            ? "bg-amber-500 text-white border border-amber-500"
+                            : "bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30"
+                        }`}
+                      >
+                        Close Trade
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${showOpenTradesList ? "bg-amber-600" : "bg-amber-500/30"}`}>
+                          {openTrades.length}
+                        </span>
+                      </button>
+                    )}
+                  </div>
 
                   {/* Trade List */}
                   {selectedDayTrades.length === 0 ? (
@@ -2561,16 +2741,26 @@ export default function EconomicCalendarPage() {
                       </div>
 
                       {/* Individual Trades */}
-                      {selectedDayTrades.map((trade) => (
+                      {selectedDayTrades.map((trade) => {
+                        // Determine if this is a swing trade being viewed from entry date or close date
+                        const closeDate = trade.closeDate || trade.date;
+                        const isSwingTrade = trade.status === "CLOSED" && closeDate !== trade.date;
+                        const isViewingFromEntryDate = isSwingTrade && selectedDay === trade.date;
+                        const isViewingFromCloseDate = isSwingTrade && selectedDay === closeDate;
+
+                        // Card styling based on trade state and viewing context
+                        const cardStyle = trade.status === "OPEN"
+                          ? "bg-amber-500/5 border-amber-500/30"
+                          : isViewingFromEntryDate
+                            ? "bg-blue-500/5 border-blue-500/30"
+                            : trade.pnl >= 0
+                              ? "bg-emerald-500/5 border-emerald-500/20"
+                              : "bg-red-500/5 border-red-500/20";
+
+                        return (
                         <div
                           key={trade.id}
-                          className={`p-3 rounded-lg border transition-all ${
-                            trade.status === "OPEN"
-                              ? "bg-amber-500/5 border-amber-500/30"
-                              : trade.pnl >= 0
-                                ? "bg-emerald-500/5 border-emerald-500/20"
-                                : "bg-red-500/5 border-red-500/20"
-                          }`}
+                          className={`p-3 rounded-lg border transition-all ${cardStyle}`}
                         >
                           {/* Top Row */}
                           <div className="flex items-center justify-between mb-2">
@@ -2588,19 +2778,56 @@ export default function EconomicCalendarPage() {
                                 {trade.direction === "LONG" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                 {trade.direction}
                               </span>
-                              {/* Open Trade Badge */}
+                              {/* Trade Status Badge - Open trades */}
                               {trade.status === "OPEN" && (
                                 <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
                                   OPEN
                                 </span>
                               )}
+                              {/* Swing trade on ENTRY date - show "Closed on" badge (clickable) */}
+                              {isViewingFromEntryDate && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedDay(closeDate);
+                                    // Update calendar view to show the close date's month
+                                    const [y, m, d] = closeDate.split("-").map(Number);
+                                    setCurrentMonth(new Date(y, m - 1, d));
+                                  }}
+                                  className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors cursor-pointer"
+                                >
+                                  Closed {new Date(closeDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </button>
+                              )}
+                              {/* Swing trade on CLOSE date - show "From" badge (clickable) */}
+                              {isViewingFromCloseDate && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedDay(trade.date);
+                                    // Update calendar view to show the entry date's month
+                                    const [y, m, d] = trade.date.split("-").map(Number);
+                                    setCurrentMonth(new Date(y, m - 1, d));
+                                  }}
+                                  className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors cursor-pointer"
+                                >
+                                  From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </button>
+                              )}
                             </div>
+                            {/* P&L display - hide on entry date for closed swing trades */}
                             <span className={`font-bold ${
                               trade.status === "OPEN"
                                 ? "text-amber-400"
-                                : trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"
+                                : isViewingFromEntryDate
+                                  ? "text-blue-400"
+                                  : trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"
                             }`}>
-                              {trade.status === "OPEN" ? "Open" : `${trade.pnl >= 0 ? "+" : ""}$${trade.pnl.toFixed(2)}`}
+                              {trade.status === "OPEN"
+                                ? "Open"
+                                : isViewingFromEntryDate
+                                  ? "Swing"
+                                  : `${trade.pnl >= 0 ? "+" : ""}$${trade.pnl.toFixed(2)}`}
                             </span>
                           </div>
 
@@ -2612,8 +2839,13 @@ export default function EconomicCalendarPage() {
                                 {trade.time}
                               </span>
                             )}
-                            {trade.entryPrice && trade.exitPrice && (
-                              <span>{trade.entryPrice.toFixed(2)} → {trade.exitPrice.toFixed(2)}</span>
+                            {/* Entry date view: show entry price only */}
+                            {isViewingFromEntryDate && trade.entryPrice && (
+                              <span>Entry: ${trade.entryPrice.toFixed(2)}</span>
+                            )}
+                            {/* Close date view or day trades: show entry → exit */}
+                            {!isViewingFromEntryDate && trade.entryPrice && trade.exitPrice && (
+                              <span>${trade.entryPrice.toFixed(2)} → ${trade.exitPrice.toFixed(2)}</span>
                             )}
                             {trade.size && <span>{trade.size} qty</span>}
                           </div>
@@ -2656,7 +2888,8 @@ export default function EconomicCalendarPage() {
                             </button>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -2676,36 +2909,6 @@ export default function EconomicCalendarPage() {
               </div>
             )}
           </div>
-
-          {/* Trade Entry Form - appears to the right */}
-          {showTradeForm && selectedDay && (
-            <div
-              className="w-full max-w-md max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in ml-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <TradeForm
-                date={selectedDay}
-                tags={tags}
-                editingTrade={editingTrade}
-                onSave={async (formData) => {
-                  if (editingTrade) {
-                    await updateTrade(editingTrade.id, formData);
-                  } else {
-                    await createTrade(selectedDay, formData);
-                  }
-                  setShowTradeForm(false);
-                  setEditingTrade(null);
-                  setTradeFormData(DEFAULT_TRADE_FORM);
-                }}
-                onCancel={() => {
-                  setShowTradeForm(false);
-                  setEditingTrade(null);
-                  setTradeFormData(DEFAULT_TRADE_FORM);
-                }}
-                onCreateTag={createTag}
-              />
-            </div>
-          )}
 
           {/* Note Entry Modal - appears to the right */}
           {showNoteModal && (
@@ -2822,6 +3025,193 @@ export default function EconomicCalendarPage() {
               </div>
             </div>
           )}
+
+          {/* Open Trades Side Panel */}
+          {showOpenTradesList && openTrades.length > 0 && (
+            <div
+              className="absolute left-full top-0 ml-3 w-72 max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-amber-500/10">
+                <h4 className="font-bold text-sm text-amber-400">Open Trades</h4>
+                <button
+                  onClick={() => setShowOpenTradesList(false)}
+                  className="p-1 hover:bg-card-hover rounded"
+                >
+                  <X className="w-4 h-4 text-muted" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                {openTrades.map((trade) => (
+                  <button
+                    key={trade.id}
+                    onClick={() => openCloseTrade(trade)}
+                    className="w-full p-4 text-left hover:bg-card-hover border-b border-border/50 last:border-0 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent">
+                        {trade.assetType || "STOCK"}
+                      </span>
+                      <span className="font-bold">{trade.ticker}</span>
+                      <span className={`text-xs ${trade.direction === "LONG" ? "text-emerald-400" : "text-red-400"}`}>
+                        {trade.direction}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted mt-1">
+                      {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
+                    {trade.entryPrice && (
+                      <div className="text-xs text-muted mt-0.5">
+                        Entry: ${trade.entryPrice.toFixed(2)}
+                        {trade.size && ` • Size: ${trade.size}`}
+                      </div>
+                    )}
+                    {trade.notes && (
+                      <div className="text-xs text-muted/70 mt-1 line-clamp-2 italic">
+                        {trade.notes}
+                      </div>
+                      )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          </div>
+        )}
+        </div>
+      )}
+
+      {/* Close Trade Modal */}
+      {closingTrade && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass rounded-2xl border border-border/50 p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">Close Trade</h3>
+              <button onClick={() => setClosingTrade(null)} className="p-2 hover:bg-card-hover rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="mb-4 p-3 rounded-lg bg-card border border-border">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-accent/20 text-accent">{closingTrade.assetType || "STOCK"}</span>
+                <span className="font-bold">{closingTrade.ticker}</span>
+                <span className={`text-xs ${closingTrade.direction === "LONG" ? "text-emerald-400" : "text-red-400"}`}>
+                  {closingTrade.direction}
+                </span>
+              </div>
+              <div className="text-xs text-muted">
+                Opened {new Date(closingTrade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} |
+                Entry: {closingTrade.entryPrice ? `$${closingTrade.entryPrice.toFixed(2)}` : "N/A"} |
+                Size: {closingTrade.size || "N/A"}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="relative" ref={closeDatePickerRef}>
+                <label className="text-sm text-muted block mb-1">Close Date</label>
+                <button
+                  type="button"
+                  onClick={() => setShowCloseDatePicker(!showCloseDatePicker)}
+                  className={`w-full px-4 py-2.5 bg-card border border-border rounded-lg text-left text-sm ${!closeTradeForm.closeDate ? "text-muted" : ""}`}
+                >
+                  {formatCloseDateDisplay(closeTradeForm.closeDate) || "Select date"}
+                </button>
+                {showCloseDatePicker && (
+                  <div className="absolute top-full left-0 mt-1 p-2 bg-card border border-border rounded-lg shadow-xl z-50">
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={closeDateMonth}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+                          updateCloseDate(val, closeDateDay, closeDateYear);
+                        }}
+                        placeholder="MM"
+                        className="w-10 px-1 py-1.5 bg-background border border-border rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
+                      />
+                      <span className="text-sm">/</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={closeDateDay}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+                          updateCloseDate(closeDateMonth, val, closeDateYear);
+                        }}
+                        placeholder="DD"
+                        className="w-10 px-1 py-1.5 bg-background border border-border rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
+                      />
+                      <span className="text-sm">/</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={closeDateYear}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                          updateCloseDate(closeDateMonth, closeDateDay, val);
+                        }}
+                        placeholder="YYYY"
+                        className="w-14 px-1 py-1.5 bg-background border border-border rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCloseDatePicker(false)}
+                        className="ml-1 px-2 py-1.5 bg-accent text-white text-xs rounded hover:bg-accent/90"
+                      >
+                        OK
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="text-sm text-muted block mb-1">Exit Price</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={closeTradeForm.exitPrice}
+                  onChange={(e) => setCloseTradeForm(prev => ({ ...prev, exitPrice: e.target.value }))}
+                  placeholder="0.00"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted block mb-1">P&L</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={closeTradeForm.pnl}
+                  onChange={(e) => setCloseTradeForm(prev => ({ ...prev, pnl: e.target.value }))}
+                  placeholder="+/- 0.00"
+                  className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => setClosingTrade(null)}
+                className="px-4 py-2 text-sm text-muted hover:text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!closeTradeForm.pnl || !closeTradeForm.closeDate) return;
+                  await closeTrade(
+                    closingTrade.id,
+                    closeTradeForm.closeDate,
+                    closeTradeForm.exitPrice ? parseFloat(closeTradeForm.exitPrice) : null,
+                    parseFloat(closeTradeForm.pnl)
+                  );
+                  setClosingTrade(null);
+                  setCloseTradeForm({ exitPrice: "", pnl: "", closeDate: "" });
+                }}
+                disabled={!closeTradeForm.pnl || !closeTradeForm.closeDate}
+                className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 text-sm font-medium"
+              >
+                Close Trade
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
