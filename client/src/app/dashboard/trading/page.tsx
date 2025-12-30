@@ -39,7 +39,7 @@ interface TooltipContent {
   tip?: string;
 }
 
-// Tooltip Component - uses fixed positioning to stay in viewport
+// Tooltip Component - clean, visual design
 const Tooltip = ({ children, content }: { children: React.ReactNode; content: TooltipContent }) => {
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
   const [isVisible, setIsVisible] = useState(false);
@@ -48,20 +48,17 @@ const Tooltip = ({ children, content }: { children: React.ReactNode; content: To
   const handleMouseEnter = () => {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
-    const tooltipWidth = 280;
-    const tooltipHeight = 160;
+    const tooltipWidth = 240;
+    const tooltipHeight = 200;
     const padding = 12;
 
     let left = rect.left + rect.width / 2 - tooltipWidth / 2;
     let top = rect.bottom + padding;
 
-    // Keep tooltip within horizontal bounds
     if (left < padding) left = padding;
     if (left + tooltipWidth > window.innerWidth - padding) {
       left = window.innerWidth - tooltipWidth - padding;
     }
-
-    // If tooltip would go below viewport, show above instead
     if (top + tooltipHeight > window.innerHeight - padding) {
       top = rect.top - tooltipHeight - padding;
     }
@@ -80,46 +77,35 @@ const Tooltip = ({ children, content }: { children: React.ReactNode; content: To
       {children}
       <div
         style={tooltipStyle}
-        className={`fixed w-[280px] bg-card border border-border rounded-xl shadow-2xl overflow-hidden transition-all duration-200 z-[9999] pointer-events-none ${
+        className={`fixed w-[240px] bg-card border border-border rounded-lg shadow-2xl overflow-hidden transition-all duration-200 z-[9999] pointer-events-none ${
           isVisible ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
       >
-        {/* Header */}
-        <div className="px-3 py-2 bg-accent/10 border-b border-border">
-          <h4 className="text-xs font-semibold text-accent-light flex items-center gap-1.5">
-            <Info className="w-3 h-3" />
-            {content.title}
-          </h4>
+        {/* Title */}
+        <div className="px-3 py-2 border-b border-border/50">
+          <h4 className="text-sm font-semibold text-foreground">{content.title}</h4>
         </div>
 
         {/* Body */}
-        <div className="p-3 space-y-2">
-          <p className="text-xs text-muted leading-relaxed">{content.description}</p>
+        <div className="p-3">
+          <p className="text-xs text-muted leading-relaxed mb-3">{content.description}</p>
 
-          {/* Details list */}
+          {/* Details - card style */}
           {content.details && content.details.length > 0 && (
-            <div className="space-y-1 pt-1">
+            <div className="space-y-2">
               {content.details.map((detail, i) => (
-                <div key={i} className="flex items-center justify-between text-[10px]">
-                  <span className="text-muted">{detail.label}</span>
-                  <span className={`font-medium ${detail.color || "text-foreground"}`}>{detail.value}</span>
+                <div key={i} className="flex items-center justify-between">
+                  <span className="text-xs text-muted">{detail.label}</span>
+                  <span className={`text-sm font-semibold ${detail.color || "text-foreground"}`}>{detail.value}</span>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Formula */}
-          {content.formula && (
-            <div className="mt-2 px-2 py-1.5 bg-background rounded-md border border-border/50">
-              <code className="text-[10px] text-accent-light font-mono">{content.formula}</code>
-            </div>
-          )}
-
           {/* Tip */}
           {content.tip && (
-            <div className="flex items-start gap-1.5 mt-2 pt-2 border-t border-border/50">
-              <Zap className="w-3 h-3 text-yellow-400 flex-shrink-0 mt-0.5" />
-              <p className="text-[10px] text-muted italic">{content.tip}</p>
+            <div className="mt-3 pt-2 border-t border-border/50">
+              <p className="text-[11px] text-muted/80">{content.tip}</p>
             </div>
           )}
         </div>
@@ -186,7 +172,7 @@ const CircularProgress = ({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold">{clampedPercentage.toFixed(0)}%</span>
-        <span className="text-[10px] text-muted uppercase tracking-wider">{label}</span>
+        <span className="text-[10px] text-muted">{label}</span>
       </div>
     </div>
   );
@@ -195,7 +181,7 @@ const CircularProgress = ({
 // Compact Stat Component for summary bar
 const CompactStat = ({ label, value, count }: { label: string; value: number; count?: number }) => (
   <div className="flex items-center gap-2">
-    <span className="text-[10px] text-muted uppercase tracking-wider">{label}</span>
+    <span className="text-[10px] text-muted">{label}</span>
     <span className={`font-bold ${value >= 0 ? "text-emerald-400" : "text-red-400"}`}>
       {value >= 0 ? "+" : ""}${value.toFixed(0)}
     </span>
@@ -207,23 +193,82 @@ const CompactStat = ({ label, value, count }: { label: string; value: number; co
 interface TradingGoals {
   yearlyPnlGoal: number;
   monthlyPnlGoal: number;
+  startingEquity: number;
 }
 
 // Equity curve data point type
 interface EquityDataPoint {
   date: string;
+  dateEnd?: string; // For weekly aggregation, the end date of the week
   pnl: number;
   cumulative: number;
   drawdown: number;
   drawdownPercent: number;
+  tradeCount: number; // Number of trades in this period
 }
 
 // Equity Curve Chart Component with hover info panel
-const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
+interface EquityCurveChartProps {
+  data: EquityDataPoint[];
+  dateRange?: { start: string; end: string } | null;
+  period?: "all" | "ytd" | "mtd" | "wtd" | "daily";
+  startingEquity?: number;
+}
+
+const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 }: EquityCurveChartProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 0 });
   const chartRef = useRef<HTMLDivElement>(null);
   const chartAreaRef = useRef<HTMLDivElement>(null);
+
+  // Helper to get day number from a date string (YYYY-MM-DD)
+  const getDayOfRange = (dateStr: string): number => {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(y, m - 1, d).getTime();
+  };
+
+  // Helper to get the start of week (Sunday) for a date
+  const getWeekStartFromDate = (date: Date): Date => {
+    const result = new Date(date);
+    result.setDate(date.getDate() - date.getDay());
+    return result;
+  };
+
+  // Calculate total days/weeks in range for calendar-based positioning
+  const hasCalendarRange = dateRange !== null && dateRange !== undefined;
+  const rangeStartTime = hasCalendarRange ? getDayOfRange(dateRange.start) : 0;
+  const rangeEndTime = hasCalendarRange ? getDayOfRange(dateRange.end) : 0;
+  const totalRangeDays = hasCalendarRange ? Math.round((rangeEndTime - rangeStartTime) / (1000 * 60 * 60 * 24)) + 1 : data.length;
+
+  // For YTD, calculate week-based positioning
+  const isYtdWeekly = period === 'ytd';
+  const weekStartTime = isYtdWeekly && hasCalendarRange
+    ? getWeekStartFromDate(new Date(dateRange.start)).getTime()
+    : rangeStartTime;
+  const weekEndTime = isYtdWeekly && hasCalendarRange
+    ? getDayOfRange(dateRange.end)
+    : rangeEndTime;
+  const totalRangeWeeks = isYtdWeekly && hasCalendarRange
+    ? Math.ceil((weekEndTime - weekStartTime) / (7 * 24 * 60 * 60 * 1000)) + 1
+    : 1;
+
+  // Get X position as percentage (0-100) for a given date
+  const getXPercent = (dateStr: string, index: number): number => {
+    if (hasCalendarRange) {
+      if (isYtdWeekly) {
+        // For YTD with weekly aggregation, position based on week number
+        const dateTime = getDayOfRange(dateStr);
+        const weekIndex = Math.floor((dateTime - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+        return ((weekIndex + 0.5) / totalRangeWeeks) * 100;
+      }
+      const dateTime = getDayOfRange(dateStr);
+      const dayIndex = Math.round((dateTime - rangeStartTime) / (1000 * 60 * 60 * 24));
+      // Position at the day within the range (0 to totalRangeDays-1), centered in each day slot
+      return ((dayIndex + 0.5) / totalRangeDays) * 100;
+    }
+    // Original behavior: position based on index
+    return ((index + 1) / data.length) * 100;
+  };
 
   // Update chart dimensions on mount and resize
   useEffect(() => {
@@ -243,8 +288,9 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
   if (data.length === 0) return null;
 
   const values = data.map(d => d.cumulative);
-  const minVal = Math.min(...values, 0);
-  const maxVal = Math.max(...values);
+  // Use startingEquity as the baseline (zero point)
+  const minVal = Math.min(...values, startingEquity);
+  const maxVal = Math.max(...values, startingEquity);
   const range = maxVal - minVal || 1;
 
   // Calculate nice round numbers for the grid
@@ -335,7 +381,7 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
   const maxDDPoint = data[maxDDIndex];
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || data.length === 0) return;
     const rect = chartRef.current.getBoundingClientRect();
     const chartLeft = marginLeft;
     const chartWidth = rect.width - marginLeft - marginRight;
@@ -346,11 +392,21 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
       return;
     }
 
-    // Account for origin at x=0, trades at x=(i+1)/n
-    const xPercent = relativeX / chartWidth;
-    const index = Math.round(xPercent * data.length - 1);
-    const clampedIndex = Math.max(0, Math.min(data.length - 1, index));
-    setHoveredIndex(clampedIndex);
+    const xPercent = (relativeX / chartWidth) * 100;
+
+    // Find the closest data point to the mouse position
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+    data.forEach((d, i) => {
+      const pointX = getXPercent(d.date, i);
+      const distance = Math.abs(pointX - xPercent);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = i;
+      }
+    });
+
+    setHoveredIndex(closestIndex);
   };
 
   const hoveredData = hoveredIndex !== null ? data[hoveredIndex] : null;
@@ -358,12 +414,12 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
   const displayData = hoveredData || lastData;
   const isHovering = hoveredIndex !== null;
 
-  // Calculate pixel position for a data point (shifted right - origin at x=0, trades at x=(i+1)/n)
+  // Calculate pixel position for a data point
   const getPixelPos = (index: number, d: EquityDataPoint) => {
-    const xPercent = (index + 1) / data.length;
+    const xPct = getXPercent(d.date, index) / 100;
     const yPercent = (max - d.cumulative) / totalRange;
     return {
-      x: xPercent * chartDimensions.width,
+      x: xPct * chartDimensions.width,
       y: yPercent * chartDimensions.height,
     };
   };
@@ -437,27 +493,67 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
                 );
               })}
 
-              {/* Vertical grid lines */}
-              {[0, 25, 50, 75, 100].map((x) => (
-                <line
-                  key={`v${x}`}
-                  x1={x}
-                  y1="0"
-                  x2={x}
-                  y2="100"
-                  stroke="currentColor"
-                  strokeOpacity="0.08"
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
+              {/* Vertical grid lines - calendar-based for MTD/WTD/YTD */}
+              {hasCalendarRange ? (
+                isYtdWeekly ? (
+                  // For YTD, show grid lines for each week
+                  Array.from({ length: totalRangeWeeks }, (_, i) => {
+                    const xPos = ((i + 0.5) / totalRangeWeeks) * 100;
+                    // Show every 4th week more prominently
+                    const isEvery4th = i % 4 === 0;
+                    return (
+                      <line
+                        key={`v${i}`}
+                        x1={xPos}
+                        y1="0"
+                        x2={xPos}
+                        y2="100"
+                        stroke="currentColor"
+                        strokeOpacity={isEvery4th ? "0.12" : "0.04"}
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    );
+                  })
+                ) : (
+                  // Show grid lines for each day in the range
+                  Array.from({ length: totalRangeDays }, (_, i) => {
+                    const xPos = ((i + 0.5) / totalRangeDays) * 100;
+                    return (
+                      <line
+                        key={`v${i}`}
+                        x1={xPos}
+                        y1="0"
+                        x2={xPos}
+                        y2="100"
+                        stroke="currentColor"
+                        strokeOpacity="0.06"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    );
+                  })
+                )
+              ) : (
+                [0, 25, 50, 75, 100].map((x) => (
+                  <line
+                    key={`v${x}`}
+                    x1={x}
+                    y1="0"
+                    x2={x}
+                    y2="100"
+                    stroke="currentColor"
+                    strokeOpacity="0.08"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))
+              )}
 
-              {/* Zero line */}
-              {minVal < 0 && maxVal > 0 && (
+              {/* Baseline (starting equity) line */}
+              {minVal < startingEquity && maxVal > startingEquity && (
                 <line
                   x1="0"
-                  y1={`${((max - 0) / totalRange) * 100}`}
+                  y1={`${((max - startingEquity) / totalRange) * 100}`}
                   x2="100"
-                  y2={`${((max - 0) / totalRange) * 100}`}
+                  y2={`${((max - startingEquity) / totalRange) * 100}`}
                   stroke="#888"
                   strokeOpacity="0.5"
                   strokeDasharray="4 2"
@@ -465,59 +561,239 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
                 />
               )}
 
-              {/* Equity fill area (subtle) - starts from origin at $0 */}
+              {/* Equity fill area - angled lines from previous period to trade */}
               <path
-                d={`M 0 ${((max - 0) / totalRange) * 100} ${data.map((d, i) => {
-                  const x = ((i + 1) / data.length) * 100;
-                  const y = ((max - d.cumulative) / totalRange) * 100;
-                  return `L ${x} ${y}`;
-                }).join(" ")} L 100 100 L 0 100 Z`}
+                d={(() => {
+                  const baselineY = ((max - startingEquity) / totalRange) * 100;
+                  let path = `M 0 ${baselineY}`;
+                  let lastY = baselineY;
+
+                  data.forEach((d, i) => {
+                    const prevCumulative = i === 0 ? startingEquity : data[i - 1].cumulative;
+                    const prevY = ((max - prevCumulative) / totalRange) * 100;
+                    const currX = getXPercent(d.date, i);
+                    const currY = ((max - d.cumulative) / totalRange) * 100;
+
+                    // Calculate previous period's X position (day or week)
+                    let prevPeriodX: number;
+                    if (hasCalendarRange && dateRange) {
+                      const tradeDateMs = getDayOfRange(d.date);
+                      if (isYtdWeekly) {
+                        const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
+                        const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+                        prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
+                      } else {
+                        const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
+                        const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
+                        prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
+                      }
+                    } else {
+                      prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                    }
+
+                    // Horizontal line to previous period, then diagonal to trade
+                    path += ` L ${prevPeriodX} ${lastY}`;
+                    path += ` L ${currX} ${currY}`;
+                    lastY = currY;
+                  });
+
+                  // Extend to end of chart (flat line from last trade)
+                  path += ` L 100 ${lastY}`;
+                  // Close the path for fill
+                  path += ` L 100 100 L 0 100 Z`;
+                  return path;
+                })()}
                 fill="url(#equityGradient)"
               />
 
-              {/* Drawdown area with gradient - between equity line and peak line */}
+              {/* Drawdown area - between peak line and equity line */}
               <path
-                d={`M 0 ${((max - 0) / totalRange) * 100} ${data.map((d, i) => {
-                  const x = ((i + 1) / data.length) * 100;
-                  const y = ((max - d.cumulative + d.drawdown) / totalRange) * 100;
-                  return `L ${x} ${Math.min(y, 100)}`;
-                }).join(" ")} L ${100} ${((max - data[data.length - 1].cumulative) / totalRange) * 100} ${[...data].reverse().map((d, i) => {
-                  const x = ((data.length - i) / data.length) * 100;
-                  const y = ((max - d.cumulative) / totalRange) * 100;
-                  return `L ${x} ${y}`;
-                }).join(" ")} L 0 ${((max - 0) / totalRange) * 100} Z`}
+                d={(() => {
+                  const baselineY = ((max - startingEquity) / totalRange) * 100;
+                  // Build the top edge (peak line)
+                  let topPath = `M 0 ${baselineY}`;
+                  let runningPeak = startingEquity;
+                  let lastPeakY = baselineY;
+
+                  data.forEach((d, i) => {
+                    const currX = getXPercent(d.date, i);
+
+                    // Calculate previous period's X position (day or week)
+                    let prevPeriodX: number;
+                    if (hasCalendarRange && dateRange) {
+                      const tradeDateMs = getDayOfRange(d.date);
+                      if (isYtdWeekly) {
+                        const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
+                        const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+                        prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
+                      } else {
+                        const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
+                        const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
+                        prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
+                      }
+                    } else {
+                      prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                    }
+
+                    // Horizontal to previous period at current peak level
+                    topPath += ` L ${prevPeriodX} ${lastPeakY}`;
+
+                    runningPeak = Math.max(runningPeak, d.cumulative);
+                    const peakY = ((max - runningPeak) / totalRange) * 100;
+                    topPath += ` L ${currX} ${peakY}`;
+                    lastPeakY = peakY;
+                  });
+
+                  topPath += ` L 100 ${lastPeakY}`;
+
+                  // Build the bottom edge (equity line, reversed)
+                  let bottomPath = '';
+                  const lastEquityY = data.length > 0 ? ((max - data[data.length - 1].cumulative) / totalRange) * 100 : baselineY;
+                  bottomPath += ` L 100 ${lastEquityY}`;
+
+                  for (let i = data.length - 1; i >= 0; i--) {
+                    const d = data[i];
+                    const currX = getXPercent(d.date, i);
+                    const currY = ((max - d.cumulative) / totalRange) * 100;
+                    const prevCumulative = i === 0 ? startingEquity : data[i - 1].cumulative;
+                    const prevY = ((max - prevCumulative) / totalRange) * 100;
+
+                    // Calculate previous period's X position (day or week)
+                    let prevPeriodX: number;
+                    if (hasCalendarRange && dateRange) {
+                      const tradeDateMs = getDayOfRange(d.date);
+                      if (isYtdWeekly) {
+                        const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
+                        const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+                        prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
+                      } else {
+                        const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
+                        const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
+                        prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
+                      }
+                    } else {
+                      prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                    }
+
+                    bottomPath += ` L ${currX} ${currY}`;
+                    bottomPath += ` L ${prevPeriodX} ${prevY}`;
+                  }
+                  bottomPath += ` L 0 ${baselineY}`;
+
+                  return topPath + bottomPath + ' Z';
+                })()}
                 fill="url(#drawdownGradient)"
               />
 
-              {/* Colored line segments - starting from origin at $0 */}
-              {data.map((d, i) => {
-                // Origin is at x=0, trades are at x = (i+1) / data.length
-                const prevCumulative = i === 0 ? 0 : data[i - 1].cumulative;
-                const x1 = (i / data.length) * 100;
-                const y1 = ((max - prevCumulative) / totalRange) * 100;
-                const x2 = ((i + 1) / data.length) * 100;
-                const y2 = ((max - d.cumulative) / totalRange) * 100;
-                const isUp = d.pnl >= 0;
-                return (
+              {/* Initial flat gray line from start to first trade */}
+              {hasCalendarRange && data.length > 0 && (() => {
+                const firstTradeDateMs = getDayOfRange(data[0].date);
+                let prevPeriodX: number;
+
+                if (isYtdWeekly) {
+                  const prevWeekMs = firstTradeDateMs - (7 * 24 * 60 * 60 * 1000);
+                  const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+                  prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
+                } else {
+                  const prevDayMs = firstTradeDateMs - (24 * 60 * 60 * 1000);
+                  const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
+                  prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
+                }
+                const baselineY = ((max - startingEquity) / totalRange) * 100;
+
+                return prevPeriodX > 0 ? (
                   <line
-                    key={`seg-${i}`}
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke={isUp ? "#34d399" : "#ef4444"}
-                    strokeWidth="2"
+                    x1="0"
+                    y1={baselineY}
+                    x2={prevPeriodX}
+                    y2={baselineY}
+                    stroke="#6b7280"
+                    strokeWidth="1.5"
                     vectorEffect="non-scaling-stroke"
                   />
+                ) : null;
+              })()}
+
+              {/* Flat gray lines between trades + colored diagonal lines to trades */}
+              {data.map((d, i) => {
+                const prevCumulative = i === 0 ? startingEquity : data[i - 1].cumulative;
+                const currX = getXPercent(d.date, i);
+                const currY = ((max - d.cumulative) / totalRange) * 100;
+                const prevY = ((max - prevCumulative) / totalRange) * 100;
+                const isUp = d.pnl >= 0;
+
+                // Calculate previous period's X position (day or week before the trade)
+                let prevPeriodX: number;
+                // Calculate previous trade's X position (or 0 for first trade)
+                let prevTradeX: number;
+
+                if (hasCalendarRange && dateRange) {
+                  const tradeDateMs = getDayOfRange(d.date);
+
+                  if (isYtdWeekly) {
+                    // For YTD with weekly aggregation, get the previous week
+                    const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
+                    const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+                    prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
+                  } else {
+                    // For other periods, get the day before
+                    const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
+                    const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
+                    prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
+                  }
+                  prevTradeX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                } else {
+                  prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                  prevTradeX = prevPeriodX;
+                }
+
+                return (
+                  <g key={`seg-${i}`}>
+                    {/* Flat gray line from previous trade to period before this trade */}
+                    {hasCalendarRange && prevTradeX < prevPeriodX && (
+                      <line
+                        x1={prevTradeX}
+                        y1={prevY}
+                        x2={prevPeriodX}
+                        y2={prevY}
+                        stroke="#6b7280"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    )}
+                    {/* Diagonal colored line from previous period to trade */}
+                    <line
+                      x1={prevPeriodX}
+                      y1={prevY}
+                      x2={currX}
+                      y2={currY}
+                      stroke={isUp ? "#34d399" : "#ef4444"}
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </g>
                 );
               })}
+
+              {/* Trailing flat gray line from last trade to end of chart */}
+              {data.length > 0 && (
+                <line
+                  x1={getXPercent(data[data.length - 1].date, data.length - 1)}
+                  y1={((max - data[data.length - 1].cumulative) / totalRange) * 100}
+                  x2="100"
+                  y2={((max - data[data.length - 1].cumulative) / totalRange) * 100}
+                  stroke="#6b7280"
+                  strokeWidth="1.5"
+                  vectorEffect="non-scaling-stroke"
+                />
+              )}
 
               {/* Hover indicator line */}
               {hoveredIndex !== null && (
                 <line
-                  x1={`${((hoveredIndex + 1) / data.length) * 100}`}
+                  x1={`${getXPercent(data[hoveredIndex].date, hoveredIndex)}`}
                   y1="0"
-                  x2={`${((hoveredIndex + 1) / data.length) * 100}`}
+                  x2={`${getXPercent(data[hoveredIndex].date, hoveredIndex)}`}
                   y2="100"
                   stroke="#fff"
                   strokeOpacity="0.4"
@@ -595,10 +871,130 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
           </div>
 
           {/* X-axis date labels */}
-          <div className="absolute left-[55px] right-[10px] bottom-0 h-6 flex justify-between items-center text-[10px] text-muted">
-            {dateLabels.map((date, i) => (
-              <span key={i}>{date}</span>
-            ))}
+          <div className="absolute left-[55px] right-[10px] bottom-0 h-6 text-[10px] text-muted">
+            {hasCalendarRange && dateRange ? (
+              // Calendar-based labels for all periods
+              (() => {
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const getOrdinal = (n: number) => {
+                  const s = ['th', 'st', 'nd', 'rd'];
+                  const v = n % 100;
+                  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+                };
+                const labels: { date: string; label: string; xPos: number }[] = [];
+
+                if (period === 'wtd') {
+                  // For WTD, show day abbreviations for each day
+                  for (let i = 0; i < totalRangeDays; i++) {
+                    const dayDate = new Date(rangeStartTime + i * 24 * 60 * 60 * 1000);
+                    const dayOfWeek = dayDate.getDay();
+                    const xPos = ((i + 0.5) / totalRangeDays) * 100;
+                    labels.push({ date: '', label: dayNames[dayOfWeek], xPos });
+                  }
+                } else if (period === 'mtd') {
+                  // For MTD, show every other day starting from 1st
+                  for (let i = 0; i < totalRangeDays; i++) {
+                    const dayDate = new Date(rangeStartTime + i * 24 * 60 * 60 * 1000);
+                    const dayNum = dayDate.getDate();
+                    const xPos = ((i + 0.5) / totalRangeDays) * 100;
+                    if (dayNum % 2 === 1) {
+                      labels.push({ date: '', label: getOrdinal(dayNum), xPos });
+                    }
+                  }
+                } else if (period === 'ytd') {
+                  // For YTD with weekly aggregation, show week numbers with month context
+                  for (let w = 0; w < totalRangeWeeks; w++) {
+                    const weekDate = new Date(weekStartTime + w * 7 * 24 * 60 * 60 * 1000);
+                    const xPos = ((w + 0.5) / totalRangeWeeks) * 100;
+                    // Show every 4th week to avoid crowding, plus first week
+                    if (w === 0 || w % 4 === 0) {
+                      const monthIdx = weekDate.getMonth();
+                      const dayNum = weekDate.getDate();
+                      // Show "Jan 1" format for clarity
+                      labels.push({ date: '', label: `${monthNames[monthIdx]} ${dayNum}`, xPos });
+                    }
+                  }
+                } else if (period === 'all') {
+                  // For All, show months or quarters depending on span
+                  const totalMonths = totalRangeDays / 30;
+                  let lastLabel = '';
+                  for (let i = 0; i < totalRangeDays; i++) {
+                    const dayDate = new Date(rangeStartTime + i * 24 * 60 * 60 * 1000);
+                    const monthIdx = dayDate.getMonth();
+                    const year = dayDate.getFullYear();
+                    const dayNum = dayDate.getDate();
+                    const xPos = ((i + 0.5) / totalRangeDays) * 100;
+
+                    if (totalMonths > 24) {
+                      // Show quarters for spans > 2 years
+                      const quarter = Math.floor(monthIdx / 3) + 1;
+                      const label = `Q${quarter} ${year}`;
+                      if (label !== lastLabel && dayNum <= 7 && (monthIdx % 3 === 0)) {
+                        labels.push({ date: '', label, xPos });
+                        lastLabel = label;
+                      }
+                    } else if (totalMonths > 6) {
+                      // Show month + year for spans > 6 months
+                      const label = `${monthNames[monthIdx]} ${year.toString().slice(-2)}`;
+                      if (label !== lastLabel && dayNum <= 7) {
+                        labels.push({ date: '', label, xPos });
+                        lastLabel = label;
+                      }
+                    } else {
+                      // Show just months for shorter spans
+                      if (monthIdx.toString() !== lastLabel && dayNum <= 7) {
+                        labels.push({ date: '', label: monthNames[monthIdx], xPos });
+                        lastLabel = monthIdx.toString();
+                      }
+                    }
+                  }
+                }
+
+                return labels.map((l, idx) => (
+                  <span
+                    key={idx}
+                    className="absolute -translate-x-1/2"
+                    style={{ left: `${l.xPos}%` }}
+                  >
+                    {l.label}
+                  </span>
+                ));
+              })()
+            ) : data.length >= 3 ? (
+              <>
+                {/* First label */}
+                <span
+                  className="absolute -translate-x-1/2"
+                  style={{ left: `${getXPercent(data[0].date, 0)}%` }}
+                >
+                  {data[0].date}
+                </span>
+                {/* Middle label */}
+                <span
+                  className="absolute -translate-x-1/2"
+                  style={{ left: `${getXPercent(data[Math.floor(data.length / 2)].date, Math.floor(data.length / 2))}%` }}
+                >
+                  {data[Math.floor(data.length / 2)].date}
+                </span>
+                {/* Last label */}
+                <span
+                  className="absolute right-0"
+                >
+                  {data[data.length - 1].date}
+                </span>
+              </>
+            ) : (
+              dateLabels.map((date, i) => (
+                <span
+                  key={i}
+                  className="absolute -translate-x-1/2"
+                  style={{ left: `${getXPercent(date, i)}%` }}
+                >
+                  {date}
+                </span>
+              ))
+            )}
           </div>
 
         </div>
@@ -634,43 +1030,81 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
         <div className="grid grid-cols-5 gap-2">
           {/* Date */}
           <div className="text-center">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">
+            <div className="text-[10px] text-muted mb-1">
               {isHovering ? "Selected" : "Latest"}
             </div>
-            <div className="text-sm font-semibold text-foreground">{displayData.date}</div>
+            <div className="text-sm font-semibold text-foreground">
+              {displayData.dateEnd ? (
+                // Weekly view - show date range
+                (() => {
+                  const formatShort = (dateStr: string) => {
+                    const [y, m, d] = dateStr.split("-").map(Number);
+                    const date = new Date(y, m - 1, d);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                  };
+                  return `${formatShort(displayData.date)} - ${formatShort(displayData.dateEnd)}`;
+                })()
+              ) : (
+                (() => {
+                  const [y, m, d] = displayData.date.split("-").map(Number);
+                  const date = new Date(y, m - 1, d);
+                  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                })()
+              )}
+            </div>
           </div>
 
-          {/* Daily P&L */}
+          {/* Period P&L */}
           <div className="text-center">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Daily P&L</div>
+            <div className="text-[10px] text-muted mb-1">
+              {displayData.dateEnd ? "Weekly P&L" : "Daily P&L"}
+            </div>
             <div className={`text-sm font-bold ${displayData.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
               {displayData.pnl >= 0 ? "+" : ""}${displayData.pnl.toFixed(2)}
             </div>
           </div>
 
-          {/* Cumulative */}
+          {/* Total P&L */}
           <div className="text-center">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Total Equity</div>
-            <div className={`text-sm font-bold ${displayData.cumulative >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-              {displayData.cumulative >= 0 ? "+" : ""}${displayData.cumulative.toFixed(2)}
-            </div>
+            <div className="text-[10px] text-muted mb-1">Total P&L</div>
+            {(() => {
+              const totalPnl = displayData.cumulative - startingEquity;
+              return (
+                <div className={`text-sm font-bold ${totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  {totalPnl >= 0 ? "+" : ""}${totalPnl.toFixed(2)}
+                </div>
+              );
+            })()}
           </div>
 
-          {/* Drawdown */}
+          {/* Trade Count (for weekly) or Drawdown */}
           <div className="text-center">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Drawdown</div>
-            {displayData.drawdown > 0 ? (
-              <div className="text-sm font-bold text-red-400">
-                -{displayData.drawdownPercent.toFixed(1)}%
+            <div className="text-[10px] text-muted mb-1">
+              {displayData.dateEnd ? "Trades" : "Drawdown"}
+            </div>
+            {displayData.dateEnd ? (
+              <div className="text-sm font-bold text-accent-light">
+                {displayData.tradeCount}
+              </div>
+            ) : displayData.drawdown > 0 ? (
+              <div>
+                <div className="text-sm font-bold text-red-400">
+                  -${displayData.drawdown.toFixed(2)} ({displayData.drawdownPercent.toFixed(2)}%)
+                </div>
+                <div className="text-[9px] text-muted mt-0.5">
+                  Peak: ${(displayData.cumulative + displayData.drawdown).toFixed(2)}
+                </div>
               </div>
             ) : (
-              <div className="text-sm font-bold text-yellow-400">At Peak</div>
+              <div className="text-sm font-bold text-emerald-400">At Peak</div>
             )}
           </div>
 
           {/* Status */}
           <div className="text-center">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Day Result</div>
+            <div className="text-[10px] text-muted mb-1">
+              {displayData.dateEnd ? "Week Result" : "Day Result"}
+            </div>
             <div className={`text-xs font-medium px-2 py-0.5 rounded inline-block ${
               displayData.pnl >= 0
                 ? "bg-emerald-500/20 text-emerald-400"
@@ -688,8 +1122,8 @@ const EquityCurveChart = ({ data }: { data: EquityDataPoint[] }) => {
 export default function TradingPage() {
   const { trades, tags, loading, closeTrade } = useTradeJournal();
   const [showGoalSettings, setShowGoalSettings] = useState(false);
-  const [goals, setGoals] = useState<TradingGoals>({ yearlyPnlGoal: 0, monthlyPnlGoal: 0 });
-  const [goalInput, setGoalInput] = useState({ yearly: "", monthly: "" });
+  const [goals, setGoals] = useState<TradingGoals>({ yearlyPnlGoal: 0, monthlyPnlGoal: 0, startingEquity: 0 });
+  const [goalInput, setGoalInput] = useState({ yearly: "", monthly: "", startingEquity: "" });
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [showRecentTrades, setShowRecentTrades] = useState(false);
   const [showOpenTrades, setShowOpenTrades] = useState(true);
@@ -715,10 +1149,11 @@ export default function TradingPage() {
     const savedGoals = localStorage.getItem("tradingGoals");
     if (savedGoals) {
       const parsed = JSON.parse(savedGoals);
-      setGoals(parsed);
+      setGoals({ ...parsed, startingEquity: parsed.startingEquity || 0 });
       setGoalInput({
         yearly: parsed.yearlyPnlGoal > 0 ? parsed.yearlyPnlGoal.toString() : "",
         monthly: parsed.monthlyPnlGoal > 0 ? parsed.monthlyPnlGoal.toString() : "",
+        startingEquity: parsed.startingEquity > 0 ? parsed.startingEquity.toString() : "",
       });
     }
   }, []);
@@ -728,6 +1163,7 @@ export default function TradingPage() {
     const newGoals = {
       yearlyPnlGoal: parseFloat(goalInput.yearly) || 0,
       monthlyPnlGoal: parseFloat(goalInput.monthly) || 0,
+      startingEquity: parseFloat(goalInput.startingEquity) || 0,
     };
     setGoals(newGoals);
     localStorage.setItem("tradingGoals", JSON.stringify(newGoals));
@@ -859,9 +1295,10 @@ export default function TradingPage() {
       }
     }
 
-    // Calculate equity curve with drawdown
-    let runningPnl = 0;
-    let peak = 0;
+    // Calculate equity curve with drawdown (using starting equity as base)
+    const startingEquity = goals.startingEquity || 0;
+    let runningEquity = startingEquity;
+    let peak = startingEquity;
     let maxDrawdown = 0;
     let maxDrawdownPercent = 0;
     let currentDrawdown = 0;
@@ -873,15 +1310,15 @@ export default function TradingPage() {
     const equityCurve: { date: string; pnl: number; cumulative: number; drawdown: number; drawdownPercent: number }[] = [];
 
     sortedDates.forEach((date) => {
-      runningPnl += tradesByDate[date];
+      runningEquity += tradesByDate[date];
 
-      if (runningPnl > peak) {
-        peak = runningPnl;
+      if (runningEquity > peak) {
+        peak = runningEquity;
         inDrawdown = false;
         drawdownStart = null;
       }
 
-      currentDrawdown = peak - runningPnl;
+      currentDrawdown = peak - runningEquity;
       const drawdownPercent = peak > 0 ? (currentDrawdown / peak) * 100 : 0;
 
       if (currentDrawdown > 0 && !inDrawdown) {
@@ -899,9 +1336,10 @@ export default function TradingPage() {
       equityCurve.push({
         date,
         pnl: tradesByDate[date],
-        cumulative: runningPnl,
+        cumulative: runningEquity,
         drawdown: currentDrawdown,
         drawdownPercent,
+        tradeCount: 1,
       });
     });
 
@@ -980,7 +1418,7 @@ export default function TradingPage() {
       // Sorted trades for table
       sortedTrades,
     };
-  }, [trades]);
+  }, [trades, goals.startingEquity]);
 
   // Goal progress calculations
   const goalProgress = useMemo(() => {
@@ -1042,7 +1480,7 @@ export default function TradingPage() {
 
   // Filtered equity curve based on period and tags
   const filteredEquityCurve = useMemo(() => {
-    if (!tradingStats) return [];
+    if (!tradingStats) return { data: [], dateRange: null, period: equityPeriod };
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -1059,6 +1497,9 @@ export default function TradingPage() {
         trade.tags.some(tag => equityTagFilter.includes(tag.id))
       );
     }
+
+    // Determine date range based on period
+    let dateRange: { start: string; end: string } | null = null;
 
     // Then filter by time period
     if (equityPeriod !== "all") {
@@ -1079,36 +1520,116 @@ export default function TradingPage() {
             return true;
         }
       });
+
+      // Set date range for calendar-based periods
+      switch (equityPeriod) {
+        case "ytd": {
+          const startOfYear = new Date(currentYear, 0, 1);
+          // Add one day after today so the last trade is visible on the grid
+          const [ty, tm, td] = today.split("-").map(Number);
+          const dayAfterToday = new Date(ty, tm - 1, td);
+          dayAfterToday.setDate(dayAfterToday.getDate() + 1);
+          dateRange = {
+            start: startOfYear.toISOString().split("T")[0],
+            end: dayAfterToday.toISOString().split("T")[0]
+          };
+          break;
+        }
+        case "mtd": {
+          const startOfMonth = new Date(currentYear, currentMonth, 1);
+          // Add one day after today so the last trade is visible on the grid
+          const [ty, tm, td] = today.split("-").map(Number);
+          const dayAfterToday = new Date(ty, tm - 1, td);
+          dayAfterToday.setDate(dayAfterToday.getDate() + 1);
+          dateRange = {
+            start: startOfMonth.toISOString().split("T")[0],
+            end: dayAfterToday.toISOString().split("T")[0]
+          };
+          break;
+        }
+        // WTD uses trade-based positioning (no dateRange), not calendar-based
+      }
+    }
+
+    // For "all" period, set range from day before first trade to day after last trade
+    if (equityPeriod === "all" && filteredTrades.length > 0) {
+      const sortedByDate = [...filteredTrades].sort((a, b) => a.date.localeCompare(b.date));
+      const firstTradeDate = sortedByDate[0].date;
+      const lastTradeDate = sortedByDate[sortedByDate.length - 1].date;
+
+      // Get day before first trade
+      const [fy, fm, fd] = firstTradeDate.split("-").map(Number);
+      const dayBeforeFirst = new Date(fy, fm - 1, fd);
+      dayBeforeFirst.setDate(dayBeforeFirst.getDate() - 1);
+
+      // Get day after last trade so it's visible on the grid
+      const [ly, lm, ld] = lastTradeDate.split("-").map(Number);
+      const dayAfterLast = new Date(ly, lm - 1, ld);
+      dayAfterLast.setDate(dayAfterLast.getDate() + 1);
+
+      dateRange = {
+        start: dayBeforeFirst.toISOString().split("T")[0],
+        end: dayAfterLast.toISOString().split("T")[0]
+      };
     }
 
     // Build equity curve from filtered trades
     const sortedTrades = [...filteredTrades].sort((a, b) => a.date.localeCompare(b.date));
-    const dailyPnl: Record<string, number> = {};
+
+    // Helper to get the start of week (Sunday) for a given date
+    const getWeekStart = (dateStr: string): string => {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const date = new Date(y, m - 1, d);
+      const dayOfWeek = date.getDay(); // 0 = Sunday
+      const weekStart = new Date(date);
+      weekStart.setDate(date.getDate() - dayOfWeek);
+      return weekStart.toISOString().split("T")[0];
+    };
+
+    // For YTD, aggregate by week; otherwise aggregate by day
+    const pnlByPeriod: Record<string, { pnl: number; count: number }> = {};
     sortedTrades.forEach(t => {
-      dailyPnl[t.date] = (dailyPnl[t.date] || 0) + t.pnl;
+      const key = equityPeriod === "ytd" ? getWeekStart(t.date) : t.date;
+      if (!pnlByPeriod[key]) {
+        pnlByPeriod[key] = { pnl: 0, count: 0 };
+      }
+      pnlByPeriod[key].pnl += t.pnl;
+      pnlByPeriod[key].count += 1;
     });
 
-    const curve: { date: string; pnl: number; cumulative: number; drawdown: number; drawdownPercent: number }[] = [];
-    let cumulative = 0;
-    let peak = 0;
+    // Helper to get end of week (Saturday) from week start
+    const getWeekEnd = (weekStartStr: string): string => {
+      const [y, m, d] = weekStartStr.split("-").map(Number);
+      const weekStart = new Date(y, m - 1, d);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      return weekEnd.toISOString().split("T")[0];
+    };
 
-    Object.keys(dailyPnl).sort().forEach(date => {
-      cumulative += dailyPnl[date];
+    const curve: EquityDataPoint[] = [];
+    const startingEquity = goals.startingEquity || 0;
+    let cumulative = startingEquity;
+    let peak = startingEquity;
+
+    Object.keys(pnlByPeriod).sort().forEach(date => {
+      cumulative += pnlByPeriod[date].pnl;
       peak = Math.max(peak, cumulative);
       const drawdown = peak - cumulative;
       const drawdownPercent = peak > 0 ? (drawdown / peak) * 100 : 0;
 
       curve.push({
         date,
-        pnl: dailyPnl[date],
+        dateEnd: equityPeriod === "ytd" ? getWeekEnd(date) : undefined,
+        pnl: pnlByPeriod[date].pnl,
         cumulative,
         drawdown,
         drawdownPercent,
+        tradeCount: pnlByPeriod[date].count,
       });
     });
 
-    return curve;
-  }, [tradingStats, closedTrades, equityPeriod, equityTagFilter]);
+    return { data: curve, dateRange, period: equityPeriod, tradeCount: filteredTrades.length, startingEquity };
+  }, [tradingStats, closedTrades, equityPeriod, equityTagFilter, goals.startingEquity]);
 
   const getConsistencyGrade = (score: number) => {
     if (score >= 90) return { grade: "A+", color: "text-emerald-400" };
@@ -1153,13 +1674,9 @@ export default function TradingPage() {
               <BarChart3 className="w-4 h-4 text-accent-light" />
               Equity Curve
               <InfoTip content={{
-                title: "Equity Curve Chart",
-                description: "Visual representation of your cumulative P&L over time.",
-                details: [
-                  { label: "Green line", value: "Your equity growth", color: "text-emerald-400" },
-                  { label: "Red area", value: "Drawdown periods", color: "text-red-400" }
-                ],
-                tip: "A smooth upward curve indicates consistent, disciplined trading."
+                title: "Equity Curve",
+                description: "Your account value over time. Green shows growth, red shows losses from peaks.",
+                tip: "Smooth upward = consistent trading."
               }} />
             </h3>
             <div className="flex items-center gap-3">
@@ -1184,6 +1701,28 @@ export default function TradingPage() {
                   </button>
                 ))}
               </div>
+
+              {/* Period indicator */}
+              <span className="text-xs text-muted">
+                {equityPeriod === "all" && filteredEquityCurve.dateRange
+                  ? (() => {
+                      const start = new Date(filteredEquityCurve.dateRange.start);
+                      start.setDate(start.getDate() + 1); // Adjust for day before first trade
+                      const end = new Date(filteredEquityCurve.dateRange.end);
+                      const formatDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                      return `${formatDate(start)} - ${formatDate(end)}`;
+                    })()
+                  : equityPeriod === "ytd"
+                    ? `${new Date().getFullYear()} YTD`
+                    : equityPeriod !== "all"
+                      ? new Date().toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })
+                      : null
+                }
+              </span>
 
               {/* Tag Filter */}
               {tags.length > 0 && (
@@ -1255,55 +1794,63 @@ export default function TradingPage() {
           </div>
 
           {/* Chart */}
-          <EquityCurveChart data={filteredEquityCurve.length > 0 ? filteredEquityCurve : tradingStats.equityCurve} />
+          <EquityCurveChart
+            data={filteredEquityCurve.data.length > 0 ? filteredEquityCurve.data : tradingStats.equityCurve}
+            dateRange={filteredEquityCurve.dateRange}
+            period={filteredEquityCurve.period}
+            startingEquity={filteredEquityCurve.startingEquity}
+          />
 
           {/* Drawdown Stats */}
           <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">
-            <div>
-              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
+            <div className="text-center">
+              <div className="text-[10px] text-muted flex items-center justify-center">
                 Max Drawdown
                 <InfoTip content={{
-                  title: "Maximum Drawdown",
-                  description: "The largest peak-to-trough decline in your equity - your worst losing streak from a high point.",
+                  title: "Max Drawdown",
+                  description: "Your largest loss from a peak - the worst decline before recovering.",
                   details: [
-                    { label: "Pro target", value: "< 20%", color: "text-emerald-400" },
-                    { label: "Warning zone", value: "> 30%", color: "text-yellow-400" },
-                    { label: "Danger zone", value: "> 50%", color: "text-red-400" }
+                    { label: "Peak was", value: `$${tradingStats.peak.toFixed(0)}`, color: "text-emerald-400" },
+                    { label: "Dropped to", value: `$${(tradingStats.peak - tradingStats.maxDrawdown).toFixed(0)}`, color: "text-red-400" },
                   ],
-                  tip: "Lower is better - this measures your worst-case loss scenario."
+                  tip: "Pro traders keep this under 20%."
                 }} />
               </div>
               <div className="text-lg font-bold text-red-400">
-                -${tradingStats.maxDrawdown.toFixed(0)} <span className="text-sm">({tradingStats.maxDrawdownPercent.toFixed(1)}%)</span>
+                -${tradingStats.maxDrawdown.toFixed(2)} <span className="text-sm">({tradingStats.maxDrawdownPercent.toFixed(2)}%)</span>
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
+            <div className="text-center">
+              <div className="text-[10px] text-muted flex items-center justify-center">
                 Current Drawdown
                 <InfoTip content={{
                   title: "Current Drawdown",
-                  description: "How far below your peak equity you currently are.",
+                  description: "How far you are below your all-time high right now.",
                   details: [
-                    { label: "At Peak", value: "No drawdown", color: "text-emerald-400" },
-                    { label: "In Drawdown", value: "Below your high", color: "text-red-400" }
+                    { label: "Peak", value: `$${tradingStats.peak.toFixed(0)}`, color: "text-emerald-400" },
+                    { label: "Now", value: `$${(tradingStats.peak - tradingStats.currentDrawdown).toFixed(0)}`, color: "text-foreground" },
                   ],
-                  tip: "Shows how much you need to recover to reach a new all-time high."
+                  tip: "At $0 means you're at a new all-time high."
                 }} />
               </div>
               <div className={`text-lg font-bold ${tradingStats.currentDrawdown > 0 ? "text-red-400" : "text-emerald-400"}`}>
-                {tradingStats.currentDrawdown > 0 ? `-$${tradingStats.currentDrawdown.toFixed(0)}` : "At Peak"}
+                {tradingStats.currentDrawdown > 0 ? `-$${tradingStats.currentDrawdown.toFixed(2)} (${tradingStats.currentDrawdownPercent.toFixed(2)}%)` : "At Peak"}
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-muted uppercase tracking-wider flex items-center">
+            <div className="text-center">
+              <div className="text-[10px] text-muted flex items-center justify-center">
                 Peak Equity
                 <InfoTip content={{
-                  title: "Peak Equity (High Water Mark)",
-                  description: "The highest cumulative P&L you've ever reached - your all-time high.",
-                  tip: "New profits push this higher. Losses create drawdown measured from this level."
+                  title: "Peak Equity",
+                  description: "Your highest account value ever - the high water mark.",
+                  details: [
+                    { label: "Started with", value: `$${(goals.startingEquity || 0).toFixed(0)}`, color: "text-blue-400" },
+                    { label: "Profit", value: `+$${(tradingStats.peak - (goals.startingEquity || 0)).toFixed(0)}`, color: "text-emerald-400" },
+                  ],
+                  tip: "Drawdown is measured from this level."
                 }} />
               </div>
-              <div className="text-lg font-bold text-emerald-400">${tradingStats.peak.toFixed(0)}</div>
+              <div className="text-lg font-bold text-emerald-400">${tradingStats.peak.toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -1410,7 +1957,7 @@ export default function TradingPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Today's Progress */}
                 <div className="p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
-                  <div className="text-xs text-muted uppercase tracking-wider mb-2">Today's Progress</div>
+                  <div className="text-xs text-muted mb-2">Today's Progress</div>
                   <div className="flex items-center justify-between">
                     <div>
                       <div className={`text-xl font-bold ${(goalProgress?.todayPnl || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
@@ -1431,7 +1978,7 @@ export default function TradingPage() {
 
                 {/* Monthly Breakdown - spans 2 columns */}
                 <div className="md:col-span-2 p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
-                  <div className="text-xs text-muted uppercase tracking-wider mb-3">Monthly Breakdown ({tradingStats.currentYear})</div>
+                  <div className="text-xs text-muted mb-3">Monthly Breakdown ({tradingStats.currentYear})</div>
                   <div className="flex items-end justify-between gap-1 h-12">
                     {goalProgress?.monthlyPnl.map((pnl, i) => {
                       const maxPnl = Math.max(...(goalProgress?.monthlyPnl.map(Math.abs) || [1]));
@@ -1716,7 +2263,7 @@ export default function TradingPage() {
           <div className="flex items-center gap-4 divide-x divide-border">
             {/* Consistency Grade */}
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted uppercase tracking-wider">Grade</span>
+              <span className="text-[10px] text-muted">Grade</span>
               <span className={`text-lg font-bold ${consistencyGrade.color}`}>{consistencyGrade.grade}</span>
             </div>
             {/* Current Streak */}
@@ -1749,7 +2296,7 @@ export default function TradingPage() {
           </h3>
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center p-2 rounded-lg bg-card border border-border">
-              <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Current</div>
+              <div className="text-[10px] text-muted mb-1">Current</div>
               <div className={`text-xl font-bold ${
                 tradingStats.currentStreakType === "win" ? "text-emerald-400" :
                 tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted"
@@ -1761,12 +2308,12 @@ export default function TradingPage() {
               </div>
             </div>
             <div className="text-center p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-              <div className="text-[10px] text-emerald-400 uppercase tracking-wider mb-1">Best</div>
+              <div className="text-[10px] text-emerald-400 mb-1">Best</div>
               <div className="text-xl font-bold text-emerald-400">{tradingStats.longestWinStreak}</div>
               <div className="text-[9px] text-emerald-400/70">Wins</div>
             </div>
             <div className="text-center p-2 rounded-lg bg-red-500/10 border border-red-500/30">
-              <div className="text-[10px] text-red-400 uppercase tracking-wider mb-1">Worst</div>
+              <div className="text-[10px] text-red-400 mb-1">Worst</div>
               <div className="text-xl font-bold text-red-400">{tradingStats.longestLossStreak}</div>
               <div className="text-[9px] text-red-400/70">Losses</div>
             </div>
@@ -1933,6 +2480,21 @@ export default function TradingPage() {
 
             <div className="p-5 space-y-4">
               <div>
+                <label className="block text-sm font-medium mb-2">Starting Equity</label>
+                <p className="text-xs text-muted mb-2">Your initial account balance before any trades</p>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+                  <input
+                    type="number"
+                    value={goalInput.startingEquity}
+                    onChange={(e) => setGoalInput({ ...goalInput, startingEquity: e.target.value })}
+                    placeholder="e.g. 10000"
+                    className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-border">
                 <label className="block text-sm font-medium mb-2">Yearly P&L Goal</label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
@@ -1941,7 +2503,7 @@ export default function TradingPage() {
                     value={goalInput.yearly}
                     onChange={(e) => setGoalInput({ ...goalInput, yearly: e.target.value })}
                     placeholder="e.g. 50000"
-                    className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
@@ -1955,7 +2517,7 @@ export default function TradingPage() {
                     value={goalInput.monthly}
                     onChange={(e) => setGoalInput({ ...goalInput, monthly: e.target.value })}
                     placeholder="e.g. 5000"
-                    className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>

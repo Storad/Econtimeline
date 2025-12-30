@@ -193,6 +193,7 @@ export default function TradeForm({
       weekday: "short",
       month: "short",
       day: "numeric",
+      year: "numeric",
     });
   };
 

@@ -1574,7 +1574,7 @@ export default function EconomicCalendarPage() {
             </span>
             <span className="text-muted">|</span>
             <span className="text-sm font-medium text-foreground">
-              {currentTime.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+              {currentTime.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
             </span>
           </div>
 
@@ -1917,7 +1917,7 @@ export default function EconomicCalendarPage() {
                         : "left-1/2 -translate-x-1/2"
                     }`}>
                       <div className="text-[10px] text-muted mb-1.5 font-medium">
-                        {date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                        {date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
                       </div>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {nonHolidayEvents.slice(0, 4).map((event) => (
@@ -2159,7 +2159,7 @@ export default function EconomicCalendarPage() {
                           {/* Show swing trades closed today with their entry dates */}
                           {tradesClosedToday.length > 0 && tradesClosedToday.map((trade, idx) => (
                             <div key={idx} className="truncate">
-                              From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </div>
                           ))}
                           {/* Show count summary */}
@@ -2301,7 +2301,7 @@ export default function EconomicCalendarPage() {
                     {/* Show swing trades closed today with their entry dates */}
                     {tradesClosedToday.length > 0 && tradesClosedToday.map((trade, idx) => (
                       <div key={idx} className="truncate">
-                        From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </div>
                     ))}
                     {/* Show count summary */}
@@ -2796,7 +2796,7 @@ export default function EconomicCalendarPage() {
                                   }}
                                   className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors cursor-pointer"
                                 >
-                                  Closed {new Date(closeDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  Closed {new Date(closeDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </button>
                               )}
                               {/* Swing trade on CLOSE date - show "From" badge (clickable) */}
@@ -2811,7 +2811,7 @@ export default function EconomicCalendarPage() {
                                   }}
                                   className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors cursor-pointer"
                                 >
-                                  From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </button>
                               )}
                             </div>
@@ -3517,7 +3517,7 @@ export default function EconomicCalendarPage() {
                                   <div className={`px-3 py-1.5 flex items-center justify-between gap-3 ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
                                     <div className="text-sm font-bold text-foreground">Trade #{hoveredTrade.index - 999}</div>
                                     <div className="text-[11px] text-muted">
-                                      {new Date(hoveredTrade.trade.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                      {new Date(hoveredTrade.trade.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                   </div>
                                   <div className="px-3 py-2 space-y-1">
@@ -4281,7 +4281,7 @@ export default function EconomicCalendarPage() {
                   <h3 className="text-lg font-bold">
                     {weeklyBreakdown.effectiveStart.getTime() === weeklyBreakdown.effectiveEnd.getTime()
                       ? weeklyBreakdown.effectiveStart.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                      : `${weeklyBreakdown.effectiveStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weeklyBreakdown.effectiveEnd.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+                      : `${weeklyBreakdown.effectiveStart.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} - ${weeklyBreakdown.effectiveEnd.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
                     }
                   </h3>
                 </div>
@@ -4569,7 +4569,7 @@ export default function EconomicCalendarPage() {
                                     <div className={`px-3 py-1.5 flex items-center justify-between gap-3 ${hoveredTrade.trade.pnl >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
                                       <div className="text-sm font-bold text-foreground">Trade #{hoveredTrade.index + 1}</div>
                                       <div className="text-[11px] text-muted">
-                                        {new Date(hoveredTrade.trade.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                        {new Date(hoveredTrade.trade.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                       </div>
                                     </div>
                                     <div className="px-3 py-2 space-y-1">
