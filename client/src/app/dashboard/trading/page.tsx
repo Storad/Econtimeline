@@ -1307,7 +1307,7 @@ export default function TradingPage() {
     let maxDrawdownEnd: string | null = null;
     let inDrawdown = false;
 
-    const equityCurve: { date: string; pnl: number; cumulative: number; drawdown: number; drawdownPercent: number }[] = [];
+    const equityCurve: { date: string; pnl: number; cumulative: number; drawdown: number; drawdownPercent: number; tradeCount: number }[] = [];
 
     sortedDates.forEach((date) => {
       runningEquity += tradesByDate[date];
