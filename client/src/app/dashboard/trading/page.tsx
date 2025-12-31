@@ -205,6 +205,7 @@ interface EquityDataPoint {
   drawdown: number;
   drawdownPercent: number;
   tradeCount: number; // Number of trades in this period
+  tradeIndex?: number; // For WTD individual trade display
 }
 
 // Equity Curve Chart Component with hover info panel
@@ -260,6 +261,10 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
         const dateTime = getDayOfRange(dateStr);
         const weekIndex = Math.floor((dateTime - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
         return ((weekIndex + 0.5) / totalRangeWeeks) * 100;
+      }
+      if (period === 'wtd') {
+        // For WTD, simple sequential positioning - each trade gets equal space
+        return ((index + 0.5) / data.length) * 100;
       }
       const dateTime = getDayOfRange(dateStr);
       const dayIndex = Math.round((dateTime - rangeStartTime) / (1000 * 60 * 60 * 24));
@@ -514,8 +519,53 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
                       />
                     );
                   })
+                ) : period === 'wtd' ? (
+                  // For WTD, simple grid - line per trade + day separators
+                  (() => {
+                    const elements: React.ReactNode[] = [];
+                    let lastDate = '';
+
+                    data.forEach((d, i) => {
+                      const xPos = ((i + 0.5) / data.length) * 100;
+
+                      // Day separator line when date changes
+                      if (lastDate && d.date !== lastDate) {
+                        const sepX = (i / data.length) * 100;
+                        elements.push(
+                          <line
+                            key={`sep${i}`}
+                            x1={sepX}
+                            y1="0"
+                            x2={sepX}
+                            y2="100"
+                            stroke="currentColor"
+                            strokeOpacity="0.25"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        );
+                      }
+
+                      // Light line for each trade
+                      elements.push(
+                        <line
+                          key={`trade${i}`}
+                          x1={xPos}
+                          y1="0"
+                          x2={xPos}
+                          y2="100"
+                          stroke="currentColor"
+                          strokeOpacity="0.08"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      );
+
+                      lastDate = d.date;
+                    });
+
+                    return elements;
+                  })()
                 ) : (
-                  // Show grid lines for each day in the range
+                  // Show grid lines for each day in the range (MTD, All)
                   Array.from({ length: totalRangeDays }, (_, i) => {
                     const xPos = ((i + 0.5) / totalRangeDays) * 100;
                     return (
@@ -569,31 +619,32 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
                   let lastY = baselineY;
 
                   data.forEach((d, i) => {
-                    const prevCumulative = i === 0 ? startingEquity : data[i - 1].cumulative;
-                    const prevY = ((max - prevCumulative) / totalRange) * 100;
                     const currX = getXPercent(d.date, i);
                     const currY = ((max - d.cumulative) / totalRange) * 100;
 
-                    // Calculate previous period's X position (day or week)
-                    let prevPeriodX: number;
-                    if (hasCalendarRange && dateRange) {
-                      const tradeDateMs = getDayOfRange(d.date);
-                      if (isYtdWeekly) {
-                        const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
-                        const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
-                        prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
-                      } else {
-                        const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
-                        const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
-                        prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
-                      }
+                    if (period === 'wtd') {
+                      // For WTD, draw directly from previous trade to current trade
+                      path += ` L ${currX} ${currY}`;
                     } else {
-                      prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                      // For other periods, do horizontal step then diagonal
+                      let prevPeriodX: number;
+                      if (hasCalendarRange && dateRange) {
+                        const tradeDateMs = getDayOfRange(d.date);
+                        if (isYtdWeekly) {
+                          const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
+                          const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+                          prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
+                        } else {
+                          const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
+                          const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
+                          prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
+                        }
+                      } else {
+                        prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                      }
+                      path += ` L ${prevPeriodX} ${lastY}`;
+                      path += ` L ${currX} ${currY}`;
                     }
-
-                    // Horizontal line to previous period, then diagonal to trade
-                    path += ` L ${prevPeriodX} ${lastY}`;
-                    path += ` L ${currX} ${currY}`;
                     lastY = currY;
                   });
 
@@ -617,30 +668,32 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
 
                   data.forEach((d, i) => {
                     const currX = getXPercent(d.date, i);
-
-                    // Calculate previous period's X position (day or week)
-                    let prevPeriodX: number;
-                    if (hasCalendarRange && dateRange) {
-                      const tradeDateMs = getDayOfRange(d.date);
-                      if (isYtdWeekly) {
-                        const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
-                        const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
-                        prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
-                      } else {
-                        const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
-                        const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
-                        prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
-                      }
-                    } else {
-                      prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
-                    }
-
-                    // Horizontal to previous period at current peak level
-                    topPath += ` L ${prevPeriodX} ${lastPeakY}`;
-
                     runningPeak = Math.max(runningPeak, d.cumulative);
                     const peakY = ((max - runningPeak) / totalRange) * 100;
-                    topPath += ` L ${currX} ${peakY}`;
+
+                    if (period === 'wtd') {
+                      // For WTD, draw directly to current position
+                      topPath += ` L ${currX} ${peakY}`;
+                    } else {
+                      // For other periods, do horizontal step then diagonal
+                      let prevPeriodX: number;
+                      if (hasCalendarRange && dateRange) {
+                        const tradeDateMs = getDayOfRange(d.date);
+                        if (isYtdWeekly) {
+                          const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
+                          const prevWeekIndex = Math.floor((prevWeekMs - weekStartTime) / (7 * 24 * 60 * 60 * 1000));
+                          prevPeriodX = ((Math.max(0, prevWeekIndex) + 0.5) / totalRangeWeeks) * 100;
+                        } else {
+                          const prevDayMs = tradeDateMs - (24 * 60 * 60 * 1000);
+                          const prevDayIndex = Math.round((prevDayMs - rangeStartTime) / (1000 * 60 * 60 * 24));
+                          prevPeriodX = ((Math.max(0, prevDayIndex) + 0.5) / totalRangeDays) * 100;
+                        }
+                      } else {
+                        prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                      }
+                      topPath += ` L ${prevPeriodX} ${lastPeakY}`;
+                      topPath += ` L ${currX} ${peakY}`;
+                    }
                     lastPeakY = peakY;
                   });
 
@@ -658,9 +711,11 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
                     const prevCumulative = i === 0 ? startingEquity : data[i - 1].cumulative;
                     const prevY = ((max - prevCumulative) / totalRange) * 100;
 
-                    // Calculate previous period's X position (day or week)
+                    // Calculate previous position
                     let prevPeriodX: number;
-                    if (hasCalendarRange && dateRange) {
+                    if (period === 'wtd') {
+                      prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                    } else if (hasCalendarRange && dateRange) {
                       const tradeDateMs = getDayOfRange(d.date);
                       if (isYtdWeekly) {
                         const prevWeekMs = tradeDateMs - (7 * 24 * 60 * 60 * 1000);
@@ -675,8 +730,13 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
                       prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
                     }
 
-                    bottomPath += ` L ${currX} ${currY}`;
-                    bottomPath += ` L ${prevPeriodX} ${prevY}`;
+                    if (period === 'wtd') {
+                      // For WTD, draw directly between trades
+                      bottomPath += ` L ${currX} ${currY}`;
+                    } else {
+                      bottomPath += ` L ${currX} ${currY}`;
+                      bottomPath += ` L ${prevPeriodX} ${prevY}`;
+                    }
                   }
                   bottomPath += ` L 0 ${baselineY}`;
 
@@ -686,7 +746,7 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
               />
 
               {/* Initial flat gray line from start to first trade */}
-              {hasCalendarRange && data.length > 0 && (() => {
+              {hasCalendarRange && period !== 'wtd' && data.length > 0 && (() => {
                 const firstTradeDateMs = getDayOfRange(data[0].date);
                 let prevPeriodX: number;
 
@@ -727,7 +787,11 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
                 // Calculate previous trade's X position (or 0 for first trade)
                 let prevTradeX: number;
 
-                if (hasCalendarRange && dateRange) {
+                if (period === 'wtd') {
+                  // For WTD, draw directly from previous trade to current trade
+                  prevPeriodX = i === 0 ? 0 : getXPercent(data[i - 1].date, i - 1);
+                  prevTradeX = prevPeriodX;
+                } else if (hasCalendarRange && dateRange) {
                   const tradeDateMs = getDayOfRange(d.date);
 
                   if (isYtdWeekly) {
@@ -776,7 +840,7 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
               })}
 
               {/* Trailing flat gray line from last trade to end of chart */}
-              {data.length > 0 && (
+              {period !== 'wtd' && data.length > 0 && (
                 <line
                   x1={getXPercent(data[data.length - 1].date, data.length - 1)}
                   y1={((max - data[data.length - 1].cumulative) / totalRange) * 100}
@@ -885,13 +949,33 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
                 const labels: { date: string; label: string; xPos: number }[] = [];
 
                 if (period === 'wtd') {
-                  // For WTD, show day abbreviations for each day
-                  for (let i = 0; i < totalRangeDays; i++) {
-                    const dayDate = new Date(rangeStartTime + i * 24 * 60 * 60 * 1000);
-                    const dayOfWeek = dayDate.getDay();
-                    const xPos = ((i + 0.5) / totalRangeDays) * 100;
-                    labels.push({ date: '', label: dayNames[dayOfWeek], xPos });
+                  // For WTD, show day label centered over each day's trades
+                  const dayGroups: { date: string; startIdx: number; endIdx: number }[] = [];
+                  let currentDate = '';
+                  let startIdx = 0;
+
+                  data.forEach((d, i) => {
+                    if (d.date !== currentDate) {
+                      if (currentDate) {
+                        dayGroups.push({ date: currentDate, startIdx, endIdx: i - 1 });
+                      }
+                      currentDate = d.date;
+                      startIdx = i;
+                    }
+                  });
+                  if (currentDate) {
+                    dayGroups.push({ date: currentDate, startIdx, endIdx: data.length - 1 });
                   }
+
+                  dayGroups.forEach(group => {
+                    const centerIdx = (group.startIdx + group.endIdx) / 2;
+                    const xPos = ((centerIdx + 0.5) / data.length) * 100;
+                    const [y, m, d] = group.date.split("-").map(Number);
+                    const date = new Date(y, m - 1, d);
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                    const dayNum = date.getDate();
+                    labels.push({ date: '', label: `${dayName} ${dayNum}`, xPos });
+                  });
                 } else if (period === 'mtd') {
                   // For MTD, show every other day starting from 1st
                   for (let i = 0; i < totalRangeDays; i++) {
@@ -1028,13 +1112,16 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
 
         {/* Data row */}
         <div className="grid grid-cols-5 gap-2">
-          {/* Date */}
+          {/* Date / Trade # */}
           <div className="text-center">
             <div className="text-[10px] text-muted mb-1">
               {isHovering ? "Selected" : "Latest"}
             </div>
             <div className="text-sm font-semibold text-foreground">
-              {displayData.dateEnd ? (
+              {period === 'wtd' && displayData.tradeIndex ? (
+                // WTD individual trade view - show trade number
+                `Trade #${displayData.tradeIndex}`
+              ) : displayData.dateEnd ? (
                 // Weekly view - show date range
                 (() => {
                   const formatShort = (dateStr: string) => {
@@ -1057,7 +1144,7 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
           {/* Period P&L */}
           <div className="text-center">
             <div className="text-[10px] text-muted mb-1">
-              {displayData.dateEnd ? "Weekly P&L" : "Daily P&L"}
+              {period === 'wtd' ? "Trade P&L" : displayData.dateEnd ? "Weekly P&L" : "Daily P&L"}
             </div>
             <div className={`text-sm font-bold ${displayData.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
               {displayData.pnl >= 0 ? "+" : ""}${displayData.pnl.toFixed(2)}
@@ -1103,7 +1190,7 @@ const EquityCurveChart = ({ data, dateRange, period = "all", startingEquity = 0 
           {/* Status */}
           <div className="text-center">
             <div className="text-[10px] text-muted mb-1">
-              {displayData.dateEnd ? "Week Result" : "Day Result"}
+              {period === 'wtd' ? "Trade Result" : displayData.dateEnd ? "Week Result" : "Day Result"}
             </div>
             <div className={`text-xs font-medium px-2 py-0.5 rounded inline-block ${
               displayData.pnl >= 0
@@ -1502,9 +1589,12 @@ export default function TradingPage() {
     let dateRange: { start: string; end: string } | null = null;
 
     // Then filter by time period
+    // Use closeDate for closed trades (swing trades), otherwise use date
     if (equityPeriod !== "all") {
       filteredTrades = filteredTrades.filter(trade => {
-        const [y, m, d] = trade.date.split("-").map(Number);
+        // For closed trades, use closeDate if available, otherwise use date
+        const effectiveDate = trade.closeDate || trade.date;
+        const [y, m, d] = effectiveDate.split("-").map(Number);
         const tradeDate = new Date(y, m - 1, d);
 
         switch (equityPeriod) {
@@ -1515,7 +1605,7 @@ export default function TradingPage() {
           case "wtd":
             return tradeDate >= startOfWeek;
           case "daily":
-            return trade.date === today;
+            return effectiveDate === today;
           default:
             return true;
         }
@@ -1547,7 +1637,16 @@ export default function TradingPage() {
           };
           break;
         }
-        // WTD uses trade-based positioning (no dateRange), not calendar-based
+        case "wtd": {
+          // WTD shows full week Sunday to Saturday
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 7); // Day after Saturday
+          dateRange = {
+            start: startOfWeek.toISOString().split("T")[0],
+            end: endOfWeek.toISOString().split("T")[0]
+          };
+          break;
+        }
       }
     }
 
@@ -1574,7 +1673,12 @@ export default function TradingPage() {
     }
 
     // Build equity curve from filtered trades
-    const sortedTrades = [...filteredTrades].sort((a, b) => a.date.localeCompare(b.date));
+    // Sort by effective date (closeDate for swing trades, otherwise date)
+    const sortedTrades = [...filteredTrades].sort((a, b) => {
+      const dateA = a.closeDate || a.date;
+      const dateB = b.closeDate || b.date;
+      return dateA.localeCompare(dateB);
+    });
 
     // Helper to get the start of week (Sunday) for a given date
     const getWeekStart = (dateStr: string): string => {
@@ -1585,17 +1689,6 @@ export default function TradingPage() {
       weekStart.setDate(date.getDate() - dayOfWeek);
       return weekStart.toISOString().split("T")[0];
     };
-
-    // For YTD, aggregate by week; otherwise aggregate by day
-    const pnlByPeriod: Record<string, { pnl: number; count: number }> = {};
-    sortedTrades.forEach(t => {
-      const key = equityPeriod === "ytd" ? getWeekStart(t.date) : t.date;
-      if (!pnlByPeriod[key]) {
-        pnlByPeriod[key] = { pnl: 0, count: 0 };
-      }
-      pnlByPeriod[key].pnl += t.pnl;
-      pnlByPeriod[key].count += 1;
-    });
 
     // Helper to get end of week (Saturday) from week start
     const getWeekEnd = (weekStartStr: string): string => {
@@ -1611,22 +1704,55 @@ export default function TradingPage() {
     let cumulative = startingEquity;
     let peak = startingEquity;
 
-    Object.keys(pnlByPeriod).sort().forEach(date => {
-      cumulative += pnlByPeriod[date].pnl;
-      peak = Math.max(peak, cumulative);
-      const drawdown = peak - cumulative;
-      const drawdownPercent = peak > 0 ? (drawdown / peak) * 100 : 0;
+    // For WTD, show each individual trade; for YTD aggregate by week; otherwise aggregate by day
+    if (equityPeriod === "wtd") {
+      // Show each individual trade for WTD
+      sortedTrades.forEach((t, index) => {
+        cumulative += t.pnl;
+        peak = Math.max(peak, cumulative);
+        const drawdown = peak - cumulative;
+        const drawdownPercent = peak > 0 ? (drawdown / peak) * 100 : 0;
 
-      curve.push({
-        date,
-        dateEnd: equityPeriod === "ytd" ? getWeekEnd(date) : undefined,
-        pnl: pnlByPeriod[date].pnl,
-        cumulative,
-        drawdown,
-        drawdownPercent,
-        tradeCount: pnlByPeriod[date].count,
+        curve.push({
+          date: t.closeDate || t.date, // Use closeDate for swing trades
+          pnl: t.pnl,
+          cumulative,
+          drawdown,
+          drawdownPercent,
+          tradeCount: 1,
+          tradeIndex: index + 1, // 1-based index for display
+        });
       });
-    });
+    } else {
+      // Aggregate by week (YTD) or by day (all, mtd)
+      const pnlByPeriod: Record<string, { pnl: number; count: number }> = {};
+      sortedTrades.forEach(t => {
+        const effectiveDate = t.closeDate || t.date;
+        const key = equityPeriod === "ytd" ? getWeekStart(effectiveDate) : effectiveDate;
+        if (!pnlByPeriod[key]) {
+          pnlByPeriod[key] = { pnl: 0, count: 0 };
+        }
+        pnlByPeriod[key].pnl += t.pnl;
+        pnlByPeriod[key].count += 1;
+      });
+
+      Object.keys(pnlByPeriod).sort().forEach(date => {
+        cumulative += pnlByPeriod[date].pnl;
+        peak = Math.max(peak, cumulative);
+        const drawdown = peak - cumulative;
+        const drawdownPercent = peak > 0 ? (drawdown / peak) * 100 : 0;
+
+        curve.push({
+          date,
+          dateEnd: equityPeriod === "ytd" ? getWeekEnd(date) : undefined,
+          pnl: pnlByPeriod[date].pnl,
+          cumulative,
+          drawdown,
+          drawdownPercent,
+          tradeCount: pnlByPeriod[date].count,
+        });
+      });
+    }
 
     return { data: curve, dateRange, period: equityPeriod, tradeCount: filteredTrades.length, startingEquity };
   }, [tradingStats, closedTrades, equityPeriod, equityTagFilter, goals.startingEquity]);
@@ -1669,7 +1795,7 @@ export default function TradingPage() {
     <div className="h-full overflow-y-auto space-y-6 pb-6">
       {/* EQUITY CURVE - Full Width Top Section */}
       <div className="glass rounded-xl border border-border/50 p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="relative flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-accent-light" />
               Equity Curve
@@ -1679,6 +1805,40 @@ export default function TradingPage() {
                 tip: "Smooth upward = consistent trading."
               }} />
             </h3>
+
+            {/* Period indicator - centered */}
+            <span className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-foreground">
+              {equityPeriod === "all" && filteredEquityCurve.dateRange
+                ? (() => {
+                    const start = new Date(filteredEquityCurve.dateRange.start);
+                    start.setDate(start.getDate() + 1); // Adjust for day before first trade
+                    const end = new Date(filteredEquityCurve.dateRange.end);
+                    const formatDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return `${formatDate(start)} - ${formatDate(end)}`;
+                  })()
+                : equityPeriod === "ytd"
+                  ? `${new Date().getFullYear()} YTD`
+                  : equityPeriod === "mtd"
+                    ? new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                    : equityPeriod === "wtd"
+                      ? (() => {
+                          const now = new Date();
+                          const startOfWeek = new Date(now);
+                          startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+                          const endOfWeek = new Date(startOfWeek);
+                          endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+                          const formatDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                          const startYear = startOfWeek.getFullYear();
+                          const endYear = endOfWeek.getFullYear();
+                          if (startYear !== endYear) {
+                            return `${formatDate(startOfWeek)}, ${startYear} - ${formatDate(endOfWeek)}, ${endYear}`;
+                          }
+                          return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}, ${endYear}`;
+                        })()
+                      : null
+              }
+            </span>
+
             <div className="flex items-center gap-3">
               {/* Period Filter */}
               <div className="flex items-center gap-1 bg-card rounded-lg p-1">
@@ -1701,28 +1861,6 @@ export default function TradingPage() {
                   </button>
                 ))}
               </div>
-
-              {/* Period indicator */}
-              <span className="text-xs text-muted">
-                {equityPeriod === "all" && filteredEquityCurve.dateRange
-                  ? (() => {
-                      const start = new Date(filteredEquityCurve.dateRange.start);
-                      start.setDate(start.getDate() + 1); // Adjust for day before first trade
-                      const end = new Date(filteredEquityCurve.dateRange.end);
-                      const formatDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                      return `${formatDate(start)} - ${formatDate(end)}`;
-                    })()
-                  : equityPeriod === "ytd"
-                    ? `${new Date().getFullYear()} YTD`
-                    : equityPeriod !== "all"
-                      ? new Date().toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })
-                      : null
-                }
-              </span>
 
               {/* Tag Filter */}
               {tags.length > 0 && (
