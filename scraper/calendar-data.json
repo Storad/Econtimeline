@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-31T22:16:19.524Z",
+  "lastUpdated": "2026-01-01T11:18:53.959Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -244,54 +244,6 @@
       "previous": null
     },
     {
-      "date": "2025-10-06",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-06",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-10-07",
       "time": "12:00",
       "title": "EIA Short-Term Energy Outlook",
@@ -442,130 +394,6 @@
       "previous": null
     },
     {
-      "date": "2025-10-09",
-      "time": "13:00",
-      "title": "10-Year Note Auction",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 10-year government notes.",
-      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
-        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
-      },
-      "relatedAssets": [
-        "US 10-year yield",
-        "USD",
-        "Mortgage rates"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-10",
-      "time": "12:00",
-      "title": "30-Year Bond Auction",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 30-year government bonds.",
-      "whyItMatters": "Key indicator of demand for long-term US government debt.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 30-year yield",
-        "USD",
-        "TLT ETF"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-13",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-13",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-13",
-      "time": "19:00",
-      "title": "Federal Budget Balance",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://fiscaldata.treasury.gov/",
-      "category": "fiscal",
-      "description": "Monthly US government budget surplus or deficit.",
-      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal direct impact",
-        "lowerThanExpected": "Minimal direct impact"
-      },
-      "relatedAssets": [
-        "US Treasury yields"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-10-14",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -615,11 +443,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.579Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-15",
@@ -697,54 +522,6 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-20",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-20",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -902,11 +679,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.255Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-10-24",
@@ -937,131 +711,6 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.678Z"
-    },
-    {
-      "date": "2025-10-24",
-      "time": "18:00",
-      "title": "2-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 2-year government notes.",
-      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 2-year yield",
-        "Fed funds futures"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-27",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-27",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-27",
-      "time": "18:00",
-      "title": "5-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 5-year government notes.",
-      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 5-year yield",
-        "Corporate bonds"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-27",
-      "time": "18:00",
-      "title": "7-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 7-year government notes.",
-      "whyItMatters": "Part of the belly of the curve.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US Treasury yields"
-      ],
-      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -1408,54 +1057,6 @@
       "previous": null
     },
     {
-      "date": "2025-11-03",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-03",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-11-04",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -1606,58 +1207,6 @@
       "previous": null
     },
     {
-      "date": "2025-11-06",
-      "time": "13:00",
-      "title": "10-Year Note Auction",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 10-year government notes.",
-      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
-        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
-      },
-      "relatedAssets": [
-        "US 10-year yield",
-        "USD",
-        "Mortgage rates"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-07",
-      "time": "12:00",
-      "title": "30-Year Bond Auction",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 30-year government bonds.",
-      "whyItMatters": "Key indicator of demand for long-term US government debt.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 30-year yield",
-        "USD",
-        "TLT ETF"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-11-07",
       "time": "15:00",
       "title": "Consumer Credit m/m",
@@ -1685,54 +1234,6 @@
       "previous": null
     },
     {
-      "date": "2025-11-10",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-10",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-11-11",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -1751,30 +1252,6 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-11",
-      "time": "19:00",
-      "title": "Federal Budget Balance",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://fiscaldata.treasury.gov/",
-      "category": "fiscal",
-      "description": "Monthly US government budget surplus or deficit.",
-      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal direct impact",
-        "lowerThanExpected": "Minimal direct impact"
-      },
-      "relatedAssets": [
-        "US Treasury yields"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -1885,57 +1362,6 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.579Z"
-    },
-    {
-      "date": "2025-11-17",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-17",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -1968,11 +1394,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-18",
@@ -2023,11 +1446,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.423Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-19",
@@ -2108,11 +1528,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:15.376Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-20",
@@ -2163,16 +1580,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-20",
@@ -2229,11 +1643,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-21",
@@ -2290,82 +1701,6 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.102Z"
-    },
-    {
-      "date": "2025-11-24",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-24",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-24",
-      "time": "18:00",
-      "title": "2-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 2-year government notes.",
-      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 2-year yield",
-        "Fed funds futures"
-      ],
-      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -2398,11 +1733,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.469Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-25",
@@ -2432,11 +1764,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.751Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-25",
@@ -2554,31 +1883,6 @@
       "previous": null
     },
     {
-      "date": "2025-11-25",
-      "time": "18:00",
-      "title": "5-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 5-year government notes.",
-      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 5-year yield",
-        "Corporate bonds"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-11-26",
       "time": "08:30",
       "title": "Durable Goods Orders m/m",
@@ -2607,11 +1911,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-26",
@@ -2636,16 +1937,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-11-26",
@@ -2697,30 +1995,6 @@
       "previous": null
     },
     {
-      "date": "2025-11-26",
-      "time": "18:00",
-      "title": "7-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 7-year government notes.",
-      "whyItMatters": "Part of the belly of the curve.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US Treasury yields"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-11-27",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -2747,28 +2021,6 @@
       "previous": null
     },
     {
-      "date": "2025-11-27",
-      "time": "All Day",
-      "title": "Thanksgiving Day (Market Closed)",
-      "impact": "holiday",
-      "currency": "USD",
-      "country": "US",
-      "source": "holidays",
-      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
-      "category": "holiday",
-      "description": "US stock markets (NYSE, NASDAQ) are closed for Thanksgiving Day.",
-      "frequency": "Annual",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-11-28",
       "time": "09:45",
       "title": "Chicago PMI",
@@ -2790,30 +2042,6 @@
         "Industrial stocks"
       ],
       "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-11-28",
-      "time": "13:00",
-      "title": "Early Close (1:00 PM ET)",
-      "impact": "early_close",
-      "currency": "USD",
-      "country": "US",
-      "source": "holidays",
-      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
-      "category": "holiday",
-      "isEarlyClose": true,
-      "closeTimeET": "13:00",
-      "description": "US stock markets close early at 1:00 PM ET. Bond markets may also have reduced hours.",
-      "frequency": "Annual",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -2918,54 +2146,6 @@
       "previous": null
     },
     {
-      "date": "2025-12-01",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-01",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-12-02",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -3041,11 +2221,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.102Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-03",
@@ -3202,11 +2379,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-04",
@@ -3231,16 +2405,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-04",
@@ -3298,11 +2469,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.968Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-05",
@@ -3326,54 +2494,6 @@
         "USD",
         "Consumer stocks",
         "Bank stocks"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-08",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-08",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
       ],
       "historicalVolatility": "Low",
       "actual": null,
@@ -3407,11 +2527,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "7.7M",
-      "previous": "7.7M",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.052Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-09",
@@ -3434,32 +2551,6 @@
         "Crude Oil",
         "Natural Gas",
         "Energy stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-09",
-      "time": "13:00",
-      "title": "10-Year Note Auction",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 10-year government notes.",
-      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
-        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
-      },
-      "relatedAssets": [
-        "US 10-year yield",
-        "USD",
-        "Mortgage rates"
       ],
       "historicalVolatility": "Medium",
       "actual": null,
@@ -3639,11 +2730,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.423Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-11",
@@ -3668,16 +2756,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-11",
@@ -3702,56 +2787,6 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-11",
-      "time": "12:00",
-      "title": "30-Year Bond Auction",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 30-year government bonds.",
-      "whyItMatters": "Key indicator of demand for long-term US government debt.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 30-year yield",
-        "USD",
-        "TLT ETF"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-11",
-      "time": "19:00",
-      "title": "Federal Budget Balance",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://fiscaldata.treasury.gov/",
-      "category": "fiscal",
-      "description": "Monthly US government budget surplus or deficit.",
-      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal direct impact",
-        "lowerThanExpected": "Minimal direct impact"
-      },
-      "relatedAssets": [
-        "US Treasury yields"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -3783,57 +2818,6 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.579Z"
-    },
-    {
-      "date": "2025-12-15",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-15",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -3867,11 +2851,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:15.376Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -3902,11 +2883,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.469Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -4009,11 +2987,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.255Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-18",
@@ -4064,16 +3039,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-18",
@@ -4130,11 +3102,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-19",
@@ -4159,54 +3128,6 @@
         "REITs"
       ],
       "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-22",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-22",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -4238,11 +3159,8 @@
       "latestDate": "2025-07-01",
       "priorDate": "2025-04-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "4.3%",
-      "previous": "3.8%",
-      "actualDate": "2025-07-01",
-      "previousDate": "2025-04-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.231Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4274,11 +3192,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.968Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4309,11 +3224,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4344,11 +3256,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.102Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -4443,16 +3352,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-24",
@@ -4478,55 +3384,6 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-24",
-      "time": "13:00",
-      "title": "Early Close (1:00 PM ET)",
-      "impact": "early_close",
-      "currency": "USD",
-      "country": "US",
-      "source": "holidays",
-      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
-      "category": "holiday",
-      "isEarlyClose": true,
-      "closeTimeET": "13:00",
-      "description": "US stock markets close early at 1:00 PM ET. Bond markets may also have reduced hours.",
-      "frequency": "Annual",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-24",
-      "time": "18:00",
-      "title": "2-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 2-year government notes.",
-      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 2-year yield",
-        "Fed funds futures"
-      ],
-      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -4557,77 +3414,6 @@
       "previous": null
     },
     {
-      "date": "2025-12-25",
-      "time": "18:00",
-      "title": "5-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 5-year government notes.",
-      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US 5-year yield",
-        "Corporate bonds"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-25",
-      "time": "All Day",
-      "title": "Christmas Day (Market Closed)",
-      "impact": "holiday",
-      "currency": "USD",
-      "country": "US",
-      "source": "holidays",
-      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
-      "category": "holiday",
-      "description": "US stock markets (NYSE, NASDAQ) are closed for Christmas Day.",
-      "frequency": "Annual",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-26",
-      "time": "18:00",
-      "title": "7-Year Note Auction",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 7-year government notes.",
-      "whyItMatters": "Part of the belly of the curve.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Strong demand = yields fall",
-        "lowerThanExpected": "Weak demand = yields rise"
-      },
-      "relatedAssets": [
-        "US Treasury yields"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
       "date": "2025-12-29",
       "time": "10:00",
       "title": "Pending Home Sales m/m",
@@ -4646,54 +3432,6 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-29",
-      "time": "16:30",
-      "title": "4-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 4-week bills.",
-      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-29",
-      "time": "16:30",
-      "title": "8-Week Bill Auction",
-      "impact": "low",
-      "currency": "USD",
-      "country": "US",
-      "source": "treasury",
-      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
-      "category": "bonds",
-      "description": "US Treasury auction for 8-week bills.",
-      "whyItMatters": "Short-term funding rate.",
-      "frequency": "Weekly (Monday)",
-      "typicalReaction": {
-        "higherThanExpected": "Minimal market impact",
-        "lowerThanExpected": "Minimal market impact"
-      },
-      "relatedAssets": [
-        "T-bill rates"
-      ],
-      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -4764,16 +3502,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-31",
@@ -5171,11 +3906,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -5205,11 +3937,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "7.7M",
-      "previous": "7.7M",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.052Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -5265,11 +3994,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.423Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -5346,16 +4072,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -5466,11 +4189,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:15.376Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -5501,11 +4221,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.790Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -5535,11 +4252,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.996Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -5668,11 +4382,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.255Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -5702,11 +4413,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.223Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -5759,11 +4467,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.469Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-14",
@@ -5793,11 +4498,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.751Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-14",
@@ -5978,11 +4680,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.579Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -6007,16 +4706,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -6098,11 +4794,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.102Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-19",
@@ -6251,11 +4944,8 @@
       "latestDate": "2025-07-01",
       "priorDate": "2025-04-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "4.3%",
-      "previous": "3.8%",
-      "actualDate": "2025-07-01",
-      "previousDate": "2025-04-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.231Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -6280,16 +4970,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -6346,11 +5033,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-23",
@@ -6407,11 +5091,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-26",
@@ -6564,11 +5245,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.790Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -6598,11 +5276,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.996Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -6654,11 +5329,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.223Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -6835,11 +5507,8 @@
       "latestDate": "2025-07-01",
       "priorDate": "2025-04-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "4.3%",
-      "previous": "3.8%",
-      "actualDate": "2025-07-01",
-      "previousDate": "2025-04-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.231Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -6871,11 +5540,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.968Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -6906,11 +5572,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -6939,11 +5602,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.423Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -6994,16 +5654,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -7081,11 +5738,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.751Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-30",
@@ -7311,11 +5965,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-04",
@@ -7446,11 +6097,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.423Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -7501,16 +6149,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -7568,11 +6213,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:15.376Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-06",
@@ -7777,11 +6419,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.255Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-11",
@@ -7940,11 +6579,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.751Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-12",
@@ -7969,16 +6605,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-12",
@@ -8131,11 +6764,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.469Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-17",
@@ -8165,11 +6795,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.579Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-17",
@@ -8270,11 +6897,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.102Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -8374,16 +6998,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-19",
@@ -8440,11 +7061,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -8666,11 +7284,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.790Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-25",
@@ -8700,11 +7315,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.996Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-25",
@@ -8734,11 +7346,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.223Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-25",
@@ -8820,11 +7429,8 @@
       "latestDate": "2025-07-01",
       "priorDate": "2025-04-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "4.3%",
-      "previous": "3.8%",
-      "actualDate": "2025-07-01",
-      "previousDate": "2025-04-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.231Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -8856,11 +7462,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.968Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -8891,11 +7494,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -8920,16 +7520,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -9353,11 +7950,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -9386,11 +7980,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.423Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -9441,16 +8032,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -9508,11 +8096,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:15.376Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-06",
@@ -9640,11 +8225,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.255Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-11",
@@ -9777,11 +8359,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.751Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -9806,16 +8385,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -9898,11 +8474,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.469Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -9932,11 +8505,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.579Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -9967,11 +8537,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.102Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -10239,16 +8806,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-19",
@@ -10379,11 +8943,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.790Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -10413,11 +8974,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.996Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -10447,11 +9005,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.223Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -10551,11 +9106,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-25",
@@ -10657,16 +9209,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-26",
@@ -10768,11 +9317,8 @@
       "latestDate": "2025-07-01",
       "priorDate": "2025-04-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "4.3%",
-      "previous": "3.8%",
-      "actualDate": "2025-07-01",
-      "previousDate": "2025-04-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.231Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-27",
@@ -10804,11 +9350,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.968Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-27",
@@ -10839,11 +9382,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-30",
@@ -11144,11 +9684,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -11177,11 +9714,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-52.8B",
-      "previous": "-59.3B",
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.423Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -11206,16 +9740,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -11273,11 +9804,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+64K",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:15.376Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-03",
@@ -11571,16 +10099,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -11663,11 +10188,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "325.0%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.255Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-10",
@@ -11795,11 +10317,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.1%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.751Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-14",
@@ -11851,11 +10370,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-3.9",
-      "previous": "18.7",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.579Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-15",
@@ -11938,11 +10454,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "RSAFS",
-      "actual": "+0.0%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.469Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -11993,16 +10506,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -12033,11 +10543,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.102Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -12238,11 +10745,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HOUST",
-      "actual": "1307K",
-      "previous": "1429K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.790Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -12272,11 +10776,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1330K",
-      "previous": "1362K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.996Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -12301,16 +10802,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -12340,11 +10838,8 @@
       "latestDate": "2025-08-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "HSN1F",
-      "actual": "800K",
-      "previous": "664K",
-      "actualDate": "2025-08-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2025-12-31T22:16:19.223Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -12427,11 +10922,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-09-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-2.2%",
-      "previous": null,
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-09-01",
-      "dataUpdatedAt": "2025-12-31T22:16:18.340Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-24",
@@ -12462,11 +10954,8 @@
       "latestDate": "2025-11-01",
       "priorDate": "2025-10-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "51.0",
-      "previous": "53.6",
-      "actualDate": "2025-11-01",
-      "previousDate": "2025-10-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-24",
@@ -12809,11 +11298,8 @@
       "latestDate": "2025-07-01",
       "priorDate": "2025-04-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "4.3%",
-      "previous": "3.8%",
-      "actualDate": "2025-07-01",
-      "previousDate": "2025-04-01",
-      "dataUpdatedAt": "2025-12-31T22:16:17.231Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -12845,11 +11331,8 @@
       "latestDate": "2025-09-01",
       "priorDate": "2025-08-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2025-09-01",
-      "previousDate": "2025-08-01",
-      "dataUpdatedAt": "2025-12-31T22:16:16.968Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -12900,16 +11383,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "214000K",
-      "priorValue": "224000K",
-      "latestDate": "2025-12-20",
-      "priorDate": "2025-12-13",
+      "latestValue": "199000K",
+      "priorValue": "215000K",
+      "latestDate": "2025-12-27",
+      "priorDate": "2025-12-20",
       "fredSeriesId": "ICSA",
-      "actual": "199000K",
-      "previous": "215000K",
-      "actualDate": "2025-12-27",
-      "previousDate": "2025-12-20",
-      "dataUpdatedAt": "2025-12-31T22:16:15.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -13059,6 +11539,54 @@
         "Industrial stocks"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-04",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-04",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -13239,6 +11767,104 @@
       "previous": null
     },
     {
+      "date": "2026-05-11",
+      "time": "13:00",
+      "title": "10-Year Note Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 10-year government notes.",
+      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
+        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
+      },
+      "relatedAssets": [
+        "US 10-year yield",
+        "USD",
+        "Mortgage rates"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-11",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-11",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-11",
+      "time": "19:00",
+      "title": "Federal Budget Balance",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://fiscaldata.treasury.gov/",
+      "category": "fiscal",
+      "description": "Monthly US government budget surplus or deficit.",
+      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal direct impact",
+        "lowerThanExpected": "Minimal direct impact"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-05-12",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -13288,6 +11914,32 @@
       "previous": null
     },
     {
+      "date": "2026-05-13",
+      "time": "12:00",
+      "title": "30-Year Bond Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 30-year government bonds.",
+      "whyItMatters": "Key indicator of demand for long-term US government debt.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 30-year yield",
+        "USD",
+        "TLT ETF"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-05-14",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -13310,6 +11962,54 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-18",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-18",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -13438,6 +12138,104 @@
     },
     {
       "date": "2026-05-25",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-25",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-25",
+      "time": "18:00",
+      "title": "2-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 2-year government notes.",
+      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 2-year yield",
+        "Fed funds futures"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-25",
+      "time": "18:00",
+      "title": "5-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 5-year government notes.",
+      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 5-year yield",
+        "Corporate bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-25",
       "time": "All Day",
       "title": "Memorial Day (Market Closed)",
       "impact": "holiday",
@@ -13547,6 +12345,30 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-26",
+      "time": "18:00",
+      "title": "7-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 7-year government notes.",
+      "whyItMatters": "Part of the belly of the curve.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
     },
@@ -14462,6 +13284,106 @@
       "previous": null
     },
     {
+      "date": "2026-07-01",
+      "time": "15:00",
+      "title": "ISM Manufacturing PMI",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "ism",
+      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
+      "category": "manufacturing",
+      "description": "Institute for Supply Management survey of purchasing managers at 400+ manufacturing firms. Above 50 = expansion.",
+      "whyItMatters": "Most watched US manufacturing indicator. Strong predictor of industrial production and GDP.",
+      "frequency": "Monthly (first business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-01",
+      "time": "15:00",
+      "title": "ISM Manufacturing Prices",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "ism",
+      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
+      "category": "manufacturing",
+      "description": "Input prices paid by manufacturers. Leading indicator of producer and consumer inflation.",
+      "whyItMatters": "Rising prices signal inflation pressures building in supply chain.",
+      "frequency": "Monthly (first business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish (inflation), bonds bearish",
+        "lowerThanExpected": "USD bearish, bonds bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-01",
+      "time": "15:00",
+      "title": "ISM Manufacturing Employment",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "ism",
+      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
+      "category": "employment",
+      "description": "Employment component of ISM Manufacturing survey.",
+      "whyItMatters": "Provides early read on manufacturing employment ahead of NFP.",
+      "frequency": "Monthly (first business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-01",
+      "time": "15:00",
+      "title": "ISM Manufacturing New Orders",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "ism",
+      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
+      "category": "manufacturing",
+      "description": "New orders component - most forward-looking part of ISM survey.",
+      "whyItMatters": "New orders lead production by 1-2 months. Strong predictor of future activity.",
+      "frequency": "Monthly (first business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-07-03",
       "time": "13:00",
       "title": "Early Close (1:00 PM ET)",
@@ -14620,7 +13542,274 @@
       "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
+    },
+    {
+      "date": "2027-01-01",
+      "time": "All Day",
+      "title": "New Year's Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for New Year's Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-01-18",
+      "time": "All Day",
+      "title": "MLK Jr. Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for MLK Jr. Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-15",
+      "time": "All Day",
+      "title": "Presidents' Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Presidents' Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-03-26",
+      "time": "All Day",
+      "title": "Good Friday (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Good Friday.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-05-31",
+      "time": "All Day",
+      "title": "Memorial Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Memorial Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-06-18",
+      "time": "All Day",
+      "title": "Juneteenth (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Juneteenth.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-07-05",
+      "time": "All Day",
+      "title": "Independence Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Independence Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-09-06",
+      "time": "All Day",
+      "title": "Labor Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Labor Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-11-25",
+      "time": "All Day",
+      "title": "Thanksgiving Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Thanksgiving Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-11-26",
+      "time": "13:00",
+      "title": "Early Close (1:00 PM ET)",
+      "impact": "early_close",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "isEarlyClose": true,
+      "closeTimeET": "13:00",
+      "description": "US stock markets close early at 1:00 PM ET. Bond markets may also have reduced hours.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-12-24",
+      "time": "13:00",
+      "title": "Early Close (1:00 PM ET)",
+      "impact": "early_close",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "isEarlyClose": true,
+      "closeTimeET": "13:00",
+      "description": "US stock markets close early at 1:00 PM ET. Bond markets may also have reduced hours.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-12-24",
+      "time": "All Day",
+      "title": "Christmas Day (Market Closed)",
+      "impact": "holiday",
+      "currency": "USD",
+      "country": "US",
+      "source": "holidays",
+      "sourceUrl": "https://www.nyse.com/markets/hours-calendars",
+      "category": "holiday",
+      "description": "US stock markets (NYSE, NASDAQ) are closed for Christmas Day.",
+      "frequency": "Annual",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
     }
-  ],
-  "dataRefreshedAt": "2025-12-31T22:16:19.524Z"
+  ]
 }
