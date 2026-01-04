@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-03T11:17:35.412Z",
+  "lastUpdated": "2026-01-04T11:17:36.432Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,81 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-10-03",
-      "time": "15:00",
-      "title": "ISM Services PMI",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "services",
-      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
-      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
-      "frequency": "Monthly (third business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, stocks bullish",
-        "lowerThanExpected": "USD bearish, stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "Service stocks"
-      ],
-      "historicalVolatility": "High",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-03",
-      "time": "15:00",
-      "title": "ISM Services Prices",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "services",
-      "description": "Prices paid component of ISM Services survey.",
-      "whyItMatters": "Services inflation is stickier than goods. Key Fed watch item.",
-      "frequency": "Monthly (third business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, bonds bearish",
-        "lowerThanExpected": "USD bearish, bonds bullish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US bonds"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-03",
-      "time": "15:00",
-      "title": "ISM Services Employment",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "employment",
-      "description": "Employment component of ISM Services survey.",
-      "whyItMatters": "Services employ most Americans. Key input for NFP expectations.",
-      "frequency": "Monthly (third business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish",
-        "lowerThanExpected": "USD mildly bearish"
-      },
-      "relatedAssets": [
-        "USD"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-10-07",
       "time": "12:00",
@@ -11386,6 +11311,38 @@
         "Industrial stocks"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-04",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-2.2%",
+      "priorValue": "+0.7%",
+      "latestDate": "2025-10-01",
+      "priorDate": "2025-09-01",
+      "fredSeriesId": "DGORDER",
       "actual": null,
       "previous": null
     },
