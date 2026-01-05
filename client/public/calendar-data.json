@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-04T11:17:36.432Z",
+  "lastUpdated": "2026-01-05T11:19:51.068Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -11391,6 +11391,36 @@
         "T-bill rates"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-05",
+      "time": "08:30",
+      "title": "Trade Balance",
+      "impact": "medium",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=51",
+      "fredReleaseId": 51,
+      "description": "Difference between exports and imports of goods and services.",
+      "whyItMatters": "Large deficits can weaken currency. Trade data affects GDP calculations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "Local currency"
+      ],
+      "historicalVolatility": "Low",
+      "latestValue": "-52.8B",
+      "priorValue": "-59.3B",
+      "latestDate": "2025-09-01",
+      "priorDate": "2025-08-01",
+      "fredSeriesId": "BOPGSTB",
       "actual": null,
       "previous": null
     },
