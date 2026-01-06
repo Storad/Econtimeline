@@ -103,14 +103,10 @@ export default function TradeList({ trades, onEdit, onDelete }: TradeListProps) 
               <TagIcon className="w-3 h-3 text-muted" />
               {trade.tags.map((tag) => (
                 <span
-                  key={tag.id}
-                  className="px-2 py-0.5 text-[10px] rounded-full"
-                  style={{
-                    backgroundColor: tag.color + "20",
-                    color: tag.color,
-                  }}
+                  key={tag}
+                  className="px-2 py-0.5 text-[10px] rounded-full bg-accent/20 text-accent"
                 >
-                  {tag.name}
+                  {tag}
                 </span>
               ))}
             </div>

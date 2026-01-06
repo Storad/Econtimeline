@@ -410,7 +410,8 @@ function getSessionDateTime(
 // Check if it's a weekend (Saturday or Sunday) in a specific timezone
 function isWeekendInTimezone(timezone: string, currentTime: Date): boolean {
   // Get day of week: 0 = Sunday, 6 = Saturday
-  const dayNum = new Date(currentTime.toLocaleString("en-US", { timeZone: timezone })).getDay();
+  // Uses getDayOfWeekInTimezone for reliable cross-platform behavior
+  const dayNum = getDayOfWeekInTimezone(currentTime, timezone);
   return dayNum === 0 || dayNum === 6;
 }
 
@@ -512,8 +513,15 @@ function getTimeRemainingNow(
 }
 
 // Get day of week in a timezone (0 = Sunday, 6 = Saturday)
+// Uses Intl.DateTimeFormat for reliable cross-platform timezone conversion
 function getDayOfWeekInTimezone(date: Date, timezone: string): number {
-  return new Date(date.toLocaleString("en-US", { timeZone: timezone })).getDay();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    weekday: 'short'
+  });
+  const dayName = formatter.format(date);
+  const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  return dayMap[dayName] ?? 0;
 }
 
 // Get time until session opens

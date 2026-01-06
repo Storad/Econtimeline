@@ -40,7 +40,19 @@
       "WebFetch(domain:www.xtb.com)",
       "Bash(npm run build:*)",
       "Bash(dir \"C:\\Users\\stora\\OneDrive\\Desktop\\econtimeline\")",
-      "Bash(npx prisma migrate dev:*)"
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" stash pop)",
+      "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" stash drop:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(grep:*)",
+      "WebFetch(domain:www.tradervue.com)",
+      "Bash(npx next build)",
+      "Bash(timeout /t 5 /nobreak)",
+      "WebFetch(domain:edgewonk.com)",
+      "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" diff --stat)",
+      "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" add -A)"
     ],
     "deny": [],
     "ask": []

@@ -27,8 +27,8 @@ export async function GET(
       );
     }
 
-    // Check access: must be owner or strategy must be published
-    if (strategy.userId !== userId && !strategy.isPublished) {
+    // Check access: must be owner
+    if (strategy.userId !== userId) {
       return NextResponse.json(
         { error: "Strategy not found" },
         { status: 404 }

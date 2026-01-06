@@ -19,10 +19,8 @@ export async function GET(request: NextRequest) {
     let whereClause: { userId: string; date?: string | { gte?: string; lte?: string } } = { userId };
 
     if (date) {
-      // Get trades for a specific date
       whereClause.date = date;
     } else if (startDate && endDate) {
-      // Get trades for a date range
       whereClause.date = {
         gte: startDate,
         lte: endDate,
@@ -31,23 +29,10 @@ export async function GET(request: NextRequest) {
 
     const trades = await prisma.trade.findMany({
       where: whereClause,
-      include: {
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
       orderBy: [{ date: "desc" }, { time: "desc" }, { createdAt: "desc" }],
     });
 
-    // Transform to flatten tags
-    const transformedTrades = trades.map((trade) => ({
-      ...trade,
-      tags: trade.tags.map((tt) => tt.tag),
-    }));
-
-    return NextResponse.json({ trades: transformedTrades });
+    return NextResponse.json({ trades });
   } catch (error) {
     console.error("Error fetching trades:", error);
     return NextResponse.json(
@@ -68,14 +53,11 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tagIds,
-      // New fields
+      date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tags,
       assetType, status, closeDate,
-      // Options fields
       optionType, strikePrice, expirationDate, premium, underlyingTicker
     } = body;
 
-    // For open trades, P&L is optional. For closed trades, P&L is required.
     const tradeStatus = status || "CLOSED";
     if (!date || !ticker || !direction) {
       return NextResponse.json(
@@ -90,7 +72,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create trade with tags
     const trade = await prisma.trade.create({
       data: {
         userId,
@@ -103,39 +84,19 @@ export async function POST(request: NextRequest) {
         size: size || null,
         pnl: pnl ?? 0,
         notes: notes || null,
-        // New fields
         assetType: assetType || "STOCK",
         status: tradeStatus,
         closeDate: closeDate || null,
-        // Options fields
         optionType: optionType || null,
         strikePrice: strikePrice || null,
         expirationDate: expirationDate || null,
         premium: premium || null,
         underlyingTicker: underlyingTicker || null,
-        tags: tagIds?.length
-          ? {
-              create: tagIds.map((tagId: string) => ({
-                tagId,
-              })),
-            }
-          : undefined,
-      },
-      include: {
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: tags || [],
       },
     });
 
-    return NextResponse.json({
-      trade: {
-        ...trade,
-        tags: trade.tags.map((tt) => tt.tag),
-      },
-    });
+    return NextResponse.json({ trade });
   } catch (error) {
     console.error("Error creating trade:", error);
     return NextResponse.json(
@@ -156,10 +117,8 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     const {
-      id, date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tagIds,
-      // New fields
+      id, date, time, ticker, direction, entryPrice, exitPrice, size, pnl, notes, tags,
       assetType, status, closeDate,
-      // Options fields
       optionType, strikePrice, expirationDate, premium, underlyingTicker
     } = body;
 
@@ -170,7 +129,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Verify ownership
     const existingTrade = await prisma.trade.findUnique({
       where: { id },
     });
@@ -182,60 +140,31 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Update trade and replace tags
-    const trade = await prisma.$transaction(async (tx) => {
-      // Delete existing tags
-      await tx.tradeTag.deleteMany({
-        where: { tradeId: id },
-      });
-
-      // Update trade and create new tags
-      return tx.trade.update({
-        where: { id },
-        data: {
-          date: date || existingTrade.date,
-          time: time !== undefined ? time : existingTrade.time,
-          ticker: ticker ? ticker.toUpperCase() : existingTrade.ticker,
-          direction: direction ? direction.toUpperCase() : existingTrade.direction,
-          entryPrice: entryPrice !== undefined ? entryPrice : existingTrade.entryPrice,
-          exitPrice: exitPrice !== undefined ? exitPrice : existingTrade.exitPrice,
-          size: size !== undefined ? size : existingTrade.size,
-          pnl: pnl !== undefined ? pnl : existingTrade.pnl,
-          notes: notes !== undefined ? notes : existingTrade.notes,
-          // New fields
-          assetType: assetType !== undefined ? assetType : existingTrade.assetType,
-          status: status !== undefined ? status : existingTrade.status,
-          closeDate: closeDate !== undefined ? closeDate : existingTrade.closeDate,
-          // Options fields
-          optionType: optionType !== undefined ? optionType : existingTrade.optionType,
-          strikePrice: strikePrice !== undefined ? strikePrice : existingTrade.strikePrice,
-          expirationDate: expirationDate !== undefined ? expirationDate : existingTrade.expirationDate,
-          premium: premium !== undefined ? premium : existingTrade.premium,
-          underlyingTicker: underlyingTicker !== undefined ? underlyingTicker : existingTrade.underlyingTicker,
-          tags: tagIds?.length
-            ? {
-                create: tagIds.map((tagId: string) => ({
-                  tagId,
-                })),
-              }
-            : undefined,
-        },
-        include: {
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-      });
-    });
-
-    return NextResponse.json({
-      trade: {
-        ...trade,
-        tags: trade.tags.map((tt) => tt.tag),
+    const trade = await prisma.trade.update({
+      where: { id },
+      data: {
+        date: date || existingTrade.date,
+        time: time !== undefined ? time : existingTrade.time,
+        ticker: ticker ? ticker.toUpperCase() : existingTrade.ticker,
+        direction: direction ? direction.toUpperCase() : existingTrade.direction,
+        entryPrice: entryPrice !== undefined ? entryPrice : existingTrade.entryPrice,
+        exitPrice: exitPrice !== undefined ? exitPrice : existingTrade.exitPrice,
+        size: size !== undefined ? size : existingTrade.size,
+        pnl: pnl !== undefined ? pnl : existingTrade.pnl,
+        notes: notes !== undefined ? notes : existingTrade.notes,
+        assetType: assetType !== undefined ? assetType : existingTrade.assetType,
+        status: status !== undefined ? status : existingTrade.status,
+        closeDate: closeDate !== undefined ? closeDate : existingTrade.closeDate,
+        optionType: optionType !== undefined ? optionType : existingTrade.optionType,
+        strikePrice: strikePrice !== undefined ? strikePrice : existingTrade.strikePrice,
+        expirationDate: expirationDate !== undefined ? expirationDate : existingTrade.expirationDate,
+        premium: premium !== undefined ? premium : existingTrade.premium,
+        underlyingTicker: underlyingTicker !== undefined ? underlyingTicker : existingTrade.underlyingTicker,
+        tags: tags !== undefined ? tags : existingTrade.tags,
       },
     });
+
+    return NextResponse.json({ trade });
   } catch (error) {
     console.error("Error updating trade:", error);
     return NextResponse.json(
@@ -264,7 +193,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Verify ownership
     const existingTrade = await prisma.trade.findUnique({
       where: { id },
     });

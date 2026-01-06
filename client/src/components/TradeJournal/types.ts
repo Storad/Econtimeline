@@ -1,11 +1,3 @@
-export interface Tag {
-  id: string;
-  userId: string | null;
-  name: string;
-  type: "SETUP" | "EMOTION" | "CUSTOM";
-  color: string;
-}
-
 export type AssetType = "STOCK" | "FUTURES" | "OPTIONS" | "FOREX" | "CRYPTO";
 export type TradeStatus = "OPEN" | "CLOSED";
 export type OptionType = "CALL" | "PUT";
@@ -22,7 +14,7 @@ export interface Trade {
   size: number | null;
   pnl: number;
   notes: string | null;
-  tags: Tag[];
+  tags: string[]; // Simple string array
   createdAt: string;
   updatedAt: string;
   // Asset type and status
@@ -46,7 +38,7 @@ export interface TradeFormData {
   size: string;
   pnl: string;
   notes: string;
-  tagIds: string[];
+  tags: string[]; // Simple string array
   // Asset type and status
   assetType: AssetType;
   status: TradeStatus;
@@ -78,7 +70,7 @@ export interface TradeStats {
     LONG: { count: number; pnl: number; wins: number };
     SHORT: { count: number; pnl: number; wins: number };
   };
-  byTag: Record<string, { count: number; pnl: number; wins: number; name: string; color: string }>;
+  byTag: Record<string, { count: number; pnl: number; wins: number }>;
   dailyPnl: { date: string; pnl: number }[];
 }
 
@@ -91,7 +83,7 @@ export const DEFAULT_TRADE_FORM: TradeFormData = {
   size: "",
   pnl: "",
   notes: "",
-  tagIds: [],
+  tags: [],
   // Asset type and status
   assetType: "STOCK",
   status: "CLOSED",

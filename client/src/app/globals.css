@@ -350,3 +350,48 @@ html {
     filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 12px currentColor);
   }
 }
+
+/* Page transition animations */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.animate-page-in {
+  animation: page-fade-in 0.3s ease-out forwards;
+}
+
+.animate-page-out {
+  animation: page-fade-out 0.15s ease-in forwards;
+}
+
+/* Loading spinner animation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1s linear infinite;
+}

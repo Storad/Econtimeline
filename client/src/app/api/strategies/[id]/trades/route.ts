@@ -27,7 +27,7 @@ export async function GET(
       );
     }
 
-    if (strategy.userId !== userId && !strategy.isPublished) {
+    if (strategy.userId !== userId) {
       return NextResponse.json(
         { error: "Strategy not found" },
         { status: 404 }

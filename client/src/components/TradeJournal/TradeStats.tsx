@@ -304,17 +304,14 @@ export default function TradeStatsPanel({
                 {Object.entries(stats.byTag)
                   .sort((a, b) => b[1].pnl - a[1].pnl)
                   .slice(0, 5)
-                  .map(([tagId, data]) => (
+                  .map(([tag, data]) => (
                     <div
-                      key={tagId}
+                      key={tag}
                       className="flex items-center justify-between p-2 rounded-lg bg-card/50 border border-border/50"
                     >
                       <div className="flex items-center gap-2">
-                        <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: data.color }}
-                        />
-                        <span className="text-sm">{data.name}</span>
+                        <span className="w-2 h-2 rounded-full bg-accent" />
+                        <span className="text-sm">{tag}</span>
                         <span className="text-xs text-muted">
                           {data.count} ({data.wins}W)
                         </span>

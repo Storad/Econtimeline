@@ -13,33 +13,16 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
-    const includePublic = searchParams.get("includePublic") === "true";
-
-    // Build where clause
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const whereClause: any = {};
-
-    if (includePublic) {
-      // Get user's strategies + all published strategies
-      whereClause.OR = [
-        { userId },
-        { isPublished: true },
-      ];
-    } else {
-      whereClause.userId = userId;
-    }
-
-    if (status) {
-      whereClause.status = status;
-    }
 
     const strategies = await prisma.strategy.findMany({
-      where: whereClause,
+      where: {
+        userId,
+        ...(status && { status }),
+      },
       include: {
         _count: {
           select: {
             trades: true,
-            subscriptions: true,
           },
         },
       },
@@ -50,7 +33,6 @@ export async function GET(request: NextRequest) {
     const transformedStrategies = strategies.map((strategy) => ({
       ...strategy,
       tradeCount: strategy._count.trades,
-      subscriberCount: strategy._count.subscriptions,
       _count: undefined,
     }));
 

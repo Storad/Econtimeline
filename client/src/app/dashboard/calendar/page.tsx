@@ -34,8 +34,9 @@ import {
   Tag as TagIcon,
 } from "lucide-react";
 import { useTradeJournal } from "@/hooks/useTradeJournal";
-import { Trade, Tag, TradeFormData, DEFAULT_TRADE_FORM } from "@/components/TradeJournal/types";
+import { Trade, TradeFormData, DEFAULT_TRADE_FORM } from "@/components/TradeJournal/types";
 import TradeForm from "@/components/TradeJournal/TradeForm";
+import { useDemoMode } from "@/context/DemoModeContext";
 
 interface EconomicEvent {
   id: string;
@@ -83,17 +84,6 @@ const impactColorsLegacy = {
   holiday: "bg-gray-500",
 };
 
-// Trade note interface
-interface TradeNote {
-  id: string;
-  userId: string;
-  date: string;
-  trades: number | null;
-  pnl: number | null;
-  note: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
 
 const currencyFlags: Record<string, string> = {
   USD: "🇺🇸",
@@ -134,8 +124,6 @@ export default function EconomicCalendarPage() {
   const [showEvents, setShowEvents] = useState(true);
   const [showTenDayWindow, setShowTenDayWindow] = useState(true);
   const [showNotes, setShowNotes] = useState(true);
-  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
-  const [deletingAllNotes, setDeletingAllNotes] = useState(false);
   const [showMonthSummary, setShowMonthSummary] = useState(false);
   const [showYtdSummary, setShowYtdSummary] = useState(false);
   const [showDeleteAllTradesConfirm, setShowDeleteAllTradesConfirm] = useState(false);
@@ -167,20 +155,10 @@ export default function EconomicCalendarPage() {
   const [showFilters, setShowFilters] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Trade Notes State (legacy - for daily notes)
-  const [tradeNotes, setTradeNotes] = useState<Record<string, TradeNote>>({});
-  const [showNoteModal, setShowNoteModal] = useState(false);
-  const [noteFormData, setNoteFormData] = useState({
-    trades: "",
-    pnl: "",
-    note: "",
-  });
-  const [savingNote, setSavingNote] = useState(false);
-
-  // Trade Journal State (new - individual trades)
+  // Trade Journal State
   const {
-    trades,
-    tags,
+    trades: realTrades,
+    tags: realTags,
     stats,
     loading: tradesLoading,
     statsLoading,
@@ -189,8 +167,6 @@ export default function EconomicCalendarPage() {
     updateTrade,
     deleteTrade,
     closeTrade,
-    createTag,
-    deleteTag,
     changeStatsPeriod,
     getTradesByDate,
     getDailyPnL,
@@ -201,13 +177,68 @@ export default function EconomicCalendarPage() {
     getTradesClosedOnDate,
   } = useTradeJournal();
 
+  // Demo mode integration
+  const { isDemoMode, demoTrades } = useDemoMode();
+
+  // Use demo trades when in demo mode, otherwise use real trades
+  const trades = useMemo(() => {
+    if (isDemoMode) {
+      return demoTrades as unknown as Trade[];
+    }
+    return realTrades;
+  }, [isDemoMode, demoTrades, realTrades]);
+
+  // Get unique tags from current trades
+  const tags = useMemo(() => {
+    if (isDemoMode) {
+      const allTags = new Set<string>();
+      demoTrades.forEach(t => t.tags.forEach(tag => allTags.add(tag)));
+      return Array.from(allTags);
+    }
+    return realTags;
+  }, [isDemoMode, demoTrades, realTags]);
+
+  // Demo-aware helper functions
+  const getTradesByDateLocal = useCallback((date: string): Trade[] => {
+    if (isDemoMode) {
+      return trades.filter(t => t.date === date || t.closeDate === date);
+    }
+    return getTradesByDate(date);
+  }, [isDemoMode, trades, getTradesByDate]);
+
+  const getDailyPnLLocal = useCallback((date: string): number => {
+    if (isDemoMode) {
+      return trades
+        .filter(t => {
+          const effectiveDate = t.closeDate || t.date;
+          return effectiveDate === date && t.status === "CLOSED";
+        })
+        .reduce((sum, t) => sum + t.pnl, 0);
+    }
+    return getDailyPnL(date);
+  }, [isDemoMode, trades, getDailyPnL]);
+
+  const getClosedTradesOpenedOnDateLocal = useCallback((date: string): Trade[] => {
+    if (isDemoMode) {
+      return trades.filter(t => t.date === date && t.status === "CLOSED");
+    }
+    return getClosedTradesOpenedOnDate(date);
+  }, [isDemoMode, trades, getClosedTradesOpenedOnDate]);
+
+  const getTradesClosedOnDateLocal = useCallback((date: string): Trade[] => {
+    if (isDemoMode) {
+      return trades.filter(t => {
+        const closeDate = t.closeDate || t.date;
+        return closeDate === date && t.status === "CLOSED";
+      });
+    }
+    return getTradesClosedOnDate(date);
+  }, [isDemoMode, trades, getTradesClosedOnDate]);
+
   const [showTradeForm, setShowTradeForm] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [tradeFormData, setTradeFormData] = useState<TradeFormData>(DEFAULT_TRADE_FORM);
   const [savingTrade, setSavingTrade] = useState(false);
-  const [showNewTagInput, setShowNewTagInput] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState("#6b7280");
   const [modalTab, setModalTab] = useState<"events" | "trades">("events");
 
   // Close trade state
@@ -222,125 +253,6 @@ export default function EconomicCalendarPage() {
 
   // Get all open trades
   const openTrades = useMemo(() => trades.filter(t => t.status === "OPEN"), [trades]);
-
-  // Fetch trade notes
-  const fetchTradeNotes = async () => {
-    try {
-      const response = await fetch("/api/trade-notes");
-      const data = await response.json();
-      if (data.notes) {
-        const notesMap: Record<string, TradeNote> = {};
-        data.notes.forEach((note: TradeNote) => {
-          notesMap[note.date] = note;
-        });
-        setTradeNotes(notesMap);
-      }
-    } catch (error) {
-      console.error("Failed to fetch trade notes:", error);
-    }
-  };
-
-  // Save trade note
-  const saveTradeNote = async () => {
-    if (!selectedDay) return;
-
-    setSavingNote(true);
-    try {
-      const payload = {
-        date: selectedDay,
-        trades: noteFormData.trades ? parseInt(noteFormData.trades) : null,
-        pnl: noteFormData.pnl ? parseFloat(noteFormData.pnl.replace(/[^0-9.-]/g, "")) : null,
-        note: noteFormData.note || null,
-      };
-
-      const response = await fetch("/api/trade-notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-      if (data.note) {
-        setTradeNotes((prev) => ({
-          ...prev,
-          [selectedDay]: data.note,
-        }));
-      }
-
-      // Close both modals
-      setShowNoteModal(false);
-      setShowModal(false);
-      setHighlightedDay(null);
-      setNoteFormData({ trades: "", pnl: "", note: "" });
-    } catch (error) {
-      console.error("Failed to save trade note:", error);
-    } finally {
-      setSavingNote(false);
-    }
-  };
-
-  // Delete trade note
-  const deleteTradeNote = async () => {
-    if (!selectedDay) return;
-
-    setSavingNote(true);
-    try {
-      await fetch(`/api/trade-notes?date=${selectedDay}`, {
-        method: "DELETE",
-      });
-
-      setTradeNotes((prev) => {
-        const newNotes = { ...prev };
-        delete newNotes[selectedDay];
-        return newNotes;
-      });
-
-      setShowNoteModal(false);
-      setShowModal(false);
-      setHighlightedDay(null);
-      setNoteFormData({ trades: "", pnl: "", note: "" });
-    } catch (error) {
-      console.error("Failed to delete trade note:", error);
-    } finally {
-      setSavingNote(false);
-    }
-  };
-
-  // Delete all trade notes
-  const deleteAllTradeNotes = async () => {
-    setDeletingAllNotes(true);
-    try {
-      // Delete each note one by one
-      const dates = Object.keys(tradeNotes);
-      for (const date of dates) {
-        await fetch(`/api/trade-notes?date=${date}`, {
-          method: "DELETE",
-        });
-      }
-      setTradeNotes({});
-      setShowDeleteAllConfirm(false);
-      setShowFilters(false);
-    } catch (error) {
-      console.error("Failed to delete all trade notes:", error);
-    } finally {
-      setDeletingAllNotes(false);
-    }
-  };
-
-  // Open note modal with existing data
-  const openNoteModal = () => {
-    if (selectedDay && tradeNotes[selectedDay]) {
-      const existingNote = tradeNotes[selectedDay];
-      setNoteFormData({
-        trades: existingNote.trades?.toString() || "",
-        pnl: existingNote.pnl?.toString() || "",
-        note: existingNote.note || "",
-      });
-    } else {
-      setNoteFormData({ trades: "", pnl: "", note: "" });
-    }
-    setShowNoteModal(true);
-  };
 
   // Get last used asset type from localStorage
   const getLastAssetType = () => {
@@ -366,7 +278,7 @@ export default function EconomicCalendarPage() {
         size: trade.size?.toString() || "",
         pnl: trade.pnl.toString(),
         notes: trade.notes || "",
-        tagIds: trade.tags.map((t) => t.id),
+        tags: trade.tags || [],
         // New fields
         assetType: trade.assetType || "STOCK",
         status: trade.status || "CLOSED",
@@ -426,36 +338,14 @@ export default function EconomicCalendarPage() {
     });
   };
 
-  const handleCreateTag = async () => {
-    if (!newTagName.trim()) return;
-    const tag = await createTag(newTagName.trim(), newTagColor);
-    if (tag) {
-      setTradeFormData((prev) => ({
-        ...prev,
-        tagIds: [...prev.tagIds, tag.id],
-      }));
-      setNewTagName("");
-      setShowNewTagInput(false);
-    }
-  };
 
-  const toggleTag = (tagId: string) => {
-    setTradeFormData((prev) => ({
-      ...prev,
-      tagIds: prev.tagIds.includes(tagId)
-        ? prev.tagIds.filter((id) => id !== tagId)
-        : [...prev.tagIds, tagId],
-    }));
-  };
+  // Get trades for selected day (using local functions that support demo mode)
+  const selectedDayTrades = selectedDay ? getTradesByDateLocal(selectedDay) : [];
+  const selectedDayPnL = selectedDay ? getDailyPnLLocal(selectedDay) : 0;
 
-  // Get trades for selected day
-  const selectedDayTrades = selectedDay ? getTradesByDate(selectedDay) : [];
-  const selectedDayPnL = selectedDay ? getDailyPnL(selectedDay) : 0;
-
-  // Fetch events and notes on mount
+  // Fetch events on mount
   useEffect(() => {
     fetchEvents();
-    fetchTradeNotes();
   }, []);
 
   // Live clock update
@@ -2053,13 +1943,13 @@ export default function EconomicCalendarPage() {
             const isMarketClosed = holidayName !== null;
             const isEarlyClose = earlyCloseInfo !== null;
 
-            // Trade journal data for this day
-            const dayPnL = getDailyPnL(dateKey);
-            const dayHasOpenTrades = hasOpenTrades(dateKey);
-            const openCount = getOpenTradeCount(dateKey);
-            const closedCount = getClosedTradeCount(dateKey);
-            const closedTradesOpenedToday = getClosedTradesOpenedOnDate(dateKey);
-            const tradesClosedToday = getTradesClosedOnDate(dateKey);
+            // Trade journal data for this day (using local functions for demo mode support)
+            const dayPnL = getDailyPnLLocal(dateKey);
+            const dayHasOpenTrades = isDemoMode ? trades.some(t => t.date === dateKey && t.status === "OPEN") : hasOpenTrades(dateKey);
+            const openCount = isDemoMode ? trades.filter(t => t.date === dateKey && t.status === "OPEN").length : getOpenTradeCount(dateKey);
+            const closedCount = isDemoMode ? trades.filter(t => t.date === dateKey && t.status === "CLOSED").length : getClosedTradeCount(dateKey);
+            const closedTradesOpenedToday = getClosedTradesOpenedOnDateLocal(dateKey);
+            const tradesClosedToday = getTradesClosedOnDateLocal(dateKey);
             const dayTradeCount = openCount + closedCount + closedTradesOpenedToday.length;
             const hasPnL = closedCount > 0; // Only count closed trades for P&L
             const hasTrades = dayTradeCount > 0;
@@ -2156,14 +2046,10 @@ export default function EconomicCalendarPage() {
                       {/* Trade details */}
                       {showNotes && hasTrades && (
                         <div className="text-xs text-muted space-y-0.5">
-                          {/* Show swing trades closed today with their entry dates */}
-                          {tradesClosedToday.length > 0 && tradesClosedToday.map((trade, idx) => (
-                            <div key={idx} className="truncate">
-                              From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </div>
-                          ))}
                           {/* Show count summary */}
-                          {closedCount > 0 && <div>{closedCount} Trade{closedCount !== 1 ? "s" : ""}</div>}
+                          {(closedCount > 0 || tradesClosedToday.length > 0) && (
+                            <div>{closedCount + tradesClosedToday.length} Trade{(closedCount + tradesClosedToday.length) !== 1 ? "s" : ""}</div>
+                          )}
                           {openCount > 0 && <div>{openCount} Open</div>}
                           {hasTradesOpenedToday && <div>{closedTradesOpenedToday.length} Opened</div>}
                         </div>
@@ -2298,14 +2184,10 @@ export default function EconomicCalendarPage() {
                 {/* Trade details */}
                 {showNotes && hasTrades && (
                   <div className="text-xs text-muted space-y-0.5">
-                    {/* Show swing trades closed today with their entry dates */}
-                    {tradesClosedToday.length > 0 && tradesClosedToday.map((trade, idx) => (
-                      <div key={idx} className="truncate">
-                        From {new Date(trade.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </div>
-                    ))}
                     {/* Show count summary */}
-                    {closedCount > 0 && <div>{closedCount} Trade{closedCount !== 1 ? "s" : ""}</div>}
+                    {(closedCount > 0 || tradesClosedToday.length > 0) && (
+                      <div>{closedCount + tradesClosedToday.length} Trade{(closedCount + tradesClosedToday.length) !== 1 ? "s" : ""}</div>
+                    )}
                     {openCount > 0 && <div>{openCount} Open</div>}
                     {hasTradesOpenedToday && <div>{closedTradesOpenedToday.length} Opened</div>}
                   </div>
@@ -2433,8 +2315,6 @@ export default function EconomicCalendarPage() {
                   setEditingTrade(null);
                   setTradeFormData(DEFAULT_TRADE_FORM);
                 }}
-                onCreateTag={createTag}
-                onDeleteTag={deleteTag}
               />
             </div>
           ) : (
@@ -2472,7 +2352,6 @@ export default function EconomicCalendarPage() {
                 onClick={() => {
                   setShowModal(false);
                   setHighlightedDay(null);
-                  setShowNoteModal(false);
                   setShowTradeForm(false);
                   setShowOpenTradesList(false);
                   setModalTab("events");
@@ -2855,11 +2734,10 @@ export default function EconomicCalendarPage() {
                             <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                               {trade.tags.map((tag) => (
                                 <span
-                                  key={tag.id}
-                                  className="px-2 py-0.5 text-[10px] rounded-full"
-                                  style={{ backgroundColor: tag.color + "20", color: tag.color }}
+                                  key={tag}
+                                  className="px-2 py-0.5 text-[10px] rounded-full bg-accent/20 text-accent"
                                 >
-                                  {tag.name}
+                                  {tag}
                                 </span>
                               ))}
                             </div>
@@ -2909,122 +2787,6 @@ export default function EconomicCalendarPage() {
               </div>
             )}
           </div>
-
-          {/* Note Entry Modal - appears to the right */}
-          {showNoteModal && (
-            <div
-              className="w-full max-w-sm max-h-[80vh] glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col animate-slide-in ml-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Note Modal Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-accent-light" />
-                  <h3 className="font-bold text-lg">
-                    {tradeNotes[selectedDay] ? "Edit Note" : "Add Note"}
-                  </h3>
-                </div>
-                <button
-                  onClick={() => setShowNoteModal(false)}
-                  className="p-2 rounded-lg hover:bg-card-hover transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Note Modal Content */}
-              <div className="p-5 space-y-4 overflow-y-auto flex-1">
-                {/* Trades Input */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-                    <BarChart3 className="w-4 h-4" />
-                    Number of Trades
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={noteFormData.trades}
-                    onChange={(e) => setNoteFormData((prev) => ({ ...prev, trades: e.target.value }))}
-                    placeholder="e.g., 3"
-                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
-                  />
-                </div>
-
-                {/* P&L Input */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-                    <DollarSign className="w-4 h-4" />
-                    Profit / Loss
-                  </label>
-                  <input
-                    type="text"
-                    value={noteFormData.pnl}
-                    onChange={(e) => setNoteFormData((prev) => ({ ...prev, pnl: e.target.value }))}
-                    placeholder="e.g., 150 or -75"
-                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50"
-                  />
-                  <p className="text-[10px] text-muted mt-1">Use negative for losses (e.g., -75)</p>
-                </div>
-
-                {/* Notes Input */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-muted mb-2">
-                    <StickyNote className="w-4 h-4" />
-                    Notes
-                  </label>
-                  <textarea
-                    value={noteFormData.note}
-                    onChange={(e) => setNoteFormData((prev) => ({ ...prev, note: e.target.value }))}
-                    placeholder="Trade notes, observations, lessons learned..."
-                    rows={4}
-                    className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none"
-                  />
-                </div>
-
-                {/* Existing Note Preview */}
-                {tradeNotes[selectedDay]?.note && (
-                  <div className="p-3 bg-card/50 rounded-lg border border-border/50">
-                    <p className="text-xs text-muted mb-1">Current Note:</p>
-                    <p className="text-sm text-foreground/80 whitespace-pre-wrap">{tradeNotes[selectedDay].note}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Note Modal Footer */}
-              <div className="px-5 py-4 border-t border-border/50 bg-card/50 flex items-center justify-between">
-                {tradeNotes[selectedDay] && (
-                  <button
-                    onClick={deleteTradeNote}
-                    disabled={savingNote}
-                    className="flex items-center gap-2 px-3 py-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors text-sm"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </button>
-                )}
-                <div className={`flex items-center gap-2 ${!tradeNotes[selectedDay] ? "ml-auto" : ""}`}>
-                  <button
-                    onClick={() => setShowNoteModal(false)}
-                    className="px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={saveTradeNote}
-                    disabled={savingNote}
-                    className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors text-sm font-medium disabled:opacity-50"
-                  >
-                    {savingNote ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
-                    Save
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Open Trades Side Panel */}
           {showOpenTradesList && openTrades.length > 0 && (
@@ -4799,49 +4561,6 @@ export default function EconomicCalendarPage() {
           </div>
         );
       })()}
-
-      {/* Delete All Notes Confirmation Modal */}
-      {showDeleteAllConfirm && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowDeleteAllConfirm(false)}
-        >
-          <div
-            className="w-full max-w-sm glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden animate-slide-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-6 h-6 text-red-400" />
-              </div>
-              <h3 className="text-lg font-bold mb-2">Delete All Notes?</h3>
-              <p className="text-sm text-muted mb-6">
-                This will permanently delete all {Object.keys(tradeNotes).length} trade notes. This action cannot be undone.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowDeleteAllConfirm(false)}
-                  className="flex-1 px-4 py-2.5 bg-card-hover border border-border rounded-lg text-sm font-medium hover:bg-card transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={deleteAllTradeNotes}
-                  disabled={deletingAllNotes}
-                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {deletingAllNotes ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-4 h-4" />
-                  )}
-                  Delete All
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete All Trades Confirmation Modal */}
       {showDeleteAllTradesConfirm && (

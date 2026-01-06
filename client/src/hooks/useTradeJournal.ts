@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Trade, Tag, TradeStats, TradeFormData } from "@/components/TradeJournal/types";
+import { Trade, TradeStats, TradeFormData } from "@/components/TradeJournal/types";
 
 export function useTradeJournal() {
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<string[]>([]); // Preset tag suggestions
   const [stats, setStats] = useState<TradeStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsPeriod, setStatsPeriod] = useState("month");
 
-  // Fetch all tags
+  // Fetch preset tag suggestions
   const fetchTags = useCallback(async () => {
     try {
       const response = await fetch("/api/tags");
@@ -84,12 +84,10 @@ export function useTradeJournal() {
             size: formData.size ? parseFloat(formData.size) : null,
             pnl: formData.pnl ? parseFloat(formData.pnl) : 0,
             notes: formData.notes || null,
-            tagIds: formData.tagIds,
-            // New fields
+            tags: formData.tags, // Simple string array
             assetType: formData.assetType,
             status: formData.status,
             closeDate: formData.closeDate || null,
-            // Options fields
             optionType: formData.optionType || null,
             strikePrice: formData.strikePrice ? parseFloat(formData.strikePrice) : null,
             expirationDate: formData.expirationDate || null,
@@ -101,7 +99,6 @@ export function useTradeJournal() {
         const data = await response.json();
         if (data.trade) {
           setTrades((prev) => [data.trade, ...prev]);
-          // Refresh stats
           fetchStats(statsPeriod);
           return data.trade;
         }
@@ -131,12 +128,10 @@ export function useTradeJournal() {
             size: formData.size ? parseFloat(formData.size) : null,
             pnl: formData.pnl ? parseFloat(formData.pnl) : 0,
             notes: formData.notes || null,
-            tagIds: formData.tagIds,
-            // New fields
+            tags: formData.tags, // Simple string array
             assetType: formData.assetType,
             status: formData.status,
             closeDate: formData.closeDate || null,
-            // Options fields
             optionType: formData.optionType || null,
             strikePrice: formData.strikePrice ? parseFloat(formData.strikePrice) : null,
             expirationDate: formData.expirationDate || null,
@@ -150,7 +145,6 @@ export function useTradeJournal() {
           setTrades((prev) =>
             prev.map((t) => (t.id === id ? data.trade : t))
           );
-          // Refresh stats
           fetchStats(statsPeriod);
           return data.trade;
         }
@@ -184,7 +178,6 @@ export function useTradeJournal() {
           setTrades((prev) =>
             prev.map((t) => (t.id === id ? data.trade : t))
           );
-          // Refresh stats
           fetchStats(statsPeriod);
           return data.trade;
         }
@@ -207,7 +200,6 @@ export function useTradeJournal() {
 
         if (response.ok) {
           setTrades((prev) => prev.filter((t) => t.id !== id));
-          // Refresh stats
           fetchStats(statsPeriod);
           return true;
         }
@@ -220,86 +212,32 @@ export function useTradeJournal() {
     [fetchStats, statsPeriod]
   );
 
-  // Create a custom tag
-  const createTag = useCallback(
-    async (name: string, color: string): Promise<Tag | null> => {
-      try {
-        const response = await fetch("/api/tags", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, color }),
-        });
-
-        const data = await response.json();
-        if (data.tag) {
-          setTags((prev) => [...prev, data.tag]);
-          return data.tag;
-        }
-        return null;
-      } catch (error) {
-        console.error("Failed to create tag:", error);
-        return null;
-      }
-    },
-    []
-  );
-
-  // Delete a custom tag
-  const deleteTag = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`/api/tags?id=${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setTags((prev) => prev.filter((t) => t.id !== id));
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Failed to delete tag:", error);
-      return false;
-    }
-  }, []);
-
   // Get trades by date (from local state)
-  // Returns trades for display on a specific date:
-  // - Open trades that started on this date (pending)
-  // - Day trades (closed on same day as opened)
-  // - Swing trades show on BOTH entry date AND close date
   const getTradesByDate = useCallback(
     (date: string): Trade[] => {
       return trades.filter((t) => {
-        // Open/pending trades show on entry date
         if (t.status === "OPEN" && t.date === date) return true;
-
-        // Closed trades
         if (t.status === "CLOSED") {
           const closeDate = t.closeDate || t.date;
           const isSwingTrade = closeDate !== t.date;
-
           if (isSwingTrade) {
-            // Swing trades show on BOTH entry date and close date
             return t.date === date || closeDate === date;
           } else {
-            // Day trades show on entry/close date (same day)
             return t.date === date;
           }
         }
-
         return false;
       });
     },
     [trades]
   );
 
-  // Get daily P&L summary (only closed trades, using closeDate if available)
+  // Get daily P&L summary
   const getDailyPnL = useCallback(
     (date: string): number => {
       return trades
         .filter((t) => {
           if (t.status !== "CLOSED") return false;
-          // Use closeDate if available, otherwise fall back to entry date
           const pnlDate = t.closeDate || t.date;
           return pnlDate === date;
         })
@@ -308,7 +246,7 @@ export function useTradeJournal() {
     [trades]
   );
 
-  // Check if date has open trades (open trades show on entry date)
+  // Check if date has open trades
   const hasOpenTrades = useCallback(
     (date: string): boolean => {
       return trades.some((t) => t.date === date && t.status === "OPEN");
@@ -316,7 +254,7 @@ export function useTradeJournal() {
     [trades]
   );
 
-  // Get count of open trades for date (open trades show on entry date)
+  // Get count of open trades for date
   const getOpenTradeCount = useCallback(
     (date: string): number => {
       return trades.filter((t) => t.date === date && t.status === "OPEN").length;
@@ -324,7 +262,7 @@ export function useTradeJournal() {
     [trades]
   );
 
-  // Get count of closed trades for date (closed trades show on close date)
+  // Get count of closed trades for date
   const getClosedTradeCount = useCallback(
     (date: string): number => {
       return trades.filter((t) => {
@@ -336,7 +274,7 @@ export function useTradeJournal() {
     [trades]
   );
 
-  // Get trade count for date (open trades on entry date, closed trades on close date)
+  // Get trade count for date
   const getTradeCount = useCallback(
     (date: string): number => {
       const openCount = trades.filter((t) => t.date === date && t.status === "OPEN").length;
@@ -350,14 +288,12 @@ export function useTradeJournal() {
     [trades]
   );
 
-  // Get swing trades that were OPENED on this date (for showing "Trade opened" indicator)
-  // Only includes trades where entry date differs from close date (multi-day trades)
+  // Get swing trades that were OPENED on this date
   const getClosedTradesOpenedOnDate = useCallback(
     (date: string): Trade[] => {
       return trades.filter((t) => {
         if (t.status !== "CLOSED") return false;
         if (t.date !== date) return false;
-        // Only swing trades: entry date differs from close date
         const closeDate = t.closeDate || t.date;
         return closeDate !== t.date;
       });
@@ -365,15 +301,13 @@ export function useTradeJournal() {
     [trades]
   );
 
-  // Get swing trades that were CLOSED on this date (for showing P&L with reference to open date)
-  // Only includes trades where entry date differs from close date (multi-day trades)
+  // Get swing trades that were CLOSED on this date
   const getTradesClosedOnDate = useCallback(
     (date: string): Trade[] => {
       return trades.filter((t) => {
         if (t.status !== "CLOSED") return false;
         const closeDate = t.closeDate || t.date;
         if (closeDate !== date) return false;
-        // Only swing trades: entry date differs from close date
         return closeDate !== t.date;
       });
     },
@@ -405,7 +339,7 @@ export function useTradeJournal() {
   return {
     // State
     trades,
-    tags,
+    tags, // Now string[] of preset suggestions
     stats,
     loading,
     statsLoading,
@@ -416,8 +350,6 @@ export function useTradeJournal() {
     updateTrade,
     deleteTrade,
     closeTrade,
-    createTag,
-    deleteTag,
     fetchTradesForDate,
     changeStatsPeriod,
 

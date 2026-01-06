@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    const period = searchParams.get("period"); // "day", "week", "month", "year", "all"
+    const period = searchParams.get("period");
 
     // Build date filter
     let dateFilter: { gte?: string; lte?: string } | undefined;
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
           start = new Date(now.getFullYear(), 0, 1);
           break;
         default:
-          start = new Date(0); // All time
+          start = new Date(0);
       }
 
       dateFilter = {
@@ -56,13 +56,6 @@ export async function GET(request: NextRequest) {
       where: {
         userId,
         ...(dateFilter && { date: dateFilter }),
-      },
-      include: {
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
       },
       orderBy: { date: "asc" },
     });
@@ -87,6 +80,17 @@ export async function GET(request: NextRequest) {
           byDirection: { LONG: { count: 0, pnl: 0 }, SHORT: { count: 0, pnl: 0 } },
           byTag: {},
           dailyPnl: [],
+          // Advanced metrics
+          maxConsecWins: 0,
+          maxConsecLosses: 0,
+          currentStreak: 0,
+          currentStreakType: "none",
+          expectancy: 0,
+          maxDrawdown: 0,
+          recoveryFactor: 0,
+          sharpeRatio: 0,
+          winDays: 0,
+          lossDays: 0,
         },
       });
     }
@@ -132,17 +136,16 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // By tag
-    const byTag: Record<string, { count: number; pnl: number; wins: number; name: string; color: string }> = {};
+    // By tag (now simple string array)
+    const byTag: Record<string, { count: number; pnl: number; wins: number }> = {};
     trades.forEach((t) => {
-      t.tags.forEach((tt) => {
-        const tag = tt.tag;
-        if (!byTag[tag.id]) {
-          byTag[tag.id] = { count: 0, pnl: 0, wins: 0, name: tag.name, color: tag.color };
+      t.tags.forEach((tag) => {
+        if (!byTag[tag]) {
+          byTag[tag] = { count: 0, pnl: 0, wins: 0 };
         }
-        byTag[tag.id].count++;
-        byTag[tag.id].pnl += t.pnl;
-        if (t.pnl > 0) byTag[tag.id].wins++;
+        byTag[tag].count++;
+        byTag[tag].pnl += t.pnl;
+        if (t.pnl > 0) byTag[tag].wins++;
       });
     });
 
@@ -160,6 +163,69 @@ export async function GET(request: NextRequest) {
 
     // Unique trading days
     const tradingDays = new Set(trades.map((t) => t.date)).size;
+
+    // Calculate max consecutive wins/losses
+    let maxConsecWins = 0;
+    let maxConsecLosses = 0;
+    let currentConsecWins = 0;
+    let currentConsecLosses = 0;
+    let currentStreak = 0;
+    let currentStreakType: "win" | "loss" | "none" = "none";
+
+    trades.forEach((t) => {
+      if (t.pnl > 0) {
+        currentConsecWins++;
+        currentConsecLosses = 0;
+        maxConsecWins = Math.max(maxConsecWins, currentConsecWins);
+        currentStreak = currentConsecWins;
+        currentStreakType = "win";
+      } else if (t.pnl < 0) {
+        currentConsecLosses++;
+        currentConsecWins = 0;
+        maxConsecLosses = Math.max(maxConsecLosses, currentConsecLosses);
+        currentStreak = currentConsecLosses;
+        currentStreakType = "loss";
+      } else {
+        // Break even doesn't break streak but doesn't extend it
+      }
+    });
+
+    // Calculate expectancy: (Win% × AvgWin) - (Loss% × AvgLoss)
+    const winRateDecimal = trades.length > 0 ? winningTrades.length / trades.length : 0;
+    const lossRateDecimal = trades.length > 0 ? losingTrades.length / trades.length : 0;
+    const expectancy = (winRateDecimal * averageWin) - (lossRateDecimal * averageLoss);
+
+    // Calculate max drawdown from daily P&L
+    let peak = 0;
+    let maxDrawdown = 0;
+    let cumulative = 0;
+    dailyPnl.forEach(({ pnl }) => {
+      cumulative += pnl;
+      peak = Math.max(peak, cumulative);
+      const drawdown = peak - cumulative;
+      maxDrawdown = Math.max(maxDrawdown, drawdown);
+    });
+
+    // Recovery factor: Total P&L / Max Drawdown
+    const recoveryFactor = maxDrawdown > 0 ? totalPnl / maxDrawdown : totalPnl > 0 ? Infinity : 0;
+
+    // Calculate daily returns standard deviation for Sharpe-like ratio
+    const dailyReturns = dailyPnl.map(d => d.pnl);
+    const avgDailyReturn = dailyReturns.length > 0
+      ? dailyReturns.reduce((a, b) => a + b, 0) / dailyReturns.length
+      : 0;
+    const variance = dailyReturns.length > 1
+      ? dailyReturns.reduce((sum, r) => sum + Math.pow(r - avgDailyReturn, 2), 0) / (dailyReturns.length - 1)
+      : 0;
+    const stdDev = Math.sqrt(variance);
+
+    // Simplified Sharpe-like ratio (avg daily return / daily std dev)
+    // Annualized by multiplying by sqrt(252 trading days)
+    const sharpeRatio = stdDev > 0 ? (avgDailyReturn / stdDev) * Math.sqrt(252) : 0;
+
+    // Win days vs loss days
+    const winDays = dailyPnl.filter(d => d.pnl > 0).length;
+    const lossDays = dailyPnl.filter(d => d.pnl < 0).length;
 
     const stats = {
       totalTrades: trades.length,
@@ -179,6 +245,17 @@ export async function GET(request: NextRequest) {
       byDirection,
       byTag,
       dailyPnl,
+      // Advanced metrics
+      maxConsecWins,
+      maxConsecLosses,
+      currentStreak,
+      currentStreakType,
+      expectancy,
+      maxDrawdown,
+      recoveryFactor,
+      sharpeRatio,
+      winDays,
+      lossDays,
     };
 
     return NextResponse.json({ stats });

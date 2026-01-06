@@ -16,18 +16,12 @@ export async function GET(
     }
 
     const strategy = await prisma.strategy.findUnique({
-      where: { id },
+      where: { id, userId },
       include: {
         _count: {
           select: {
             trades: true,
-            subscriptions: true,
-            signals: true,
           },
-        },
-        subscriptions: {
-          where: { userId },
-          take: 1,
         },
       },
     });
@@ -39,25 +33,11 @@ export async function GET(
       );
     }
 
-    // Check access: must be owner or strategy must be published
-    if (strategy.userId !== userId && !strategy.isPublished) {
-      return NextResponse.json(
-        { error: "Strategy not found" },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json({
       strategy: {
         ...strategy,
         tradeCount: strategy._count.trades,
-        subscriberCount: strategy._count.subscriptions,
-        signalCount: strategy._count.signals,
-        isSubscribed: strategy.subscriptions.length > 0,
-        subscription: strategy.subscriptions[0] || null,
-        isOwner: strategy.userId === userId,
         _count: undefined,
-        subscriptions: undefined,
       },
     });
   } catch (error) {
@@ -84,12 +64,12 @@ export async function PUT(
 
     // Verify ownership
     const existingStrategy = await prisma.strategy.findUnique({
-      where: { id },
+      where: { id, userId },
     });
 
-    if (!existingStrategy || existingStrategy.userId !== userId) {
+    if (!existingStrategy) {
       return NextResponse.json(
-        { error: "Strategy not found or unauthorized" },
+        { error: "Strategy not found" },
         { status: 404 }
       );
     }
@@ -100,7 +80,6 @@ export async function PUT(
       description,
       type,
       status,
-      isPublished,
       color,
       defaultRiskPercent,
       maxDrawdownPercent,
@@ -109,14 +88,13 @@ export async function PUT(
     const strategy = await prisma.strategy.update({
       where: { id },
       data: {
-        name: name !== undefined ? name : existingStrategy.name,
-        description: description !== undefined ? description : existingStrategy.description,
-        type: type !== undefined ? type.toUpperCase() : existingStrategy.type,
-        status: status !== undefined ? status : existingStrategy.status,
-        isPublished: isPublished !== undefined ? isPublished : existingStrategy.isPublished,
-        color: color !== undefined ? color : existingStrategy.color,
-        defaultRiskPercent: defaultRiskPercent !== undefined ? defaultRiskPercent : existingStrategy.defaultRiskPercent,
-        maxDrawdownPercent: maxDrawdownPercent !== undefined ? maxDrawdownPercent : existingStrategy.maxDrawdownPercent,
+        name: name ?? existingStrategy.name,
+        description: description ?? existingStrategy.description,
+        type: type ? type.toUpperCase() : existingStrategy.type,
+        status: status ?? existingStrategy.status,
+        color: color ?? existingStrategy.color,
+        defaultRiskPercent: defaultRiskPercent ?? existingStrategy.defaultRiskPercent,
+        maxDrawdownPercent: maxDrawdownPercent ?? existingStrategy.maxDrawdownPercent,
       },
     });
 
@@ -145,12 +123,12 @@ export async function DELETE(
 
     // Verify ownership
     const existingStrategy = await prisma.strategy.findUnique({
-      where: { id },
+      where: { id, userId },
     });
 
-    if (!existingStrategy || existingStrategy.userId !== userId) {
+    if (!existingStrategy) {
       return NextResponse.json(
-        { error: "Strategy not found or unauthorized" },
+        { error: "Strategy not found" },
         { status: 404 }
       );
     }

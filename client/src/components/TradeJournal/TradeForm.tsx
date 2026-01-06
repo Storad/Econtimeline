@@ -5,29 +5,25 @@ import {
   X,
   TrendingUp,
   TrendingDown,
-  DollarSign,
-  Clock,
-  Hash,
-  FileText,
   Save,
   RefreshCw,
   Tag as TagIcon,
   Plus,
-  BarChart3,
-  CircleDot,
-  Calendar,
   Info,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
-import { Tag, Trade, TradeFormData, DEFAULT_TRADE_FORM, AssetType, TradeStatus } from "./types";
+import { Trade, TradeFormData, DEFAULT_TRADE_FORM, AssetType } from "./types";
+import { useTagSettings, TAG_COLORS } from "@/context/TagContext";
+
+const MAX_TAGS = 5;
 
 interface TradeFormProps {
   date: string;
-  tags: Tag[];
+  tags: string[]; // Preset tag suggestions
   editingTrade?: Trade | null;
   onSave: (trade: TradeFormData) => Promise<void>;
   onCancel: () => void;
-  onCreateTag: (name: string, color: string) => Promise<Tag | null>;
-  onDeleteTag?: (id: string) => Promise<boolean>;
 }
 
 const ASSET_TYPES: { value: AssetType; label: string }[] = [
@@ -46,8 +42,6 @@ export default function TradeForm({
   editingTrade,
   onSave,
   onCancel,
-  onCreateTag,
-  onDeleteTag,
 }: TradeFormProps) {
   const getLastAssetType = (): AssetType => {
     if (typeof window !== "undefined") {
@@ -70,7 +64,7 @@ export default function TradeForm({
         size: editingTrade.size?.toString() || "",
         pnl: editingTrade.pnl.toString(),
         notes: editingTrade.notes || "",
-        tagIds: editingTrade.tags.map((t) => t.id),
+        tags: editingTrade.tags || [],
         assetType: editingTrade.assetType || "STOCK",
         status: editingTrade.status || "CLOSED",
         closeDate: editingTrade.closeDate || "",
@@ -88,23 +82,17 @@ export default function TradeForm({
   });
 
   const [saving, setSaving] = useState(false);
-  const [showNewTagInput, setShowNewTagInput] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState("#6b7280");
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const colorPickerRef = useRef<HTMLDivElement>(null);
-
-  // Preset colors for custom tags
-  const TAG_COLORS = [
-    "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4",
-    "#3b82f6", "#8b5cf6", "#ec4899", "#ffffff", "#6b7280",
-  ];
+  const [showCustomTagInput, setShowCustomTagInput] = useState(false);
+  const [customTagName, setCustomTagName] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDurationPicker, setShowDurationPicker] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
   const durationPickerRef = useRef<HTMLDivElement>(null);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
-  // Close pickers when clicking outside
+  // Get tag settings from context
+  const { tagSettings, getTagColor } = useTagSettings();
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node)) {
@@ -112,9 +100,6 @@ export default function TradeForm({
       }
       if (durationPickerRef.current && !durationPickerRef.current.contains(e.target as Node)) {
         setShowDurationPicker(false);
-      }
-      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
-        setShowColorPicker(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -148,43 +133,42 @@ export default function TradeForm({
     }
   };
 
-  const toggleTag = (tagId: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tagIds: prev.tagIds.includes(tagId)
-        ? prev.tagIds.filter((id) => id !== tagId)
-        : [...prev.tagIds, tagId],
-    }));
+  const toggleTag = (tag: string) => {
+    setFormData((prev) => {
+      // If removing, always allow
+      if (prev.tags.includes(tag)) {
+        return { ...prev, tags: prev.tags.filter((t) => t !== tag) };
+      }
+      // If adding, check max limit
+      if (prev.tags.length >= MAX_TAGS) {
+        return prev; // Don't add more than MAX_TAGS
+      }
+      return { ...prev, tags: [...prev.tags, tag] };
+    });
   };
 
-  const handleCreateTag = async () => {
-    if (!newTagName.trim()) return;
-    const tag = await onCreateTag(newTagName.trim(), newTagColor);
-    if (tag) {
-      setFormData((prev) => ({
-        ...prev,
-        tagIds: [...prev.tagIds, tag.id],
-      }));
-      setNewTagName("");
-      setShowNewTagInput(false);
-    }
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) {
+        next.delete(sectionId);
+      } else {
+        next.add(sectionId);
+      }
+      return next;
+    });
   };
 
-  // Organize tags by type
-  const setupTags = tags.filter((t) => t.type === "SETUP");
-  const emotionTags = tags.filter((t) => t.type === "EMOTION");
-  const customTags = tags.filter((t) => t.type === "CUSTOM");
-
-  const handleDeleteTag = async (tagId: string) => {
-    if (!onDeleteTag) return;
-    // Remove from selected if it was selected
-    if (formData.tagIds.includes(tagId)) {
+  const addCustomTag = () => {
+    const trimmed = customTagName.trim();
+    if (trimmed && !formData.tags.includes(trimmed) && formData.tags.length < MAX_TAGS) {
       setFormData((prev) => ({
         ...prev,
-        tagIds: prev.tagIds.filter((id) => id !== tagId),
+        tags: [...prev.tags, trimmed],
       }));
     }
-    await onDeleteTag(tagId);
+    setCustomTagName("");
+    setShowCustomTagInput(false);
   };
 
   const formatDate = (dateStr: string) => {
@@ -209,14 +193,11 @@ export default function TradeForm({
     return true;
   };
 
-  // Common input class to hide number spinners
   const numberInputClass = "w-full px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
-  // Duration state (hours and minutes)
   const [durationHours, setDurationHours] = useState("");
   const [durationMinutes, setDurationMinutes] = useState("");
 
-  // Update form time when duration changes
   const updateDuration = (hours: string, minutes: string) => {
     setDurationHours(hours);
     setDurationMinutes(minutes);
@@ -233,7 +214,6 @@ export default function TradeForm({
     }
   };
 
-  // Date picker state - initialize from existing expiration date if editing
   const [selectedMonth, setSelectedMonth] = useState(() => {
     if (editingTrade?.expirationDate) {
       const parts = editingTrade.expirationDate.split("-");
@@ -288,11 +268,10 @@ export default function TradeForm({
         </button>
       </div>
 
-      {/* Form Content - Two Column Layout */}
+      {/* Form Content */}
       <div className="p-5 overflow-y-auto flex-1 min-h-0">
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-
-          {/* LEFT COLUMN - Trade Entry Info */}
+          {/* LEFT COLUMN */}
           <div className="space-y-4">
             {/* Asset Type */}
             <div>
@@ -315,7 +294,7 @@ export default function TradeForm({
               </div>
             </div>
 
-            {/* Ticker & Direction Row */}
+            {/* Ticker & Direction */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-muted mb-2 block">
@@ -609,162 +588,134 @@ export default function TradeForm({
             </div>
           </div>
 
-          {/* RIGHT COLUMN - Tags & Notes */}
+          {/* RIGHT COLUMN */}
           <div className="space-y-4">
-            {/* Tags - Organized by Type */}
-            <div className="space-y-3">
-              <label className="text-xs font-medium text-muted block">Tags</label>
+            {/* Tags */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-medium text-muted flex items-center gap-1">
+                  <TagIcon className="w-3.5 h-3.5" />
+                  Tags
+                </label>
+                <span className={`text-[10px] ${formData.tags.length >= MAX_TAGS ? 'text-amber-400' : 'text-muted'}`}>
+                  {formData.tags.length}/{MAX_TAGS}
+                </span>
+              </div>
 
-              {/* Setup Tags */}
-              {setupTags.length > 0 && (
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-muted/70 mb-1 block">Setup</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {setupTags.map((tag) => (
+              {/* Selected Tags */}
+              {formData.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {formData.tags.map((tagName) => {
+                    const colors = getTagColor(tagName);
+                    return (
                       <button
-                        key={tag.id}
+                        key={tagName}
                         type="button"
-                        onClick={() => toggleTag(tag.id)}
-                        className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
-                          formData.tagIds.includes(tag.id)
-                            ? "border-transparent"
-                            : "border-border bg-card hover:border-border/80"
-                        }`}
-                        style={
-                          formData.tagIds.includes(tag.id)
-                            ? { backgroundColor: tag.color + "30", color: tag.color, borderColor: tag.color }
-                            : {}
-                        }
+                        onClick={() => toggleTag(tagName)}
+                        className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border ${colors.bg} ${colors.text} ${colors.border}`}
                       >
-                        {tag.name}
+                        {tagName}
+                        <X className="w-3 h-3" />
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               )}
 
-              {/* Emotion Tags */}
-              {emotionTags.length > 0 && (
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-muted/70 mb-1 block">Emotion</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {emotionTags.map((tag) => (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => toggleTag(tag.id)}
-                        className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
-                          formData.tagIds.includes(tag.id)
-                            ? "border-transparent"
-                            : "border-border bg-card hover:border-border/80"
-                        }`}
-                        style={
-                          formData.tagIds.includes(tag.id)
-                            ? { backgroundColor: tag.color + "30", color: tag.color, borderColor: tag.color }
-                            : {}
-                        }
-                      >
-                        {tag.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Tag Sections */}
+              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                {tagSettings.sections
+                  .sort((a, b) => a.order - b.order)
+                  .map((section) => {
+                    const colors = TAG_COLORS[section.color] || TAG_COLORS.blue;
+                    const isExpanded = expandedSections.has(section.id);
 
-              {/* Custom Tags */}
-              <div>
-                <span className="text-[10px] uppercase tracking-wider text-muted/70 mb-1 block">Custom</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {customTags.map((tag) => (
-                    <div key={tag.id} className="group relative flex items-center">
-                      <button
-                        type="button"
-                        onClick={() => toggleTag(tag.id)}
-                        className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
-                          formData.tagIds.includes(tag.id)
-                            ? "border-transparent pr-6"
-                            : "border-border bg-card hover:border-border/80 group-hover:pr-6"
-                        }`}
-                        style={
-                          formData.tagIds.includes(tag.id)
-                            ? { backgroundColor: tag.color + "30", color: tag.color, borderColor: tag.color }
-                            : {}
-                        }
-                      >
-                        {tag.name}
-                      </button>
-                      {onDeleteTag && (
+                    return (
+                      <div key={section.id} className={`rounded-lg border ${colors.border} overflow-hidden`}>
                         <button
                           type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteTag(tag.id);
-                          }}
-                          className="absolute right-1 opacity-0 group-hover:opacity-100 p-0.5 rounded-full hover:bg-red-500/20 text-red-400 transition-all"
-                          title="Delete tag"
+                          onClick={() => toggleSection(section.id)}
+                          className={`w-full ${colors.bg} px-2.5 py-1.5 flex items-center justify-between text-xs`}
                         >
-                          <X className="w-3 h-3" />
+                          <span className={`font-medium ${colors.text}`}>{section.name}</span>
+                          {isExpanded ? (
+                            <ChevronDown className={`w-3.5 h-3.5 ${colors.text}`} />
+                          ) : (
+                            <ChevronRight className={`w-3.5 h-3.5 ${colors.text}`} />
+                          )}
                         </button>
-                      )}
-                    </div>
-                  ))}
-                  {!showNewTagInput && (
-                    <button
-                      type="button"
-                      onClick={() => setShowNewTagInput(true)}
-                      className="px-2.5 py-1 text-xs rounded-full border border-dashed border-accent/50 text-accent hover:bg-accent/10"
-                    >
-                      + Add
-                    </button>
-                  )}
-                </div>
-                {showNewTagInput && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className="relative" ref={colorPickerRef}>
-                      <button
-                        type="button"
-                        onClick={() => setShowColorPicker(!showColorPicker)}
-                        className="w-7 h-7 rounded-lg border border-border hover:border-accent/50 transition-colors"
-                        style={{ backgroundColor: newTagColor }}
-                      />
-                      {showColorPicker && (
-                        <div className="absolute top-full left-0 mt-1 p-2 bg-card border border-border rounded-lg shadow-xl z-50">
-                          <div className="flex items-center gap-1.5">
-                            {TAG_COLORS.map((color) => (
-                              <button
-                                key={color}
-                                type="button"
-                                onClick={() => {
-                                  setNewTagColor(color);
-                                  setShowColorPicker(false);
-                                }}
-                                className={`w-4 h-4 rounded flex-shrink-0 border transition-all hover:scale-110 ${
-                                  newTagColor === color ? "border-white" : "border-transparent"
-                                }`}
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
+                        {isExpanded && (
+                          <div className="p-2 bg-card-hover/30 flex flex-wrap gap-1">
+                            {section.tags
+                              .sort((a, b) => a.order - b.order)
+                              .map((tag) => {
+                                const isSelected = formData.tags.includes(tag.name);
+                                const isDisabled = !isSelected && formData.tags.length >= MAX_TAGS;
+                                return (
+                                  <button
+                                    key={tag.id}
+                                    type="button"
+                                    onClick={() => !isDisabled && toggleTag(tag.name)}
+                                    disabled={isDisabled}
+                                    className={`px-2 py-0.5 text-[11px] rounded border transition-all ${
+                                      isSelected
+                                        ? `${colors.bg} ${colors.border} ${colors.text}`
+                                        : isDisabled
+                                          ? "border-border bg-card text-muted/50 cursor-not-allowed"
+                                          : `border-border bg-card hover:${colors.border} text-muted hover:${colors.text}`
+                                    }`}
+                                  >
+                                    {tag.name}
+                                  </button>
+                                );
+                              })}
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* Custom Tag Input */}
+              <div className="mt-2">
+                {!showCustomTagInput ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomTagInput(true)}
+                    disabled={formData.tags.length >= MAX_TAGS}
+                    className={`px-2.5 py-1 text-xs rounded-lg border border-dashed transition-colors ${
+                      formData.tags.length >= MAX_TAGS
+                        ? "border-border text-muted/50 cursor-not-allowed"
+                        : "border-accent/50 text-accent hover:bg-accent/10"
+                    }`}
+                  >
+                    <Plus className="w-3 h-3 inline mr-1" />
+                    Custom Tag
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      value={newTagName}
-                      onChange={(e) => setNewTagName(e.target.value)}
-                      placeholder="Tag name"
+                      value={customTagName}
+                      onChange={(e) => setCustomTagName(e.target.value)}
+                      placeholder="Custom tag..."
                       className="flex-1 px-2 py-1.5 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-accent/50"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          handleCreateTag();
+                          addCustomTag();
                         }
                       }}
                     />
-                    <button type="button" onClick={handleCreateTag} className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg">
+                    <button
+                      type="button"
+                      onClick={addCustomTag}
+                      disabled={formData.tags.length >= MAX_TAGS}
+                      className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg disabled:opacity-50"
+                    >
                       Add
                     </button>
-                    <button type="button" onClick={() => setShowNewTagInput(false)} className="p-1 text-muted hover:text-foreground">
+                    <button type="button" onClick={() => setShowCustomTagInput(false)} className="p-1 text-muted hover:text-foreground">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -779,7 +730,7 @@ export default function TradeForm({
                 value={formData.notes}
                 onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
                 placeholder="Trade reasoning, lessons learned..."
-                rows={3}
+                rows={6}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
               />
             </div>
