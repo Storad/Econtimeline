@@ -74,9 +74,9 @@ function SettingsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   } = useTagSettings();
 
   const [activeTab, setActiveTab] = useState<"general" | "tags" | "demo">("general");
-  const [tradeCount, setTradeCount] = useState(demoSettings.tradeCount);
-  const [monthsBack, setMonthsBack] = useState(demoSettings.monthsBack);
-  const [demoEquity, setDemoEquity] = useState(demoSettings.startingEquity);
+  const [tradeCount, setTradeCount] = useState(String(demoSettings.tradeCount));
+  const [monthsBack, setMonthsBack] = useState(String(demoSettings.monthsBack));
+  const [demoEquity, setDemoEquity] = useState(String(demoSettings.startingEquity));
   const [profitable, setProfitable] = useState(demoSettings.profitable);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [newTagInputs, setNewTagInputs] = useState<Record<string, string>>({});
@@ -87,7 +87,12 @@ function SettingsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   if (!isOpen) return null;
 
   const handleEnableDemo = () => {
-    enableDemoMode({ tradeCount, monthsBack, startingEquity: demoEquity, profitable });
+    enableDemoMode({
+      tradeCount: parseInt(tradeCount) || 50,
+      monthsBack: parseInt(monthsBack) || 3,
+      startingEquity: parseInt(demoEquity) || 10000,
+      profitable
+    });
   };
 
   const toggleSection = (sectionId: string) => {
@@ -379,7 +384,7 @@ function SettingsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                       <input
                         type="number"
                         value={tradeCount}
-                        onChange={(e) => setTradeCount(Math.max(1, parseInt(e.target.value) || 1))}
+                        onChange={(e) => setTradeCount(e.target.value)}
                         className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         min="1"
                         max="500"
@@ -390,7 +395,7 @@ function SettingsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                       <input
                         type="number"
                         value={monthsBack}
-                        onChange={(e) => setMonthsBack(Math.max(1, parseInt(e.target.value) || 1))}
+                        onChange={(e) => setMonthsBack(e.target.value)}
                         className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         min="1"
                         max="24"
@@ -401,7 +406,7 @@ function SettingsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                       <input
                         type="number"
                         value={demoEquity}
-                        onChange={(e) => setDemoEquity(Math.max(100, parseInt(e.target.value) || 100))}
+                        onChange={(e) => setDemoEquity(e.target.value)}
                         className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         min="100"
                         step="100"

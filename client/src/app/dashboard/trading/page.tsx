@@ -201,6 +201,18 @@ export default function TradingPage() {
     return [...assetPills, ...tagPills];
   }, [equityTagFilter, equityAssetFilter, getTagById]);
 
+  // Count trades per tag for filter dropdown
+  const tagTradeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    closedTrades.forEach(trade => {
+      const tradeTags = (trade as any).tags || [];
+      tradeTags.forEach((tagName: string) => {
+        counts[tagName] = (counts[tagName] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [closedTrades]);
+
   // Load goals from localStorage
   useEffect(() => {
     const savedGoals = localStorage.getItem("tradingGoals");
@@ -1324,6 +1336,7 @@ export default function TradingPage() {
                                         )}
                                       </div>
                                       <span className={isSelected ? colors.text : "text-foreground"}>{tag.name}</span>
+                                      <span className="ml-auto text-[10px] text-muted">{tagTradeCounts[tag.name] || 0}</span>
                                     </button>
                                   );
                                 })}

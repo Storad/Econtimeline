@@ -292,9 +292,9 @@ function generateDemoTrades(
       expirationDate = `${expDate.getFullYear()}-${String(expDate.getMonth() + 1).padStart(2, "0")}-${String(expDate.getDate()).padStart(2, "0")}`;
     }
 
-    // Some trades are swing trades (5% chance, spanning 1-5 days) - not for day trading assets
+    // Some trades are swing trades (20% chance, spanning 1-5 days) - not for day trading assets
     let closeDate: string | undefined;
-    if (assetType !== "FUTURES" && Math.random() < 0.05) {
+    if (assetType !== "FUTURES" && Math.random() < 0.20) {
       const closeDateObj = new Date(tradeDate);
       closeDateObj.setDate(closeDateObj.getDate() + 1 + Math.floor(Math.random() * 5));
       // Skip weekends

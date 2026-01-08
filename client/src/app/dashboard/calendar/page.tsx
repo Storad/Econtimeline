@@ -32,11 +32,22 @@ import {
   Edit2,
   Hash,
   Tag as TagIcon,
+  ArrowUpRight,
 } from "lucide-react";
 import { useTradeJournal } from "@/hooks/useTradeJournal";
 import { Trade, TradeFormData, DEFAULT_TRADE_FORM } from "@/components/TradeJournal/types";
 import TradeForm from "@/components/TradeJournal/TradeForm";
 import { useDemoMode } from "@/context/DemoModeContext";
+import { useTagSettings, TAG_COLORS } from "@/context/TagContext";
+
+// Asset type colors (warm to cool, left to right)
+const ASSET_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
+  STOCK: { bg: "bg-orange-500/20", text: "text-orange-400" },
+  FUTURES: { bg: "bg-amber-500/20", text: "text-amber-400" },
+  OPTIONS: { bg: "bg-cyan-500/20", text: "text-cyan-400" },
+  FOREX: { bg: "bg-indigo-500/20", text: "text-indigo-400" },
+  CRYPTO: { bg: "bg-purple-500/20", text: "text-purple-400" },
+};
 
 interface EconomicEvent {
   id: string;
@@ -179,6 +190,7 @@ export default function EconomicCalendarPage() {
 
   // Demo mode integration
   const { isDemoMode, demoTrades } = useDemoMode();
+  const { getTagById } = useTagSettings();
 
   // Use demo trades when in demo mode, otherwise use real trades
   const trades = useMemo(() => {
@@ -220,7 +232,12 @@ export default function EconomicCalendarPage() {
 
   const getClosedTradesOpenedOnDateLocal = useCallback((date: string): Trade[] => {
     if (isDemoMode) {
-      return trades.filter(t => t.date === date && t.status === "CLOSED");
+      return trades.filter(t => {
+        if (t.status !== "CLOSED") return false;
+        if (t.date !== date) return false;
+        const closeDate = t.closeDate || t.date;
+        return closeDate !== t.date; // Only swing trades (closed on different day)
+      });
     }
     return getClosedTradesOpenedOnDate(date);
   }, [isDemoMode, trades, getClosedTradesOpenedOnDate]);
@@ -1947,7 +1964,11 @@ export default function EconomicCalendarPage() {
             const dayPnL = getDailyPnLLocal(dateKey);
             const dayHasOpenTrades = isDemoMode ? trades.some(t => t.date === dateKey && t.status === "OPEN") : hasOpenTrades(dateKey);
             const openCount = isDemoMode ? trades.filter(t => t.date === dateKey && t.status === "OPEN").length : getOpenTradeCount(dateKey);
-            const closedCount = isDemoMode ? trades.filter(t => t.date === dateKey && t.status === "CLOSED").length : getClosedTradeCount(dateKey);
+            const closedCount = isDemoMode ? trades.filter(t => {
+              if (t.status !== "CLOSED") return false;
+              const closeDate = t.closeDate || t.date;
+              return closeDate === dateKey;
+            }).length : getClosedTradeCount(dateKey);
             const closedTradesOpenedToday = getClosedTradesOpenedOnDateLocal(dateKey);
             const tradesClosedToday = getTradesClosedOnDateLocal(dateKey);
             const dayTradeCount = openCount + closedCount + closedTradesOpenedToday.length;
@@ -2037,21 +2058,25 @@ export default function EconomicCalendarPage() {
                           {formatPnL(dayPnL)}
                         </div>
                       )}
-                      {showNotes && hasTradesOpenedToday && !hasPnL && !hasOnlyOpenTrades && (
-                        <div className="text-sm font-bold mt-0.5 text-blue-400">
-                          Opened
-                        </div>
-                      )}
-
                       {/* Trade details */}
                       {showNotes && hasTrades && (
                         <div className="text-xs text-muted space-y-0.5">
                           {/* Show count summary */}
-                          {(closedCount > 0 || tradesClosedToday.length > 0) && (
-                            <div>{closedCount + tradesClosedToday.length} Trade{(closedCount + tradesClosedToday.length) !== 1 ? "s" : ""}</div>
+                          {(closedCount > 0 || hasTradesOpenedToday) && (
+                            <div className="flex items-center gap-1">
+                              {closedCount > 0 && (
+                                <span className="text-foreground/80">{closedCount} Trade{closedCount !== 1 ? "s" : ""}</span>
+                              )}
+                              {closedCount > 0 && hasTradesOpenedToday && <span className="text-muted">•</span>}
+                              {hasTradesOpenedToday && (
+                                <span className="flex items-center gap-0.5 text-blue-400">
+                                  <ArrowUpRight className="w-3 h-3" />
+                                  {closedTradesOpenedToday.length} Opened
+                                </span>
+                              )}
+                            </div>
                           )}
                           {openCount > 0 && <div>{openCount} Open</div>}
-                          {hasTradesOpenedToday && <div>{closedTradesOpenedToday.length} Opened</div>}
                         </div>
                       )}
                     </button>
@@ -2175,21 +2200,25 @@ export default function EconomicCalendarPage() {
                     {formatPnL(dayPnL)}
                   </div>
                 )}
-                {showNotes && hasTradesOpenedToday && !hasPnL && !hasOnlyOpenTrades && (
-                  <div className="text-sm font-bold mt-0.5 text-blue-400">
-                    Opened
-                  </div>
-                )}
-
                 {/* Trade details */}
                 {showNotes && hasTrades && (
                   <div className="text-xs text-muted space-y-0.5">
                     {/* Show count summary */}
-                    {(closedCount > 0 || tradesClosedToday.length > 0) && (
-                      <div>{closedCount + tradesClosedToday.length} Trade{(closedCount + tradesClosedToday.length) !== 1 ? "s" : ""}</div>
+                    {(closedCount > 0 || hasTradesOpenedToday) && (
+                      <div className="flex items-center gap-1">
+                        {closedCount > 0 && (
+                          <span className="text-foreground/80">{closedCount} Trade{closedCount !== 1 ? "s" : ""}</span>
+                        )}
+                        {closedCount > 0 && hasTradesOpenedToday && <span className="text-muted">•</span>}
+                        {hasTradesOpenedToday && (
+                          <span className="flex items-center gap-0.5 text-blue-400">
+                            <ArrowUpRight className="w-3 h-3" />
+                            {closedTradesOpenedToday.length} Opened
+                          </span>
+                        )}
+                      </div>
                     )}
                     {openCount > 0 && <div>{openCount} Open</div>}
-                    {hasTradesOpenedToday && <div>{closedTradesOpenedToday.length} Opened</div>}
                   </div>
                 )}
 
@@ -2645,7 +2674,7 @@ export default function EconomicCalendarPage() {
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                               {/* Asset Type Badge */}
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent/20 text-accent">
+                              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${ASSET_TYPE_COLORS[trade.assetType || "STOCK"]?.bg || "bg-blue-500/20"} ${ASSET_TYPE_COLORS[trade.assetType || "STOCK"]?.text || "text-blue-400"}`}>
                                 {trade.assetType || "STOCK"}
                               </span>
                               <span className="font-bold text-foreground">{trade.ticker}</span>
@@ -2732,14 +2761,18 @@ export default function EconomicCalendarPage() {
                           {/* Tags */}
                           {trade.tags.length > 0 && (
                             <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-                              {trade.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="px-2 py-0.5 text-[10px] rounded-full bg-accent/20 text-accent"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
+                              {trade.tags.map((tag) => {
+                                const tagInfo = getTagById(tag);
+                                const colors = tagInfo ? TAG_COLORS[tagInfo.section.color] : TAG_COLORS.blue;
+                                return (
+                                  <span
+                                    key={tag}
+                                    className={`px-2 py-0.5 text-[10px] rounded-full ${colors.bg} ${colors.text}`}
+                                  >
+                                    {tag}
+                                  </span>
+                                );
+                              })}
                             </div>
                           )}
 
@@ -2810,7 +2843,7 @@ export default function EconomicCalendarPage() {
                     className="w-full p-4 text-left hover:bg-card-hover border-b border-border/50 last:border-0 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent">
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${ASSET_TYPE_COLORS[trade.assetType || "STOCK"]?.bg || "bg-blue-500/20"} ${ASSET_TYPE_COLORS[trade.assetType || "STOCK"]?.text || "text-blue-400"}`}>
                         {trade.assetType || "STOCK"}
                       </span>
                       <span className="font-bold">{trade.ticker}</span>
@@ -2854,7 +2887,7 @@ export default function EconomicCalendarPage() {
             </div>
             <div className="mb-4 p-3 rounded-lg bg-card border border-border">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs px-1.5 py-0.5 rounded bg-accent/20 text-accent">{closingTrade.assetType || "STOCK"}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${ASSET_TYPE_COLORS[closingTrade.assetType || "STOCK"]?.bg || "bg-blue-500/20"} ${ASSET_TYPE_COLORS[closingTrade.assetType || "STOCK"]?.text || "text-blue-400"}`}>{closingTrade.assetType || "STOCK"}</span>
                 <span className="font-bold">{closingTrade.ticker}</span>
                 <span className={`text-xs ${closingTrade.direction === "LONG" ? "text-emerald-400" : "text-red-400"}`}>
                   {closingTrade.direction}

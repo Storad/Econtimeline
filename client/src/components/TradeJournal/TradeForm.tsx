@@ -8,7 +8,6 @@ import {
   Save,
   RefreshCw,
   Tag as TagIcon,
-  Plus,
   Info,
   ChevronDown,
   ChevronRight,
@@ -30,9 +29,18 @@ const ASSET_TYPES: { value: AssetType; label: string }[] = [
   { value: "STOCK", label: "Stock" },
   { value: "FUTURES", label: "Futures" },
   { value: "OPTIONS", label: "Options" },
-  { value: "FOREX", label: "Forex" },
   { value: "CRYPTO", label: "Crypto" },
+  { value: "FOREX", label: "Forex" },
 ];
+
+// Asset type colors (warm to cool, left to right)
+const ASSET_TYPE_COLORS: Record<string, { bg: string; text: string; border: string; bgSelected: string }> = {
+  STOCK: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/30", bgSelected: "bg-orange-500/20" },
+  FUTURES: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/30", bgSelected: "bg-amber-500/20" },
+  OPTIONS: { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/30", bgSelected: "bg-cyan-500/20" },
+  FOREX: { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/30", bgSelected: "bg-indigo-500/20" },
+  CRYPTO: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/30", bgSelected: "bg-purple-500/20" },
+};
 
 const LAST_ASSET_TYPE_KEY = "lastAssetType";
 
@@ -82,8 +90,6 @@ export default function TradeForm({
   });
 
   const [saving, setSaving] = useState(false);
-  const [showCustomTagInput, setShowCustomTagInput] = useState(false);
-  const [customTagName, setCustomTagName] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDurationPicker, setShowDurationPicker] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
@@ -157,18 +163,6 @@ export default function TradeForm({
       }
       return next;
     });
-  };
-
-  const addCustomTag = () => {
-    const trimmed = customTagName.trim();
-    if (trimmed && !formData.tags.includes(trimmed) && formData.tags.length < MAX_TAGS) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, trimmed],
-      }));
-    }
-    setCustomTagName("");
-    setShowCustomTagInput(false);
   };
 
   const formatDate = (dateStr: string) => {
@@ -277,20 +271,24 @@ export default function TradeForm({
             <div>
               <label className="text-xs font-medium text-muted mb-2 block">Asset Type</label>
               <div className="flex flex-wrap gap-1.5">
-                {ASSET_TYPES.map((type) => (
-                  <button
-                    key={type.value}
-                    type="button"
-                    onClick={() => setFormData((prev) => ({ ...prev, assetType: type.value }))}
-                    className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
-                      formData.assetType === type.value
-                        ? "bg-accent/20 border-accent text-accent font-medium"
-                        : "bg-card border-border text-muted hover:border-accent/50"
-                    }`}
-                  >
-                    {type.label}
-                  </button>
-                ))}
+                {ASSET_TYPES.map((type) => {
+                  const colors = ASSET_TYPE_COLORS[type.value];
+                  const isSelected = formData.assetType === type.value;
+                  return (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, assetType: type.value }))}
+                      className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
+                        isSelected
+                          ? `${colors.bgSelected} ${colors.border} ${colors.text} font-medium`
+                          : `${colors.bg} border-border ${colors.text} hover:${colors.border}`
+                      }`}
+                    >
+                      {type.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -623,7 +621,7 @@ export default function TradeForm({
               )}
 
               {/* Tag Sections */}
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              <div className="space-y-1.5">
                 {tagSettings.sections
                   .sort((a, b) => a.order - b.order)
                   .map((section) => {
@@ -675,52 +673,6 @@ export default function TradeForm({
                     );
                   })}
               </div>
-
-              {/* Custom Tag Input */}
-              <div className="mt-2">
-                {!showCustomTagInput ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowCustomTagInput(true)}
-                    disabled={formData.tags.length >= MAX_TAGS}
-                    className={`px-2.5 py-1 text-xs rounded-lg border border-dashed transition-colors ${
-                      formData.tags.length >= MAX_TAGS
-                        ? "border-border text-muted/50 cursor-not-allowed"
-                        : "border-accent/50 text-accent hover:bg-accent/10"
-                    }`}
-                  >
-                    <Plus className="w-3 h-3 inline mr-1" />
-                    Custom Tag
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={customTagName}
-                      onChange={(e) => setCustomTagName(e.target.value)}
-                      placeholder="Custom tag..."
-                      className="flex-1 px-2 py-1.5 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-accent/50"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addCustomTag();
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={addCustomTag}
-                      disabled={formData.tags.length >= MAX_TAGS}
-                      className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg disabled:opacity-50"
-                    >
-                      Add
-                    </button>
-                    <button type="button" onClick={() => setShowCustomTagInput(false)} className="p-1 text-muted hover:text-foreground">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Notes */}
@@ -730,7 +682,7 @@ export default function TradeForm({
                 value={formData.notes}
                 onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
                 placeholder="Trade reasoning, lessons learned..."
-                rows={6}
+                rows={3}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
               />
             </div>
