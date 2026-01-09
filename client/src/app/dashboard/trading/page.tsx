@@ -64,7 +64,7 @@ interface MetricConfig {
   category: "performance" | "risk" | "trade" | "streak";
   format: "currency" | "percent" | "ratio" | "number";
   colorLogic: "positive" | "negative" | "neutral" | "threshold";
-  getValue: (stats: ReturnType<typeof useTradingStats>) => number;
+  getValue?: (stats: TradingStatsType) => number;
 }
 
 // Helper type for stats
