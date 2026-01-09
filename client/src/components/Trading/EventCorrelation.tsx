@@ -35,6 +35,156 @@ interface Correlations {
   };
 }
 
+interface EconomicEvent {
+  id: string;
+  date: string;
+  time: string;
+  currency: string;
+  event: string;
+  impact: "high" | "medium" | "low" | "holiday" | "early_close";
+  category: string;
+}
+
+interface TradeInput {
+  date: string;
+  pnl: number;
+}
+
+interface EventCorrelationProps {
+  trades?: TradeInput[];
+}
+
+function createEmptyStats(): CorrelationStats {
+  return { count: 0, wins: 0, losses: 0, totalPnl: 0, winRate: 0, avgPnl: 0 };
+}
+
+function finalizeStats(stats: CorrelationStats): CorrelationStats {
+  return {
+    ...stats,
+    winRate: stats.count > 0 ? (stats.wins / stats.count) * 100 : 0,
+    avgPnl: stats.count > 0 ? stats.totalPnl / stats.count : 0,
+  };
+}
+
+function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): Correlations {
+  // Group events by date for quick lookup
+  const eventsByDate = new Map<string, EconomicEvent[]>();
+  events.forEach((event) => {
+    const existing = eventsByDate.get(event.date) || [];
+    existing.push(event);
+    eventsByDate.set(event.date, existing);
+  });
+
+  // Initialize correlation stats
+  const byImpact: Record<string, CorrelationStats> = {
+    high: createEmptyStats(),
+    medium: createEmptyStats(),
+    low: createEmptyStats(),
+  };
+  const byCategory: Record<string, CorrelationStats> = {};
+  const byEventType: Record<string, CorrelationStats> = {};
+  const noEventDays = createEmptyStats();
+
+  let tradesOnEventDays = 0;
+  let tradesOnNonEventDays = 0;
+
+  // Process each trade
+  trades.forEach((trade) => {
+    const dayEvents = eventsByDate.get(trade.date) || [];
+    const isWin = trade.pnl > 0;
+    const isLoss = trade.pnl < 0;
+
+    if (dayEvents.length === 0) {
+      noEventDays.count++;
+      if (isWin) noEventDays.wins++;
+      if (isLoss) noEventDays.losses++;
+      noEventDays.totalPnl += trade.pnl;
+      tradesOnNonEventDays++;
+    } else {
+      tradesOnEventDays++;
+
+      const uniqueImpacts = new Set<string>();
+      const uniqueCategories = new Set<string>();
+      const uniqueEventTypes = new Set<string>();
+
+      dayEvents.forEach((event) => {
+        if (event.impact !== "holiday" && event.impact !== "early_close") {
+          uniqueImpacts.add(event.impact);
+        }
+        if (event.category) {
+          uniqueCategories.add(event.category);
+        }
+        const eventType = event.event.substring(0, 40);
+        uniqueEventTypes.add(eventType);
+      });
+
+      uniqueImpacts.forEach((impact) => {
+        if (!byImpact[impact]) byImpact[impact] = createEmptyStats();
+        byImpact[impact].count++;
+        if (isWin) byImpact[impact].wins++;
+        if (isLoss) byImpact[impact].losses++;
+        byImpact[impact].totalPnl += trade.pnl;
+      });
+
+      uniqueCategories.forEach((category) => {
+        if (!byCategory[category]) byCategory[category] = createEmptyStats();
+        byCategory[category].count++;
+        if (isWin) byCategory[category].wins++;
+        if (isLoss) byCategory[category].losses++;
+        byCategory[category].totalPnl += trade.pnl;
+      });
+
+      uniqueEventTypes.forEach((eventType) => {
+        if (!byEventType[eventType]) byEventType[eventType] = createEmptyStats();
+        byEventType[eventType].count++;
+        if (isWin) byEventType[eventType].wins++;
+        if (isLoss) byEventType[eventType].losses++;
+        byEventType[eventType].totalPnl += trade.pnl;
+      });
+    }
+  });
+
+  // Finalize all stats
+  Object.keys(byImpact).forEach((k) => {
+    byImpact[k] = finalizeStats(byImpact[k]);
+  });
+  Object.keys(byCategory).forEach((k) => {
+    byCategory[k] = finalizeStats(byCategory[k]);
+  });
+  Object.keys(byEventType).forEach((k) => {
+    byEventType[k] = finalizeStats(byEventType[k]);
+  });
+  const finalNoEventDays = finalizeStats(noEventDays);
+
+  // Find best performers
+  const findBest = (stats: Record<string, CorrelationStats>): string | null => {
+    let best: string | null = null;
+    let bestRate = -1;
+    Object.entries(stats).forEach(([key, s]) => {
+      if (s.count >= 3 && s.winRate > bestRate) {
+        bestRate = s.winRate;
+        best = key;
+      }
+    });
+    return best;
+  };
+
+  return {
+    byImpact,
+    byCategory,
+    byEventType,
+    noEventDays: finalNoEventDays,
+    summary: {
+      totalTrades: trades.length,
+      tradesOnEventDays,
+      tradesOnNonEventDays,
+      bestImpactLevel: findBest(byImpact),
+      bestCategory: findBest(byCategory),
+      bestEventType: findBest(byEventType),
+    },
+  };
+}
+
 const IMPACT_COLORS: Record<string, string> = {
   high: "text-red-400",
   medium: "text-amber-400",
@@ -95,28 +245,67 @@ function StatCard({
   );
 }
 
-export default function EventCorrelation() {
+export default function EventCorrelation({ trades }: EventCorrelationProps) {
   const [correlations, setCorrelations] = useState<Correlations | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [calendarEvents, setCalendarEvents] = useState<EconomicEvent[]>([]);
 
+  // Fetch calendar events for client-side calculation
   useEffect(() => {
-    async function fetchCorrelations() {
+    async function fetchCalendarEvents() {
       try {
-        const res = await fetch("/api/trades/correlations");
+        const res = await fetch("/calendar-data.json");
         if (res.ok) {
           const data = await res.json();
-          setCorrelations(data.correlations);
+          const events = (data.events || []).map((e: Record<string, unknown>, i: number) => ({
+            id: `event-${i}`,
+            date: e.date as string,
+            time: e.time as string,
+            currency: e.currency as string,
+            event: e.title as string,
+            impact: e.impact as "high" | "medium" | "low" | "holiday" | "early_close",
+            category: e.category as string,
+          }));
+          setCalendarEvents(events);
         }
       } catch (error) {
-        console.error("Failed to fetch correlations:", error);
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch calendar events:", error);
       }
     }
-    fetchCorrelations();
+    fetchCalendarEvents();
   }, []);
+
+  // Calculate correlations from passed trades (demo mode) or fetch from API
+  useEffect(() => {
+    if (trades && trades.length > 0 && calendarEvents.length > 0) {
+      // Client-side calculation for demo trades
+      const calculated = calculateCorrelations(trades, calendarEvents);
+      setCorrelations(calculated);
+      setLoading(false);
+    } else if (trades && trades.length === 0) {
+      // Empty trades array passed - show empty state
+      setCorrelations(null);
+      setLoading(false);
+    } else if (!trades) {
+      // No trades prop - fetch from API (real trades mode)
+      async function fetchCorrelations() {
+        try {
+          const res = await fetch("/api/trades/correlations");
+          if (res.ok) {
+            const data = await res.json();
+            setCorrelations(data.correlations);
+          }
+        } catch (error) {
+          console.error("Failed to fetch correlations:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchCorrelations();
+    }
+  }, [trades, calendarEvents]);
 
   if (loading) {
     return (

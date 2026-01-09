@@ -12,6 +12,10 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Calendar,
   DollarSign,
   BarChart3,
@@ -51,23 +55,269 @@ const ASSET_TYPES = [
   { value: "FOREX", label: "Forex", color: "emerald" },
 ] as const;
 
+// Metric configuration for customizable Key Metrics section
+interface MetricConfig {
+  id: string;
+  name: string;
+  shortName: string;
+  tooltip: string;
+  category: "performance" | "risk" | "trade" | "streak";
+  format: "currency" | "percent" | "ratio" | "number";
+  colorLogic: "positive" | "negative" | "neutral" | "threshold";
+  getValue: (stats: ReturnType<typeof useTradingStats>) => number;
+}
+
+// Helper type for stats
+type TradingStatsType = {
+  expectancy: number;
+  riskRewardRatio: number;
+  profitFactor: number;
+  sharpeRatio: number;
+  recoveryFactor: number;
+  winDays: number;
+  lossDays: number;
+  avgWin: number;
+  avgLoss: number;
+  maxDrawdownPercent: number;
+  currentDrawdownPercent: number;
+  winRate: number;
+  allTimePnl: number;
+  allTimeTrades: number;
+  winningTrades: number;
+  losingTrades: number;
+  currentStreak: number;
+  currentStreakType: "win" | "loss" | null;
+  longestWinStreak: number;
+  longestLossStreak: number;
+  sortedTrades: { pnl: number }[];
+  consistencyScore: number;
+};
+
+const AVAILABLE_METRICS: Omit<MetricConfig, "getValue">[] = [
+  // Performance Metrics
+  {
+    id: "winRate",
+    name: "Win Rate",
+    shortName: "Win Rate",
+    tooltip: "Percentage of profitable trades. Formula: (Winning Trades ÷ Total Trades) × 100. Above 50% is good, but must be paired with adequate R:R ratio.",
+    category: "performance",
+    format: "percent",
+    colorLogic: "threshold",
+  },
+  {
+    id: "profitFactor",
+    name: "Profit Factor",
+    shortName: "Profit Factor",
+    tooltip: "Ratio of gross profits to gross losses. Formula: Gross Profits ÷ Gross Losses. Above 1.0 is profitable, 1.5+ is good, 2.0+ is excellent.",
+    category: "performance",
+    format: "ratio",
+    colorLogic: "threshold",
+  },
+  {
+    id: "expectancy",
+    name: "Expectancy",
+    shortName: "Expectancy",
+    tooltip: "Average profit expected per trade. Formula: (Win% × Avg Win) − (Loss% × Avg Loss). Positive value means strategy is profitable over time.",
+    category: "performance",
+    format: "currency",
+    colorLogic: "positive",
+  },
+  {
+    id: "riskReward",
+    name: "Risk/Reward Ratio",
+    shortName: "R:R Ratio",
+    tooltip: "Average win size compared to average loss. Formula: Average Win ÷ Average Loss. 1.5+ is good, 2.0+ is excellent. Higher allows lower win rate.",
+    category: "performance",
+    format: "ratio",
+    colorLogic: "threshold",
+  },
+  {
+    id: "sharpe",
+    name: "Sharpe Ratio",
+    shortName: "Sharpe",
+    tooltip: "Risk-adjusted return measure. Formula: (Return − Risk-free Rate) ÷ Standard Deviation. Above 1.0 is acceptable, 2.0+ is very good, 3.0+ is excellent.",
+    category: "performance",
+    format: "ratio",
+    colorLogic: "threshold",
+  },
+  {
+    id: "avgTrade",
+    name: "Average Trade",
+    shortName: "Avg Trade",
+    tooltip: "Average P&L per trade. Formula: Net P&L ÷ Total Trades. Shows expected value of each trade regardless of outcome.",
+    category: "performance",
+    format: "currency",
+    colorLogic: "positive",
+  },
+  // Risk Metrics
+  {
+    id: "maxDrawdown",
+    name: "Maximum Drawdown",
+    shortName: "Max DD",
+    tooltip: "Largest peak-to-trough decline. Formula: (Peak − Trough) ÷ Peak × 100. Under 20% is good, under 10% is excellent. Critical for risk management.",
+    category: "risk",
+    format: "percent",
+    colorLogic: "negative",
+  },
+  {
+    id: "currentDrawdown",
+    name: "Current Drawdown",
+    shortName: "Current DD",
+    tooltip: "Current decline from peak equity. Formula: (Peak − Current) ÷ Peak × 100. Shows how far you are from your high-water mark.",
+    category: "risk",
+    format: "percent",
+    colorLogic: "negative",
+  },
+  {
+    id: "recoveryFactor",
+    name: "Recovery Factor",
+    shortName: "Recovery",
+    tooltip: "Profit relative to max drawdown. Formula: Net Profit ÷ Max Drawdown. Above 3.0 is good, above 5.0 is excellent. Higher means faster recovery from losses.",
+    category: "risk",
+    format: "ratio",
+    colorLogic: "threshold",
+  },
+  {
+    id: "winDays",
+    name: "Win/Loss Days",
+    shortName: "Win Days",
+    tooltip: "Ratio of profitable to unprofitable trading days. Shows consistency across sessions. Green/red numbers show winning vs losing days.",
+    category: "risk",
+    format: "number",
+    colorLogic: "neutral",
+  },
+  // Trade Metrics
+  {
+    id: "avgWin",
+    name: "Average Win",
+    shortName: "Avg Win",
+    tooltip: "Mean profit from winning trades. Formula: Total Profit from Wins ÷ Number of Wins. Compare with Avg Loss to assess R:R.",
+    category: "trade",
+    format: "currency",
+    colorLogic: "positive",
+  },
+  {
+    id: "avgLoss",
+    name: "Average Loss",
+    shortName: "Avg Loss",
+    tooltip: "Mean loss from losing trades. Formula: Total Losses ÷ Number of Losses. Should be smaller than Avg Win for positive expectancy.",
+    category: "trade",
+    format: "currency",
+    colorLogic: "negative",
+  },
+  {
+    id: "bestTrade",
+    name: "Best Trade",
+    shortName: "Best Trade",
+    tooltip: "Largest single winning trade. Identifies outlier wins. If much larger than average, strategy may rely on rare big wins.",
+    category: "trade",
+    format: "currency",
+    colorLogic: "positive",
+  },
+  {
+    id: "worstTrade",
+    name: "Worst Trade",
+    shortName: "Worst Trade",
+    tooltip: "Largest single losing trade. Reveals risk exposure. If much larger than average loss, review position sizing and stop-losses.",
+    category: "trade",
+    format: "currency",
+    colorLogic: "negative",
+  },
+  {
+    id: "totalTrades",
+    name: "Total Trades",
+    shortName: "Total Trades",
+    tooltip: "Number of completed trades. More trades = more statistical significance. At least 30+ trades needed for reliable metrics.",
+    category: "trade",
+    format: "number",
+    colorLogic: "neutral",
+  },
+  {
+    id: "winningTrades",
+    name: "Winning Trades",
+    shortName: "Winners",
+    tooltip: "Count of profitable trades. Use alongside Total Trades to calculate win rate manually.",
+    category: "trade",
+    format: "number",
+    colorLogic: "positive",
+  },
+  {
+    id: "losingTrades",
+    name: "Losing Trades",
+    shortName: "Losers",
+    tooltip: "Count of unprofitable trades. Compare with Winners to see the balance of your trading outcomes.",
+    category: "trade",
+    format: "number",
+    colorLogic: "negative",
+  },
+  {
+    id: "netPnl",
+    name: "Net P&L",
+    shortName: "Net P&L",
+    tooltip: "Total profit or loss from all trades. The bottom line of your trading performance after all wins and losses.",
+    category: "trade",
+    format: "currency",
+    colorLogic: "positive",
+  },
+  // Streak Metrics
+  {
+    id: "currentStreak",
+    name: "Current Streak",
+    shortName: "Streak",
+    tooltip: "Current consecutive wins or losses. Helps identify momentum and potential regression to mean. Don't get overconfident on win streaks.",
+    category: "streak",
+    format: "number",
+    colorLogic: "neutral",
+  },
+  {
+    id: "bestStreak",
+    name: "Best Win Streak",
+    shortName: "Best Streak",
+    tooltip: "Longest consecutive winning trades. Know this to avoid overconfidence and excessive risk-taking during winning runs.",
+    category: "streak",
+    format: "number",
+    colorLogic: "positive",
+  },
+  {
+    id: "worstStreak",
+    name: "Worst Loss Streak",
+    shortName: "Worst Streak",
+    tooltip: "Longest consecutive losing trades. Know this to prevent panic during normal drawdowns. All strategies have losing streaks.",
+    category: "streak",
+    format: "number",
+    colorLogic: "negative",
+  },
+  {
+    id: "consistencyScore",
+    name: "Consistency Score",
+    shortName: "Consistency",
+    tooltip: "Overall consistency rating (0-100). Combines win rate, profit factor, drawdown, and streaks into a single score. 70+ is good.",
+    category: "performance",
+    format: "number",
+    colorLogic: "threshold",
+  },
+];
+
+// Default 10 metrics to display (most important for traders)
+const DEFAULT_METRIC_IDS = [
+  "winRate",
+  "profitFactor",
+  "expectancy",
+  "riskReward",
+  "sharpe",
+  "recoveryFactor",
+  "avgWin",
+  "avgLoss",
+  "maxDrawdown",
+  "currentDrawdown",
+];
+
 // Goal settings interface
 interface TradingGoals {
   yearlyPnlGoal: number;
   monthlyPnlGoal: number;
   startingEquity: number;
 }
-
-// Compact Stat Component for summary bar
-const CompactStat = ({ label, value, count }: { label: string; value: number; count?: number }) => (
-  <div className="flex items-center gap-2">
-    <span className="text-[10px] text-muted">{label}</span>
-    <span className={`font-bold ${value >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-      {value >= 0 ? "+" : ""}${value.toFixed(0)}
-    </span>
-    {count !== undefined && <span className="text-[10px] text-muted">({count})</span>}
-  </div>
-);
 
 export default function TradingPage() {
   const { trades: realTrades, tags: realTags, loading, closeTrade } = useTradeJournal();
@@ -97,6 +347,8 @@ export default function TradingPage() {
   const [goalInput, setGoalInput] = useState({ yearly: "", monthly: "", startingEquity: "" });
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [showRecentTrades, setShowRecentTrades] = useState(false);
+  const [recentTradesPage, setRecentTradesPage] = useState(1);
+  const tradesPerPage = 20;
   const [showOpenTrades, setShowOpenTrades] = useState(true);
   const [closingTrade, setClosingTrade] = useState<Trade | null>(null);
   const [closeTradeForm, setCloseTradeForm] = useState({ exitPrice: "", pnl: "", closeDate: "" });
@@ -107,6 +359,29 @@ export default function TradingPage() {
   const closeDatePickerRef = useRef<HTMLDivElement>(null);
   const tagDropdownRef = useRef<HTMLDivElement>(null);
   const assetDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Key Metrics customization
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("tradingMetrics");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return DEFAULT_METRIC_IDS;
+        }
+      }
+    }
+    return DEFAULT_METRIC_IDS;
+  });
+  const [showMetricsSettings, setShowMetricsSettings] = useState(false);
+
+  // Save metrics selection to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tradingMetrics", JSON.stringify(selectedMetrics));
+    }
+  }, [selectedMetrics]);
 
   // Equity curve filters
   const [equityPeriod, setEquityPeriod] = useState<"all" | "ytd" | "mtd" | "wtd" | "daily" | "custom">("all");
@@ -1446,7 +1721,7 @@ export default function TradingPage() {
         />
       </div>
 
-      {/* GOALS & PROGRESS HERO SECTION */}
+      {/* GOALS, PROGRESS & CONSISTENCY SECTION */}
       <div className="relative rounded-2xl overflow-hidden border border-border/50">
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-blue-500/5 to-purple-500/10"></div>
@@ -1460,184 +1735,485 @@ export default function TradingPage() {
                 <Target className="w-6 h-6 text-emerald-400" />
               </div>
               <div>
-                <h2 className="text-lg font-bold">Goals & Progress</h2>
-                <p className="text-xs text-muted">Track your trading targets</p>
+                <h2 className="text-lg font-bold">Goals & Performance</h2>
+                <p className="text-xs text-muted">Track targets and trading consistency</p>
               </div>
             </div>
-            <button
-              onClick={() => setShowGoalSettings(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card hover:bg-card-hover border border-border transition-colors text-sm"
-            >
-              <Settings className="w-4 h-4" />
-              Set Goals
-            </button>
-          </div>
-
-          {goals.yearlyPnlGoal > 0 || goals.monthlyPnlGoal > 0 ? (
-            <>
-              {/* Goals Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Yearly Goal Card */}
-                <div className="flex items-center gap-6 p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
-                  <CircularProgress
-                    percentage={goalProgress?.yearlyProgress || 0}
-                    size={100}
-                    strokeWidth={8}
-                    color="#34d399"
-                    label="Yearly"
-                  />
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted">Yearly Goal</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        goalProgress?.onTrack
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "bg-yellow-500/20 text-yellow-400"
-                      }`}>
-                        {goalProgress?.onTrack ? "On Track" : "Behind Pace"}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className={`text-2xl font-bold ${tradingStats.ytdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        ${tradingStats.ytdPnl.toFixed(0)}
-                      </span>
-                      <span className="text-sm text-muted">/ ${goals.yearlyPnlGoal.toFixed(0)}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-[11px] text-muted">
-                      <div className="flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-yellow-400" />
-                        <span>Daily target: <span className="text-foreground font-medium">${(goalProgress?.dailyTarget || 0).toFixed(0)}</span></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Monthly Goal Card */}
-                <div className="flex items-center gap-6 p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
-                  <CircularProgress
-                    percentage={goalProgress?.monthlyProgress || 0}
-                    size={100}
-                    strokeWidth={8}
-                    color="#60a5fa"
-                    label="Monthly"
-                  />
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted">Monthly Goal</span>
-                      <span className="text-xs text-muted">
-                        {new Date().toLocaleString('default', { month: 'short' })} {new Date().getFullYear()}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className={`text-2xl font-bold ${tradingStats.mtdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        ${tradingStats.mtdPnl.toFixed(0)}
-                      </span>
-                      <span className="text-sm text-muted">/ ${goals.monthlyPnlGoal.toFixed(0)}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-[11px] text-muted">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-blue-400" />
-                        <span>Remaining: <span className="text-foreground font-medium">${Math.max(0, goals.monthlyPnlGoal - tradingStats.mtdPnl).toFixed(0)}</span></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Today's Progress & Monthly Breakdown */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Today's Progress */}
-                <div className="p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
-                  <div className="text-xs text-muted mb-2">Today's Progress</div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className={`text-xl font-bold ${(goalProgress?.todayPnl || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {(goalProgress?.todayPnl || 0) >= 0 ? "+" : ""}${(goalProgress?.todayPnl || 0).toFixed(0)}
-                      </div>
-                      <div className="text-[11px] text-muted">
-                        vs ${(goalProgress?.dailyTarget || 0).toFixed(0)} target
-                      </div>
-                    </div>
-                    <div className={`text-2xl font-bold ${
-                      (goalProgress?.todayVsTarget || 0) >= 100 ? "text-emerald-400" :
-                      (goalProgress?.todayVsTarget || 0) >= 50 ? "text-yellow-400" : "text-red-400"
-                    }`}>
-                      {(goalProgress?.todayVsTarget || 0).toFixed(0)}%
-                    </div>
-                  </div>
-                </div>
-
-                {/* Monthly Breakdown - spans 2 columns */}
-                <div className="md:col-span-2 p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
-                  <div className="text-xs text-muted mb-3">Monthly Breakdown ({tradingStats.currentYear})</div>
-                  <div className="flex items-end justify-between gap-1 h-12">
-                    {goalProgress?.monthlyPnl.map((pnl, i) => {
-                      const maxPnl = Math.max(...(goalProgress?.monthlyPnl.map(Math.abs) || [1]));
-                      const height = maxPnl > 0 ? (Math.abs(pnl) / maxPnl) * 100 : 0;
-                      const isCurrentMonth = i === new Date().getMonth();
-                      return (
-                        <div key={i} className="flex-1 flex flex-col items-center">
-                          <div
-                            className={`w-full max-w-[20px] rounded-t transition-all ${
-                              pnl >= 0 ? "bg-emerald-500" : "bg-red-500"
-                            } ${isCurrentMonth ? "ring-2 ring-white/50" : ""}`}
-                            style={{ height: `${Math.max(height, 4)}%`, opacity: pnl === 0 ? 0.2 : 0.8 }}
-                          />
-                          <span className={`text-[9px] mt-1 ${isCurrentMonth ? "text-foreground font-bold" : "text-muted"}`}>
-                            {monthNames[i]}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Projection Banner */}
-              <div className={`mt-4 p-3 rounded-xl flex items-center justify-between ${
-                goalProgress?.onTrack
-                  ? "bg-emerald-500/10 border border-emerald-500/30"
-                  : "bg-yellow-500/10 border border-yellow-500/30"
+            <div className="flex items-center gap-2">
+              {/* Consistency Badge */}
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
+                consistencyGrade.grade === "A+" || consistencyGrade.grade === "A" ? "bg-emerald-500/10 border-emerald-500/30" :
+                consistencyGrade.grade === "B+" || consistencyGrade.grade === "B" ? "bg-blue-500/10 border-blue-500/30" :
+                consistencyGrade.grade === "C+" || consistencyGrade.grade === "C" ? "bg-yellow-500/10 border-yellow-500/30" :
+                "bg-red-500/10 border-red-500/30"
               }`}>
-                <div className="flex items-center gap-3">
-                  {goalProgress?.onTrack ? (
-                    <Trophy className="w-5 h-5 text-emerald-400" />
-                  ) : (
-                    <AlertTriangle className="w-5 h-5 text-yellow-400" />
-                  )}
-                  <div>
-                    <div className="text-sm font-medium">
-                      {goalProgress?.onTrack ? "On Track to Hit Yearly Goal!" : "Behind Yearly Pace"}
-                    </div>
-                    <div className="text-[11px] text-muted">
-                      Projected year-end: ${(goalProgress?.projectedYearEnd || 0).toFixed(0)}
-                      {" "}({goalProgress?.tradingDaysRemaining} trading days left)
-                    </div>
-                  </div>
-                </div>
-                <div className={`text-lg font-bold ${goalProgress?.onTrack ? "text-emerald-400" : "text-yellow-400"}`}>
-                  {((goalProgress?.projectedYearEnd || 0) / goals.yearlyPnlGoal * 100).toFixed(0)}%
-                </div>
+                <Award className="w-4 h-4 text-yellow-400" />
+                <span className={`text-sm font-bold ${consistencyGrade.color}`}>{consistencyGrade.grade}</span>
+                <span className="text-xs text-muted">({tradingStats.consistencyScore}/100)</span>
               </div>
-            </>
-          ) : (
-            /* No Goals Set State */
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 border border-accent/30 mb-4">
-                <Target className="w-8 h-8 text-accent-light" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Set Your Trading Goals</h3>
-              <p className="text-sm text-muted mb-4 max-w-md mx-auto">
-                Define yearly and monthly P&L targets to track your progress with visual indicators and daily targets.
-              </p>
               <button
                 onClick={() => setShowGoalSettings(true)}
-                className="px-4 py-2 rounded-lg bg-accent hover:bg-accent/90 text-white font-medium transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card hover:bg-card-hover border border-border transition-colors text-sm"
               >
-                Set Goals Now
+                <Settings className="w-4 h-4" />
+                Set Goals
               </button>
             </div>
-          )}
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Goals (2/3 width on large screens) */}
+            <div className="lg:col-span-2 space-y-4">
+              {goals.yearlyPnlGoal > 0 || goals.monthlyPnlGoal > 0 ? (
+                <>
+                  {/* Goals Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Yearly Goal Card */}
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
+                      <CircularProgress
+                        percentage={goalProgress?.yearlyProgress || 0}
+                        size={80}
+                        strokeWidth={6}
+                        color="#34d399"
+                        label="Yearly"
+                      />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted">Yearly Goal</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                            goalProgress?.onTrack
+                              ? "bg-emerald-500/20 text-emerald-400"
+                              : "bg-yellow-500/20 text-yellow-400"
+                          }`}>
+                            {goalProgress?.onTrack ? "On Track" : "Behind"}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className={`text-xl font-bold ${tradingStats.ytdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                            ${tradingStats.ytdPnl.toFixed(0)}
+                          </span>
+                          <span className="text-xs text-muted">/ ${goals.yearlyPnlGoal.toFixed(0)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-muted">
+                          <Zap className="w-3 h-3 text-yellow-400" />
+                          <span>Daily: <span className="text-foreground font-medium">${(goalProgress?.dailyTarget || 0).toFixed(0)}</span></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Monthly Goal Card */}
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
+                      <CircularProgress
+                        percentage={goalProgress?.monthlyProgress || 0}
+                        size={80}
+                        strokeWidth={6}
+                        color="#60a5fa"
+                        label="Monthly"
+                      />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted">Monthly Goal</span>
+                          <span className="text-[10px] text-muted">
+                            {new Date().toLocaleString('default', { month: 'short' })}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className={`text-xl font-bold ${tradingStats.mtdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                            ${tradingStats.mtdPnl.toFixed(0)}
+                          </span>
+                          <span className="text-xs text-muted">/ ${goals.monthlyPnlGoal.toFixed(0)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-muted">
+                          <Calendar className="w-3 h-3 text-blue-400" />
+                          <span>Left: <span className="text-foreground font-medium">${Math.max(0, goals.monthlyPnlGoal - tradingStats.mtdPnl).toFixed(0)}</span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Today + Monthly Breakdown Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Today's Progress */}
+                    <div className="p-3 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
+                      <div className="text-[10px] text-muted mb-1">Today</div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-lg font-bold ${(goalProgress?.todayPnl || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {(goalProgress?.todayPnl || 0) >= 0 ? "+" : ""}${(goalProgress?.todayPnl || 0).toFixed(0)}
+                        </span>
+                        <span className={`text-sm font-bold ${
+                          (goalProgress?.todayVsTarget || 0) >= 100 ? "text-emerald-400" :
+                          (goalProgress?.todayVsTarget || 0) >= 50 ? "text-yellow-400" : "text-red-400"
+                        }`}>
+                          {(goalProgress?.todayVsTarget || 0).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Monthly Breakdown - Enhanced */}
+                    <div className="md:col-span-3 p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-[10px] text-muted">{tradingStats.currentYear} Monthly P&L</div>
+                        <div className="flex items-center gap-3 text-[9px]">
+                          <div className="flex items-center gap-1">
+                            <div className="w-2 h-2 rounded-sm bg-emerald-500" />
+                            <span className="text-muted">Profit</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-2 h-2 rounded-sm bg-red-500" />
+                            <span className="text-muted">Loss</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chart Area */}
+                      <div className="relative">
+                        {/* Zero line */}
+                        <div className="absolute left-0 right-0 top-1/2 h-px bg-border/50 z-0" />
+
+                        {/* Bars */}
+                        <div className="flex items-center justify-between gap-1.5 h-24 relative z-10">
+                          {goalProgress?.monthlyPnl.map((pnl, i) => {
+                            const maxPnl = Math.max(...(goalProgress?.monthlyPnl.map(Math.abs) || [1]), 1);
+                            const heightPercent = maxPnl > 0 ? (Math.abs(pnl) / maxPnl) * 45 : 0;
+                            const isCurrentMonth = i === new Date().getMonth();
+                            const isPastMonth = i < new Date().getMonth();
+                            const isFutureMonth = i > new Date().getMonth();
+
+                            // Calculate cumulative P&L up to this month
+                            const cumulativePnl = goalProgress?.monthlyPnl.slice(0, i + 1).reduce((sum, p) => sum + p, 0) || 0;
+
+                            return (
+                              <div key={i} className="flex-1 flex flex-col items-center h-full justify-center group relative">
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none">
+                                  <div className="bg-slate-900 border border-accent/50 rounded-lg shadow-xl p-2 min-w-[100px]">
+                                    <div className="text-[10px] font-medium text-foreground mb-1">
+                                      {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][i]}
+                                    </div>
+                                    <div className={`text-sm font-bold ${pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                                      {pnl >= 0 ? "+" : ""}${pnl.toFixed(0)}
+                                    </div>
+                                    <div className="text-[9px] text-muted mt-1 pt-1 border-t border-white/10">
+                                      YTD: <span className={cumulativePnl >= 0 ? "text-emerald-400" : "text-red-400"}>${cumulativePnl.toFixed(0)}</span>
+                                    </div>
+                                  </div>
+                                  <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 bg-slate-900 border-r border-b border-accent/50 rotate-45" />
+                                </div>
+
+                                {/* Bar */}
+                                <div className="w-full flex flex-col items-center justify-center h-full">
+                                  {pnl >= 0 ? (
+                                    <div className="w-full flex flex-col items-center">
+                                      <div
+                                        className={`w-full max-w-[20px] rounded-t transition-all cursor-pointer ${
+                                          isCurrentMonth ? "bg-gradient-to-t from-emerald-600 to-emerald-400 ring-2 ring-emerald-400/50" :
+                                          isPastMonth ? "bg-gradient-to-t from-emerald-600 to-emerald-500" : "bg-emerald-500/30"
+                                        } group-hover:brightness-110`}
+                                        style={{ height: `${Math.max(heightPercent, pnl !== 0 ? 4 : 2)}px`, opacity: isFutureMonth && pnl === 0 ? 0.3 : 1 }}
+                                      />
+                                      <div className="h-12" />
+                                    </div>
+                                  ) : (
+                                    <div className="w-full flex flex-col items-center">
+                                      <div className="h-12" />
+                                      <div
+                                        className={`w-full max-w-[20px] rounded-b transition-all cursor-pointer ${
+                                          isCurrentMonth ? "bg-gradient-to-b from-red-600 to-red-400 ring-2 ring-red-400/50" :
+                                          isPastMonth ? "bg-gradient-to-b from-red-600 to-red-500" : "bg-red-500/30"
+                                        } group-hover:brightness-110`}
+                                        style={{ height: `${Math.max(heightPercent, 4)}px` }}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Month label */}
+                                <span className={`text-[9px] mt-1 ${
+                                  isCurrentMonth ? "text-foreground font-bold" :
+                                  isPastMonth ? "text-muted" : "text-muted/50"
+                                }`}>
+                                  {monthNames[i]}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Summary Row */}
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30 text-[10px]">
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <span className="text-muted">Best: </span>
+                            <span className="text-emerald-400 font-medium">
+                              ${Math.max(...(goalProgress?.monthlyPnl || [0])).toFixed(0)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted">Worst: </span>
+                            <span className="text-red-400 font-medium">
+                              ${Math.min(...(goalProgress?.monthlyPnl || [0])).toFixed(0)}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-muted">Avg: </span>
+                          <span className={`font-medium ${
+                            ((goalProgress?.monthlyPnl || []).filter((_, i) => i <= new Date().getMonth()).reduce((a, b) => a + b, 0) / (new Date().getMonth() + 1)) >= 0
+                              ? "text-emerald-400" : "text-red-400"
+                          }`}>
+                            ${((goalProgress?.monthlyPnl || []).filter((_, i) => i <= new Date().getMonth()).reduce((a, b) => a + b, 0) / (new Date().getMonth() + 1)).toFixed(0)}/mo
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Projection Banner */}
+                  <div className={`p-3 rounded-xl flex items-center justify-between ${
+                    goalProgress?.onTrack
+                      ? "bg-emerald-500/10 border border-emerald-500/30"
+                      : "bg-yellow-500/10 border border-yellow-500/30"
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {goalProgress?.onTrack ? (
+                        <Trophy className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                      )}
+                      <div>
+                        <div className="text-xs font-medium">
+                          {goalProgress?.onTrack ? "On Track!" : "Behind Pace"}
+                        </div>
+                        <div className="text-[10px] text-muted">
+                          Projected: ${(goalProgress?.projectedYearEnd || 0).toFixed(0)} • {goalProgress?.tradingDaysRemaining} days left
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`text-lg font-bold ${goalProgress?.onTrack ? "text-emerald-400" : "text-yellow-400"}`}>
+                      {((goalProgress?.projectedYearEnd || 0) / goals.yearlyPnlGoal * 100).toFixed(0)}%
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* No Goals Set State */
+                <div className="text-center py-12 px-4 rounded-xl bg-card/30 border border-border/30">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 border border-accent/30 mb-3">
+                    <Target className="w-6 h-6 text-accent-light" />
+                  </div>
+                  <h3 className="text-base font-semibold mb-1">Set Your Trading Goals</h3>
+                  <p className="text-xs text-muted mb-3 max-w-sm mx-auto">
+                    Define yearly and monthly P&L targets to track progress with daily targets.
+                  </p>
+                  <button
+                    onClick={() => setShowGoalSettings(true)}
+                    className="px-4 py-2 rounded-lg bg-accent hover:bg-accent/90 text-white text-sm font-medium transition-colors"
+                  >
+                    Set Goals Now
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Consistency Score (1/3 width on large screens) */}
+            <div className="space-y-3">
+              {/* Score Header with Visual Gauge */}
+              <div className="p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
+                <div className="flex items-center gap-4 mb-4">
+                  {/* Circular Score Gauge */}
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    <svg className="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        className="text-background"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        strokeWidth="3"
+                        strokeDasharray={`${tradingStats.consistencyScore}, 100`}
+                        strokeLinecap="round"
+                        className={
+                          tradingStats.consistencyScore >= 80 ? "stroke-emerald-500" :
+                          tradingStats.consistencyScore >= 60 ? "stroke-blue-500" :
+                          tradingStats.consistencyScore >= 40 ? "stroke-yellow-500" : "stroke-red-500"
+                        }
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className={`text-xl font-bold ${consistencyGrade.color}`}>{tradingStats.consistencyScore}</span>
+                      <span className="text-[8px] text-muted">/ 100</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-lg font-bold px-2 py-0.5 rounded ${
+                        consistencyGrade.grade === "A+" || consistencyGrade.grade === "A" ? "bg-emerald-500/20 text-emerald-400" :
+                        consistencyGrade.grade === "B+" || consistencyGrade.grade === "B" ? "bg-blue-500/20 text-blue-400" :
+                        consistencyGrade.grade === "C+" || consistencyGrade.grade === "C" ? "bg-yellow-500/20 text-yellow-400" :
+                        "bg-red-500/20 text-red-400"
+                      }`}>{consistencyGrade.grade}</span>
+                    </div>
+                    <div className="text-[10px] text-muted">
+                      {tradingStats.consistencyScore >= 80 ? "Elite trader consistency" :
+                       tradingStats.consistencyScore >= 60 ? "Above average discipline" :
+                       tradingStats.consistencyScore >= 40 ? "Developing consistency" : "Needs focused improvement"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detailed Metric Breakdown */}
+                <div className="space-y-2.5">
+                  {/* Win Rate */}
+                  <div className="group">
+                    <div className="flex items-center justify-between text-[10px] mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-1.5 h-1.5 rounded-full ${tradingStats.winRateScore >= 20 ? "bg-emerald-500" : tradingStats.winRateScore >= 12 ? "bg-yellow-500" : "bg-red-500"}`} />
+                        <span className="text-muted">Win Rate</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={tradingStats.winRate >= 50 ? "text-emerald-400" : "text-amber-400"}>{tradingStats.winRate.toFixed(0)}%</span>
+                        <span className="text-muted/50">→</span>
+                        <span className="text-muted/70">50%+</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-background rounded-full overflow-hidden relative">
+                      <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${(tradingStats.winRateScore / 25) * 100}%` }} />
+                      <div className="absolute top-0 bottom-0 w-px bg-white/30" style={{ left: '80%' }} title="Target: 50%" />
+                    </div>
+                  </div>
+
+                  {/* Profit Factor */}
+                  <div className="group">
+                    <div className="flex items-center justify-between text-[10px] mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-1.5 h-1.5 rounded-full ${tradingStats.profitFactorScore >= 20 ? "bg-emerald-500" : tradingStats.profitFactorScore >= 12 ? "bg-yellow-500" : "bg-red-500"}`} />
+                        <span className="text-muted">Profit Factor</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={tradingStats.profitFactor >= 1.5 ? "text-emerald-400" : tradingStats.profitFactor >= 1 ? "text-amber-400" : "text-red-400"}>{tradingStats.profitFactor.toFixed(2)}</span>
+                        <span className="text-muted/50">→</span>
+                        <span className="text-muted/70">1.5+</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-background rounded-full overflow-hidden relative">
+                      <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${(tradingStats.profitFactorScore / 25) * 100}%` }} />
+                      <div className="absolute top-0 bottom-0 w-px bg-white/30" style={{ left: '60%' }} title="Target: 1.5" />
+                    </div>
+                  </div>
+
+                  {/* Drawdown */}
+                  <div className="group">
+                    <div className="flex items-center justify-between text-[10px] mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-1.5 h-1.5 rounded-full ${tradingStats.drawdownScore >= 20 ? "bg-emerald-500" : tradingStats.drawdownScore >= 12 ? "bg-yellow-500" : "bg-red-500"}`} />
+                        <span className="text-muted">Max Drawdown</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={tradingStats.maxDrawdownPercent <= 10 ? "text-emerald-400" : tradingStats.maxDrawdownPercent <= 20 ? "text-amber-400" : "text-red-400"}>{tradingStats.maxDrawdownPercent.toFixed(1)}%</span>
+                        <span className="text-muted/50">→</span>
+                        <span className="text-muted/70">&lt;15%</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-background rounded-full overflow-hidden relative">
+                      <div className="h-full bg-yellow-500 rounded-full transition-all" style={{ width: `${(tradingStats.drawdownScore / 25) * 100}%` }} />
+                      <div className="absolute top-0 bottom-0 w-px bg-white/30" style={{ left: '60%' }} title="Target: <15%" />
+                    </div>
+                  </div>
+
+                  {/* Streaks */}
+                  <div className="group">
+                    <div className="flex items-center justify-between text-[10px] mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-1.5 h-1.5 rounded-full ${tradingStats.streakScore >= 20 ? "bg-emerald-500" : tradingStats.streakScore >= 12 ? "bg-yellow-500" : "bg-red-500"}`} />
+                        <span className="text-muted">Streak Balance</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-400">{tradingStats.longestWinStreak}W</span>
+                        <span className="text-muted/50">/</span>
+                        <span className="text-red-400">{tradingStats.longestLossStreak}L</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-background rounded-full overflow-hidden">
+                      <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${(tradingStats.streakScore / 25) * 100}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actionable Insights */}
+              {(() => {
+                const insights = [
+                  {
+                    name: "Win Rate",
+                    score: tradingStats.winRateScore,
+                    value: tradingStats.winRate,
+                    status: tradingStats.winRate >= 55 ? "excellent" : tradingStats.winRate >= 50 ? "good" : tradingStats.winRate >= 45 ? "fair" : "poor",
+                    action: tradingStats.winRate < 45 ? "Review your entry criteria - you may be entering too early or at poor levels" :
+                            tradingStats.winRate < 50 ? "Focus on higher probability setups only" : "Maintain current selection criteria"
+                  },
+                  {
+                    name: "Profit Factor",
+                    score: tradingStats.profitFactorScore,
+                    value: tradingStats.profitFactor,
+                    status: tradingStats.profitFactor >= 2 ? "excellent" : tradingStats.profitFactor >= 1.5 ? "good" : tradingStats.profitFactor >= 1 ? "fair" : "poor",
+                    action: tradingStats.profitFactor < 1 ? `Cut losses faster - your avg loss ($${tradingStats.avgLoss.toFixed(0)}) exceeds avg win ($${tradingStats.avgWin.toFixed(0)})` :
+                            tradingStats.profitFactor < 1.5 ? "Let winners run longer or tighten stop losses" : "Great risk/reward management"
+                  },
+                  {
+                    name: "Drawdown",
+                    score: tradingStats.drawdownScore,
+                    value: tradingStats.maxDrawdownPercent,
+                    status: tradingStats.maxDrawdownPercent <= 10 ? "excellent" : tradingStats.maxDrawdownPercent <= 15 ? "good" : tradingStats.maxDrawdownPercent <= 25 ? "fair" : "poor",
+                    action: tradingStats.maxDrawdownPercent > 25 ? "Reduce position sizes to 1-2% risk per trade" :
+                            tradingStats.maxDrawdownPercent > 15 ? "Consider scaling out of losing positions earlier" : "Solid risk management"
+                  },
+                  {
+                    name: "Streaks",
+                    score: tradingStats.streakScore,
+                    value: tradingStats.longestLossStreak,
+                    status: tradingStats.longestWinStreak > tradingStats.longestLossStreak + 2 ? "excellent" :
+                            tradingStats.longestWinStreak >= tradingStats.longestLossStreak ? "good" : "fair",
+                    action: tradingStats.longestLossStreak > 5 ? "Take a break after 3 consecutive losses to reset" :
+                            tradingStats.longestLossStreak > tradingStats.longestWinStreak ? "Analyze what's causing extended losing streaks" : "Good emotional control"
+                  },
+                ];
+
+                const weakest = insights.reduce((a, b) => a.score < b.score ? a : b);
+                const strongest = insights.reduce((a, b) => a.score > b.score ? a : b);
+
+                return (
+                  <div className="space-y-2">
+                    {/* Weakest Area */}
+                    {weakest.score < 20 && (
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-red-500/10 border border-amber-500/30">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                          <span className="text-[11px] font-semibold text-amber-400">Priority: {weakest.name}</span>
+                        </div>
+                        <p className="text-[10px] text-muted leading-relaxed">{weakest.action}</p>
+                      </div>
+                    )}
+
+                    {/* Strongest Area */}
+                    {strongest.score >= 20 && (
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/30">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Trophy className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-[11px] font-semibold text-emerald-400">Strength: {strongest.name}</span>
+                        </div>
+                        <p className="text-[10px] text-muted leading-relaxed">{strongest.action}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1842,245 +2418,400 @@ export default function TradingPage() {
         </div>
       )}
 
-      {/* COMPACT SUMMARY BAR */}
-      <div className="glass rounded-xl p-3 border border-border/50">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4 divide-x divide-border">
-            <CompactStat label="All-Time" value={tradingStats.allTimePnl} count={tradingStats.allTimeTrades} />
-            <div className="pl-4"><CompactStat label="YTD" value={tradingStats.ytdPnl} count={tradingStats.ytdTrades} /></div>
-            <div className="pl-4"><CompactStat label="MTD" value={tradingStats.mtdPnl} count={tradingStats.mtdTrades} /></div>
-            <div className="pl-4"><CompactStat label="WTD" value={tradingStats.wtdPnl} count={tradingStats.wtdTrades} /></div>
+      {/* KEY METRICS */}
+      <div className="glass rounded-xl border border-border/50 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
+              <BarChart3 className="w-3.5 h-3.5" />
+              Key Metrics
+            </h3>
+            <button
+              onClick={() => setShowMetricsSettings(true)}
+              className="flex items-center gap-1.5 px-2 py-1 text-[10px] text-muted hover:text-foreground rounded-md hover:bg-card-hover transition-colors"
+            >
+              <Settings className="w-3 h-3" />
+              Customize
+            </button>
           </div>
-          <div className="flex items-center gap-4 divide-x divide-border">
-            {/* Consistency Grade */}
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted">Grade</span>
-              <span className={`text-lg font-bold ${consistencyGrade.color}`}>{consistencyGrade.grade}</span>
-            </div>
-            {/* Current Streak */}
-            <div className="pl-4 flex items-center gap-2">
-              {tradingStats.currentStreakType === "win" ? (
-                <Flame className="w-4 h-4 text-orange-400" />
-              ) : tradingStats.currentStreakType === "loss" ? (
-                <Snowflake className="w-4 h-4 text-blue-400" />
-              ) : (
-                <Activity className="w-4 h-4 text-muted" />
-              )}
-              <span className={`font-bold ${
-                tradingStats.currentStreakType === "win" ? "text-emerald-400" :
-                tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted"
-              }`}>
-                {tradingStats.currentStreak}{tradingStats.currentStreakType === "win" ? "W" : tradingStats.currentStreakType === "loss" ? "L" : "-"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* SUPPORTING METRICS - 3 Column Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Streak Tracker */}
-        <div className="glass rounded-xl border border-border/50 p-5">
-          <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-            <Flame className="w-4 h-4 text-orange-400" />
-            Streak Tracker
-          </h3>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-center p-2 rounded-lg bg-card border border-border">
-              <div className="text-[10px] text-muted mb-1">Current</div>
-              <div className={`text-xl font-bold ${
-                tradingStats.currentStreakType === "win" ? "text-emerald-400" :
-                tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted"
-              }`}>
-                {tradingStats.currentStreak}
-              </div>
-              <div className="text-[9px] text-muted">
-                {tradingStats.currentStreakType === "win" ? "Wins" : tradingStats.currentStreakType === "loss" ? "Losses" : "N/A"}
-              </div>
-            </div>
-            <div className="text-center p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-              <div className="text-[10px] text-emerald-400 mb-1">Best</div>
-              <div className="text-xl font-bold text-emerald-400">{tradingStats.longestWinStreak}</div>
-              <div className="text-[9px] text-emerald-400/70">Wins</div>
-            </div>
-            <div className="text-center p-2 rounded-lg bg-red-500/10 border border-red-500/30">
-              <div className="text-[10px] text-red-400 mb-1">Worst</div>
-              <div className="text-xl font-bold text-red-400">{tradingStats.longestLossStreak}</div>
-              <div className="text-[9px] text-red-400/70">Losses</div>
-            </div>
-          </div>
-        </div>
+          {/* Dynamic Metrics Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            {selectedMetrics.map((metricId, index) => {
+              const metric = AVAILABLE_METRICS.find(m => m.id === metricId);
+              if (!metric) return null;
 
-        {/* YoY Comparison */}
-        <div className="glass rounded-xl border border-border/50 p-5">
-          <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-            <Calendar className="w-4 h-4 text-accent-light" />
-            Year over Year
-          </h3>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border">
-              <div>
-                <div className="text-sm font-medium">{tradingStats.currentYear}</div>
-                <div className="text-[10px] text-muted">{tradingStats.ytdTrades} trades</div>
-              </div>
-              <div className={`text-lg font-bold ${tradingStats.ytdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                {tradingStats.ytdPnl >= 0 ? "+" : ""}${tradingStats.ytdPnl.toFixed(0)}
+              // Calculate position for tooltip placement
+              const numCols = 5; // md:grid-cols-5
+              const row = Math.floor(index / numCols);
+              const col = index % numCols;
+              const isTopRow = row === 0;
+              const isLeftEdge = col === 0;
+              const isRightEdge = col === numCols - 1;
+
+              // Get metric value
+              let value: number | string = 0;
+              let displayValue = "—";
+              let colorClass = "text-foreground";
+
+              switch (metricId) {
+                case "winRate":
+                  value = tradingStats.winRate;
+                  displayValue = `${value.toFixed(1)}%`;
+                  colorClass = value >= 50 ? "text-emerald-400" : "text-amber-400";
+                  break;
+                case "profitFactor":
+                  value = tradingStats.profitFactor;
+                  displayValue = value.toFixed(2);
+                  colorClass = value >= 1.5 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                  break;
+                case "expectancy":
+                  value = tradingStats.expectancy;
+                  displayValue = `$${value.toFixed(0)}`;
+                  colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
+                  break;
+                case "riskReward":
+                  value = tradingStats.riskRewardRatio;
+                  displayValue = value.toFixed(2);
+                  colorClass = value >= 1.5 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                  break;
+                case "sharpe":
+                  value = tradingStats.sharpeRatio;
+                  displayValue = value.toFixed(2);
+                  colorClass = value >= 2 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                  break;
+                case "avgTrade":
+                  value = tradingStats.allTimeTrades > 0 ? tradingStats.allTimePnl / tradingStats.allTimeTrades : 0;
+                  displayValue = `$${value.toFixed(0)}`;
+                  colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
+                  break;
+                case "maxDrawdown":
+                  value = tradingStats.maxDrawdownPercent;
+                  displayValue = `${value.toFixed(1)}%`;
+                  colorClass = value <= 10 ? "text-emerald-400" : value <= 20 ? "text-amber-400" : "text-red-400";
+                  break;
+                case "currentDrawdown":
+                  value = tradingStats.currentDrawdownPercent;
+                  displayValue = `${value.toFixed(1)}%`;
+                  colorClass = value <= 5 ? "text-foreground" : value <= 15 ? "text-amber-400" : "text-red-400";
+                  break;
+                case "recoveryFactor":
+                  value = tradingStats.recoveryFactor;
+                  displayValue = value >= 10 ? ">10" : value.toFixed(1);
+                  colorClass = value >= 3 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                  break;
+                case "winDays":
+                  displayValue = `${tradingStats.winDays}/${tradingStats.lossDays}`;
+                  colorClass = "text-foreground";
+                  break;
+                case "avgWin":
+                  value = tradingStats.avgWin;
+                  displayValue = `$${value.toFixed(0)}`;
+                  colorClass = "text-emerald-400";
+                  break;
+                case "avgLoss":
+                  value = tradingStats.avgLoss;
+                  displayValue = `$${value.toFixed(0)}`;
+                  colorClass = "text-red-400";
+                  break;
+                case "bestTrade":
+                  value = tradingStats.sortedTrades.length > 0 ? Math.max(...tradingStats.sortedTrades.map(t => t.pnl)) : 0;
+                  displayValue = `$${value.toFixed(0)}`;
+                  colorClass = "text-emerald-400";
+                  break;
+                case "worstTrade":
+                  value = tradingStats.sortedTrades.length > 0 ? Math.min(...tradingStats.sortedTrades.map(t => t.pnl)) : 0;
+                  displayValue = `$${value.toFixed(0)}`;
+                  colorClass = "text-red-400";
+                  break;
+                case "totalTrades":
+                  value = tradingStats.allTimeTrades;
+                  displayValue = value.toString();
+                  colorClass = "text-foreground";
+                  break;
+                case "winningTrades":
+                  value = tradingStats.winningTrades;
+                  displayValue = value.toString();
+                  colorClass = "text-emerald-400";
+                  break;
+                case "losingTrades":
+                  value = tradingStats.losingTrades;
+                  displayValue = value.toString();
+                  colorClass = "text-red-400";
+                  break;
+                case "netPnl":
+                  value = tradingStats.allTimePnl;
+                  displayValue = `$${value.toFixed(0)}`;
+                  colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
+                  break;
+                case "currentStreak":
+                  value = tradingStats.currentStreak;
+                  displayValue = value > 0 ? `${value}${tradingStats.currentStreakType === "win" ? "W" : "L"}` : "—";
+                  colorClass = tradingStats.currentStreakType === "win" ? "text-emerald-400" : tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted";
+                  break;
+                case "bestStreak":
+                  value = tradingStats.longestWinStreak;
+                  displayValue = `${value}W`;
+                  colorClass = "text-emerald-400";
+                  break;
+                case "worstStreak":
+                  value = tradingStats.longestLossStreak;
+                  displayValue = `${value}L`;
+                  colorClass = "text-red-400";
+                  break;
+                case "consistencyScore":
+                  value = tradingStats.consistencyScore;
+                  displayValue = value.toFixed(0);
+                  colorClass = value >= 70 ? "text-emerald-400" : value >= 50 ? "text-amber-400" : "text-red-400";
+                  break;
+              }
+
+              // Determine background based on colorLogic
+              let bgClass = "bg-card/50 border-border/50";
+              if (metric.colorLogic === "positive" && typeof value === "number") {
+                bgClass = value >= 0 ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20";
+              } else if (metric.colorLogic === "negative") {
+                bgClass = "bg-amber-500/5 border-amber-500/20";
+              }
+
+              return (
+                <div
+                  key={metricId}
+                  className={`relative group text-center p-2.5 rounded-lg border ${bgClass}`}
+                >
+                  <div className="flex items-center justify-center gap-1 text-[9px] text-muted uppercase mb-0.5">
+                    <span>{metric.shortName}</span>
+                    <Info className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100 cursor-help transition-opacity" />
+                  </div>
+
+                  {/* Tooltip - positioned relative to the metric card */}
+                  <div className={`absolute opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none ${
+                    isTopRow ? "bottom-full mb-2" : "top-full mt-2"
+                  } ${
+                    isLeftEdge ? "left-0" : isRightEdge ? "right-0" : "left-1/2 -translate-x-1/2"
+                  }`}>
+                    {/* Arrow */}
+                    <div className={`absolute w-3 h-3 bg-slate-900 border-accent/50 ${
+                      isTopRow
+                        ? "-bottom-1.5 border-r-2 border-b-2 rotate-45"
+                        : "-top-1.5 border-l-2 border-t-2 rotate-45"
+                    } ${
+                      isLeftEdge ? "left-4" : isRightEdge ? "right-4" : "left-1/2 -translate-x-1/2"
+                    }`}></div>
+                    <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[200px]">
+                          <div className="text-sm font-semibold text-foreground mb-1">{metric.name}</div>
+                          {(() => {
+                            // Render metric-specific visual tooltip
+                            switch (metricId) {
+                              case "winRate":
+                                const wins = tradingStats.winningTrades;
+                                const total = tradingStats.allTimeTrades;
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">Wins ÷ Total Trades × 100</div>
+                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className="text-emerald-400 font-medium">{wins}</span>
+                                      <span className="text-muted/70">÷</span>
+                                      <span className="text-muted font-medium">{total}</span>
+                                      <span className="text-muted/70">=</span>
+                                      <span className={`font-bold text-lg ${tradingStats.winRate >= 50 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.winRate.toFixed(1)}%</span>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.winRate >= 55 ? "text-emerald-400/80" : tradingStats.winRate >= 45 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {tradingStats.winRate >= 55 ? "✓ Strong win rate" : tradingStats.winRate >= 45 ? "○ Average, check R:R" : "✗ Low - needs improvement"}
+                                    </div>
+                                  </>
+                                );
+                              case "profitFactor":
+                                const grossProfit = tradingStats.avgWin * tradingStats.winningTrades;
+                                const grossLoss = tradingStats.avgLoss * tradingStats.losingTrades;
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">Gross Profit ÷ Gross Loss</div>
+                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className="text-emerald-400 font-medium">${grossProfit.toFixed(0)}</span>
+                                      <span className="text-muted/70">÷</span>
+                                      <span className="text-red-400 font-medium">${grossLoss.toFixed(0)}</span>
+                                      <span className="text-muted/70">=</span>
+                                      <span className={`font-bold text-lg ${tradingStats.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>{tradingStats.profitFactor.toFixed(2)}</span>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.profitFactor >= 1.5 ? "text-emerald-400/80" : tradingStats.profitFactor >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {tradingStats.profitFactor >= 2 ? "✓ Excellent! Above 2.0" : tradingStats.profitFactor >= 1.5 ? "✓ Good! Above 1.5" : tradingStats.profitFactor >= 1 ? "○ Profitable" : "✗ Losing money"}
+                                    </div>
+                                  </>
+                                );
+                              case "expectancy":
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">(Win% × AvgWin) − (Loss% × AvgLoss)</div>
+                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 gap-2">
+                                      <span className="text-emerald-400 font-medium">${tradingStats.avgWin.toFixed(0)}</span>
+                                      <span className="text-muted/70">−</span>
+                                      <span className="text-red-400 font-medium">${tradingStats.avgLoss.toFixed(0)}</span>
+                                      <span className="text-muted/70">→</span>
+                                      <span className={`font-bold text-lg ${tradingStats.expectancy >= 0 ? "text-emerald-400" : "text-red-400"}`}>${tradingStats.expectancy.toFixed(0)}</span>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.expectancy > 50 ? "text-emerald-400/80" : tradingStats.expectancy > 0 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {tradingStats.expectancy > 50 ? "✓ Strong edge per trade" : tradingStats.expectancy > 0 ? "○ Positive expectancy" : "✗ Negative - losing strategy"}
+                                    </div>
+                                  </>
+                                );
+                              case "riskReward":
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">Avg Win ÷ Avg Loss</div>
+                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className="text-emerald-400 font-medium">${tradingStats.avgWin.toFixed(0)}</span>
+                                      <span className="text-muted/70">÷</span>
+                                      <span className="text-red-400 font-medium">${tradingStats.avgLoss.toFixed(0)}</span>
+                                      <span className="text-muted/70">=</span>
+                                      <span className={`font-bold text-lg ${tradingStats.riskRewardRatio >= 1 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.riskRewardRatio.toFixed(2)}</span>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.riskRewardRatio >= 2 ? "text-emerald-400/80" : tradingStats.riskRewardRatio >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {tradingStats.riskRewardRatio >= 2 ? "✓ Great! 2:1 or better" : tradingStats.riskRewardRatio >= 1 ? "○ Acceptable ratio" : "✗ Risking more than reward"}
+                                    </div>
+                                  </>
+                                );
+                              case "sharpe":
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">Risk-adjusted returns</div>
+                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className={`font-bold text-xl ${tradingStats.sharpeRatio >= 1 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.sharpeRatio.toFixed(2)}</span>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.sharpeRatio >= 2 ? "text-emerald-400/80" : tradingStats.sharpeRatio >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {tradingStats.sharpeRatio >= 2 ? "✓ Excellent risk-adjusted" : tradingStats.sharpeRatio >= 1 ? "○ Acceptable" : "✗ High risk for returns"}
+                                    </div>
+                                  </>
+                                );
+                              case "maxDrawdown":
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">Largest peak-to-trough drop</div>
+                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className={`font-bold text-xl ${tradingStats.maxDrawdownPercent <= 15 ? "text-emerald-400" : tradingStats.maxDrawdownPercent <= 25 ? "text-amber-400" : "text-red-400"}`}>{tradingStats.maxDrawdownPercent.toFixed(1)}%</span>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.maxDrawdownPercent <= 15 ? "text-emerald-400/80" : tradingStats.maxDrawdownPercent <= 25 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {tradingStats.maxDrawdownPercent <= 10 ? "✓ Excellent risk control" : tradingStats.maxDrawdownPercent <= 20 ? "○ Manageable drawdown" : "✗ High risk exposure"}
+                                    </div>
+                                  </>
+                                );
+                              case "avgWin":
+                              case "avgLoss":
+                                const isWin = metricId === "avgWin";
+                                const avgVal = isWin ? tradingStats.avgWin : tradingStats.avgLoss;
+                                const count = isWin ? tradingStats.winningTrades : tradingStats.losingTrades;
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">Total {isWin ? "profit" : "loss"} ÷ {isWin ? "winners" : "losers"}</div>
+                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className="text-muted font-medium">{count} trades</span>
+                                      <span className="text-muted/70">→</span>
+                                      <span className={`font-bold text-lg ${isWin ? "text-emerald-400" : "text-red-400"}`}>${avgVal.toFixed(0)}</span>
+                                    </div>
+                                  </>
+                                );
+                              case "bestTrade":
+                              case "worstTrade":
+                                const isBest = metricId === "bestTrade";
+                                const tradeVal = tradingStats.sortedTrades.length > 0
+                                  ? (isBest ? Math.max(...tradingStats.sortedTrades.map(t => t.pnl)) : Math.min(...tradingStats.sortedTrades.map(t => t.pnl)))
+                                  : 0;
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">{isBest ? "Largest single win" : "Largest single loss"}</div>
+                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className={`font-bold text-xl ${isBest ? "text-emerald-400" : "text-red-400"}`}>${tradeVal.toFixed(0)}</span>
+                                    </div>
+                                  </>
+                                );
+                              case "recoveryFactor":
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">Net Profit ÷ Max Drawdown</div>
+                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className="text-emerald-400 font-medium">${tradingStats.allTimePnl.toFixed(0)}</span>
+                                      <span className="text-muted/70">÷</span>
+                                      <span className="text-red-400 font-medium">${(tradingStats.maxDrawdownPercent * tradingStats.allTimePnl / 100).toFixed(0)}</span>
+                                      <span className="text-muted/70">=</span>
+                                      <span className={`font-bold text-lg ${tradingStats.recoveryFactor >= 3 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.recoveryFactor >= 10 ? ">10" : tradingStats.recoveryFactor.toFixed(1)}</span>
+                                    </div>
+                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.recoveryFactor >= 3 ? "text-emerald-400/80" : tradingStats.recoveryFactor >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
+                                      {tradingStats.recoveryFactor >= 5 ? "✓ Excellent recovery" : tradingStats.recoveryFactor >= 2 ? "○ Good recovery" : "✗ Slow recovery"}
+                                    </div>
+                                  </>
+                                );
+                              default:
+                                // Simple tooltip for other metrics
+                                return (
+                                  <>
+                                    <div className="text-[11px] text-muted mb-3">{metric.tooltip.split('.')[0]}.</div>
+                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
+                                      <span className={`font-bold text-xl ${colorClass}`}>{displayValue}</span>
+                                    </div>
+                                  </>
+                                );
+                            }
+                          })()}
+                    </div>
+                  </div>
+
+                  <div className={`text-base font-bold ${colorClass}`}>
+                    {displayValue}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Streaks & YoY Row */}
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            {/* Streaks */}
+            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/30 border border-border/30">
+              <Flame className="w-4 h-4 text-orange-400 flex-shrink-0" />
+              <div className="flex items-center gap-3 text-xs">
+                <div>
+                  <span className="text-muted">Current: </span>
+                  <span className={`font-bold ${tradingStats.currentStreakType === "win" ? "text-emerald-400" : tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted"}`}>
+                    {tradingStats.currentStreak > 0 ? `${tradingStats.currentStreak}${tradingStats.currentStreakType === "win" ? "W" : "L"}` : "—"}
+                  </span>
+                </div>
+                <span className="text-border">|</span>
+                <div>
+                  <span className="text-muted">Best: </span>
+                  <span className="font-bold text-emerald-400">{tradingStats.longestWinStreak}W</span>
+                </div>
+                <span className="text-border">|</span>
+                <div>
+                  <span className="text-muted">Worst: </span>
+                  <span className="font-bold text-red-400">{tradingStats.longestLossStreak}L</span>
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border">
-              <div>
-                <div className="text-sm font-medium">{tradingStats.lastYear}</div>
-                <div className="text-[10px] text-muted">{tradingStats.lastYearTrades} trades</div>
-              </div>
-              <div className={`text-lg font-bold ${tradingStats.lastYearPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                {tradingStats.lastYearPnl >= 0 ? "+" : ""}${tradingStats.lastYearPnl.toFixed(0)}
-              </div>
-            </div>
-            {tradingStats.lastYearPnl !== 0 && (
-              <div className="flex items-center justify-center gap-2 pt-1">
-                {tradingStats.ytdPnl >= tradingStats.lastYearPnl ? (
-                  <ArrowUpRight className="w-4 h-4 text-emerald-400" />
-                ) : (
-                  <ArrowDownRight className="w-4 h-4 text-red-400" />
+            {/* YoY */}
+            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/30 border border-border/30">
+              <Calendar className="w-4 h-4 text-accent-light flex-shrink-0" />
+              <div className="flex items-center gap-2 text-xs">
+                <div>
+                  <span className="text-muted">{tradingStats.currentYear}: </span>
+                  <span className={`font-bold ${tradingStats.ytdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    ${tradingStats.ytdPnl.toFixed(0)}
+                  </span>
+                </div>
+                <span className="text-border">vs</span>
+                <div>
+                  <span className="text-muted">{tradingStats.lastYear}: </span>
+                  <span className={`font-bold ${tradingStats.lastYearPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    ${tradingStats.lastYearPnl.toFixed(0)}
+                  </span>
+                </div>
+                {tradingStats.lastYearPnl !== 0 && (
+                  <span className={`font-medium ${tradingStats.ytdPnl >= tradingStats.lastYearPnl ? "text-emerald-400" : "text-red-400"}`}>
+                    ({tradingStats.ytdPnl >= tradingStats.lastYearPnl ? "+" : ""}{(((tradingStats.ytdPnl - tradingStats.lastYearPnl) / Math.abs(tradingStats.lastYearPnl)) * 100).toFixed(0)}%)
+                  </span>
                 )}
-                <span className={`text-xs font-medium ${tradingStats.ytdPnl >= tradingStats.lastYearPnl ? "text-emerald-400" : "text-red-400"}`}>
-                  {(((tradingStats.ytdPnl - tradingStats.lastYearPnl) / Math.abs(tradingStats.lastYearPnl)) * 100).toFixed(0)}% vs last year
-                </span>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Consistency Score */}
-        <div className="glass rounded-xl border border-border/50 p-5">
-          <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-            <Award className="w-4 h-4 text-yellow-400" />
-            Consistency Score
-          </h3>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted">Win Rate</span>
-              <span className="text-xs font-bold">{tradingStats.winRateScore.toFixed(0)}/25</span>
-            </div>
-            <div className="h-1.5 bg-background rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(tradingStats.winRateScore / 25) * 100}%` }} />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted">Profit Factor</span>
-              <span className="text-xs font-bold">{tradingStats.profitFactorScore.toFixed(0)}/25</span>
-            </div>
-            <div className="h-1.5 bg-background rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(tradingStats.profitFactorScore / 25) * 100}%` }} />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted">Drawdown</span>
-              <span className="text-xs font-bold">{tradingStats.drawdownScore.toFixed(0)}/25</span>
-            </div>
-            <div className="h-1.5 bg-background rounded-full overflow-hidden">
-              <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${(tradingStats.drawdownScore / 25) * 100}%` }} />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted">Win Streaks</span>
-              <span className="text-xs font-bold">{tradingStats.streakScore.toFixed(0)}/25</span>
-            </div>
-            <div className="h-1.5 bg-background rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 rounded-full" style={{ width: `${(tradingStats.streakScore / 25) * 100}%` }} />
-            </div>
-            <div className="pt-2 mt-2 border-t border-border flex items-center justify-between">
-              <span className="text-sm font-medium">Total Score</span>
-              <span className={`text-lg font-bold ${consistencyGrade.color}`}>
-                {tradingStats.consistencyScore}/100 ({consistencyGrade.grade})
-              </span>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* ADVANCED METRICS */}
-      <div className="glass rounded-xl border border-border/50 p-5">
-        <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-          <Activity className="w-4 h-4 text-accent-light" />
-          Advanced Metrics
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {/* Expectancy */}
-          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Expectancy</div>
-            <div className={`text-lg font-bold ${tradingStats.expectancy >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-              {tradingStats.expectancy >= 0 ? "+" : ""}${tradingStats.expectancy.toFixed(2)}
-            </div>
-            <div className="text-[10px] text-muted mt-1">per trade</div>
-          </div>
-
-          {/* Risk/Reward Ratio */}
-          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Risk/Reward</div>
-            <div className={`text-lg font-bold ${tradingStats.riskRewardRatio >= 1 ? "text-emerald-400" : "text-amber-400"}`}>
-              {tradingStats.riskRewardRatio.toFixed(2)}
-            </div>
-            <div className="text-[10px] text-muted mt-1">avg win / avg loss</div>
-          </div>
-
-          {/* Sharpe Ratio */}
-          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Sharpe Ratio</div>
-            <div className={`text-lg font-bold ${
-              tradingStats.sharpeRatio >= 2 ? "text-emerald-400" :
-              tradingStats.sharpeRatio >= 1 ? "text-amber-400" : "text-red-400"
-            }`}>
-              {tradingStats.sharpeRatio.toFixed(2)}
-            </div>
-            <div className="text-[10px] text-muted mt-1">annualized</div>
-          </div>
-
-          {/* Recovery Factor */}
-          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Recovery Factor</div>
-            <div className={`text-lg font-bold ${
-              tradingStats.recoveryFactor >= 3 ? "text-emerald-400" :
-              tradingStats.recoveryFactor >= 1 ? "text-amber-400" : "text-red-400"
-            }`}>
-              {tradingStats.recoveryFactor >= 10 ? ">10" : tradingStats.recoveryFactor.toFixed(2)}
-            </div>
-            <div className="text-[10px] text-muted mt-1">profit / max DD</div>
-          </div>
-
-          {/* Win/Loss Days */}
-          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Trading Days</div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-emerald-400">{tradingStats.winDays}W</span>
-              <span className="text-muted">/</span>
-              <span className="text-lg font-bold text-red-400">{tradingStats.lossDays}L</span>
-            </div>
-            <div className="text-[10px] text-muted mt-1">
-              {tradingStats.winDays + tradingStats.lossDays > 0
-                ? `${((tradingStats.winDays / (tradingStats.winDays + tradingStats.lossDays)) * 100).toFixed(0)}% win days`
-                : "no data"}
-            </div>
-          </div>
-
-          {/* Current Streak */}
-          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Current Streak</div>
-            <div className={`text-lg font-bold ${
-              tradingStats.currentStreakType === "win" ? "text-emerald-400" :
-              tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted"
-            }`}>
-              {tradingStats.currentStreak > 0 ? (
-                <>
-                  {tradingStats.currentStreak} {tradingStats.currentStreakType === "win" ? "wins" : "losses"}
-                </>
-              ) : (
-                "—"
-              )}
-            </div>
-            <div className="text-[10px] text-muted mt-1">
-              best: {tradingStats.longestWinStreak}W / worst: {tradingStats.longestLossStreak}L
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* EVENT CORRELATION */}
       <div className="glass rounded-xl border border-border/50 p-5">
@@ -2088,10 +2819,10 @@ export default function TradingPage() {
           <Calendar className="w-4 h-4 text-accent-light" />
           Trade-Event Correlation
         </h3>
-        <EventCorrelation />
+        <EventCorrelation trades={trades} />
       </div>
 
-      {/* RECENT TRADES - Collapsible */}
+      {/* TRADE HISTORY - Collapsible with Pagination */}
       <div className="glass rounded-xl border border-border/50">
         <button
           onClick={() => setShowRecentTrades(!showRecentTrades)}
@@ -2099,7 +2830,7 @@ export default function TradingPage() {
         >
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <Clock className="w-4 h-4 text-accent-light" />
-            Recent Trades
+            Trade History
             <span className="text-xs text-muted font-normal">({tradingStats.sortedTrades.length} total)</span>
           </h3>
           <div className="flex items-center gap-2">
@@ -2114,38 +2845,167 @@ export default function TradingPage() {
 
         {showRecentTrades && (
           <div className="px-5 pb-5">
+            {/* Pagination Controls - Top */}
+            {tradingStats.sortedTrades.length > tradesPerPage && (
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-border/50">
+                <div className="text-xs text-muted">
+                  Showing trades {Math.min((recentTradesPage - 1) * tradesPerPage + 1, tradingStats.sortedTrades.length)}-{Math.min(recentTradesPage * tradesPerPage, tradingStats.sortedTrades.length)} of {tradingStats.sortedTrades.length}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setRecentTradesPage(1)}
+                    disabled={recentTradesPage === 1}
+                    className="p-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="First page"
+                  >
+                    <ChevronsLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setRecentTradesPage(p => Math.max(1, p - 1))}
+                    disabled={recentTradesPage === 1}
+                    className="p-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Previous page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs px-2">
+                    Page {recentTradesPage} of {Math.ceil(tradingStats.sortedTrades.length / tradesPerPage)}
+                  </span>
+                  <button
+                    onClick={() => setRecentTradesPage(p => Math.min(Math.ceil(tradingStats.sortedTrades.length / tradesPerPage), p + 1))}
+                    disabled={recentTradesPage >= Math.ceil(tradingStats.sortedTrades.length / tradesPerPage)}
+                    className="p-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Next page"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setRecentTradesPage(Math.ceil(tradingStats.sortedTrades.length / tradesPerPage))}
+                    disabled={recentTradesPage >= Math.ceil(tradingStats.sortedTrades.length / tradesPerPage)}
+                    className="p-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Last page"
+                  >
+                    <ChevronsRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 px-3 text-xs text-muted font-medium">Date</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted font-medium">Time</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted font-medium">Ticker</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted font-medium">Direction</th>
-                    <th className="text-right py-2 px-3 text-xs text-muted font-medium">P&L</th>
+                    <th className="text-left py-2 px-2 text-xs text-muted font-medium w-12">#</th>
+                    <th className="text-left py-2 px-2 text-xs text-muted font-medium">Date</th>
+                    <th className="text-left py-2 px-2 text-xs text-muted font-medium">Ticker</th>
+                    <th className="text-left py-2 px-2 text-xs text-muted font-medium">Type</th>
+                    <th className="text-left py-2 px-2 text-xs text-muted font-medium">Side</th>
+                    <th className="text-right py-2 px-2 text-xs text-muted font-medium">Entry</th>
+                    <th className="text-right py-2 px-2 text-xs text-muted font-medium">Exit</th>
+                    <th className="text-right py-2 px-2 text-xs text-muted font-medium">P&L</th>
+                    <th className="text-center py-2 px-2 text-xs text-muted font-medium w-10">W/L</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tradingStats.sortedTrades.slice(-20).reverse().map((trade) => (
-                    <tr key={trade.id} className="border-b border-border/50 hover:bg-card-hover transition-colors">
-                      <td className="py-2 px-3">{trade.date}</td>
-                      <td className="py-2 px-3 text-muted">{trade.time || "-"}</td>
-                      <td className="py-2 px-3 font-medium">{trade.ticker}</td>
-                      <td className="py-2 px-3">
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          trade.direction === "LONG" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
-                        }`}>
-                          {trade.direction}
-                        </span>
-                      </td>
-                      <td className={`py-2 px-3 text-right font-medium ${trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
+                  {(() => {
+                    // Sort trades newest first and paginate
+                    const sortedDesc = [...tradingStats.sortedTrades].reverse();
+                    const startIdx = (recentTradesPage - 1) * tradesPerPage;
+                    const paginatedTrades = sortedDesc.slice(startIdx, startIdx + tradesPerPage);
+                    const totalTrades = tradingStats.sortedTrades.length;
+
+                    return paginatedTrades.map((trade, idx) => {
+                      const tradeNumber = totalTrades - startIdx - idx;
+                      const assetColors: Record<string, string> = {
+                        STOCK: "bg-blue-500/20 text-blue-400",
+                        OPTIONS: "bg-purple-500/20 text-purple-400",
+                        FUTURES: "bg-amber-500/20 text-amber-400",
+                        FOREX: "bg-emerald-500/20 text-emerald-400",
+                        CRYPTO: "bg-orange-500/20 text-orange-400",
+                      };
+
+                      return (
+                        <tr key={trade.id} className="border-b border-border/50 hover:bg-card-hover transition-colors">
+                          <td className="py-2 px-2 text-muted text-xs">{tradeNumber}</td>
+                          <td className="py-2 px-2 whitespace-nowrap">
+                            <div className="text-sm">{trade.date}</div>
+                            {trade.time && <div className="text-xs text-muted">{trade.time}</div>}
+                          </td>
+                          <td className="py-2 px-2 font-medium">{trade.ticker}</td>
+                          <td className="py-2 px-2">
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${assetColors[trade.assetType] || "bg-gray-500/20 text-gray-400"}`}>
+                              {trade.assetType}
+                            </span>
+                          </td>
+                          <td className="py-2 px-2">
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              trade.direction === "LONG" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                            }`}>
+                              {trade.direction}
+                            </span>
+                          </td>
+                          <td className="py-2 px-2 text-right text-muted">
+                            {trade.entryPrice ? `$${trade.entryPrice.toFixed(2)}` : "-"}
+                          </td>
+                          <td className="py-2 px-2 text-right text-muted">
+                            {trade.exitPrice ? `$${trade.exitPrice.toFixed(2)}` : "-"}
+                          </td>
+                          <td className={`py-2 px-2 text-right font-medium ${trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                            {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            {trade.pnl > 0 ? (
+                              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">W</span>
+                            ) : trade.pnl < 0 ? (
+                              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500/20 text-red-400 text-xs font-bold">L</span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-500/20 text-gray-400 text-xs font-bold">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls - Bottom */}
+            {tradingStats.sortedTrades.length > tradesPerPage && (
+              <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-border/50">
+                <button
+                  onClick={() => setRecentTradesPage(1)}
+                  disabled={recentTradesPage === 1}
+                  className="p-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setRecentTradesPage(p => Math.max(1, p - 1))}
+                  disabled={recentTradesPage === 1}
+                  className="px-3 py-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm"
+                >
+                  Previous
+                </button>
+                <span className="text-sm px-3">
+                  {recentTradesPage} / {Math.ceil(tradingStats.sortedTrades.length / tradesPerPage)}
+                </span>
+                <button
+                  onClick={() => setRecentTradesPage(p => Math.min(Math.ceil(tradingStats.sortedTrades.length / tradesPerPage), p + 1))}
+                  disabled={recentTradesPage >= Math.ceil(tradingStats.sortedTrades.length / tradesPerPage)}
+                  className="px-3 py-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm"
+                >
+                  Next
+                </button>
+                <button
+                  onClick={() => setRecentTradesPage(Math.ceil(tradingStats.sortedTrades.length / tradesPerPage))}
+                  disabled={recentTradesPage >= Math.ceil(tradingStats.sortedTrades.length / tradesPerPage)}
+                  className="p-1.5 rounded hover:bg-card-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -2214,6 +3074,121 @@ export default function TradingPage() {
               >
                 <Check className="w-4 h-4" />
                 Save Goals
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Metrics Settings Modal */}
+      {showMetricsSettings && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowMetricsSettings(false)}>
+          <div className="w-full max-w-2xl glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b border-border flex items-center justify-between flex-shrink-0">
+              <div>
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-accent-light" />
+                  Customize Key Metrics
+                </h3>
+                <p className="text-xs text-muted mt-0.5">Select up to 15 metrics to display. Drag to reorder.</p>
+              </div>
+              <button onClick={() => setShowMetricsSettings(false)} className="p-1.5 rounded-lg hover:bg-card-hover transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto flex-1">
+              {/* Selected Metrics */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium">Selected Metrics ({selectedMetrics.length}/10)</h4>
+                  <button
+                    onClick={() => setSelectedMetrics(DEFAULT_METRIC_IDS)}
+                    className="text-xs text-accent hover:text-accent/80 transition-colors"
+                  >
+                    Reset to Default
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedMetrics.map((metricId) => {
+                    const metric = AVAILABLE_METRICS.find(m => m.id === metricId);
+                    if (!metric) return null;
+                    return (
+                      <button
+                        key={metricId}
+                        onClick={() => setSelectedMetrics(prev => prev.filter(id => id !== metricId))}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-accent/20 text-accent text-xs font-medium hover:bg-accent/30 transition-colors group"
+                      >
+                        {metric.shortName}
+                        <X className="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                      </button>
+                    );
+                  })}
+                  {selectedMetrics.length === 0 && (
+                    <span className="text-xs text-muted italic">No metrics selected</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Available Metrics by Category */}
+              {(["performance", "risk", "trade", "streak"] as const).map((category) => {
+                const categoryMetrics = AVAILABLE_METRICS.filter(m => m.category === category);
+                const categoryNames = {
+                  performance: "Performance Metrics",
+                  risk: "Risk Metrics",
+                  trade: "Trade Metrics",
+                  streak: "Streak Metrics",
+                };
+                return (
+                  <div key={category} className="mb-4">
+                    <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">{categoryNames[category]}</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {categoryMetrics.map((metric) => {
+                        const isSelected = selectedMetrics.includes(metric.id);
+                        return (
+                          <button
+                            key={metric.id}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedMetrics(prev => prev.filter(id => id !== metric.id));
+                              } else if (selectedMetrics.length < 10) {
+                                setSelectedMetrics(prev => [...prev, metric.id]);
+                              }
+                            }}
+                            disabled={!isSelected && selectedMetrics.length >= 10}
+                            className={`relative p-2.5 rounded-lg border text-left transition-all ${
+                              isSelected
+                                ? "bg-accent/10 border-accent/30 text-foreground"
+                                : selectedMetrics.length >= 10
+                                  ? "bg-card/30 border-border/30 text-muted cursor-not-allowed opacity-50"
+                                  : "bg-card/50 border-border/50 text-foreground hover:bg-card-hover hover:border-border"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium">{metric.shortName}</span>
+                              {isSelected && (
+                                <Check className="w-3.5 h-3.5 text-accent" />
+                              )}
+                            </div>
+                            <p className="text-[10px] text-muted mt-1 line-clamp-2 leading-relaxed">
+                              {metric.tooltip.split('.')[0]}.
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="p-4 border-t border-border flex-shrink-0">
+              <button
+                onClick={() => setShowMetricsSettings(false)}
+                className="w-full py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                Done
               </button>
             </div>
           </div>
