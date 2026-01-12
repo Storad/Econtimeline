@@ -1165,17 +1165,24 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Keyboard shortcuts
+  // Sync fullscreen state with browser's native fullscreen
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isFullscreen) {
-        setIsFullscreen(false);
-      }
+    const handleFullscreenChange = () => {
+      const doc = document as Document & {
+        webkitFullscreenElement?: Element;
+      };
+      const isCurrentlyFullscreen = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
+      setIsFullscreen(isCurrentlyFullscreen);
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isFullscreen]);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   // Play market alert sound with configurable sound type and announce with speech
   const playAlertSound = useCallback((type: 'open' | 'close', marketName: string, sessionType: string | null, soundType: string = 'bell') => {
@@ -1535,10 +1542,38 @@ export default function DashboardPage() {
     setScrollOffset(0);
   }, []);
 
-  // Toggle fullscreen
+  // Toggle fullscreen using native Fullscreen API
   const toggleFullscreen = useCallback(() => {
-    setIsFullscreen(!isFullscreen);
-  }, [isFullscreen]);
+    if (!containerRef.current) return;
+
+    const doc = document as Document & {
+      webkitFullscreenElement?: Element;
+      webkitExitFullscreen?: () => Promise<void>;
+    };
+    const elem = containerRef.current as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void>;
+    };
+
+    const isCurrentlyFullscreen = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
+
+    if (!isCurrentlyFullscreen) {
+      // Enter fullscreen
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      // Exit fullscreen
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  }, []);
 
   // Open modal for new session
   const openNewSessionModal = useCallback(() => {
@@ -1822,11 +1857,7 @@ export default function DashboardPage() {
   return (
     <div
       ref={containerRef}
-      className={`${
-        isFullscreen
-          ? "fixed inset-0 z-50 bg-background"
-          : "h-full"
-      } flex flex-col select-none`}
+      className="h-full w-full bg-background flex flex-col select-none"
       onMouseMove={handleFullscreenMouseMove}
     >
       {/* Toolbar */}

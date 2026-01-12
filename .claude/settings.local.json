@@ -56,7 +56,16 @@
       "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" commit -m \"$\\(cat <<''EOF''\nTrading journal overhaul: tags, asset classes, equity curve improvements\n\n- Add TagContext with preset sections and customizable tags\n- Add asset class support \\(Stock, Options, Futures, Forex, Crypto\\) to demo trades\n- Add asset class filter to equity curve \\(OR logic for assets, AND for tags\\)\n- Fix win rate calculation to use individual trades instead of sessions\n- Fix custom date/days/trades filters to calculate correct starting equity\n- Add hover support for starting point on equity curve\n- Remove unused strategy notification and market page components\n- Clean up API routes and database schema\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" push)",
       "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" pull --rebase)",
-      "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" stash:*)"
+      "Bash(git -C \"C:\\\\Users\\\\stora\\\\OneDrive\\\\Desktop\\\\econtimeline\" stash:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(start http://localhost:3000)",
+      "WebFetch(domain:www.babypips.com)",
+      "WebFetch(domain:electronictradinghub.com)",
+      "Bash(tasklist:*)",
+      "Bash(git push:*)",
+      "Bash(start chrome http://localhost:3000)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

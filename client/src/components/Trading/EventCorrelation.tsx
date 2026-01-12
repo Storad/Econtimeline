@@ -2,13 +2,10 @@
 
 import { useState, useEffect } from "react";
 import {
-  TrendingUp,
-  TrendingDown,
   Calendar,
   Zap,
   ChevronDown,
   ChevronUp,
-  Activity,
 } from "lucide-react";
 
 interface CorrelationStats {
@@ -25,6 +22,7 @@ interface Correlations {
   byCategory: Record<string, CorrelationStats>;
   byEventType: Record<string, CorrelationStats>;
   noEventDays: CorrelationStats;
+  eventDays: CorrelationStats;
   summary: {
     totalTrades: number;
     tradesOnEventDays: number;
@@ -84,6 +82,7 @@ function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): C
   const byCategory: Record<string, CorrelationStats> = {};
   const byEventType: Record<string, CorrelationStats> = {};
   const noEventDays = createEmptyStats();
+  const eventDays = createEmptyStats(); // Track event days same way as quiet days
 
   let tradesOnEventDays = 0;
   let tradesOnNonEventDays = 0;
@@ -91,17 +90,22 @@ function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): C
   // Process each trade
   trades.forEach((trade) => {
     const dayEvents = eventsByDate.get(trade.date) || [];
-    const isWin = trade.pnl > 0;
-    const isLoss = trade.pnl < 0;
+    const pnl = Number(trade.pnl);
+    const isWin = pnl > 0;
+    const isLoss = pnl < 0;
 
     if (dayEvents.length === 0) {
       noEventDays.count++;
       if (isWin) noEventDays.wins++;
       if (isLoss) noEventDays.losses++;
-      noEventDays.totalPnl += trade.pnl;
+      noEventDays.totalPnl += pnl;
       tradesOnNonEventDays++;
     } else {
       tradesOnEventDays++;
+      eventDays.count++;
+      eventDays.totalPnl += pnl;
+      if (isWin) eventDays.wins++;
+      if (isLoss) eventDays.losses++;
 
       const uniqueImpacts = new Set<string>();
       const uniqueCategories = new Set<string>();
@@ -123,7 +127,7 @@ function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): C
         byImpact[impact].count++;
         if (isWin) byImpact[impact].wins++;
         if (isLoss) byImpact[impact].losses++;
-        byImpact[impact].totalPnl += trade.pnl;
+        byImpact[impact].totalPnl += pnl;
       });
 
       uniqueCategories.forEach((category) => {
@@ -131,7 +135,7 @@ function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): C
         byCategory[category].count++;
         if (isWin) byCategory[category].wins++;
         if (isLoss) byCategory[category].losses++;
-        byCategory[category].totalPnl += trade.pnl;
+        byCategory[category].totalPnl += pnl;
       });
 
       uniqueEventTypes.forEach((eventType) => {
@@ -139,7 +143,7 @@ function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): C
         byEventType[eventType].count++;
         if (isWin) byEventType[eventType].wins++;
         if (isLoss) byEventType[eventType].losses++;
-        byEventType[eventType].totalPnl += trade.pnl;
+        byEventType[eventType].totalPnl += pnl;
       });
     }
   });
@@ -155,6 +159,7 @@ function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): C
     byEventType[k] = finalizeStats(byEventType[k]);
   });
   const finalNoEventDays = finalizeStats(noEventDays);
+  const finalEventDays = finalizeStats(eventDays);
 
   // Find best performers
   const findBest = (stats: Record<string, CorrelationStats>): string | null => {
@@ -174,6 +179,7 @@ function calculateCorrelations(trades: TradeInput[], events: EconomicEvent[]): C
     byCategory,
     byEventType,
     noEventDays: finalNoEventDays,
+    eventDays: finalEventDays,
     summary: {
       totalTrades: trades.length,
       tradesOnEventDays,
@@ -190,6 +196,31 @@ const IMPACT_COLORS: Record<string, string> = {
   medium: "text-amber-400",
   low: "text-blue-400",
 };
+
+// Format category names for display (e.g., "central_bank" -> "Central Bank")
+function formatCategoryName(category: string): string {
+  return category
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// All possible event categories from the calendar
+const ALL_CATEGORIES = [
+  'energy',
+  'manufacturing',
+  'bonds',
+  'employment',
+  'housing',
+  'central_bank',
+  'inflation',
+  'services',
+  'trade',
+  'sentiment',
+  'consumer',
+  'growth',
+  'fiscal'
+];
 
 const IMPACT_BG: Record<string, string> = {
   high: "bg-red-500/10 border-red-500/30",
@@ -325,62 +356,129 @@ export default function EventCorrelation({ trades }: EventCorrelationProps) {
     );
   }
 
-  const { byImpact, byCategory, noEventDays, summary } = correlations;
+  const { byImpact, byCategory, noEventDays, eventDays, summary } = correlations;
 
-  // Calculate comparison between event days vs non-event days
-  const eventDaysPnl =
-    summary.tradesOnEventDays > 0
-      ? Object.values(byImpact).reduce((sum, s) => sum + s.totalPnl, 0) /
-        summary.tradesOnEventDays
-      : 0;
+  // Find best/worst performers for at-a-glance section
+  const findBestWorst = (stats: Record<string, CorrelationStats>, minTrades: number = 2) => {
+    let best: { key: string; stats: CorrelationStats } | null = null;
+    let worst: { key: string; stats: CorrelationStats } | null = null;
+
+    Object.entries(stats).forEach(([key, s]) => {
+      if (s.count >= minTrades) {
+        if (!best || s.winRate > best.stats.winRate) {
+          best = { key, stats: s };
+        }
+        if (!worst || s.winRate < worst.stats.winRate) {
+          worst = { key, stats: s };
+        }
+      }
+    });
+
+    return { best, worst };
+  };
+
+  const impactPerf = findBestWorst(byImpact);
+  const categoryPerf = findBestWorst(byCategory);
 
   return (
     <div className="space-y-3">
-      {/* Summary Bar */}
-      <div className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border/50">
-        <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-accent" />
-          <span className="text-sm font-medium">Event Impact Analysis</span>
+      {/* Performance Summary */}
+      <div className="flex items-center justify-between text-xs px-1">
+        <div className="flex items-center gap-1">
+          <span className="text-muted">Best on:</span>
+          {impactPerf.best && (
+            <span className="text-emerald-400 capitalize">{impactPerf.best.key} impact</span>
+          )}
+          {impactPerf.best && categoryPerf.best && <span className="text-muted">,</span>}
+          {categoryPerf.best && (
+            <span className="text-emerald-400">{formatCategoryName(categoryPerf.best.key)} events</span>
+          )}
         </div>
-        <div className="text-xs text-muted">
-          {summary.tradesOnEventDays} on event days / {summary.tradesOnNonEventDays} quiet
-          days
+        <div className="flex items-center gap-1">
+          <span className="text-muted">Worst on:</span>
+          {impactPerf.worst && impactPerf.worst.key !== impactPerf.best?.key && (
+            <span className="text-red-400 capitalize">{impactPerf.worst.key} impact</span>
+          )}
+          {impactPerf.worst && impactPerf.worst.key !== impactPerf.best?.key && categoryPerf.worst && categoryPerf.worst.key !== categoryPerf.best?.key && <span className="text-muted">,</span>}
+          {categoryPerf.worst && categoryPerf.worst.key !== categoryPerf.best?.key && (
+            <span className="text-red-400">{formatCategoryName(categoryPerf.worst.key)} events</span>
+          )}
         </div>
       </div>
 
-      {/* Quick Comparison */}
+      {/* Event Days vs Quiet Days */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="p-3 rounded-lg bg-accent/10 border border-accent/30">
-          <div className="flex items-center gap-1 text-xs text-accent mb-1">
+        <div className="p-2.5 rounded-lg bg-accent/10 border border-accent/30">
+          <div className="flex items-center gap-1 text-xs font-semibold text-accent mb-1">
             <Zap className="w-3 h-3" />
             Event Days
           </div>
-          <div className="text-xl font-bold">
-            {summary.tradesOnEventDays > 0 ? (
-              <span className={eventDaysPnl >= 0 ? "text-emerald-400" : "text-red-400"}>
-                ${eventDaysPnl.toFixed(0)}
-              </span>
-            ) : (
-              <span className="text-muted">—</span>
-            )}
-          </div>
-          <div className="text-[10px] text-muted">avg P&L per trade</div>
+          {eventDays.count > 0 ? (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className={`text-base font-bold ${eventDays.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {eventDays.totalPnl >= 0 ? "+" : ""}${eventDays.totalPnl.toFixed(0)}
+                  </span>
+                  <span className="text-xs text-muted ml-1">total</span>
+                </div>
+                <div>
+                  <span className={`text-sm ${eventDays.avgPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {eventDays.avgPnl >= 0 ? "+" : ""}${eventDays.avgPnl.toFixed(0)}
+                  </span>
+                  <span className="text-xs text-muted ml-1">avg</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-1">
+                <span className="text-muted">{eventDays.count} trades</span>
+                <span className={`${eventDays.winRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
+                  {eventDays.winRate.toFixed(0)}% win
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-0.5">
+                <span className="text-emerald-400">{eventDays.wins} wins</span>
+                <span className="text-red-400">{eventDays.losses} losses</span>
+              </div>
+            </>
+          ) : (
+            <div className="text-xs text-muted/40">No trades</div>
+          )}
         </div>
-        <div className="p-3 rounded-lg bg-card border border-border">
-          <div className="flex items-center gap-1 text-xs text-muted mb-1">
+        <div className="p-2.5 rounded-lg bg-card border border-border">
+          <div className="flex items-center gap-1 text-xs font-semibold text-muted mb-1">
             <Calendar className="w-3 h-3" />
             Quiet Days
           </div>
-          <div className="text-xl font-bold">
-            {noEventDays.count > 0 ? (
-              <span className={noEventDays.avgPnl >= 0 ? "text-emerald-400" : "text-red-400"}>
-                ${noEventDays.avgPnl.toFixed(0)}
-              </span>
-            ) : (
-              <span className="text-muted">—</span>
-            )}
-          </div>
-          <div className="text-[10px] text-muted">avg P&L per trade</div>
+          {noEventDays.count > 0 ? (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className={`text-base font-bold ${noEventDays.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {noEventDays.totalPnl >= 0 ? "+" : ""}${noEventDays.totalPnl.toFixed(0)}
+                  </span>
+                  <span className="text-xs text-muted ml-1">total</span>
+                </div>
+                <div>
+                  <span className={`text-sm ${noEventDays.avgPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {noEventDays.avgPnl >= 0 ? "+" : ""}${noEventDays.avgPnl.toFixed(0)}
+                  </span>
+                  <span className="text-xs text-muted ml-1">avg</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-1">
+                <span className="text-muted">{noEventDays.count} trades</span>
+                <span className={`${noEventDays.winRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
+                  {noEventDays.winRate.toFixed(0)}% win
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-0.5">
+                <span className="text-emerald-400">{noEventDays.wins} wins</span>
+                <span className="text-red-400">{noEventDays.losses} losses</span>
+              </div>
+            </>
+          ) : (
+            <div className="text-xs text-muted/40">No trades</div>
+          )}
         </div>
       </div>
 
@@ -389,18 +487,54 @@ export default function EventCorrelation({ trades }: EventCorrelationProps) {
         <div className="text-[10px] text-muted uppercase tracking-wider mb-2">
           Performance by Event Impact
         </div>
-        <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2">
           {(["high", "medium", "low"] as const).map((impact) => {
             const stats = byImpact[impact];
-            if (!stats || stats.count === 0) return null;
+            const hasData = stats && stats.count > 0;
+
             return (
-              <StatCard
+              <div
                 key={impact}
-                label={`${impact.charAt(0).toUpperCase() + impact.slice(1)} Impact`}
-                stats={stats}
-                colorClass={IMPACT_COLORS[impact]}
-                bgClass={IMPACT_BG[impact]}
-              />
+                className={`p-2.5 rounded-lg border ${
+                  !hasData
+                    ? "bg-card/30 border-border/30"
+                    : IMPACT_BG[impact]
+                }`}
+              >
+                <div className={`text-xs font-semibold mb-1 ${!hasData ? "text-muted/50" : IMPACT_COLORS[impact]}`}>
+                  {impact.charAt(0).toUpperCase() + impact.slice(1)} Impact
+                </div>
+                {hasData ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className={`text-base font-bold ${stats.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {stats.totalPnl >= 0 ? "+" : ""}${stats.totalPnl.toFixed(0)}
+                        </span>
+                        <span className="text-xs text-muted ml-1">total</span>
+                      </div>
+                      <div>
+                        <span className={`text-sm ${stats.avgPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {stats.avgPnl >= 0 ? "+" : ""}${stats.avgPnl.toFixed(0)}
+                        </span>
+                        <span className="text-xs text-muted ml-1">avg</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs mt-1">
+                      <span className="text-muted">{stats.count} trades</span>
+                      <span className={`${stats.winRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
+                        {stats.winRate.toFixed(0)}% win
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs mt-0.5">
+                      <span className="text-emerald-400">{stats.wins} wins</span>
+                      <span className="text-red-400">{stats.losses} losses</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-xs text-muted/40">No trades</div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -422,72 +556,61 @@ export default function EventCorrelation({ trades }: EventCorrelationProps) {
             <div className="text-[10px] text-muted uppercase tracking-wider mb-2">
               Performance by Event Category
             </div>
-            <div className="space-y-2">
-              {Object.entries(byCategory)
-                .filter(([, stats]) => stats.count >= 2)
-                .sort((a, b) => b[1].avgPnl - a[1].avgPnl)
-                .slice(0, 6)
-                .map(([category, stats]) => (
+            <div className="grid grid-cols-3 gap-2">
+              {ALL_CATEGORIES.map((category) => {
+                const stats = byCategory[category];
+                const hasData = stats && stats.count > 0;
+
+                return (
                   <div
                     key={category}
-                    className="flex items-center justify-between p-2 rounded-lg bg-card/50 border border-border/50"
+                    className={`p-2.5 rounded-lg border ${
+                      !hasData
+                        ? "bg-card/30 border-border/30"
+                        : stats.avgPnl >= 0
+                        ? "bg-emerald-500/5 border-emerald-500/20"
+                        : "bg-red-500/5 border-red-500/20"
+                    }`}
                   >
-                    <div>
-                      <span className="text-sm font-medium">{category}</span>
-                      <span className="text-xs text-muted ml-2">
-                        {stats.count} trades ({stats.wins}W)
-                      </span>
+                    <div className={`text-xs font-semibold mb-1 ${!hasData ? "text-muted/50" : "text-foreground"}`}>
+                      {formatCategoryName(category)}
                     </div>
-                    <div className="text-right">
-                      <div
-                        className={`text-sm font-semibold ${
-                          stats.avgPnl >= 0 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        ${stats.avgPnl.toFixed(0)} avg
-                      </div>
-                      <div
-                        className={`text-xs ${
-                          stats.winRate >= 50 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        {stats.winRate.toFixed(0)}% win
-                      </div>
-                    </div>
+                    {hasData ? (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className={`text-base font-bold ${stats.totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                              {stats.totalPnl >= 0 ? "+" : ""}${stats.totalPnl.toFixed(0)}
+                            </span>
+                            <span className="text-xs text-muted ml-1">total</span>
+                          </div>
+                          <div>
+                            <span className={`text-sm ${stats.avgPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                              {stats.avgPnl >= 0 ? "+" : ""}${stats.avgPnl.toFixed(0)}
+                            </span>
+                            <span className="text-xs text-muted ml-1">avg</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mt-1">
+                          <span className="text-muted">{stats.count} trades</span>
+                          <span className={`${stats.winRate >= 50 ? "text-emerald-400" : "text-red-400"}`}>
+                            {stats.winRate.toFixed(0)}% win
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mt-0.5">
+                          <span className="text-emerald-400">{stats.wins} wins</span>
+                          <span className="text-red-400">{stats.losses} losses</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-xs text-muted/40">No trades</div>
+                    )}
                   </div>
-                ))}
+                );
+              })}
             </div>
           </div>
 
-          {/* Best/Worst Insights */}
-          {(summary.bestCategory || summary.bestImpactLevel) && (
-            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-              <div className="flex items-center gap-1 text-xs text-emerald-400 mb-2">
-                <TrendingUp className="w-3 h-3" />
-                Best Performance
-              </div>
-              <div className="space-y-1 text-sm">
-                {summary.bestImpactLevel && byImpact[summary.bestImpactLevel] && (
-                  <div>
-                    <span className="text-muted">Impact:</span>{" "}
-                    <span className="font-medium capitalize">{summary.bestImpactLevel}</span>
-                    <span className="text-emerald-400 ml-2">
-                      {byImpact[summary.bestImpactLevel].winRate.toFixed(0)}% win rate
-                    </span>
-                  </div>
-                )}
-                {summary.bestCategory && byCategory[summary.bestCategory] && (
-                  <div>
-                    <span className="text-muted">Category:</span>{" "}
-                    <span className="font-medium">{summary.bestCategory}</span>
-                    <span className="text-emerald-400 ml-2">
-                      {byCategory[summary.bestCategory].winRate.toFixed(0)}% win rate
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

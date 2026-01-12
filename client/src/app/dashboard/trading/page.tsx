@@ -30,6 +30,7 @@ import {
   Check,
   HelpCircle,
   Tag as TagIcon,
+  GripVertical,
 } from "lucide-react";
 import { useTradeJournal } from "@/hooks/useTradeJournal";
 import { Trade } from "@/components/TradeJournal/types";
@@ -45,6 +46,23 @@ import {
 } from "@/components/Trading";
 import { useDemoMode } from "@/context/DemoModeContext";
 import { useTagSettings, TAG_COLORS } from "@/context/TagContext";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // Asset types for filtering
 const ASSET_TYPES = [
@@ -312,6 +330,43 @@ const DEFAULT_METRIC_IDS = [
   "currentDrawdown",
 ];
 
+// Sortable wrapper for metric cards
+interface SortableMetricProps {
+  id: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+function SortableMetric({ id, children, className }: SortableMetricProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: "grab",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={className}
+    >
+      {children}
+    </div>
+  );
+}
+
 // Goal settings interface
 interface TradingGoals {
   yearlyPnlGoal: number;
@@ -344,7 +399,7 @@ export default function TradingPage() {
 
   const [showGoalSettings, setShowGoalSettings] = useState(false);
   const [goals, setGoals] = useState<TradingGoals>({ yearlyPnlGoal: 0, monthlyPnlGoal: 0, startingEquity: 0 });
-  const [goalInput, setGoalInput] = useState({ yearly: "", monthly: "", startingEquity: "" });
+  const [goalInput, setGoalInput] = useState({ yearly: "", startingEquity: "" });
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [showRecentTrades, setShowRecentTrades] = useState(false);
   const [recentTradesPage, setRecentTradesPage] = useState(1);
@@ -375,6 +430,32 @@ export default function TradingPage() {
     return DEFAULT_METRIC_IDS;
   });
   const [showMetricsSettings, setShowMetricsSettings] = useState(false);
+
+  // Drag and drop sensors for Key Metrics
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end for reordering metrics
+  const handleMetricDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setSelectedMetrics((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        localStorage.setItem("tradingMetrics", JSON.stringify(newOrder));
+        return newOrder;
+      });
+    }
+  };
 
   // Save metrics selection to localStorage
   useEffect(() => {
@@ -493,10 +574,14 @@ export default function TradingPage() {
     const savedGoals = localStorage.getItem("tradingGoals");
     if (savedGoals) {
       const parsed = JSON.parse(savedGoals);
-      setGoals({ ...parsed, startingEquity: parsed.startingEquity || 0 });
+      const yearlyGoal = parsed.yearlyPnlGoal || 0;
+      setGoals({
+        yearlyPnlGoal: yearlyGoal,
+        monthlyPnlGoal: yearlyGoal / 12, // Always derive from yearly
+        startingEquity: parsed.startingEquity || 0,
+      });
       setGoalInput({
-        yearly: parsed.yearlyPnlGoal > 0 ? parsed.yearlyPnlGoal.toString() : "",
-        monthly: parsed.monthlyPnlGoal > 0 ? parsed.monthlyPnlGoal.toString() : "",
+        yearly: yearlyGoal > 0 ? yearlyGoal.toString() : "",
         startingEquity: parsed.startingEquity > 0 ? parsed.startingEquity.toString() : "",
       });
     }
@@ -504,9 +589,10 @@ export default function TradingPage() {
 
   // Save goals
   const saveGoals = () => {
+    const yearlyGoal = parseFloat(goalInput.yearly) || 0;
     const newGoals = {
-      yearlyPnlGoal: parseFloat(goalInput.yearly) || 0,
-      monthlyPnlGoal: parseFloat(goalInput.monthly) || 0,
+      yearlyPnlGoal: yearlyGoal,
+      monthlyPnlGoal: yearlyGoal / 12, // Auto-calculate from yearly
       startingEquity: parseFloat(goalInput.startingEquity) || 0,
     };
     setGoals(newGoals);
@@ -2214,6 +2300,254 @@ export default function TradingPage() {
               })()}
             </div>
           </div>
+
+          {/* KEY METRICS - Integrated */}
+          <div className="mt-6 pt-6 border-t border-border/30">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
+                <BarChart3 className="w-3.5 h-3.5" />
+                Key Metrics
+              </h3>
+              <button
+                onClick={() => setShowMetricsSettings(true)}
+                className="flex items-center gap-1.5 px-2 py-1 text-[10px] text-muted hover:text-foreground rounded-md hover:bg-card-hover transition-colors"
+              >
+                <Settings className="w-3 h-3" />
+                Customize
+              </button>
+            </div>
+
+            {/* Dynamic Metrics Grid */}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleMetricDragEnd}
+            >
+              <SortableContext items={selectedMetrics} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                  {selectedMetrics.map((metricId, index) => {
+                    const metric = AVAILABLE_METRICS.find(m => m.id === metricId);
+                    if (!metric) return null;
+
+                    const numCols = 5;
+                    const row = Math.floor(index / numCols);
+                    const col = index % numCols;
+                    const isTopRow = row === 0;
+                    const isLeftEdge = col === 0;
+                    const isRightEdge = col === numCols - 1;
+
+                    let value: number | string = 0;
+                    let displayValue = "—";
+                    let colorClass = "text-foreground";
+
+                    switch (metricId) {
+                      case "winRate":
+                        value = tradingStats.winRate;
+                        displayValue = `${value.toFixed(1)}%`;
+                        colorClass = value >= 50 ? "text-emerald-400" : "text-amber-400";
+                        break;
+                      case "profitFactor":
+                        value = tradingStats.profitFactor;
+                        displayValue = value.toFixed(2);
+                        colorClass = value >= 1.5 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                        break;
+                      case "expectancy":
+                        value = tradingStats.expectancy;
+                        displayValue = `$${value.toFixed(0)}`;
+                        colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
+                        break;
+                      case "riskReward":
+                        value = tradingStats.riskRewardRatio;
+                        displayValue = value.toFixed(2);
+                        colorClass = value >= 1.5 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                        break;
+                      case "sharpe":
+                        value = tradingStats.sharpeRatio;
+                        displayValue = value.toFixed(2);
+                        colorClass = value >= 2 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                        break;
+                      case "avgTrade":
+                        value = tradingStats.allTimeTrades > 0 ? tradingStats.allTimePnl / tradingStats.allTimeTrades : 0;
+                        displayValue = `$${value.toFixed(0)}`;
+                        colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
+                        break;
+                      case "maxDrawdown":
+                        value = tradingStats.maxDrawdownPercent;
+                        displayValue = `${value.toFixed(1)}%`;
+                        colorClass = value <= 10 ? "text-emerald-400" : value <= 20 ? "text-amber-400" : "text-red-400";
+                        break;
+                      case "currentDrawdown":
+                        value = tradingStats.currentDrawdownPercent;
+                        displayValue = `${value.toFixed(1)}%`;
+                        colorClass = value <= 5 ? "text-foreground" : value <= 15 ? "text-amber-400" : "text-red-400";
+                        break;
+                      case "recoveryFactor":
+                        value = tradingStats.recoveryFactor;
+                        displayValue = value >= 10 ? ">10" : value.toFixed(1);
+                        colorClass = value >= 3 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
+                        break;
+                      case "winDays":
+                        displayValue = `${tradingStats.winDays}/${tradingStats.lossDays}`;
+                        colorClass = "text-foreground";
+                        break;
+                      case "avgWin":
+                        value = tradingStats.avgWin;
+                        displayValue = `$${value.toFixed(0)}`;
+                        colorClass = "text-emerald-400";
+                        break;
+                      case "avgLoss":
+                        value = tradingStats.avgLoss;
+                        displayValue = `$${value.toFixed(0)}`;
+                        colorClass = "text-red-400";
+                        break;
+                      case "bestTrade":
+                        value = tradingStats.sortedTrades.length > 0 ? Math.max(...tradingStats.sortedTrades.map(t => t.pnl)) : 0;
+                        displayValue = `$${value.toFixed(0)}`;
+                        colorClass = "text-emerald-400";
+                        break;
+                      case "worstTrade":
+                        value = tradingStats.sortedTrades.length > 0 ? Math.min(...tradingStats.sortedTrades.map(t => t.pnl)) : 0;
+                        displayValue = `$${value.toFixed(0)}`;
+                        colorClass = "text-red-400";
+                        break;
+                      case "totalTrades":
+                        value = tradingStats.allTimeTrades;
+                        displayValue = value.toString();
+                        colorClass = "text-foreground";
+                        break;
+                      case "winningTrades":
+                        value = tradingStats.winningTrades;
+                        displayValue = value.toString();
+                        colorClass = "text-emerald-400";
+                        break;
+                      case "losingTrades":
+                        value = tradingStats.losingTrades;
+                        displayValue = value.toString();
+                        colorClass = "text-red-400";
+                        break;
+                      case "netPnl":
+                        value = tradingStats.allTimePnl;
+                        displayValue = `$${value.toFixed(0)}`;
+                        colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
+                        break;
+                      case "currentStreak":
+                        value = tradingStats.currentStreak;
+                        displayValue = value > 0 ? `${value}${tradingStats.currentStreakType === "win" ? "W" : "L"}` : "—";
+                        colorClass = tradingStats.currentStreakType === "win" ? "text-emerald-400" : tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted";
+                        break;
+                      case "bestStreak":
+                        value = tradingStats.longestWinStreak;
+                        displayValue = `${value}W`;
+                        colorClass = "text-emerald-400";
+                        break;
+                      case "worstStreak":
+                        value = tradingStats.longestLossStreak;
+                        displayValue = `${value}L`;
+                        colorClass = "text-red-400";
+                        break;
+                      case "consistencyScore":
+                        value = tradingStats.consistencyScore;
+                        displayValue = value.toFixed(0);
+                        colorClass = value >= 70 ? "text-emerald-400" : value >= 50 ? "text-amber-400" : "text-red-400";
+                        break;
+                    }
+
+                    let bgClass = "bg-card/50 border-border/50";
+                    if (metric.colorLogic === "positive" && typeof value === "number") {
+                      bgClass = value >= 0 ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20";
+                    } else if (metric.colorLogic === "negative") {
+                      bgClass = "bg-amber-500/5 border-amber-500/20";
+                    }
+
+                    return (
+                      <SortableMetric
+                        key={metricId}
+                        id={metricId}
+                        className={`relative group text-center p-2.5 rounded-lg border ${bgClass} hover:border-accent/50 transition-colors`}
+                      >
+                        <GripVertical className="w-3 h-3 absolute top-1 left-1 text-muted/30 group-hover:text-muted/60 transition-colors" />
+                        <div className="flex items-center justify-center gap-1 text-[9px] text-muted uppercase mb-0.5">
+                          <span>{metric.shortName}</span>
+                          <Info className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100 cursor-help transition-opacity" />
+                        </div>
+
+                        {/* Tooltip */}
+                        <div className={`absolute opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none ${
+                          isTopRow ? "bottom-full mb-2" : "top-full mt-2"
+                        } ${
+                          isLeftEdge ? "left-0" : isRightEdge ? "right-0" : "left-1/2 -translate-x-1/2"
+                        }`}>
+                          <div className={`absolute w-3 h-3 bg-slate-900 border-accent/50 ${
+                            isTopRow
+                              ? "-bottom-1.5 border-r-2 border-b-2 rotate-45"
+                              : "-top-1.5 border-l-2 border-t-2 rotate-45"
+                          } ${
+                            isLeftEdge ? "left-4" : isRightEdge ? "right-4" : "left-1/2 -translate-x-1/2"
+                          }`}></div>
+                          <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[200px]">
+                            <div className="text-sm font-semibold text-foreground mb-1">{metric.name}</div>
+                            <div className="text-[11px] text-muted">{metric.tooltip.split('.')[0]}.</div>
+                          </div>
+                        </div>
+
+                        <div className={`text-base font-bold ${colorClass}`}>
+                          {displayValue}
+                        </div>
+                      </SortableMetric>
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
+
+            {/* Streaks & YoY Row */}
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/30 border border-border/30">
+                <Flame className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                <div className="flex items-center gap-3 text-xs">
+                  <div>
+                    <span className="text-muted">Current: </span>
+                    <span className={`font-bold ${tradingStats.currentStreakType === "win" ? "text-emerald-400" : tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted"}`}>
+                      {tradingStats.currentStreak > 0 ? `${tradingStats.currentStreak}${tradingStats.currentStreakType === "win" ? "W" : "L"}` : "—"}
+                    </span>
+                  </div>
+                  <span className="text-border">|</span>
+                  <div>
+                    <span className="text-muted">Best: </span>
+                    <span className="font-bold text-emerald-400">{tradingStats.longestWinStreak}W</span>
+                  </div>
+                  <span className="text-border">|</span>
+                  <div>
+                    <span className="text-muted">Worst: </span>
+                    <span className="font-bold text-red-400">{tradingStats.longestLossStreak}L</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/30 border border-border/30">
+                <Calendar className="w-4 h-4 text-accent-light flex-shrink-0" />
+                <div className="flex items-center gap-2 text-xs">
+                  <div>
+                    <span className="text-muted">{tradingStats.currentYear}: </span>
+                    <span className={`font-bold ${tradingStats.ytdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      ${tradingStats.ytdPnl.toFixed(0)}
+                    </span>
+                  </div>
+                  <span className="text-border">vs</span>
+                  <div>
+                    <span className="text-muted">{tradingStats.lastYear}: </span>
+                    <span className={`font-bold ${tradingStats.lastYearPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      ${tradingStats.lastYearPnl.toFixed(0)}
+                    </span>
+                  </div>
+                  {tradingStats.lastYearPnl !== 0 && (
+                    <span className={`font-medium ${tradingStats.ytdPnl >= tradingStats.lastYearPnl ? "text-emerald-400" : "text-red-400"}`}>
+                      ({tradingStats.ytdPnl >= tradingStats.lastYearPnl ? "+" : ""}{(((tradingStats.ytdPnl - tradingStats.lastYearPnl) / Math.abs(tradingStats.lastYearPnl)) * 100).toFixed(0)}%)
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2417,401 +2751,6 @@ export default function TradingPage() {
           </div>
         </div>
       )}
-
-      {/* KEY METRICS */}
-      <div className="glass rounded-xl border border-border/50 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
-              <BarChart3 className="w-3.5 h-3.5" />
-              Key Metrics
-            </h3>
-            <button
-              onClick={() => setShowMetricsSettings(true)}
-              className="flex items-center gap-1.5 px-2 py-1 text-[10px] text-muted hover:text-foreground rounded-md hover:bg-card-hover transition-colors"
-            >
-              <Settings className="w-3 h-3" />
-              Customize
-            </button>
-          </div>
-
-          {/* Dynamic Metrics Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-            {selectedMetrics.map((metricId, index) => {
-              const metric = AVAILABLE_METRICS.find(m => m.id === metricId);
-              if (!metric) return null;
-
-              // Calculate position for tooltip placement
-              const numCols = 5; // md:grid-cols-5
-              const row = Math.floor(index / numCols);
-              const col = index % numCols;
-              const isTopRow = row === 0;
-              const isLeftEdge = col === 0;
-              const isRightEdge = col === numCols - 1;
-
-              // Get metric value
-              let value: number | string = 0;
-              let displayValue = "—";
-              let colorClass = "text-foreground";
-
-              switch (metricId) {
-                case "winRate":
-                  value = tradingStats.winRate;
-                  displayValue = `${value.toFixed(1)}%`;
-                  colorClass = value >= 50 ? "text-emerald-400" : "text-amber-400";
-                  break;
-                case "profitFactor":
-                  value = tradingStats.profitFactor;
-                  displayValue = value.toFixed(2);
-                  colorClass = value >= 1.5 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
-                  break;
-                case "expectancy":
-                  value = tradingStats.expectancy;
-                  displayValue = `$${value.toFixed(0)}`;
-                  colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
-                  break;
-                case "riskReward":
-                  value = tradingStats.riskRewardRatio;
-                  displayValue = value.toFixed(2);
-                  colorClass = value >= 1.5 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
-                  break;
-                case "sharpe":
-                  value = tradingStats.sharpeRatio;
-                  displayValue = value.toFixed(2);
-                  colorClass = value >= 2 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
-                  break;
-                case "avgTrade":
-                  value = tradingStats.allTimeTrades > 0 ? tradingStats.allTimePnl / tradingStats.allTimeTrades : 0;
-                  displayValue = `$${value.toFixed(0)}`;
-                  colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
-                  break;
-                case "maxDrawdown":
-                  value = tradingStats.maxDrawdownPercent;
-                  displayValue = `${value.toFixed(1)}%`;
-                  colorClass = value <= 10 ? "text-emerald-400" : value <= 20 ? "text-amber-400" : "text-red-400";
-                  break;
-                case "currentDrawdown":
-                  value = tradingStats.currentDrawdownPercent;
-                  displayValue = `${value.toFixed(1)}%`;
-                  colorClass = value <= 5 ? "text-foreground" : value <= 15 ? "text-amber-400" : "text-red-400";
-                  break;
-                case "recoveryFactor":
-                  value = tradingStats.recoveryFactor;
-                  displayValue = value >= 10 ? ">10" : value.toFixed(1);
-                  colorClass = value >= 3 ? "text-emerald-400" : value >= 1 ? "text-amber-400" : "text-red-400";
-                  break;
-                case "winDays":
-                  displayValue = `${tradingStats.winDays}/${tradingStats.lossDays}`;
-                  colorClass = "text-foreground";
-                  break;
-                case "avgWin":
-                  value = tradingStats.avgWin;
-                  displayValue = `$${value.toFixed(0)}`;
-                  colorClass = "text-emerald-400";
-                  break;
-                case "avgLoss":
-                  value = tradingStats.avgLoss;
-                  displayValue = `$${value.toFixed(0)}`;
-                  colorClass = "text-red-400";
-                  break;
-                case "bestTrade":
-                  value = tradingStats.sortedTrades.length > 0 ? Math.max(...tradingStats.sortedTrades.map(t => t.pnl)) : 0;
-                  displayValue = `$${value.toFixed(0)}`;
-                  colorClass = "text-emerald-400";
-                  break;
-                case "worstTrade":
-                  value = tradingStats.sortedTrades.length > 0 ? Math.min(...tradingStats.sortedTrades.map(t => t.pnl)) : 0;
-                  displayValue = `$${value.toFixed(0)}`;
-                  colorClass = "text-red-400";
-                  break;
-                case "totalTrades":
-                  value = tradingStats.allTimeTrades;
-                  displayValue = value.toString();
-                  colorClass = "text-foreground";
-                  break;
-                case "winningTrades":
-                  value = tradingStats.winningTrades;
-                  displayValue = value.toString();
-                  colorClass = "text-emerald-400";
-                  break;
-                case "losingTrades":
-                  value = tradingStats.losingTrades;
-                  displayValue = value.toString();
-                  colorClass = "text-red-400";
-                  break;
-                case "netPnl":
-                  value = tradingStats.allTimePnl;
-                  displayValue = `$${value.toFixed(0)}`;
-                  colorClass = value >= 0 ? "text-emerald-400" : "text-red-400";
-                  break;
-                case "currentStreak":
-                  value = tradingStats.currentStreak;
-                  displayValue = value > 0 ? `${value}${tradingStats.currentStreakType === "win" ? "W" : "L"}` : "—";
-                  colorClass = tradingStats.currentStreakType === "win" ? "text-emerald-400" : tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted";
-                  break;
-                case "bestStreak":
-                  value = tradingStats.longestWinStreak;
-                  displayValue = `${value}W`;
-                  colorClass = "text-emerald-400";
-                  break;
-                case "worstStreak":
-                  value = tradingStats.longestLossStreak;
-                  displayValue = `${value}L`;
-                  colorClass = "text-red-400";
-                  break;
-                case "consistencyScore":
-                  value = tradingStats.consistencyScore;
-                  displayValue = value.toFixed(0);
-                  colorClass = value >= 70 ? "text-emerald-400" : value >= 50 ? "text-amber-400" : "text-red-400";
-                  break;
-              }
-
-              // Determine background based on colorLogic
-              let bgClass = "bg-card/50 border-border/50";
-              if (metric.colorLogic === "positive" && typeof value === "number") {
-                bgClass = value >= 0 ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20";
-              } else if (metric.colorLogic === "negative") {
-                bgClass = "bg-amber-500/5 border-amber-500/20";
-              }
-
-              return (
-                <div
-                  key={metricId}
-                  className={`relative group text-center p-2.5 rounded-lg border ${bgClass}`}
-                >
-                  <div className="flex items-center justify-center gap-1 text-[9px] text-muted uppercase mb-0.5">
-                    <span>{metric.shortName}</span>
-                    <Info className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100 cursor-help transition-opacity" />
-                  </div>
-
-                  {/* Tooltip - positioned relative to the metric card */}
-                  <div className={`absolute opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none ${
-                    isTopRow ? "bottom-full mb-2" : "top-full mt-2"
-                  } ${
-                    isLeftEdge ? "left-0" : isRightEdge ? "right-0" : "left-1/2 -translate-x-1/2"
-                  }`}>
-                    {/* Arrow */}
-                    <div className={`absolute w-3 h-3 bg-slate-900 border-accent/50 ${
-                      isTopRow
-                        ? "-bottom-1.5 border-r-2 border-b-2 rotate-45"
-                        : "-top-1.5 border-l-2 border-t-2 rotate-45"
-                    } ${
-                      isLeftEdge ? "left-4" : isRightEdge ? "right-4" : "left-1/2 -translate-x-1/2"
-                    }`}></div>
-                    <div className="bg-slate-900 border-2 border-accent/50 rounded-xl shadow-2xl shadow-accent/20 p-3 min-w-[200px]">
-                          <div className="text-sm font-semibold text-foreground mb-1">{metric.name}</div>
-                          {(() => {
-                            // Render metric-specific visual tooltip
-                            switch (metricId) {
-                              case "winRate":
-                                const wins = tradingStats.winningTrades;
-                                const total = tradingStats.allTimeTrades;
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">Wins ÷ Total Trades × 100</div>
-                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className="text-emerald-400 font-medium">{wins}</span>
-                                      <span className="text-muted/70">÷</span>
-                                      <span className="text-muted font-medium">{total}</span>
-                                      <span className="text-muted/70">=</span>
-                                      <span className={`font-bold text-lg ${tradingStats.winRate >= 50 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.winRate.toFixed(1)}%</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.winRate >= 55 ? "text-emerald-400/80" : tradingStats.winRate >= 45 ? "text-yellow-400/80" : "text-red-400/80"}`}>
-                                      {tradingStats.winRate >= 55 ? "✓ Strong win rate" : tradingStats.winRate >= 45 ? "○ Average, check R:R" : "✗ Low - needs improvement"}
-                                    </div>
-                                  </>
-                                );
-                              case "profitFactor":
-                                const grossProfit = tradingStats.avgWin * tradingStats.winningTrades;
-                                const grossLoss = tradingStats.avgLoss * tradingStats.losingTrades;
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">Gross Profit ÷ Gross Loss</div>
-                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className="text-emerald-400 font-medium">${grossProfit.toFixed(0)}</span>
-                                      <span className="text-muted/70">÷</span>
-                                      <span className="text-red-400 font-medium">${grossLoss.toFixed(0)}</span>
-                                      <span className="text-muted/70">=</span>
-                                      <span className={`font-bold text-lg ${tradingStats.profitFactor >= 1 ? "text-emerald-400" : "text-red-400"}`}>{tradingStats.profitFactor.toFixed(2)}</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.profitFactor >= 1.5 ? "text-emerald-400/80" : tradingStats.profitFactor >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
-                                      {tradingStats.profitFactor >= 2 ? "✓ Excellent! Above 2.0" : tradingStats.profitFactor >= 1.5 ? "✓ Good! Above 1.5" : tradingStats.profitFactor >= 1 ? "○ Profitable" : "✗ Losing money"}
-                                    </div>
-                                  </>
-                                );
-                              case "expectancy":
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">(Win% × AvgWin) − (Loss% × AvgLoss)</div>
-                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2 gap-2">
-                                      <span className="text-emerald-400 font-medium">${tradingStats.avgWin.toFixed(0)}</span>
-                                      <span className="text-muted/70">−</span>
-                                      <span className="text-red-400 font-medium">${tradingStats.avgLoss.toFixed(0)}</span>
-                                      <span className="text-muted/70">→</span>
-                                      <span className={`font-bold text-lg ${tradingStats.expectancy >= 0 ? "text-emerald-400" : "text-red-400"}`}>${tradingStats.expectancy.toFixed(0)}</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.expectancy > 50 ? "text-emerald-400/80" : tradingStats.expectancy > 0 ? "text-yellow-400/80" : "text-red-400/80"}`}>
-                                      {tradingStats.expectancy > 50 ? "✓ Strong edge per trade" : tradingStats.expectancy > 0 ? "○ Positive expectancy" : "✗ Negative - losing strategy"}
-                                    </div>
-                                  </>
-                                );
-                              case "riskReward":
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">Avg Win ÷ Avg Loss</div>
-                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className="text-emerald-400 font-medium">${tradingStats.avgWin.toFixed(0)}</span>
-                                      <span className="text-muted/70">÷</span>
-                                      <span className="text-red-400 font-medium">${tradingStats.avgLoss.toFixed(0)}</span>
-                                      <span className="text-muted/70">=</span>
-                                      <span className={`font-bold text-lg ${tradingStats.riskRewardRatio >= 1 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.riskRewardRatio.toFixed(2)}</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.riskRewardRatio >= 2 ? "text-emerald-400/80" : tradingStats.riskRewardRatio >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
-                                      {tradingStats.riskRewardRatio >= 2 ? "✓ Great! 2:1 or better" : tradingStats.riskRewardRatio >= 1 ? "○ Acceptable ratio" : "✗ Risking more than reward"}
-                                    </div>
-                                  </>
-                                );
-                              case "sharpe":
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">Risk-adjusted returns</div>
-                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className={`font-bold text-xl ${tradingStats.sharpeRatio >= 1 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.sharpeRatio.toFixed(2)}</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.sharpeRatio >= 2 ? "text-emerald-400/80" : tradingStats.sharpeRatio >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
-                                      {tradingStats.sharpeRatio >= 2 ? "✓ Excellent risk-adjusted" : tradingStats.sharpeRatio >= 1 ? "○ Acceptable" : "✗ High risk for returns"}
-                                    </div>
-                                  </>
-                                );
-                              case "maxDrawdown":
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">Largest peak-to-trough drop</div>
-                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className={`font-bold text-xl ${tradingStats.maxDrawdownPercent <= 15 ? "text-emerald-400" : tradingStats.maxDrawdownPercent <= 25 ? "text-amber-400" : "text-red-400"}`}>{tradingStats.maxDrawdownPercent.toFixed(1)}%</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.maxDrawdownPercent <= 15 ? "text-emerald-400/80" : tradingStats.maxDrawdownPercent <= 25 ? "text-yellow-400/80" : "text-red-400/80"}`}>
-                                      {tradingStats.maxDrawdownPercent <= 10 ? "✓ Excellent risk control" : tradingStats.maxDrawdownPercent <= 20 ? "○ Manageable drawdown" : "✗ High risk exposure"}
-                                    </div>
-                                  </>
-                                );
-                              case "avgWin":
-                              case "avgLoss":
-                                const isWin = metricId === "avgWin";
-                                const avgVal = isWin ? tradingStats.avgWin : tradingStats.avgLoss;
-                                const count = isWin ? tradingStats.winningTrades : tradingStats.losingTrades;
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">Total {isWin ? "profit" : "loss"} ÷ {isWin ? "winners" : "losers"}</div>
-                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className="text-muted font-medium">{count} trades</span>
-                                      <span className="text-muted/70">→</span>
-                                      <span className={`font-bold text-lg ${isWin ? "text-emerald-400" : "text-red-400"}`}>${avgVal.toFixed(0)}</span>
-                                    </div>
-                                  </>
-                                );
-                              case "bestTrade":
-                              case "worstTrade":
-                                const isBest = metricId === "bestTrade";
-                                const tradeVal = tradingStats.sortedTrades.length > 0
-                                  ? (isBest ? Math.max(...tradingStats.sortedTrades.map(t => t.pnl)) : Math.min(...tradingStats.sortedTrades.map(t => t.pnl)))
-                                  : 0;
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">{isBest ? "Largest single win" : "Largest single loss"}</div>
-                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className={`font-bold text-xl ${isBest ? "text-emerald-400" : "text-red-400"}`}>${tradeVal.toFixed(0)}</span>
-                                    </div>
-                                  </>
-                                );
-                              case "recoveryFactor":
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">Net Profit ÷ Max Drawdown</div>
-                                    <div className="flex items-center justify-between text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className="text-emerald-400 font-medium">${tradingStats.allTimePnl.toFixed(0)}</span>
-                                      <span className="text-muted/70">÷</span>
-                                      <span className="text-red-400 font-medium">${(tradingStats.maxDrawdownPercent * tradingStats.allTimePnl / 100).toFixed(0)}</span>
-                                      <span className="text-muted/70">=</span>
-                                      <span className={`font-bold text-lg ${tradingStats.recoveryFactor >= 3 ? "text-emerald-400" : "text-amber-400"}`}>{tradingStats.recoveryFactor >= 10 ? ">10" : tradingStats.recoveryFactor.toFixed(1)}</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-2 pt-2 border-t border-white/10 ${tradingStats.recoveryFactor >= 3 ? "text-emerald-400/80" : tradingStats.recoveryFactor >= 1 ? "text-yellow-400/80" : "text-red-400/80"}`}>
-                                      {tradingStats.recoveryFactor >= 5 ? "✓ Excellent recovery" : tradingStats.recoveryFactor >= 2 ? "○ Good recovery" : "✗ Slow recovery"}
-                                    </div>
-                                  </>
-                                );
-                              default:
-                                // Simple tooltip for other metrics
-                                return (
-                                  <>
-                                    <div className="text-[11px] text-muted mb-3">{metric.tooltip.split('.')[0]}.</div>
-                                    <div className="flex items-center justify-center text-sm bg-slate-800/50 rounded-lg px-3 py-2">
-                                      <span className={`font-bold text-xl ${colorClass}`}>{displayValue}</span>
-                                    </div>
-                                  </>
-                                );
-                            }
-                          })()}
-                    </div>
-                  </div>
-
-                  <div className={`text-base font-bold ${colorClass}`}>
-                    {displayValue}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Streaks & YoY Row */}
-          <div className="grid grid-cols-2 gap-3 mt-3">
-            {/* Streaks */}
-            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/30 border border-border/30">
-              <Flame className="w-4 h-4 text-orange-400 flex-shrink-0" />
-              <div className="flex items-center gap-3 text-xs">
-                <div>
-                  <span className="text-muted">Current: </span>
-                  <span className={`font-bold ${tradingStats.currentStreakType === "win" ? "text-emerald-400" : tradingStats.currentStreakType === "loss" ? "text-red-400" : "text-muted"}`}>
-                    {tradingStats.currentStreak > 0 ? `${tradingStats.currentStreak}${tradingStats.currentStreakType === "win" ? "W" : "L"}` : "—"}
-                  </span>
-                </div>
-                <span className="text-border">|</span>
-                <div>
-                  <span className="text-muted">Best: </span>
-                  <span className="font-bold text-emerald-400">{tradingStats.longestWinStreak}W</span>
-                </div>
-                <span className="text-border">|</span>
-                <div>
-                  <span className="text-muted">Worst: </span>
-                  <span className="font-bold text-red-400">{tradingStats.longestLossStreak}L</span>
-                </div>
-              </div>
-            </div>
-            {/* YoY */}
-            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-card/30 border border-border/30">
-              <Calendar className="w-4 h-4 text-accent-light flex-shrink-0" />
-              <div className="flex items-center gap-2 text-xs">
-                <div>
-                  <span className="text-muted">{tradingStats.currentYear}: </span>
-                  <span className={`font-bold ${tradingStats.ytdPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                    ${tradingStats.ytdPnl.toFixed(0)}
-                  </span>
-                </div>
-                <span className="text-border">vs</span>
-                <div>
-                  <span className="text-muted">{tradingStats.lastYear}: </span>
-                  <span className={`font-bold ${tradingStats.lastYearPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                    ${tradingStats.lastYearPnl.toFixed(0)}
-                  </span>
-                </div>
-                {tradingStats.lastYearPnl !== 0 && (
-                  <span className={`font-medium ${tradingStats.ytdPnl >= tradingStats.lastYearPnl ? "text-emerald-400" : "text-red-400"}`}>
-                    ({tradingStats.ytdPnl >= tradingStats.lastYearPnl ? "+" : ""}{(((tradingStats.ytdPnl - tradingStats.lastYearPnl) / Math.abs(tradingStats.lastYearPnl)) * 100).toFixed(0)}%)
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
 
       {/* EVENT CORRELATION */}
       <div className="glass rounded-xl border border-border/50 p-5">
@@ -3054,19 +2993,14 @@ export default function TradingPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Monthly P&L Goal</label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-                  <input
-                    type="number"
-                    value={goalInput.monthly}
-                    onChange={(e) => setGoalInput({ ...goalInput, monthly: e.target.value })}
-                    placeholder="e.g. 5000"
-                    className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
+              {goalInput.yearly && parseFloat(goalInput.yearly) > 0 && (
+                <div className="p-3 bg-card/50 rounded-lg border border-border/50">
+                  <div className="text-xs text-muted mb-1">Monthly Target (auto-calculated)</div>
+                  <div className="text-lg font-bold text-foreground">
+                    ${(parseFloat(goalInput.yearly) / 12).toFixed(0)}/mo
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button
                 onClick={saveGoals}

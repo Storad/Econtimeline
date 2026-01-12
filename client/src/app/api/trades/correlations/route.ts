@@ -28,6 +28,7 @@ interface Correlations {
   byCategory: Record<string, CorrelationStats>;
   byEventType: Record<string, CorrelationStats>;
   noEventDays: CorrelationStats;
+  eventDays: CorrelationStats;
   summary: {
     totalTrades: number;
     tradesOnEventDays: number;
@@ -94,6 +95,7 @@ export async function GET() {
           byCategory: {},
           byEventType: {},
           noEventDays: createEmptyStats(),
+          eventDays: createEmptyStats(),
           summary: {
             totalTrades: 0,
             tradesOnEventDays: 0,
@@ -123,6 +125,7 @@ export async function GET() {
     const byCategory: Record<string, CorrelationStats> = {};
     const byEventType: Record<string, CorrelationStats> = {};
     const noEventDays = createEmptyStats();
+    const eventDays = createEmptyStats(); // Track event days same way as quiet days
 
     let tradesOnEventDays = 0;
     let tradesOnNonEventDays = 0;
@@ -130,18 +133,23 @@ export async function GET() {
     // Process each trade
     trades.forEach((trade) => {
       const dayEvents = eventsByDate.get(trade.date) || [];
-      const isWin = trade.pnl > 0;
-      const isLoss = trade.pnl < 0;
+      const pnl = Number(trade.pnl);
+      const isWin = pnl > 0;
+      const isLoss = pnl < 0;
 
       if (dayEvents.length === 0) {
         // No events on this day
         noEventDays.count++;
         if (isWin) noEventDays.wins++;
         if (isLoss) noEventDays.losses++;
-        noEventDays.totalPnl += trade.pnl;
+        noEventDays.totalPnl += pnl;
         tradesOnNonEventDays++;
       } else {
         tradesOnEventDays++;
+        eventDays.count++;
+        eventDays.totalPnl += pnl;
+        if (isWin) eventDays.wins++;
+        if (isLoss) eventDays.losses++;
 
         // Track unique impacts and categories for this trade
         const uniqueImpacts = new Set<string>();
@@ -167,7 +175,7 @@ export async function GET() {
           byImpact[impact].count++;
           if (isWin) byImpact[impact].wins++;
           if (isLoss) byImpact[impact].losses++;
-          byImpact[impact].totalPnl += trade.pnl;
+          byImpact[impact].totalPnl += pnl;
         });
 
         // Record by category
@@ -176,7 +184,7 @@ export async function GET() {
           byCategory[category].count++;
           if (isWin) byCategory[category].wins++;
           if (isLoss) byCategory[category].losses++;
-          byCategory[category].totalPnl += trade.pnl;
+          byCategory[category].totalPnl += pnl;
         });
 
         // Record by event type
@@ -185,7 +193,7 @@ export async function GET() {
           byEventType[eventType].count++;
           if (isWin) byEventType[eventType].wins++;
           if (isLoss) byEventType[eventType].losses++;
-          byEventType[eventType].totalPnl += trade.pnl;
+          byEventType[eventType].totalPnl += pnl;
         });
       }
     });
@@ -201,6 +209,7 @@ export async function GET() {
       byEventType[k] = finalizeStats(byEventType[k]);
     });
     const finalNoEventDays = finalizeStats(noEventDays);
+    const finalEventDays = finalizeStats(eventDays);
 
     // Find best performers (by win rate, with min 3 trades)
     const findBest = (stats: Record<string, CorrelationStats>): string | null => {
@@ -220,6 +229,7 @@ export async function GET() {
       byCategory,
       byEventType,
       noEventDays: finalNoEventDays,
+      eventDays: finalEventDays,
       summary: {
         totalTrades: trades.length,
         tradesOnEventDays,

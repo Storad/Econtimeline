@@ -1554,7 +1554,7 @@ export default function EconomicCalendarPage() {
           </div>
 
           {/* Filter Dropdown */}
-          <div className="relative" ref={filterDropdownRef}>
+          <div className="relative z-30" ref={filterDropdownRef}>
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all ${
@@ -1721,7 +1721,7 @@ export default function EconomicCalendarPage() {
 
       {/* 10-Day Window */}
       {showTenDayWindow && (
-      <div className="glass rounded-xl p-3 flex-shrink-0">
+      <div className="glass rounded-xl p-3 flex-shrink-0 relative z-20">
         <h2 className="text-xs font-medium text-muted mb-3">10-Day Window</h2>
         <div className="grid grid-cols-10 gap-2">
           {tenDayWindow.map((date, dayIndex) => {
