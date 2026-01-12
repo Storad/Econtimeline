@@ -359,9 +359,10 @@ export default function EventCorrelation({ trades }: EventCorrelationProps) {
   const { byImpact, byCategory, noEventDays, eventDays, summary } = correlations;
 
   // Find best/worst performers for at-a-glance section
-  const findBestWorst = (stats: Record<string, CorrelationStats>, minTrades: number = 2) => {
-    let best: { key: string; stats: CorrelationStats } | null = null;
-    let worst: { key: string; stats: CorrelationStats } | null = null;
+  type PerfResult = { key: string; stats: CorrelationStats } | null;
+  const findBestWorst = (stats: Record<string, CorrelationStats>, minTrades: number = 2): { best: PerfResult; worst: PerfResult } => {
+    let best: PerfResult = null;
+    let worst: PerfResult = null;
 
     Object.entries(stats).forEach(([key, s]) => {
       if (s.count >= minTrades) {
