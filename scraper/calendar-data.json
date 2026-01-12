@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-11T11:18:23.427Z",
+  "lastUpdated": "2026-01-12T11:21:03.548Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -11693,6 +11693,38 @@
         "US Treasury yields"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-12",
+      "time": "08:30",
+      "title": "CPI m/m",
+      "impact": "high",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=10",
+      "fredReleaseId": 10,
+      "description": "Consumer Price Index measures the monthly change in prices paid by consumers for goods and services.",
+      "whyItMatters": "Primary inflation gauge that central banks target. Higher inflation typically leads to rate hikes, lower inflation to rate cuts.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency bullish (rate hike expectations), bonds bearish, gold mixed",
+        "lowerThanExpected": "Currency bearish (rate cut expectations), bonds bullish"
+      },
+      "relatedAssets": [
+        "Local currency",
+        "Government bonds",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "latestValue": "325.0%",
+      "priorValue": null,
+      "latestDate": "2025-11-01",
+      "priorDate": "2025-10-01",
+      "fredSeriesId": "CPIAUCSL",
       "actual": null,
       "previous": null
     },
