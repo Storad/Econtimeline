@@ -55,7 +55,7 @@ export const Tooltip = ({ children, content }: { children: React.ReactNode; cont
         }`}
       >
         {/* Title */}
-        <div className="px-3 py-2 border-b border-border/50">
+        <div className="px-3 py-2 border-b border-border/40">
           <h4 className="text-sm font-semibold text-foreground">{content.title}</h4>
         </div>
 
@@ -77,7 +77,7 @@ export const Tooltip = ({ children, content }: { children: React.ReactNode; cont
 
           {/* Tip */}
           {content.tip && (
-            <div className="mt-3 pt-2 border-t border-border/50">
+            <div className="mt-3 pt-2 border-t border-border/40">
               <p className="text-[11px] text-muted/80">{content.tip}</p>
             </div>
           )}

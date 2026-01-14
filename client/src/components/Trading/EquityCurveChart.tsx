@@ -365,56 +365,54 @@ export const EquityCurveChart = ({
 
   return (
     <div className="space-y-4">
-      {/* Stats Bar */}
-      <div className="grid grid-cols-6 gap-3">
-        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-4 border border-border/50">
-          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Total P&L</div>
+      {/* Stats Bar - 5 Key Metrics */}
+      <div className="grid grid-cols-5 gap-4">
+        {/* Total P&L */}
+        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-5 border border-border/40 hover:border-border/60 transition-colors">
+          <div className="text-[11px] text-muted uppercase tracking-wider mb-2 font-medium">Total P&L</div>
           <div className={`text-2xl font-bold ${stats.totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {stats.totalPnl >= 0 ? '+' : ''}{stats.totalPnl.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 })}
           </div>
-          <div className={`text-xs mt-1 ${stats.totalReturn >= 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>
-            {stats.totalReturn >= 0 ? '+' : ''}{stats.totalReturn.toFixed(2)}% return
+          <div className={`text-xs mt-2 ${stats.totalReturn >= 0 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
+            {stats.totalReturn >= 0 ? '+' : ''}{stats.totalReturn.toFixed(1)}% return
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-4 border border-border/50">
-          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Win Rate</div>
+        {/* Win Rate */}
+        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-5 border border-border/40 hover:border-border/60 transition-colors">
+          <div className="text-[11px] text-muted uppercase tracking-wider mb-2 font-medium">Win Rate</div>
           <div className={`text-2xl font-bold ${stats.winRate >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>
             {stats.winRate.toFixed(0)}%
           </div>
-          <div className="text-xs text-muted mt-1">
-            <span className="text-emerald-400">{stats.winTrades}W</span>
-            <span className="mx-1">/</span>
-            <span className="text-red-400">{stats.lossTrades}L</span>
+          <div className="text-xs text-muted mt-2">
+            <span className="text-emerald-400 font-medium">{stats.winTrades}W</span>
+            <span className="mx-1.5 opacity-50">/</span>
+            <span className="text-red-400 font-medium">{stats.lossTrades}L</span>
+            <span className="mx-1.5 opacity-50">·</span>
+            <span className="text-muted">{stats.trades} trades</span>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-4 border border-border/50">
-          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Trades</div>
-          <div className="text-2xl font-bold text-foreground">{stats.trades}</div>
-          <div className="text-xs text-muted mt-1">
-            {stats.sessions} sessions (<span className="text-emerald-400">{stats.winSessions}W</span>/<span className="text-red-400">{stats.lossSessions}L</span>)
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-4 border border-border/50">
-          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Max Drawdown</div>
+        {/* Max Drawdown */}
+        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-5 border border-border/40 hover:border-border/60 transition-colors">
+          <div className="text-[11px] text-muted uppercase tracking-wider mb-2 font-medium">Max Drawdown</div>
           <div className="text-2xl font-bold text-red-400">-{stats.maxDD.toFixed(1)}%</div>
-          <div className="text-xs text-muted mt-1">from peak</div>
+          <div className="text-xs text-muted mt-2">from equity peak</div>
         </div>
 
-        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-4 border border-border/50">
-          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Current Equity</div>
+        {/* Current Equity */}
+        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-5 border border-border/40 hover:border-border/60 transition-colors">
+          <div className="text-[11px] text-muted uppercase tracking-wider mb-2 font-medium">Current Equity</div>
           <div className="text-2xl font-bold text-foreground">
             ${stats.currentEquity.toLocaleString('en-US', { minimumFractionDigits: 0 })}
           </div>
-          <div className={`text-xs mt-1 flex items-center gap-1 ${stats.atPeak ? 'text-emerald-400' : 'text-muted'}`}>
+          <div className={`text-xs mt-2 flex items-center gap-1.5 ${stats.atPeak ? 'text-emerald-400' : 'text-muted'}`}>
             {stats.atPeak ? (
               <>
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                New High!
+                <span className="font-medium">New High!</span>
               </>
             ) : (
               `Peak: $${stats.peak.toLocaleString('en-US', { minimumFractionDigits: 0 })}`
@@ -422,19 +420,20 @@ export const EquityCurveChart = ({
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-4 border border-border/50">
-          <div className="text-[10px] text-muted uppercase tracking-wider mb-1">Avg per Trade</div>
+        {/* Avg per Trade */}
+        <div className="bg-gradient-to-br from-card/80 to-card/40 rounded-xl p-5 border border-border/40 hover:border-border/60 transition-colors">
+          <div className="text-[11px] text-muted uppercase tracking-wider mb-2 font-medium">Expectancy</div>
           <div className={`text-2xl font-bold ${stats.trades > 0 && stats.totalPnl / stats.trades >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {stats.trades > 0 ? (stats.totalPnl / stats.trades >= 0 ? '+' : '') + '$' + Math.abs(stats.totalPnl / stats.trades).toFixed(0) : '$0'}
           </div>
-          <div className="text-xs text-muted mt-1">expectancy</div>
+          <div className="text-xs text-muted mt-2">per trade avg</div>
         </div>
       </div>
 
       {/* Chart Container */}
-      <div className="rounded-xl border border-border/50 overflow-hidden">
+      <div className="rounded-xl border border-border/40 overflow-hidden">
         {/* Hover Info Bar - Fixed at top */}
-        <div className="px-4 py-2.5 bg-card/80 border-b border-border/30">
+        <div className="px-4 py-2.5 bg-card/80 border-b border-border/40">
           {hoveredStart ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

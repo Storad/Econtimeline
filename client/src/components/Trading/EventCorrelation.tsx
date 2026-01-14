@@ -498,7 +498,7 @@ export default function EventCorrelation({ trades }: EventCorrelationProps) {
                 key={impact}
                 className={`p-2.5 rounded-lg border ${
                   !hasData
-                    ? "bg-card/30 border-border/30"
+                    ? "bg-card/30 border-border/40"
                     : IMPACT_BG[impact]
                 }`}
               >
@@ -567,7 +567,7 @@ export default function EventCorrelation({ trades }: EventCorrelationProps) {
                     key={category}
                     className={`p-2.5 rounded-lg border ${
                       !hasData
-                        ? "bg-card/30 border-border/30"
+                        ? "bg-card/30 border-border/40"
                         : stats.avgPnl >= 0
                         ? "bg-emerald-500/5 border-emerald-500/20"
                         : "bg-red-500/5 border-red-500/20"

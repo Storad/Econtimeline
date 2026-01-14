@@ -411,6 +411,7 @@ export default function TradingPage() {
 
   // Consistency settings - customizable thresholds
   const [showConsistencySettings, setShowConsistencySettings] = useState(false);
+  const [showGradeScale, setShowGradeScale] = useState(false);
   const [showTradingAudit, setShowTradingAudit] = useState(false);
   const [consistencySettings, setConsistencySettings] = useState(() => {
     if (typeof window !== "undefined") {
@@ -424,10 +425,10 @@ export default function TradingPage() {
       }
     }
     return {
-      winRateTarget: 60,      // Target win rate for max score (default 60%)
-      profitFactorTarget: 2,  // Target profit factor for max score (default 2.0)
-      maxDrawdownLimit: 25,   // Max acceptable drawdown (default 25%)
-      streakTarget: 10,       // Target win streak for max score (default 10)
+      winRateTarget: 60,        // Target win rate for max score (default 60%)
+      profitFactorTarget: 2,    // Target profit factor for max score (default 2.0)
+      maxDrawdownLimit: 25,     // Max acceptable drawdown (default 25%)
+      riskRewardTarget: 1.5,    // Target risk/reward ratio for max score (default 1.5)
     };
   });
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -500,6 +501,11 @@ export default function TradingPage() {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [equityAssetFilter, setEquityAssetFilter] = useState<string[]>([]);
   const [showAssetDropdown, setShowAssetDropdown] = useState(false);
+  // Unified filters dropdown
+  const [showFiltersDropdown, setShowFiltersDropdown] = useState(false);
+  const [activeFilterTab, setActiveFilterTab] = useState<"period" | "tags" | "assets">("period");
+  const filtersDropdownRef = useRef<HTMLDivElement>(null);
+  const gradeScaleRef = useRef<HTMLDivElement>(null);
   // Initialize date range with today and one month ago
   const [customFilter, setCustomFilter] = useState<{
     type: "dateRange" | "daysBack" | "tradesBack";
@@ -668,6 +674,28 @@ export default function TradingPage() {
     const handleClickOutside = (e: MouseEvent) => {
       if (assetDropdownRef.current && !assetDropdownRef.current.contains(e.target as Node)) {
         setShowAssetDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close unified filters dropdown click outside handler
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filtersDropdownRef.current && !filtersDropdownRef.current.contains(e.target as Node)) {
+        setShowFiltersDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close grade scale popup click outside handler
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (gradeScaleRef.current && !gradeScaleRef.current.contains(e.target as Node)) {
+        setShowGradeScale(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -880,14 +908,19 @@ export default function TradingPage() {
     const grossLoss = Math.abs(losingTrades.reduce((sum, t) => sum + t.pnl, 0));
     const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 10 : 0;
 
-    // Consistency factors - using customizable thresholds
-    const { winRateTarget, profitFactorTarget, maxDrawdownLimit, streakTarget } = consistencySettings;
+    // Calculate avg win/loss early for R:R ratio
+    const avgWinCalc = winningTrades.length > 0 ? grossProfit / winningTrades.length : 0;
+    const avgLossCalc = losingTrades.length > 0 ? grossLoss / losingTrades.length : 0;
+    const riskRewardRatio = avgLossCalc > 0 ? avgWinCalc / avgLossCalc : avgWinCalc > 0 ? 5 : 0;
+
+    // Consistency factors - using customizable thresholds (with fallbacks for old localStorage data)
+    const { winRateTarget = 60, profitFactorTarget = 2, maxDrawdownLimit = 25, riskRewardTarget = 1.5 } = consistencySettings;
     const winRateScore = Math.min((winRate / winRateTarget) * 25, 25); // Max 25 points at target win rate
     const profitFactorScore = Math.min((profitFactor / profitFactorTarget) * 25, 25); // Max 25 points at target PF
     const drawdownScore = Math.max(25 - (maxDrawdownPercent / maxDrawdownLimit * 25), 0); // Lose points for high drawdown
-    const streakScore = Math.min((longestWinStreak / streakTarget) * 25, 25); // Max 25 at target streak
+    const riskRewardScore = Math.min((riskRewardRatio / riskRewardTarget) * 25, 25); // Max 25 at target R:R
 
-    const consistencyScore = Math.round(winRateScore + profitFactorScore + drawdownScore + streakScore);
+    const consistencyScore = Math.round(winRateScore + profitFactorScore + drawdownScore + riskRewardScore);
 
     // YoY monthly comparison
     const monthlyByYear: Record<number, Record<number, number>> = {};
@@ -924,9 +957,6 @@ export default function TradingPage() {
     const winDays = equityCurve.filter(d => d.pnl > 0).length;
     const lossDays = equityCurve.filter(d => d.pnl < 0).length;
 
-    // Risk/Reward ratio (avg win / avg loss)
-    const riskRewardRatio = avgLoss > 0 ? avgWin / avgLoss : avgWin > 0 ? 10 : 0;
-
     return {
       // P&L summaries
       allTimePnl,
@@ -958,7 +988,7 @@ export default function TradingPage() {
       winRateScore,
       profitFactorScore,
       drawdownScore,
-      streakScore,
+      riskRewardScore,
       // Core stats
       winRate,
       profitFactor,
@@ -1350,13 +1380,10 @@ export default function TradingPage() {
   }, [tradingStats, closedTrades, equityPeriod, equityTagFilter, equityAssetFilter, effectiveStartingEquity, customFilter]);
 
   const getConsistencyGrade = (score: number) => {
-    if (score >= 90) return { grade: "A+", color: "text-emerald-400" };
-    if (score >= 80) return { grade: "A", color: "text-emerald-400" };
-    if (score >= 70) return { grade: "B+", color: "text-green-400" };
-    if (score >= 60) return { grade: "B", color: "text-green-400" };
-    if (score >= 50) return { grade: "C+", color: "text-yellow-400" };
-    if (score >= 40) return { grade: "C", color: "text-yellow-400" };
-    if (score >= 30) return { grade: "D", color: "text-orange-400" };
+    if (score >= 90) return { grade: "A", color: "text-emerald-400" };
+    if (score >= 80) return { grade: "B", color: "text-green-400" };
+    if (score >= 70) return { grade: "C", color: "text-yellow-400" };
+    if (score >= 60) return { grade: "D", color: "text-orange-400" };
     return { grade: "F", color: "text-red-400" };
   };
 
@@ -1386,15 +1413,15 @@ export default function TradingPage() {
   return (
     <div className="h-full overflow-y-auto space-y-6 pb-6">
       {/* EQUITY CURVE - Full Width Top Section */}
-      <div className="rounded-xl border border-border/50 bg-gradient-to-br from-card/80 to-card/40 p-6">
+      <div className="rounded-xl border border-border/40 bg-gradient-to-br from-card/80 to-card/40 p-6 shadow-lg shadow-black/5">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/20 bg-gradient-to-r from-transparent via-card/30 to-transparent -mx-6 px-6 -mt-6 pt-6 rounded-t-xl">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-accent/10 border border-accent/20">
+            <div className="p-2.5 rounded-xl bg-accent/10 border border-accent/20">
               <BarChart3 className="w-5 h-5 text-accent-light" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Performance</h2>
+              <h2 className="text-lg font-bold text-foreground">Equity Curve</h2>
               <p className="text-xs text-muted">
                 {equityPeriod === "custom"
                   ? customFilter.type === "dateRange"
@@ -1439,352 +1466,255 @@ export default function TradingPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Period Filter */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center bg-card/80 rounded-lg p-1 border border-border/50">
-                {[
-                  { value: "all", label: "All Time" },
-                  { value: "ytd", label: "YTD" },
-                  { value: "mtd", label: "MTD" },
-                  { value: "wtd", label: "WTD" },
-                ].map((p) => (
-                  <button
-                    key={p.value}
-                    onClick={() => {
-                      setEquityPeriod(p.value as typeof equityPeriod);
-                      setShowCustomMenu(false);
-                    }}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                      equityPeriod === p.value
-                        ? "bg-accent text-white shadow-sm"
-                        : "text-muted hover:text-foreground hover:bg-card-hover"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-                {/* Custom with dropdown */}
-                <div className="relative" ref={customMenuRef}>
-                  <button
-                    onClick={() => {
-                      if (equityPeriod === "custom") {
-                        setShowCustomMenu(!showCustomMenu);
-                      } else {
-                        setEquityPeriod("custom");
-                        setShowCustomMenu(true);
-                      }
-                    }}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1 ${
-                      equityPeriod === "custom"
-                        ? "bg-accent text-white shadow-sm"
-                        : "text-muted hover:text-foreground hover:bg-card-hover"
-                    }`}
-                  >
-                    Custom
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-
-                  {/* Custom Filter Dropdown */}
-                  {showCustomMenu && (
-                    <div className="absolute top-full right-0 mt-2 w-72 bg-card border border-border rounded-xl shadow-2xl z-30 overflow-hidden">
-                      {/* Filter Type Tabs */}
-                      <div className="flex border-b border-border">
-                        {[
-                          { type: "dateRange" as const, label: "Date Range", icon: Calendar },
-                          { type: "daysBack" as const, label: "Days", icon: Clock },
-                          { type: "tradesBack" as const, label: "Trades", icon: BarChart3 },
-                        ].map(({ type, label, icon: Icon }) => (
-                          <button
-                            key={type}
-                            onClick={() => setCustomFilter(prev => ({ ...prev, type }))}
-                            className={`flex-1 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
-                              customFilter.type === type
-                                ? "bg-accent/10 text-accent-light border-b-2 border-accent"
-                                : "text-muted hover:text-foreground hover:bg-card-hover"
-                            }`}
-                          >
-                            <Icon className="w-3.5 h-3.5" />
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Filter Content */}
-                      <div className="p-4">
-                        {customFilter.type === "dateRange" && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted w-10">From</span>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={startDateInputs.month}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "").slice(0, 2);
-                                  updateStartDate(val, startDateInputs.day, startDateInputs.year);
-                                }}
-                                placeholder="MM"
-                                className="w-10 px-1 py-2 bg-card-hover border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
-                              />
-                              <span className="text-muted">/</span>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={startDateInputs.day}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "").slice(0, 2);
-                                  updateStartDate(startDateInputs.month, val, startDateInputs.year);
-                                }}
-                                placeholder="DD"
-                                className="w-10 px-1 py-2 bg-card-hover border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
-                              />
-                              <span className="text-muted">/</span>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={startDateInputs.year}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-                                  updateStartDate(startDateInputs.month, startDateInputs.day, val);
-                                }}
-                                placeholder="YYYY"
-                                className="w-14 px-1 py-2 bg-card-hover border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted w-10">To</span>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={endDateInputs.month}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "").slice(0, 2);
-                                  updateEndDate(val, endDateInputs.day, endDateInputs.year);
-                                }}
-                                placeholder="MM"
-                                className="w-10 px-1 py-2 bg-card-hover border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
-                              />
-                              <span className="text-muted">/</span>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={endDateInputs.day}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "").slice(0, 2);
-                                  updateEndDate(endDateInputs.month, val, endDateInputs.year);
-                                }}
-                                placeholder="DD"
-                                className="w-10 px-1 py-2 bg-card-hover border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
-                              />
-                              <span className="text-muted">/</span>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={endDateInputs.year}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-                                  updateEndDate(endDateInputs.month, endDateInputs.day, val);
-                                }}
-                                placeholder="YYYY"
-                                className="w-14 px-1 py-2 bg-card-hover border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-accent/50"
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {customFilter.type === "daysBack" && (
-                          <div>
-                            <label className="text-xs text-muted block mb-1.5">Number of Days</label>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={customFilter.daysBack === 0 ? "" : customFilter.daysBack}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "");
-                                  setCustomFilter(prev => ({
-                                    ...prev,
-                                    daysBack: val === "" ? 0 : parseInt(val)
-                                  }));
-                                }}
-                                placeholder="Enter days"
-                                className="flex-1 px-3 py-2 bg-card-hover border border-border rounded-lg text-sm"
-                              />
-                              <span className="text-sm text-muted">days back</span>
-                            </div>
-                            <div className="flex gap-2 mt-3">
-                              {[7, 14, 30, 60, 90].map(days => (
-                                <button
-                                  key={days}
-                                  onClick={() => setCustomFilter(prev => ({ ...prev, daysBack: days }))}
-                                  className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
-                                    customFilter.daysBack === days
-                                      ? "bg-accent text-white"
-                                      : "bg-card-hover text-muted hover:text-foreground"
-                                  }`}
-                                >
-                                  {days}d
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {customFilter.type === "tradesBack" && (
-                          <div>
-                            <label className="text-xs text-muted block mb-1.5">Number of Trades</label>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={customFilter.tradesBack === 0 ? "" : customFilter.tradesBack}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, "");
-                                  setCustomFilter(prev => ({
-                                    ...prev,
-                                    tradesBack: val === "" ? 0 : parseInt(val)
-                                  }));
-                                }}
-                                placeholder="Enter trades"
-                                className="flex-1 px-3 py-2 bg-card-hover border border-border rounded-lg text-sm"
-                              />
-                              <span className="text-sm text-muted">recent trades</span>
-                            </div>
-                            <div className="flex gap-2 mt-3">
-                              {[10, 25, 50, 100, 200].map(count => (
-                                <button
-                                  key={count}
-                                  onClick={() => setCustomFilter(prev => ({ ...prev, tradesBack: count }))}
-                                  className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
-                                    customFilter.tradesBack === count
-                                      ? "bg-accent text-white"
-                                      : "bg-card-hover text-muted hover:text-foreground"
-                                  }`}
-                                >
-                                  {count}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Tag Filter */}
-            {tagSettings.sections.length > 0 && (
-              <div ref={tagDropdownRef} className="relative">
-                <button
-                  onClick={() => setShowTagDropdown(!showTagDropdown)}
-                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-                    equityTagFilter.length > 0
-                      ? "bg-accent/20 border-accent/50 text-accent-light"
-                      : "bg-card/80 border-border/50 text-muted hover:text-foreground hover:border-border"
-                  }`}
-                >
-                  <TagIcon className="w-3.5 h-3.5" />
-                  {equityTagFilter.length > 0 ? `${equityTagFilter.length} Tags` : "Filter"}
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-                {showTagDropdown && (
-                  <div className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-xl shadow-2xl z-20 py-2 backdrop-blur-xl max-h-80 overflow-y-auto">
-                    {tagSettings.sections
-                      .sort((a, b) => a.order - b.order)
-                      .map((section) => {
-                        const colors = TAG_COLORS[section.color] || TAG_COLORS.blue;
-                        return (
-                          <div key={section.id} className="mb-2">
-                            <div className={`px-4 py-1.5 text-[10px] font-medium uppercase tracking-wider ${colors.text}`}>
-                              {section.name}
-                            </div>
-                            <div className="px-2">
-                              {section.tags
-                                .sort((a, b) => a.order - b.order)
-                                .map((tag) => {
-                                  const isSelected = equityTagFilter.includes(tag.name);
-                                  return (
-                                    <button
-                                      key={tag.id}
-                                      onClick={() => {
-                                        setEquityTagFilter((prev) =>
-                                          prev.includes(tag.name)
-                                            ? prev.filter((t) => t !== tag.name)
-                                            : [...prev, tag.name]
-                                        );
-                                      }}
-                                      className="w-full px-2 py-1.5 text-xs text-left hover:bg-card-hover rounded-lg flex items-center gap-2"
-                                    >
-                                      <div className={`w-3.5 h-3.5 rounded flex items-center justify-center border ${
-                                        isSelected
-                                          ? `${colors.bg} ${colors.border}`
-                                          : "border-border"
-                                      }`}>
-                                        {isSelected && (
-                                          <Check className={`w-2.5 h-2.5 ${colors.text}`} />
-                                        )}
-                                      </div>
-                                      <span className={isSelected ? colors.text : "text-foreground"}>{tag.name}</span>
-                                      <span className="ml-auto text-[10px] text-muted">{tagTradeCounts[tag.name] || 0}</span>
-                                    </button>
-                                  );
-                                })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
+          {/* Active Filter Pills & Unified Filters Button */}
+          <div className="flex items-center gap-2">
+            {/* Active Filter Pills */}
+            {(equityPeriod !== "all" || equityTagFilter.length > 0 || equityAssetFilter.length > 0) && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Period Pill */}
+                {equityPeriod !== "all" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-accent/20 text-accent-light border border-accent/30">
+                    {equityPeriod === "custom"
+                      ? customFilter.type === "dateRange" ? "Custom Range"
+                        : customFilter.type === "daysBack" ? `${customFilter.daysBack}d`
+                        : `${customFilter.tradesBack} trades`
+                      : equityPeriod.toUpperCase()}
+                    <button
+                      onClick={() => setEquityPeriod("all")}
+                      className="ml-0.5 hover:bg-accent/30 rounded p-0.5 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
                 )}
+                {/* Asset Pills */}
+                {equityAssetFilter.map(assetType => {
+                  const asset = ASSET_TYPES.find(a => a.value === assetType);
+                  const colors = TAG_COLORS[asset?.color || "blue"];
+                  return (
+                    <span key={assetType} className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium ${colors.bg} ${colors.text} border ${colors.border}`}>
+                      {asset?.label}
+                      <button
+                        onClick={() => setEquityAssetFilter(prev => prev.filter(a => a !== assetType))}
+                        className="ml-0.5 hover:bg-black/20 rounded p-0.5 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  );
+                })}
+                {/* Tag Pills */}
+                {equityTagFilter.map(tagName => {
+                  const tagInfo = getTagById(tagName);
+                  const colors = tagInfo ? TAG_COLORS[tagInfo.section.color] || TAG_COLORS.blue : TAG_COLORS.blue;
+                  return (
+                    <span key={tagName} className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium ${colors.bg} ${colors.text} border ${colors.border}`}>
+                      {tagInfo?.tag.name || tagName}
+                      <button
+                        onClick={() => setEquityTagFilter(prev => prev.filter(t => t !== tagName))}
+                        className="ml-0.5 hover:bg-black/20 rounded p-0.5 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  );
+                })}
+                {/* Clear All */}
+                <button
+                  onClick={() => {
+                    setEquityPeriod("all");
+                    setEquityTagFilter([]);
+                    setEquityAssetFilter([]);
+                  }}
+                  className="text-[11px] text-muted hover:text-foreground transition-colors px-1.5"
+                >
+                  Clear all
+                </button>
               </div>
             )}
 
-            {/* Asset Class Filter */}
-            <div ref={assetDropdownRef} className="relative">
+            {/* Unified Filters Dropdown */}
+            <div ref={filtersDropdownRef} className="relative">
               <button
-                onClick={() => setShowAssetDropdown(!showAssetDropdown)}
-                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-                  equityAssetFilter.length > 0
-                    ? "bg-accent/20 border-accent/50 text-accent-light"
-                    : "bg-card/80 border-border/50 text-muted hover:text-foreground hover:border-border"
+                onClick={() => setShowFiltersDropdown(!showFiltersDropdown)}
+                className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border transition-all ${
+                  showFiltersDropdown
+                    ? "bg-accent text-white border-accent"
+                    : "bg-card/80 border-border/40 text-muted hover:text-foreground hover:border-border"
                 }`}
               >
-                <BarChart3 className="w-3.5 h-3.5" />
-                {equityAssetFilter.length > 0 ? `${equityAssetFilter.length} Assets` : "Asset"}
-                <ChevronDown className="w-3.5 h-3.5" />
+                <Settings className="w-4 h-4" />
+                Filters
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showFiltersDropdown ? "rotate-180" : ""}`} />
               </button>
-              {showAssetDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-xl shadow-2xl z-20 py-2 backdrop-blur-xl">
-                  {ASSET_TYPES.map((asset) => {
-                    const colors = TAG_COLORS[asset.color] || TAG_COLORS.blue;
-                    const isSelected = equityAssetFilter.includes(asset.value);
-                    return (
+
+              {showFiltersDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-card border border-border rounded-xl shadow-2xl z-30 overflow-hidden">
+                  {/* Tabs */}
+                  <div className="flex border-b border-border">
+                    {[
+                      { id: "period" as const, label: "Period", icon: Calendar },
+                      { id: "tags" as const, label: "Tags", icon: TagIcon },
+                      { id: "assets" as const, label: "Assets", icon: BarChart3 },
+                    ].map(({ id, label, icon: Icon }) => (
                       <button
-                        key={asset.value}
-                        onClick={() => {
-                          setEquityAssetFilter((prev) =>
-                            prev.includes(asset.value)
-                              ? prev.filter((a) => a !== asset.value)
-                              : [...prev, asset.value]
-                          );
-                        }}
-                        className="w-full px-4 py-2 text-xs text-left hover:bg-card-hover flex items-center gap-2"
+                        key={id}
+                        onClick={() => setActiveFilterTab(id)}
+                        className={`flex-1 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                          activeFilterTab === id
+                            ? "bg-accent/10 text-accent-light border-b-2 border-accent"
+                            : "text-muted hover:text-foreground hover:bg-card-hover"
+                        }`}
                       >
-                        <div className={`w-3.5 h-3.5 rounded flex items-center justify-center border ${
-                          isSelected
-                            ? `${colors.bg} ${colors.border}`
-                            : "border-border"
-                        }`}>
-                          {isSelected && (
-                            <Check className={`w-2.5 h-2.5 ${colors.text}`} />
-                          )}
-                        </div>
-                        <span className={isSelected ? colors.text : "text-foreground"}>{asset.label}</span>
+                        <Icon className="w-3.5 h-3.5" />
+                        {label}
                       </button>
-                    );
-                  })}
+                    ))}
+                  </div>
+
+                  {/* Tab Content */}
+                  <div className="p-4 max-h-80 overflow-y-auto">
+                    {/* Period Tab */}
+                    {activeFilterTab === "period" && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { value: "all", label: "All Time" },
+                            { value: "ytd", label: "YTD" },
+                            { value: "mtd", label: "MTD" },
+                            { value: "wtd", label: "WTD" },
+                            { value: "daily", label: "Today" },
+                            { value: "custom", label: "Custom" },
+                          ].map((p) => (
+                            <button
+                              key={p.value}
+                              onClick={() => {
+                                setEquityPeriod(p.value as typeof equityPeriod);
+                                if (p.value !== "custom") setShowCustomMenu(false);
+                              }}
+                              className={`px-3 py-2 text-xs font-medium rounded-lg transition-all ${
+                                equityPeriod === p.value
+                                  ? "bg-accent text-white shadow-sm"
+                                  : "bg-card-hover text-muted hover:text-foreground"
+                              }`}
+                            >
+                              {p.label}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Custom Options */}
+                        {equityPeriod === "custom" && (
+                          <div className="pt-3 border-t border-border/40 space-y-3">
+                            <div className="flex gap-2">
+                              {[
+                                { type: "dateRange" as const, label: "Date Range" },
+                                { type: "daysBack" as const, label: "Days" },
+                                { type: "tradesBack" as const, label: "Trades" },
+                              ].map(({ type, label }) => (
+                                <button
+                                  key={type}
+                                  onClick={() => setCustomFilter(prev => ({ ...prev, type }))}
+                                  className={`flex-1 py-1.5 text-[11px] font-medium rounded-md transition-colors ${
+                                    customFilter.type === type
+                                      ? "bg-accent/20 text-accent-light"
+                                      : "text-muted hover:text-foreground"
+                                  }`}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                            {customFilter.type === "dateRange" && (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted w-10">From</span>
+                                  <input type="text" inputMode="numeric" value={startDateInputs.month} onChange={(e) => updateStartDate(e.target.value.replace(/\D/g, "").slice(0, 2), startDateInputs.day, startDateInputs.year)} placeholder="MM" className="w-10 px-1 py-1.5 bg-card-hover border border-border rounded text-xs text-center" />
+                                  <span className="text-muted">/</span>
+                                  <input type="text" inputMode="numeric" value={startDateInputs.day} onChange={(e) => updateStartDate(startDateInputs.month, e.target.value.replace(/\D/g, "").slice(0, 2), startDateInputs.year)} placeholder="DD" className="w-10 px-1 py-1.5 bg-card-hover border border-border rounded text-xs text-center" />
+                                  <span className="text-muted">/</span>
+                                  <input type="text" inputMode="numeric" value={startDateInputs.year} onChange={(e) => updateStartDate(startDateInputs.month, startDateInputs.day, e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="YYYY" className="w-12 px-1 py-1.5 bg-card-hover border border-border rounded text-xs text-center" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted w-10">To</span>
+                                  <input type="text" inputMode="numeric" value={endDateInputs.month} onChange={(e) => updateEndDate(e.target.value.replace(/\D/g, "").slice(0, 2), endDateInputs.day, endDateInputs.year)} placeholder="MM" className="w-10 px-1 py-1.5 bg-card-hover border border-border rounded text-xs text-center" />
+                                  <span className="text-muted">/</span>
+                                  <input type="text" inputMode="numeric" value={endDateInputs.day} onChange={(e) => updateEndDate(endDateInputs.month, e.target.value.replace(/\D/g, "").slice(0, 2), endDateInputs.year)} placeholder="DD" className="w-10 px-1 py-1.5 bg-card-hover border border-border rounded text-xs text-center" />
+                                  <span className="text-muted">/</span>
+                                  <input type="text" inputMode="numeric" value={endDateInputs.year} onChange={(e) => updateEndDate(endDateInputs.month, endDateInputs.day, e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="YYYY" className="w-12 px-1 py-1.5 bg-card-hover border border-border rounded text-xs text-center" />
+                                </div>
+                              </div>
+                            )}
+                            {customFilter.type === "daysBack" && (
+                              <div className="flex flex-wrap gap-2">
+                                {[7, 14, 30, 60, 90, 180].map(days => (
+                                  <button key={days} onClick={() => setCustomFilter(prev => ({ ...prev, daysBack: days }))} className={`px-3 py-1.5 text-xs rounded-md transition-colors ${customFilter.daysBack === days ? "bg-accent text-white" : "bg-card-hover text-muted hover:text-foreground"}`}>{days}d</button>
+                                ))}
+                              </div>
+                            )}
+                            {customFilter.type === "tradesBack" && (
+                              <div className="flex flex-wrap gap-2">
+                                {[10, 25, 50, 100, 200].map(count => (
+                                  <button key={count} onClick={() => setCustomFilter(prev => ({ ...prev, tradesBack: count }))} className={`px-3 py-1.5 text-xs rounded-md transition-colors ${customFilter.tradesBack === count ? "bg-accent text-white" : "bg-card-hover text-muted hover:text-foreground"}`}>{count}</button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tags Tab */}
+                    {activeFilterTab === "tags" && (
+                      <div className="space-y-3">
+                        {tagSettings.sections.length === 0 ? (
+                          <p className="text-xs text-muted text-center py-4">No tags configured</p>
+                        ) : (
+                          tagSettings.sections.sort((a, b) => a.order - b.order).map((section) => {
+                            const colors = TAG_COLORS[section.color] || TAG_COLORS.blue;
+                            return (
+                              <div key={section.id}>
+                                <div className={`text-[10px] font-medium uppercase tracking-wider mb-2 ${colors.text}`}>{section.name}</div>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {section.tags.sort((a, b) => a.order - b.order).map((tag) => {
+                                    const isSelected = equityTagFilter.includes(tag.name);
+                                    return (
+                                      <button
+                                        key={tag.id}
+                                        onClick={() => setEquityTagFilter((prev) => prev.includes(tag.name) ? prev.filter((t) => t !== tag.name) : [...prev, tag.name])}
+                                        className={`px-2.5 py-1 text-[11px] rounded-md transition-all ${isSelected ? `${colors.bg} ${colors.text} ${colors.border} border` : "bg-card-hover text-muted hover:text-foreground"}`}
+                                      >
+                                        {tag.name}
+                                        {tagTradeCounts[tag.name] ? <span className="ml-1 opacity-60">({tagTradeCounts[tag.name]})</span> : null}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+
+                    {/* Assets Tab */}
+                    {activeFilterTab === "assets" && (
+                      <div className="flex flex-wrap gap-2">
+                        {ASSET_TYPES.map((asset) => {
+                          const colors = TAG_COLORS[asset.color] || TAG_COLORS.blue;
+                          const isSelected = equityAssetFilter.includes(asset.value);
+                          return (
+                            <button
+                              key={asset.value}
+                              onClick={() => setEquityAssetFilter((prev) => prev.includes(asset.value) ? prev.filter((a) => a !== asset.value) : [...prev, asset.value])}
+                              className={`px-3 py-2 text-xs font-medium rounded-lg transition-all ${isSelected ? `${colors.bg} ${colors.text} ${colors.border} border` : "bg-card-hover text-muted hover:text-foreground"}`}
+                            >
+                              {asset.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1838,18 +1768,26 @@ export default function TradingPage() {
         />
       </div>
 
-      {/* GOALS & PERFORMANCE */}
-      <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-card/30 to-transparent p-5 space-y-4">
+      {/* PERFORMANCE & METRICS */}
+      <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-card/30 to-transparent p-5 space-y-4 shadow-lg shadow-black/5">
         {/* Section Header */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Goals & Performance</h2>
+        <div className="flex items-center justify-between pb-4 border-b border-border/20 bg-gradient-to-r from-transparent via-card/30 to-transparent -mx-5 px-5 -mt-5 pt-5 rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <Activity className="w-5 h-5 text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Performance & Metrics</h2>
+              <p className="text-xs text-muted">Your trading statistics and key performance indicators</p>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowGoalSettings(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 transition-colors"
+              onClick={() => setShowMetricsSettings(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 hover:bg-card-hover border border-border/40 text-sm text-muted hover:text-foreground transition-colors"
             >
-              <Target className="w-4 h-4 text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-400">Goals</span>
+              <Settings className="w-4 h-4" />
+              Customize
             </button>
             <button
               onClick={() => setShowTradingAudit(true)}
@@ -1866,7 +1804,7 @@ export default function TradingPage() {
           {/* Left Side - P&L + Stats (2 cols) */}
           <div className="lg:col-span-2 grid grid-cols-2 gap-4">
             {/* P&L Card */}
-            <div className="p-4 rounded-xl bg-card/50 border border-border/30">
+            <div className="p-4 rounded-xl bg-card/50 border border-border/40">
               <div className="text-xs text-muted uppercase tracking-wide mb-2">Total P&L</div>
               <div className={`text-2xl font-bold mb-2 ${tradingStats.allTimePnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {tradingStats.allTimePnl >= 0 ? '+' : ''}${tradingStats.allTimePnl.toLocaleString()}
@@ -1888,7 +1826,7 @@ export default function TradingPage() {
             </div>
 
             {/* Key Stats Card */}
-            <div className="p-4 rounded-xl bg-card/50 border border-border/30">
+            <div className="p-4 rounded-xl bg-card/50 border border-border/40">
               <div className="text-xs text-muted uppercase tracking-wide mb-2">Key Stats</div>
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
@@ -1918,68 +1856,29 @@ export default function TradingPage() {
               </div>
             </div>
 
-            {/* Goals Progress (if set) - spans both columns */}
-            {(goals.yearlyPnlGoal > 0 || goals.monthlyPnlGoal > 0) && (
-              <div className="col-span-2 p-4 rounded-xl bg-card/50 border border-border/30">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-muted uppercase tracking-wide">Goal Progress</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${goalProgress?.onTrack ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
-                    {goalProgress?.onTrack ? "On Track" : "Behind Pace"}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-muted">Yearly</span>
-                      <span className={tradingStats.ytdPnl >= 0 ? "text-foreground" : "text-red-400"}>
-                        {tradingStats.ytdPnl < 0 ? "-" : ""}${Math.abs(tradingStats.ytdPnl).toFixed(0)} / ${goals.yearlyPnlGoal.toFixed(0)}
-                      </span>
-                    </div>
-                    <div className="h-2 bg-card rounded-full overflow-hidden relative">
-                      {tradingStats.ytdPnl >= 0 ? (
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(goalProgress?.yearlyProgress || 0, 100)}%` }} />
-                      ) : (
-                        <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.min(Math.abs(tradingStats.ytdPnl) / goals.yearlyPnlGoal * 100, 100)}%` }} />
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-muted">Monthly</span>
-                      <span className={tradingStats.mtdPnl >= 0 ? "text-foreground" : "text-red-400"}>
-                        {tradingStats.mtdPnl < 0 ? "-" : ""}${Math.abs(tradingStats.mtdPnl).toFixed(0)} / ${goals.monthlyPnlGoal.toFixed(0)}
-                      </span>
-                    </div>
-                    <div className="h-2 bg-card rounded-full overflow-hidden relative">
-                      {tradingStats.mtdPnl >= 0 ? (
-                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(goalProgress?.monthlyProgress || 0, 100)}%` }} />
-                      ) : (
-                        <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.min(Math.abs(tradingStats.mtdPnl) / goals.monthlyPnlGoal * 100, 100)}%` }} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Side - Consistency Score */}
-          <div className="p-4 rounded-xl bg-card/50 border border-border/30">
+          <div className="p-4 rounded-xl bg-card/50 border border-border/40">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs text-muted uppercase tracking-wide">Consistency Score</span>
               <button
                 onClick={() => setShowConsistencySettings(true)}
-                className="p-1 rounded hover:bg-card-hover transition-colors"
+                className="p-1.5 rounded-lg bg-card-hover/50 hover:bg-card-hover border border-border/40 hover:border-accent/50 transition-all group"
                 title="Customize thresholds"
               >
-                <Settings className="w-3.5 h-3.5 text-muted/50 hover:text-muted" />
+                <Settings className="w-4 h-4 text-muted group-hover:text-accent-light group-hover:rotate-45 transition-all duration-300" />
               </button>
             </div>
 
             {/* Score Circle */}
-            <div className="flex justify-center mb-4">
-              <div className="relative w-20 h-20">
-                <svg className="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+            <div className="flex justify-center mb-4 relative">
+              <div
+                className="relative w-20 h-20 cursor-pointer group"
+                onClick={() => setShowGradeScale(!showGradeScale)}
+                title="Click to view grading scale"
+              >
+                <svg className="w-20 h-20 -rotate-90 transition-transform group-hover:scale-105" viewBox="0 0 36 36">
                   <path
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     fill="none"
@@ -2005,6 +1904,35 @@ export default function TradingPage() {
                   <span className="text-[10px] text-muted">{tradingStats.consistencyScore}/100</span>
                 </div>
               </div>
+
+              {/* Grade Scale Popup */}
+              {showGradeScale && (
+                <div ref={gradeScaleRef} className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-card border border-border/40 rounded-lg shadow-xl p-3 w-[200px]">
+                  <div className="text-xs font-medium text-muted mb-2 text-center">Grading Scale</div>
+                  <div className="grid grid-cols-5 gap-1 text-center">
+                    <div className="py-1.5 rounded bg-emerald-500/15 border border-emerald-500/30">
+                      <div className="text-xs font-bold text-emerald-400">A</div>
+                      <div className="text-[9px] text-muted">90+</div>
+                    </div>
+                    <div className="py-1.5 rounded bg-green-500/15 border border-green-500/30">
+                      <div className="text-xs font-bold text-green-400">B</div>
+                      <div className="text-[9px] text-muted">80+</div>
+                    </div>
+                    <div className="py-1.5 rounded bg-yellow-500/15 border border-yellow-500/30">
+                      <div className="text-xs font-bold text-yellow-400">C</div>
+                      <div className="text-[9px] text-muted">70+</div>
+                    </div>
+                    <div className="py-1.5 rounded bg-orange-500/15 border border-orange-500/30">
+                      <div className="text-xs font-bold text-orange-400">D</div>
+                      <div className="text-[9px] text-muted">60+</div>
+                    </div>
+                    <div className="py-1.5 rounded bg-red-500/15 border border-red-500/30">
+                      <div className="text-xs font-bold text-red-400">F</div>
+                      <div className="text-[9px] text-muted">&lt;60</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Metric Breakdown Bars */}
@@ -2044,30 +1972,24 @@ export default function TradingPage() {
               </div>
               <div>
                 <div className="flex justify-between text-[10px] mb-0.5">
-                  <span className="text-muted">Win Streak</span>
-                  <span className="text-purple-400">{tradingStats.longestWinStreak}W</span>
+                  <span className="text-muted">Risk/Reward</span>
+                  <span className={tradingStats.riskRewardRatio >= 1.5 ? "text-emerald-400" : "text-purple-400"}>{tradingStats.riskRewardRatio.toFixed(2)}</span>
                 </div>
                 <div className="h-1.5 bg-card rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: `${(tradingStats.streakScore / 25) * 100}%` }} />
+                  <div className="h-full bg-purple-500 rounded-full" style={{ width: `${(tradingStats.riskRewardScore / 25) * 100}%` }} />
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ADDITIONAL METRICS */}
-      <div className="glass rounded-xl border border-border/50 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-medium text-muted uppercase tracking-wide">Additional Metrics</span>
-          <button
-            onClick={() => setShowMetricsSettings(true)}
-            className="text-xs text-muted hover:text-foreground transition-colors"
-          >
-            Customize
-          </button>
-        </div>
-        <DndContext
+        {/* Customizable Metrics Grid */}
+        <div className="pt-4 border-t border-border/20">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-muted uppercase tracking-wide">Key Metrics</span>
+            <span className="text-[10px] text-muted">Drag to reorder</span>
+          </div>
+          <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleMetricDragEnd}
@@ -2201,7 +2123,7 @@ export default function TradingPage() {
                         break;
                     }
 
-                    let bgClass = "bg-card/50 border-border/50";
+                    let bgClass = "bg-card/50 border-border/40";
                     if (metric.colorLogic === "positive" && typeof value === "number") {
                       bgClass = value >= 0 ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20";
                     } else if (metric.colorLogic === "negative") {
@@ -2392,23 +2314,156 @@ export default function TradingPage() {
                 </div>
               </SortableContext>
             </DndContext>
+        </div>
       </div>
+
+      {/* GOALS SECTION */}
+      {(goals.yearlyPnlGoal > 0 || goals.monthlyPnlGoal > 0) && (
+        <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-card/30 to-transparent p-5 shadow-lg shadow-black/5">
+          {/* Section Header */}
+          <div className="flex items-center justify-between pb-4 border-b border-border/20 bg-gradient-to-r from-transparent via-card/30 to-transparent -mx-5 px-5 -mt-5 pt-5 rounded-t-2xl mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <Target className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">Goals</h2>
+                <p className="text-xs text-muted">Track your P&L targets</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${goalProgress?.onTrack ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
+                {goalProgress?.onTrack ? "On Track" : "Behind Pace"}
+              </span>
+              <button
+                onClick={() => setShowGoalSettings(true)}
+                className="p-1.5 rounded-lg bg-card-hover/50 hover:bg-card-hover border border-border/40 hover:border-emerald-500/50 transition-all group"
+                title="Edit goals"
+              >
+                <Settings className="w-4 h-4 text-muted group-hover:text-emerald-400 group-hover:rotate-45 transition-all duration-300" />
+              </button>
+            </div>
+          </div>
+
+          {/* Goals Progress */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Yearly Goal */}
+            {goals.yearlyPnlGoal > 0 && (
+              <div className="p-4 rounded-xl bg-card/50 border border-border/40">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium">Yearly Goal</span>
+                  <span className={`text-xs ${tradingStats.ytdPnl >= goals.yearlyPnlGoal ? 'text-emerald-400' : 'text-muted'}`}>
+                    {((tradingStats.ytdPnl / goals.yearlyPnlGoal) * 100).toFixed(0)}% complete
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span className={`text-2xl font-bold ${tradingStats.ytdPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {tradingStats.ytdPnl >= 0 ? '+' : ''}${tradingStats.ytdPnl.toLocaleString()}
+                  </span>
+                  <span className="text-sm text-muted">/ ${goals.yearlyPnlGoal.toLocaleString()}</span>
+                </div>
+                <div className="h-3 bg-card rounded-full overflow-hidden">
+                  {tradingStats.ytdPnl >= 0 ? (
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min((tradingStats.ytdPnl / goals.yearlyPnlGoal) * 100, 100)}%` }}
+                    />
+                  ) : (
+                    <div
+                      className="h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full"
+                      style={{ width: `${Math.min((Math.abs(tradingStats.ytdPnl) / goals.yearlyPnlGoal) * 100, 100)}%` }}
+                    />
+                  )}
+                </div>
+                <div className="flex justify-between mt-2 text-xs text-muted">
+                  <span>$0</span>
+                  <span>${(goals.yearlyPnlGoal / 2).toLocaleString()}</span>
+                  <span>${goals.yearlyPnlGoal.toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Monthly Goal */}
+            {goals.monthlyPnlGoal > 0 && (
+              <div className="p-4 rounded-xl bg-card/50 border border-border/40">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium">Monthly Goal</span>
+                  <span className={`text-xs ${tradingStats.mtdPnl >= goals.monthlyPnlGoal ? 'text-blue-400' : 'text-muted'}`}>
+                    {((tradingStats.mtdPnl / goals.monthlyPnlGoal) * 100).toFixed(0)}% complete
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span className={`text-2xl font-bold ${tradingStats.mtdPnl >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                    {tradingStats.mtdPnl >= 0 ? '+' : ''}${tradingStats.mtdPnl.toLocaleString()}
+                  </span>
+                  <span className="text-sm text-muted">/ ${goals.monthlyPnlGoal.toLocaleString()}</span>
+                </div>
+                <div className="h-3 bg-card rounded-full overflow-hidden">
+                  {tradingStats.mtdPnl >= 0 ? (
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min((tradingStats.mtdPnl / goals.monthlyPnlGoal) * 100, 100)}%` }}
+                    />
+                  ) : (
+                    <div
+                      className="h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full"
+                      style={{ width: `${Math.min((Math.abs(tradingStats.mtdPnl) / goals.monthlyPnlGoal) * 100, 100)}%` }}
+                    />
+                  )}
+                </div>
+                <div className="flex justify-between mt-2 text-xs text-muted">
+                  <span>$0</span>
+                  <span>${(goals.monthlyPnlGoal / 2).toLocaleString()}</span>
+                  <span>${goals.monthlyPnlGoal.toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Pace Indicator */}
+          <div className="mt-4 p-3 rounded-lg bg-card/30 border border-border/20">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted">
+                {(() => {
+                  const now = new Date();
+                  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+                  const daysInYear = 365;
+                  const expectedProgress = (dayOfYear / daysInYear) * 100;
+                  const actualProgress = goals.yearlyPnlGoal > 0 ? (tradingStats.ytdPnl / goals.yearlyPnlGoal) * 100 : 0;
+                  const diff = actualProgress - expectedProgress;
+
+                  if (diff >= 10) return `You're ${diff.toFixed(0)}% ahead of pace - excellent work!`;
+                  if (diff >= 0) return `You're on pace to hit your yearly goal`;
+                  if (diff >= -10) return `You're ${Math.abs(diff).toFixed(0)}% behind pace - still within reach`;
+                  return `You're ${Math.abs(diff).toFixed(0)}% behind pace - time to focus`;
+                })()}
+              </span>
+              <span className="text-muted">
+                Day {Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24))} of 365
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* OPEN TRADES SECTION */}
       {openTrades.length > 0 && (
-        <div className="glass rounded-xl border border-amber-500/30 p-5">
-          <div className="flex items-center justify-between mb-4">
+        <div className="glass rounded-xl border border-amber-500/30 p-5 shadow-lg shadow-black/5">
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-amber-500/20 bg-gradient-to-r from-transparent via-amber-500/5 to-transparent -mx-5 px-5 -mt-5 pt-5 rounded-t-xl">
             <button
               onClick={() => setShowOpenTrades(!showOpenTrades)}
-              className="flex items-center gap-2 text-sm font-semibold hover:text-accent transition-colors"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="p-1.5 rounded-lg bg-amber-500/20">
-                <Clock className="w-4 h-4 text-amber-400" />
+              <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30">
+                <AlertTriangle className="w-5 h-5 text-amber-400" />
               </div>
-              Open Positions ({openTrades.length})
-              {showOpenTrades ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <div className="text-left">
+                <h2 className="text-lg font-bold">Open Positions</h2>
+                <p className="text-xs text-muted">{openTrades.length} active trades</p>
+              </div>
+              {showOpenTrades ? <ChevronUp className="w-4 h-4 text-muted" /> : <ChevronDown className="w-4 h-4 text-muted" />}
             </button>
-            <span className="text-xs text-amber-400">Not included in stats until closed</span>
+            <span className="text-xs text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md">Not included in stats</span>
           </div>
 
           {showOpenTrades && (
@@ -2464,7 +2519,7 @@ export default function TradingPage() {
       {/* Close Trade Modal */}
       {closingTrade && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-2xl border border-border/50 p-6 w-full max-w-md">
+          <div className="glass rounded-2xl border border-border/40 p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-lg">Close Trade</h3>
               <button onClick={() => setClosingTrade(null)} className="p-2 hover:bg-card-hover rounded-lg">
@@ -2596,25 +2651,36 @@ export default function TradingPage() {
       )}
 
       {/* EVENT CORRELATION */}
-      <div className="glass rounded-xl border border-border/50 p-5">
-        <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-          <Calendar className="w-4 h-4 text-accent-light" />
-          Trade-Event Correlation
-        </h3>
+      <div className="glass rounded-xl border border-border/40 p-5 shadow-lg shadow-black/5">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-border/20 bg-gradient-to-r from-transparent via-card/30 to-transparent -mx-5 px-5 -mt-5 pt-5 rounded-t-xl">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+              <Zap className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Event Correlation</h2>
+              <p className="text-xs text-muted">How economic events affect your trades</p>
+            </div>
+          </div>
+        </div>
         <EventCorrelation trades={trades} />
       </div>
 
       {/* TRADE HISTORY - Collapsible with Pagination */}
-      <div className="glass rounded-xl border border-border/50">
+      <div className="glass rounded-xl border border-border/40 shadow-lg shadow-black/5">
         <button
           onClick={() => setShowRecentTrades(!showRecentTrades)}
-          className="w-full p-4 flex items-center justify-between hover:bg-card-hover transition-colors rounded-xl"
+          className="w-full p-5 flex items-center justify-between hover:bg-card-hover/50 transition-colors rounded-xl bg-gradient-to-r from-transparent via-card/20 to-transparent"
         >
-          <h3 className="text-sm font-semibold flex items-center gap-2">
-            <Clock className="w-4 h-4 text-accent-light" />
-            Trade History
-            <span className="text-xs text-muted font-normal">({tradingStats.sortedTrades.length} total)</span>
-          </h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <Clock className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="text-left">
+              <h2 className="text-lg font-bold">Trade History</h2>
+              <p className="text-xs text-muted">{tradingStats.sortedTrades.length} trades recorded</p>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted">{showRecentTrades ? "Hide" : "Show"}</span>
             {showRecentTrades ? (
@@ -2629,7 +2695,7 @@ export default function TradingPage() {
           <div className="px-5 pb-5">
             {/* Pagination Controls - Top */}
             {tradingStats.sortedTrades.length > tradesPerPage && (
-              <div className="flex items-center justify-between mb-3 pb-3 border-b border-border/50">
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-border/40">
                 <div className="text-xs text-muted">
                   Showing trades {Math.min((recentTradesPage - 1) * tradesPerPage + 1, tradingStats.sortedTrades.length)}-{Math.min(recentTradesPage * tradesPerPage, tradingStats.sortedTrades.length)} of {tradingStats.sortedTrades.length}
                 </div>
@@ -2707,7 +2773,7 @@ export default function TradingPage() {
                       };
 
                       return (
-                        <tr key={trade.id} className="border-b border-border/50 hover:bg-card-hover transition-colors">
+                        <tr key={trade.id} className="border-b border-border/40 hover:bg-card-hover transition-colors">
                           <td className="py-2 px-2 text-muted text-xs">{tradeNumber}</td>
                           <td className="py-2 px-2 whitespace-nowrap">
                             <div className="text-sm">{trade.date}</div>
@@ -2754,7 +2820,7 @@ export default function TradingPage() {
 
             {/* Pagination Controls - Bottom */}
             {tradingStats.sortedTrades.length > tradesPerPage && (
-              <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-border/50">
+              <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-border/40">
                 <button
                   onClick={() => setRecentTradesPage(1)}
                   disabled={recentTradesPage === 1}
@@ -2795,7 +2861,7 @@ export default function TradingPage() {
       {/* Goal Settings Modal */}
       {showGoalSettings && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowGoalSettings(false)}>
-          <div className="w-full max-w-md glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md glass rounded-2xl border border-border/40 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="p-4 border-b border-border flex items-center justify-between">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <Target className="w-5 h-5 text-accent-light" />
@@ -2837,7 +2903,7 @@ export default function TradingPage() {
               </div>
 
               {goalInput.yearly && parseFloat(goalInput.yearly) > 0 && (
-                <div className="p-3 bg-card/50 rounded-lg border border-border/50">
+                <div className="p-3 bg-card/50 rounded-lg border border-border/40">
                   <div className="text-xs text-muted mb-1">Monthly Target (auto-calculated)</div>
                   <div className="text-lg font-bold text-foreground">
                     ${(parseFloat(goalInput.yearly) / 12).toFixed(0)}/mo
@@ -2860,227 +2926,141 @@ export default function TradingPage() {
       {/* Consistency Settings Modal */}
       {showConsistencySettings && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowConsistencySettings(false)}>
-          <div className="w-full max-w-2xl glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 border-b border-border flex items-center justify-between flex-shrink-0">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <Award className="w-5 h-5 text-yellow-400" />
-                Consistency Rules
-              </h3>
-              <button onClick={() => setShowConsistencySettings(false)} className="p-1.5 rounded-lg hover:bg-card-hover transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+          <div className="w-full max-w-md glass rounded-2xl border border-border/40 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="p-5 border-b border-border/40 bg-gradient-to-r from-transparent via-card/30 to-transparent">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-yellow-500/15 border border-yellow-500/30">
+                    <Award className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">Consistency Rules</h3>
+                    <p className="text-xs text-muted">Each metric contributes 25 points to your score</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowConsistencySettings(false)} className="p-2 rounded-lg hover:bg-card-hover transition-colors">
+                  <X className="w-5 h-5 text-muted" />
+                </button>
+              </div>
             </div>
 
-            <div className="p-5 space-y-4 overflow-y-auto flex-1">
-              <p className="text-sm text-muted mb-2">
-                Customize thresholds for your trading strategy. Each factor contributes 25 points to your consistency score.
-              </p>
-
-              <div className="grid grid-cols-2 gap-4">
+            {/* Content */}
+            <div className="px-5 py-4 space-y-1 overflow-y-auto flex-1">
               {/* Win Rate Target */}
-              <div className="p-4 bg-card/30 rounded-lg border border-border/30">
+              <div className="py-3">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-base font-medium flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    Win Rate Target
-                  </label>
-                  <span className="text-base font-bold text-emerald-400">{consistencySettings.winRateTarget}%</span>
+                    <span className="text-base font-medium">Win Rate Target</span>
+                  </div>
+                  <span className="text-xl font-bold text-emerald-400">{consistencySettings.winRateTarget}%</span>
                 </div>
-                <p className="text-xs text-muted mb-3">
-                  You earn max points when your win rate reaches this target. <span className="text-emerald-400">Higher targets</span> are harder to achieve but reward consistent winning strategies.
-                </p>
-                <div className="relative h-2.5 mb-1">
-                  <div className="absolute inset-0 bg-background rounded-full" />
-                  <div
-                    className="absolute left-0 top-0 h-full bg-emerald-500 rounded-full transition-all"
-                    style={{ width: `${((consistencySettings.winRateTarget - 30) / 60) * 100}%` }}
-                  />
-                  <input
-                    type="range"
-                    min="30"
-                    max="90"
-                    value={consistencySettings.winRateTarget}
-                    onChange={(e) => setConsistencySettings({ ...consistencySettings, winRateTarget: parseInt(e.target.value) })}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white shadow-lg pointer-events-none transition-all"
-                    style={{ left: `calc(${((consistencySettings.winRateTarget - 30) / 60) * 100}% - 10px)` }}
-                  />
+                <p className="text-xs text-muted mb-3">Focus on quality setups and high-probability entries.</p>
+                <div className="relative h-2">
+                  <div className="absolute inset-0 bg-card-hover rounded-full" />
+                  <div className="absolute left-0 top-0 h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${((consistencySettings.winRateTarget - 30) / 60) * 100}%` }} />
+                  <input type="range" min="30" max="90" value={consistencySettings.winRateTarget} onChange={(e) => setConsistencySettings({ ...consistencySettings, winRateTarget: parseInt(e.target.value) })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-500 rounded-full border-2 border-background shadow-md pointer-events-none transition-all" style={{ left: `calc(${((consistencySettings.winRateTarget - 30) / 60) * 100}% - 8px)` }} />
                 </div>
-                <div className="flex justify-between text-[11px] text-muted">
-                  <span>30%</span>
-                  <span>60%</span>
-                  <span>90%</span>
-                </div>
-                <p className="text-[11px] text-muted/70 mt-2 italic">
-                  💡 To improve: Focus on quality setups, avoid overtrading, wait for high-probability entries.
-                </p>
+                <div className="flex justify-between text-[11px] text-muted/50 mt-1"><span>30%</span><span>90%</span></div>
               </div>
+
+              <div className="border-t border-border/20" />
 
               {/* Profit Factor Target */}
-              <div className="p-4 bg-card/30 rounded-lg border border-border/30">
+              <div className="py-3">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-base font-medium flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                    Profit Factor Target
-                  </label>
-                  <span className="text-base font-bold text-blue-400">{consistencySettings.profitFactorTarget.toFixed(1)}</span>
+                    <span className="text-base font-medium">Profit Factor Target</span>
+                  </div>
+                  <span className="text-xl font-bold text-blue-400">{consistencySettings.profitFactorTarget.toFixed(1)}</span>
                 </div>
-                <p className="text-xs text-muted mb-3">
-                  Ratio of gross profits to gross losses. <span className="text-blue-400">Above 1.0</span> means profitable. Set your target based on strategy style—scalpers aim for 1.5, swing traders for 2.0+.
-                </p>
-                <div className="relative h-2.5 mb-1">
-                  <div className="absolute inset-0 bg-background rounded-full" />
-                  <div
-                    className="absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all"
-                    style={{ width: `${((consistencySettings.profitFactorTarget - 1) / 4) * 100}%` }}
-                  />
-                  <input
-                    type="range"
-                    min="10"
-                    max="50"
-                    value={consistencySettings.profitFactorTarget * 10}
-                    onChange={(e) => setConsistencySettings({ ...consistencySettings, profitFactorTarget: parseInt(e.target.value) / 10 })}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-blue-500 rounded-full border-2 border-white shadow-lg pointer-events-none transition-all"
-                    style={{ left: `calc(${((consistencySettings.profitFactorTarget - 1) / 4) * 100}% - 10px)` }}
-                  />
+                <p className="text-xs text-muted mb-3">Ratio of profits to losses. Above 1.0 = profitable.</p>
+                <div className="relative h-2">
+                  <div className="absolute inset-0 bg-card-hover rounded-full" />
+                  <div className="absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all" style={{ width: `${((consistencySettings.profitFactorTarget - 1) / 4) * 100}%` }} />
+                  <input type="range" min="10" max="50" value={consistencySettings.profitFactorTarget * 10} onChange={(e) => setConsistencySettings({ ...consistencySettings, profitFactorTarget: parseInt(e.target.value) / 10 })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-background shadow-md pointer-events-none transition-all" style={{ left: `calc(${((consistencySettings.profitFactorTarget - 1) / 4) * 100}% - 8px)` }} />
                 </div>
-                <div className="flex justify-between text-[11px] text-muted">
-                  <span>1.0</span>
-                  <span>3.0</span>
-                  <span>5.0</span>
-                </div>
-                <p className="text-[11px] text-muted/70 mt-2 italic">
-                  💡 To improve: Let winners run longer, cut losers faster, maintain strict risk/reward on entries.
-                </p>
+                <div className="flex justify-between text-[11px] text-muted/50 mt-1"><span>1.0</span><span>5.0</span></div>
               </div>
+
+              <div className="border-t border-border/20" />
 
               {/* Max Drawdown Limit */}
-              <div className="p-4 bg-card/30 rounded-lg border border-border/30">
+              <div className="py-3">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-base font-medium flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                    Max Drawdown Tolerance
-                  </label>
-                  <span className="text-base font-bold text-red-400">{consistencySettings.maxDrawdownLimit}%</span>
+                    <span className="text-base font-medium">Max Drawdown Tolerance</span>
+                  </div>
+                  <span className="text-xl font-bold text-red-400">{consistencySettings.maxDrawdownLimit}%</span>
                 </div>
-                <p className="text-xs text-muted mb-3">
-                  Your acceptable peak-to-trough decline. <span className="text-red-400">Lower tolerance</span> rewards tighter risk management. Score decreases as drawdown approaches this limit.
-                </p>
-                <div className="relative h-2.5 mb-1">
-                  <div className="absolute inset-0 bg-background rounded-full" />
-                  <div
-                    className="absolute left-0 top-0 h-full bg-red-500 rounded-full transition-all"
-                    style={{ width: `${((consistencySettings.maxDrawdownLimit - 5) / 45) * 100}%` }}
-                  />
-                  <input
-                    type="range"
-                    min="5"
-                    max="50"
-                    value={consistencySettings.maxDrawdownLimit}
-                    onChange={(e) => setConsistencySettings({ ...consistencySettings, maxDrawdownLimit: parseInt(e.target.value) })}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-none transition-all"
-                    style={{ left: `calc(${((consistencySettings.maxDrawdownLimit - 5) / 45) * 100}% - 10px)` }}
-                  />
+                <p className="text-xs text-muted mb-3">Acceptable peak-to-trough decline. Use stop-losses.</p>
+                <div className="relative h-2">
+                  <div className="absolute inset-0 bg-card-hover rounded-full" />
+                  <div className="absolute left-0 top-0 h-full bg-red-500 rounded-full transition-all" style={{ width: `${((consistencySettings.maxDrawdownLimit - 5) / 45) * 100}%` }} />
+                  <input type="range" min="5" max="50" value={consistencySettings.maxDrawdownLimit} onChange={(e) => setConsistencySettings({ ...consistencySettings, maxDrawdownLimit: parseInt(e.target.value) })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full border-2 border-background shadow-md pointer-events-none transition-all" style={{ left: `calc(${((consistencySettings.maxDrawdownLimit - 5) / 45) * 100}% - 8px)` }} />
                 </div>
-                <div className="flex justify-between text-[11px] text-muted">
-                  <span>5%</span>
-                  <span>27%</span>
-                  <span>50%</span>
-                </div>
-                <p className="text-[11px] text-muted/70 mt-2 italic">
-                  💡 To improve: Use smaller position sizes, set stop-losses, avoid revenge trading after losses.
-                </p>
+                <div className="flex justify-between text-[11px] text-muted/50 mt-1"><span>5%</span><span>50%</span></div>
               </div>
 
-              {/* Streak Target */}
-              <div className="p-4 bg-card/30 rounded-lg border border-border/30">
+              <div className="border-t border-border/20" />
+
+              {/* Risk/Reward Target */}
+              <div className="py-3">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-base font-medium flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                    Win Streak Target
-                  </label>
-                  <span className="text-base font-bold text-yellow-400">{consistencySettings.streakTarget}</span>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+                    <span className="text-base font-medium">Risk/Reward Target</span>
+                  </div>
+                  <span className="text-xl font-bold text-purple-400">{consistencySettings.riskRewardTarget?.toFixed(1) || "1.5"}</span>
                 </div>
-                <p className="text-xs text-muted mb-3">
-                  Consecutive winning trades to aim for. <span className="text-yellow-400">Longer streaks</span> indicate consistent execution. Realistic targets depend on your win rate.
-                </p>
-                <div className="relative h-2.5 mb-1">
-                  <div className="absolute inset-0 bg-background rounded-full" />
-                  <div
-                    className="absolute left-0 top-0 h-full bg-yellow-500 rounded-full transition-all"
-                    style={{ width: `${((consistencySettings.streakTarget - 3) / 17) * 100}%` }}
-                  />
-                  <input
-                    type="range"
-                    min="3"
-                    max="20"
-                    value={consistencySettings.streakTarget}
-                    onChange={(e) => setConsistencySettings({ ...consistencySettings, streakTarget: parseInt(e.target.value) })}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-yellow-500 rounded-full border-2 border-white shadow-lg pointer-events-none transition-all"
-                    style={{ left: `calc(${((consistencySettings.streakTarget - 3) / 17) * 100}% - 10px)` }}
-                  />
+                <p className="text-xs text-muted mb-3">Avg win ÷ avg loss. Higher = better risk management.</p>
+                <div className="relative h-2">
+                  <div className="absolute inset-0 bg-card-hover rounded-full" />
+                  <div className="absolute left-0 top-0 h-full bg-purple-500 rounded-full transition-all" style={{ width: `${(((consistencySettings.riskRewardTarget || 1.5) - 1) / 2) * 100}%` }} />
+                  <input type="range" min="10" max="30" value={(consistencySettings.riskRewardTarget || 1.5) * 10} onChange={(e) => setConsistencySettings({ ...consistencySettings, riskRewardTarget: parseInt(e.target.value) / 10 })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-purple-500 rounded-full border-2 border-background shadow-md pointer-events-none transition-all" style={{ left: `calc(${(((consistencySettings.riskRewardTarget || 1.5) - 1) / 2) * 100}% - 8px)` }} />
                 </div>
-                <div className="flex justify-between text-[11px] text-muted">
-                  <span>3</span>
-                  <span>11</span>
-                  <span>20</span>
-                </div>
-                <p className="text-[11px] text-muted/70 mt-2 italic">
-                  💡 To improve: Trade your best setups only, follow your rules, stay patient between trades.
-                </p>
-              </div>
+                <div className="flex justify-between text-[11px] text-muted/50 mt-1"><span>1.0</span><span>3.0</span></div>
               </div>
 
-              {/* Preview */}
-              <div className="p-4 bg-card/50 rounded-lg border border-border/50">
-                <div className="text-sm text-muted mb-2">Current Score Preview</div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-3xl font-bold ${
-                    tradingStats.consistencyScore >= 80 ? "text-emerald-400" :
-                    tradingStats.consistencyScore >= 60 ? "text-blue-400" :
-                    tradingStats.consistencyScore >= 40 ? "text-yellow-400" : "text-red-400"
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-4 border-t border-border/40 bg-card/30">
+              <div className="flex items-center gap-3">
+                {/* Score Preview */}
+                <div className="flex items-center gap-2 mr-auto">
+                  <span className="text-sm text-muted">Score:</span>
+                  <span className={`text-xl font-bold ${
+                    tradingStats.consistencyScore >= 90 ? "text-emerald-400" :
+                    tradingStats.consistencyScore >= 80 ? "text-green-400" :
+                    tradingStats.consistencyScore >= 70 ? "text-yellow-400" :
+                    tradingStats.consistencyScore >= 60 ? "text-orange-400" : "text-red-400"
                   }`}>{tradingStats.consistencyScore}</span>
-                  <span className="text-base text-muted">/ 100</span>
-                  <span className={`ml-auto px-3 py-1 rounded text-sm font-bold ${
-                    consistencyGrade.grade === "A+" || consistencyGrade.grade === "A" ? "bg-emerald-500/20 text-emerald-400" :
-                    consistencyGrade.grade === "B+" || consistencyGrade.grade === "B" ? "bg-blue-500/20 text-blue-400" :
-                    consistencyGrade.grade === "C+" || consistencyGrade.grade === "C" ? "bg-yellow-500/20 text-yellow-400" :
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                    consistencyGrade.grade.startsWith("A") ? "bg-emerald-500/20 text-emerald-400" :
+                    consistencyGrade.grade.startsWith("B") ? "bg-green-500/20 text-green-400" :
+                    consistencyGrade.grade.startsWith("C") ? "bg-yellow-500/20 text-yellow-400" :
+                    consistencyGrade.grade.startsWith("D") ? "bg-orange-500/20 text-orange-400" :
                     "bg-red-500/20 text-red-400"
                   }`}>{consistencyGrade.grade}</span>
                 </div>
-              </div>
-
-              <div className="flex gap-3">
+                {/* Buttons */}
                 <button
-                  onClick={() => {
-                    setConsistencySettings({
-                      winRateTarget: 60,
-                      profitFactorTarget: 2,
-                      maxDrawdownLimit: 25,
-                      streakTarget: 10,
-                    });
-                  }}
-                  className="flex-1 py-2.5 bg-card hover:bg-card-hover border border-border rounded-lg font-medium transition-colors text-base"
+                  onClick={() => setConsistencySettings({ winRateTarget: 60, profitFactorTarget: 2, maxDrawdownLimit: 25, riskRewardTarget: 1.5 })}
+                  className="px-4 py-2 bg-card hover:bg-card-hover border border-border/40 rounded-lg text-sm font-medium transition-colors"
                 >
-                  Reset Defaults
+                  Reset
                 </button>
                 <button
-                  onClick={() => {
-                    localStorage.setItem("consistencySettings", JSON.stringify(consistencySettings));
-                    setShowConsistencySettings(false);
-                  }}
-                  className="flex-1 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-base"
+                  onClick={() => { localStorage.setItem("consistencySettings", JSON.stringify(consistencySettings)); setShowConsistencySettings(false); }}
+                  className="px-5 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                 >
                   <Check className="w-4 h-4" />
                   Save
@@ -3091,453 +3071,507 @@ export default function TradingPage() {
         </div>
       )}
 
-      {/* Trading Audit Modal */}
-      {showTradingAudit && (
+      {/* Trading Audit Modal - Conversational Analysis */}
+      {showTradingAudit && (() => {
+        // Compute real analysis from trade data
+        const auditTrades = closedTrades;
+
+        // By Asset Type
+        const byAsset: Record<string, { pnl: number; count: number; wins: number }> = {};
+        auditTrades.forEach(t => {
+          const asset = t.assetType || "Unknown";
+          if (!byAsset[asset]) byAsset[asset] = { pnl: 0, count: 0, wins: 0 };
+          byAsset[asset].pnl += t.pnl;
+          byAsset[asset].count++;
+          if (t.pnl > 0) byAsset[asset].wins++;
+        });
+        const assetBreakdown = Object.entries(byAsset)
+          .map(([name, data]) => ({ name, ...data, winRate: data.count > 0 ? (data.wins / data.count) * 100 : 0 }))
+          .sort((a, b) => b.pnl - a.pnl);
+
+        // By Tag
+        const byTag: Record<string, { pnl: number; count: number; wins: number }> = {};
+        auditTrades.forEach(t => {
+          (t.tags || []).forEach((tag: string) => {
+            if (!byTag[tag]) byTag[tag] = { pnl: 0, count: 0, wins: 0 };
+            byTag[tag].pnl += t.pnl;
+            byTag[tag].count++;
+            if (t.pnl > 0) byTag[tag].wins++;
+          });
+        });
+        const tagBreakdown = Object.entries(byTag)
+          .map(([name, data]) => ({ name, ...data, winRate: data.count > 0 ? (data.wins / data.count) * 100 : 0 }))
+          .sort((a, b) => b.pnl - a.pnl);
+
+        // By Ticker
+        const byTicker: Record<string, { pnl: number; count: number; wins: number }> = {};
+        auditTrades.forEach(t => {
+          const ticker = t.ticker || "Unknown";
+          if (!byTicker[ticker]) byTicker[ticker] = { pnl: 0, count: 0, wins: 0 };
+          byTicker[ticker].pnl += t.pnl;
+          byTicker[ticker].count++;
+          if (t.pnl > 0) byTicker[ticker].wins++;
+        });
+        const tickerBreakdown = Object.entries(byTicker)
+          .map(([name, data]) => ({ name, ...data }))
+          .sort((a, b) => b.pnl - a.pnl);
+        const topTickers = tickerBreakdown.slice(0, 3);
+        const bottomTickers = tickerBreakdown.slice(-3).reverse();
+
+        // Day of Week
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const byDay: Record<number, { pnl: number; count: number; wins: number }> = {};
+        auditTrades.forEach(t => {
+          const day = new Date(t.date).getDay();
+          if (!byDay[day]) byDay[day] = { pnl: 0, count: 0, wins: 0 };
+          byDay[day].pnl += t.pnl;
+          byDay[day].count++;
+          if (t.pnl > 0) byDay[day].wins++;
+        });
+        const dayBreakdown = Object.entries(byDay)
+          .map(([day, data]) => ({ day: dayNames[parseInt(day)], dayNum: parseInt(day), ...data, winRate: data.count > 0 ? (data.wins / data.count) * 100 : 0 }))
+          .sort((a, b) => b.pnl - a.pnl);
+        const bestDay = dayBreakdown[0];
+        const worstDay = dayBreakdown[dayBreakdown.length - 1];
+
+        // Trade Duration (day trade vs swing)
+        let dayTrades = 0, swingTrades = 0, dayPnl = 0, swingPnl = 0, dayWins = 0, swingWins = 0;
+        auditTrades.forEach(t => {
+          const isSwing = t.closeDate && t.closeDate !== t.date;
+          if (isSwing) { swingTrades++; swingPnl += t.pnl; if (t.pnl > 0) swingWins++; }
+          else { dayTrades++; dayPnl += t.pnl; if (t.pnl > 0) dayWins++; }
+        });
+        const dayWinRate = dayTrades > 0 ? (dayWins / dayTrades) * 100 : 0;
+        const swingWinRate = swingTrades > 0 ? (swingWins / swingTrades) * 100 : 0;
+
+        // Biggest trades
+        const sortedByPnl = [...auditTrades].sort((a, b) => b.pnl - a.pnl);
+        const biggestWin = sortedByPnl[0];
+        const biggestLoss = sortedByPnl[sortedByPnl.length - 1];
+
+        // Overall assessment
+        const isProfit = tradingStats.allTimePnl >= 0;
+        const hasEdge = tradingStats.expectancy > 0;
+        const goodWinRate = tradingStats.winRate >= 50;
+        const goodRR = tradingStats.riskRewardRatio >= 1.5;
+        const lowDrawdown = tradingStats.maxDrawdownPercent <= 20;
+
+        return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowTradingAudit(false)}>
-          <div className="w-full max-w-4xl glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="p-5 border-b border-border flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10">
-              <div>
-                <h3 className="text-xl font-bold flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30">
+          <div className="w-full max-w-3xl glass rounded-2xl border border-border/40 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="p-5 border-b border-border/40 bg-gradient-to-r from-purple-500/10 to-blue-500/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30">
                     <FileText className="w-5 h-5 text-purple-400" />
                   </div>
-                  <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Trading Performance Audit</span>
-                </h3>
-                <p className="text-sm text-muted mt-1">Comprehensive analysis of your trading data</p>
+                  <div>
+                    <h3 className="text-xl font-bold">Trading Performance Audit</h3>
+                    <p className="text-sm text-muted">A comprehensive review of {auditTrades.length} trades</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowTradingAudit(false)} className="p-2 rounded-lg hover:bg-card-hover transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button onClick={() => setShowTradingAudit(false)} className="p-2 rounded-lg hover:bg-card-hover transition-colors">
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
-              {/* Executive Summary */}
-              <div className="p-5 rounded-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-border/50">
-                <h4 className="text-lg font-bold mb-3 flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-purple-400" />
-                  Executive Summary
-                </h4>
-                <div className="grid grid-cols-4 gap-4 mb-4">
-                  <div className="text-center p-3 rounded-lg bg-card/50">
-                    <div className={`text-2xl font-bold ${tradingStats.allTimePnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {tradingStats.allTimePnl >= 0 ? '+' : ''}${tradingStats.allTimePnl.toFixed(0)}
-                    </div>
-                    <div className="text-xs text-muted">Total P&L</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-card/50">
-                    <div className="text-2xl font-bold text-foreground">{tradingStats.allTimeTrades}</div>
-                    <div className="text-xs text-muted">Total Trades</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-card/50">
-                    <div className={`text-2xl font-bold ${tradingStats.winRate >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                      {tradingStats.winRate.toFixed(1)}%
-                    </div>
-                    <div className="text-xs text-muted">Win Rate</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-card/50">
-                    <div className={`text-2xl font-bold ${consistencyGrade.color}`}>{consistencyGrade.grade}</div>
-                    <div className="text-xs text-muted">Grade</div>
-                  </div>
+              {auditTrades.length < 5 ? (
+                <div className="p-8 text-center">
+                  <p className="text-lg mb-2">Insufficient Data for Audit</p>
+                  <p className="text-sm text-muted">I need at least 5 closed trades to provide meaningful analysis. You currently have {auditTrades.length}.</p>
                 </div>
-                <p className="text-sm text-muted leading-relaxed">
-                  {tradingStats.allTimeTrades < 10
-                    ? "⚠️ Limited data available. Complete at least 30 trades for statistically meaningful analysis."
-                    : tradingStats.allTimeTrades < 30
-                    ? `Based on ${tradingStats.allTimeTrades} trades, your data is beginning to show patterns but more trades will improve reliability.`
-                    : `Based on ${tradingStats.allTimeTrades} trades, your trading shows ${
-                        tradingStats.consistencyScore >= 70 ? 'strong consistency and disciplined execution' :
-                        tradingStats.consistencyScore >= 50 ? 'moderate consistency with room for improvement' :
-                        'developing patterns that need focused attention'
-                      }. ${tradingStats.allTimePnl >= 0 ? 'You are net profitable.' : 'Currently in a drawdown phase.'}`
-                  }
-                </p>
-              </div>
+              ) : (
+                <>
+                  {/* Opening Statement */}
+                  <div className="p-5 rounded-xl bg-card/50 border border-border/40">
+                    <p className="text-sm leading-relaxed">
+                      {isProfit ? (
+                        hasEdge ? (
+                          <>I've reviewed your trading history of <strong>{auditTrades.length} trades</strong> totaling <strong className="text-emerald-400">${tradingStats.allTimePnl.toLocaleString()}</strong> in profit. You're showing a positive expectancy of <strong>${tradingStats.expectancy.toFixed(2)}</strong> per trade, which means your system has a statistical edge. {goodWinRate && goodRR ? "Both your win rate and risk/reward ratio are solid." : goodWinRate ? "Your win rate is strong, though your R:R could improve." : goodRR ? "Your R:R is excellent, though winning more often would help." : "There's room to improve both win rate and R:R."}</>
+                        ) : (
+                          <>You've completed <strong>{auditTrades.length} trades</strong> with a net profit of <strong className="text-emerald-400">${tradingStats.allTimePnl.toLocaleString()}</strong>. However, your expectancy is currently <strong className="text-amber-400">${tradingStats.expectancy.toFixed(2)}</strong> per trade. While you're profitable, this suggests your edge may be fragile or dependent on a few large winners. Let's identify where your real edge lies.</>
+                        )
+                      ) : (
+                        <>I've analyzed your <strong>{auditTrades.length} trades</strong> showing a net loss of <strong className="text-red-400">${Math.abs(tradingStats.allTimePnl).toLocaleString()}</strong>. Your current expectancy is <strong className="text-red-400">${tradingStats.expectancy.toFixed(2)}</strong> per trade. This isn't a criticism—it's information. Let's find where you're losing money and where your strengths might be hiding.</>
+                      )}
+                    </p>
+                  </div>
 
-              {/* Strengths & Weaknesses */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Strengths */}
-                <div className="p-5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                  <h4 className="text-base font-bold mb-3 flex items-center gap-2 text-emerald-400">
-                    <CheckCircle className="w-5 h-5" />
-                    Strengths
-                  </h4>
-                  <ul className="space-y-2 text-sm">
-                    {tradingStats.winRate >= 50 && (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Win rate above 50%</strong> - Your trade selection is better than random</span>
-                      </li>
-                    )}
-                    {tradingStats.profitFactor >= 1.5 && (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Profit factor of {tradingStats.profitFactor.toFixed(2)}</strong> - Strong reward vs risk ratio</span>
-                      </li>
-                    )}
-                    {tradingStats.riskRewardRatio >= 1.5 && (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>R:R ratio of {tradingStats.riskRewardRatio.toFixed(2)}</strong> - Winners are larger than losers</span>
-                      </li>
-                    )}
-                    {tradingStats.maxDrawdownPercent <= 15 && (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Max drawdown under 15%</strong> - Good risk management</span>
-                      </li>
-                    )}
-                    {tradingStats.longestWinStreak >= 5 && (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>{tradingStats.longestWinStreak} trade win streak</strong> - Capable of sustained performance</span>
-                      </li>
-                    )}
-                    {tradingStats.expectancy > 0 && (
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Positive expectancy (${tradingStats.expectancy.toFixed(0)}/trade)</strong> - Strategy has an edge</span>
-                      </li>
-                    )}
-                    {tradingStats.winRate < 50 && tradingStats.profitFactor < 1.5 && tradingStats.riskRewardRatio < 1.5 && tradingStats.maxDrawdownPercent > 15 && tradingStats.expectancy <= 0 && (
-                      <li className="flex items-start gap-2 text-muted">
-                        <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        <span>Continue building your track record to identify strengths</span>
-                      </li>
-                    )}
-                  </ul>
-                </div>
+                  {/* Asset Type Analysis */}
+                  {assetBreakdown.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-muted uppercase tracking-wide">Asset Class Performance</h4>
+                      <div className="p-4 rounded-xl bg-card/30 border border-border/40 space-y-3">
+                        {assetBreakdown.map((asset, i) => (
+                          <div key={asset.name} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${i === 0 && asset.pnl > 0 ? 'bg-emerald-500/20 text-emerald-400' : asset.pnl < 0 ? 'bg-red-500/20 text-red-400' : 'bg-card text-muted'}`}>
+                                {i + 1}
+                              </div>
+                              <div>
+                                <div className="font-medium">{asset.name}</div>
+                                <div className="text-xs text-muted">{asset.count} trades • {asset.winRate.toFixed(0)}% win rate</div>
+                              </div>
+                            </div>
+                            <div className={`text-lg font-bold ${asset.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {asset.pnl >= 0 ? '+' : ''}${asset.pnl.toLocaleString()}
+                            </div>
+                          </div>
+                        ))}
+                        <p className="text-sm text-muted pt-2 border-t border-border/40">
+                          {assetBreakdown.length > 1 && assetBreakdown[0].pnl > 0 ? (
+                            assetBreakdown[assetBreakdown.length - 1].pnl < 0 ? (
+                              <><strong>{assetBreakdown[0].name}</strong> is clearly your strength. Meanwhile, <strong>{assetBreakdown[assetBreakdown.length - 1].name}</strong> is costing you ${Math.abs(assetBreakdown[assetBreakdown.length - 1].pnl).toLocaleString()}. Consider focusing more on what works.</>
+                            ) : (
+                              <>You're profitable across asset classes, with <strong>{assetBreakdown[0].name}</strong> leading. This diversification is healthy.</>
+                            )
+                          ) : (
+                            <>You're primarily trading {assetBreakdown[0]?.name || "one asset class"}. Consider if expanding would benefit your strategy.</>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-                {/* Weaknesses */}
-                <div className="p-5 rounded-xl bg-red-500/5 border border-red-500/20">
-                  <h4 className="text-base font-bold mb-3 flex items-center gap-2 text-red-400">
-                    <XCircle className="w-5 h-5" />
-                    Areas for Improvement
-                  </h4>
-                  <ul className="space-y-2 text-sm">
-                    {tradingStats.winRate < 45 && (
-                      <li className="flex items-start gap-2">
-                        <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Win rate of {tradingStats.winRate.toFixed(1)}%</strong> - Review entry criteria and setup quality</span>
-                      </li>
-                    )}
-                    {tradingStats.profitFactor < 1 && (
-                      <li className="flex items-start gap-2">
-                        <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Profit factor below 1.0</strong> - Losing more than winning overall</span>
-                      </li>
-                    )}
-                    {tradingStats.riskRewardRatio < 1 && (
-                      <li className="flex items-start gap-2">
-                        <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>R:R below 1:1</strong> - Average loss exceeds average win</span>
-                      </li>
-                    )}
-                    {tradingStats.maxDrawdownPercent > 25 && (
-                      <li className="flex items-start gap-2">
-                        <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Max drawdown of {tradingStats.maxDrawdownPercent.toFixed(1)}%</strong> - Position sizing may be too aggressive</span>
-                      </li>
-                    )}
-                    {tradingStats.longestLossStreak >= 5 && (
-                      <li className="flex items-start gap-2">
-                        <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>{tradingStats.longestLossStreak} trade losing streak</strong> - Consider circuit breakers</span>
-                      </li>
-                    )}
-                    {tradingStats.expectancy < 0 && (
-                      <li className="flex items-start gap-2">
-                        <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                        <span><strong>Negative expectancy</strong> - Strategy is losing money per trade on average</span>
-                      </li>
-                    )}
-                    {tradingStats.winRate >= 45 && tradingStats.profitFactor >= 1 && tradingStats.riskRewardRatio >= 1 && tradingStats.maxDrawdownPercent <= 25 && tradingStats.expectancy >= 0 && (
-                      <li className="flex items-start gap-2 text-muted">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                        <span>No critical weaknesses detected. Focus on consistency.</span>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              </div>
+                  {/* Strategy/Tag Analysis */}
+                  {tagBreakdown.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-muted uppercase tracking-wide">Strategy Breakdown</h4>
+                      <div className="p-4 rounded-xl bg-card/30 border border-border/40 space-y-3">
+                        {tagBreakdown.slice(0, 5).map((tag, i) => (
+                          <div key={tag.name} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${tag.pnl >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                                {tag.name}
+                              </span>
+                              <span className="text-xs text-muted">{tag.count} trades • {tag.winRate.toFixed(0)}% win</span>
+                            </div>
+                            <span className={`font-bold ${tag.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {tag.pnl >= 0 ? '+' : ''}${tag.pnl.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                        <p className="text-sm text-muted pt-2 border-t border-border/40">
+                          {tagBreakdown[0]?.pnl > 0 ? (
+                            <>Your <strong>"{tagBreakdown[0].name}"</strong> setup is your most profitable strategy with {tagBreakdown[0].count} trades at a {tagBreakdown[0].winRate.toFixed(0)}% win rate. {tagBreakdown.some(t => t.pnl < 0) ? `Consider eliminating strategies that are losing money.` : `All your tagged strategies are profitable—excellent discipline.`}</>
+                          ) : (
+                            <>Your strategies are underperforming. Review your setups and entry criteria carefully.</>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-              {/* Risk Analysis */}
-              <div className="p-5 rounded-xl bg-card/30 border border-border/50">
-                <h4 className="text-base font-bold mb-4 flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-blue-400" />
-                  Risk Management Analysis
-                </h4>
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="p-3 rounded-lg bg-card/50 border border-border/30">
-                    <div className="text-xs text-muted mb-1">Max Drawdown</div>
-                    <div className={`text-xl font-bold ${tradingStats.maxDrawdownPercent <= 10 ? 'text-emerald-400' : tradingStats.maxDrawdownPercent <= 20 ? 'text-amber-400' : 'text-red-400'}`}>
-                      {tradingStats.maxDrawdownPercent.toFixed(1)}%
+                  {/* Ticker Analysis */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-muted uppercase tracking-wide">Symbol Performance</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                        <h5 className="text-xs font-semibold text-emerald-400 mb-3">Best Performers</h5>
+                        <div className="space-y-2">
+                          {topTickers.filter(t => t.pnl > 0).slice(0, 3).map(ticker => (
+                            <div key={ticker.name} className="flex justify-between text-sm">
+                              <span className="font-medium">{ticker.name}</span>
+                              <span className="text-emerald-400">+${ticker.pnl.toLocaleString()}</span>
+                            </div>
+                          ))}
+                          {topTickers.filter(t => t.pnl > 0).length === 0 && <p className="text-xs text-muted">No profitable symbols yet</p>}
+                        </div>
+                      </div>
+                      <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+                        <h5 className="text-xs font-semibold text-red-400 mb-3">Worst Performers</h5>
+                        <div className="space-y-2">
+                          {bottomTickers.filter(t => t.pnl < 0).slice(0, 3).map(ticker => (
+                            <div key={ticker.name} className="flex justify-between text-sm">
+                              <span className="font-medium">{ticker.name}</span>
+                              <span className="text-red-400">${ticker.pnl.toLocaleString()}</span>
+                            </div>
+                          ))}
+                          {bottomTickers.filter(t => t.pnl < 0).length === 0 && <p className="text-xs text-muted">No losing symbols</p>}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-[10px] text-muted mt-1">
-                      {tradingStats.maxDrawdownPercent <= 10 ? 'Excellent' : tradingStats.maxDrawdownPercent <= 20 ? 'Acceptable' : 'High risk'}
-                    </div>
+                    {bottomTickers.filter(t => t.pnl < 0).length > 0 && (
+                      <p className="text-sm text-muted">
+                        <strong>{bottomTickers[0]?.name}</strong> has cost you <strong className="text-red-400">${Math.abs(bottomTickers[0]?.pnl || 0).toLocaleString()}</strong>. Ask yourself: do you have an edge in this symbol, or are you forcing trades?
+                      </p>
+                    )}
                   </div>
-                  <div className="p-3 rounded-lg bg-card/50 border border-border/30">
-                    <div className="text-xs text-muted mb-1">Current Drawdown</div>
-                    <div className={`text-xl font-bold ${tradingStats.currentDrawdownPercent <= 5 ? 'text-emerald-400' : tradingStats.currentDrawdownPercent <= 15 ? 'text-amber-400' : 'text-red-400'}`}>
-                      {tradingStats.currentDrawdownPercent.toFixed(1)}%
-                    </div>
-                    <div className="text-[10px] text-muted mt-1">
-                      {tradingStats.currentDrawdownPercent <= 5 ? 'Near highs' : tradingStats.currentDrawdownPercent <= 15 ? 'In drawdown' : 'Deep drawdown'}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-lg bg-card/50 border border-border/30">
-                    <div className="text-xs text-muted mb-1">Recovery Factor</div>
-                    <div className={`text-xl font-bold ${tradingStats.recoveryFactor >= 3 ? 'text-emerald-400' : tradingStats.recoveryFactor >= 1 ? 'text-amber-400' : 'text-red-400'}`}>
-                      {tradingStats.recoveryFactor >= 10 ? '>10' : tradingStats.recoveryFactor.toFixed(1)}
-                    </div>
-                    <div className="text-[10px] text-muted mt-1">
-                      {tradingStats.recoveryFactor >= 3 ? 'Strong recovery' : tradingStats.recoveryFactor >= 1 ? 'Moderate' : 'Needs improvement'}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-sm text-muted leading-relaxed">
-                  {tradingStats.maxDrawdownPercent <= 15
-                    ? `✓ Your risk management is solid with a max drawdown of ${tradingStats.maxDrawdownPercent.toFixed(1)}%. This suggests appropriate position sizing.`
-                    : tradingStats.maxDrawdownPercent <= 25
-                    ? `⚠️ Your max drawdown of ${tradingStats.maxDrawdownPercent.toFixed(1)}% is within acceptable limits but approaching concerning levels. Consider reducing position sizes by 20-30%.`
-                    : `❌ A ${tradingStats.maxDrawdownPercent.toFixed(1)}% max drawdown indicates excessive risk. Immediately reduce position sizes and implement stricter stop-losses.`
-                  }
-                </div>
-              </div>
 
-              {/* Trade Quality Analysis */}
-              <div className="p-5 rounded-xl bg-card/30 border border-border/50">
-                <h4 className="text-base font-bold mb-4 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-purple-400" />
-                  Trade Quality Breakdown
-                </h4>
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-muted">Win/Loss Distribution</span>
-                      <span className="text-sm font-medium">{tradingStats.winningTrades}W / {tradingStats.losingTrades}L</span>
+                  {/* Timing Analysis */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-muted uppercase tracking-wide">Timing Analysis</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Day of Week */}
+                      <div className="p-4 rounded-xl bg-card/30 border border-border/40">
+                        <h5 className="text-xs font-semibold mb-3">Day of Week</h5>
+                        <div className="space-y-2">
+                          {bestDay && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-emerald-400">Best: {bestDay.day}</span>
+                              <span className="text-emerald-400">+${bestDay.pnl.toLocaleString()} ({bestDay.winRate.toFixed(0)}%)</span>
+                            </div>
+                          )}
+                          {worstDay && worstDay.pnl !== bestDay?.pnl && (
+                            <div className="flex justify-between text-sm">
+                              <span className={worstDay.pnl < 0 ? "text-red-400" : "text-muted"}>Worst: {worstDay.day}</span>
+                              <span className={worstDay.pnl < 0 ? "text-red-400" : "text-muted"}>{worstDay.pnl >= 0 ? '+' : ''}${worstDay.pnl.toLocaleString()}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {/* Trade Duration */}
+                      <div className="p-4 rounded-xl bg-card/30 border border-border/40">
+                        <h5 className="text-xs font-semibold mb-3">Holding Period</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Day Trades ({dayTrades})</span>
+                            <span className={dayPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}>{dayPnl >= 0 ? '+' : ''}${dayPnl.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Swing Trades ({swingTrades})</span>
+                            <span className={swingPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}>{swingPnl >= 0 ? '+' : ''}${swingPnl.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="h-3 bg-background rounded-full overflow-hidden flex">
-                      <div
-                        className="h-full bg-emerald-500 transition-all"
-                        style={{ width: `${tradingStats.allTimeTrades > 0 ? (tradingStats.winningTrades / tradingStats.allTimeTrades) * 100 : 0}%` }}
-                      />
-                      <div
-                        className="h-full bg-red-500 transition-all"
-                        style={{ width: `${tradingStats.allTimeTrades > 0 ? (tradingStats.losingTrades / tradingStats.allTimeTrades) * 100 : 0}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-[10px] text-muted mt-1">
-                      <span className="text-emerald-400">{tradingStats.allTimeTrades > 0 ? ((tradingStats.winningTrades / tradingStats.allTimeTrades) * 100).toFixed(1) : 0}% wins</span>
-                      <span className="text-red-400">{tradingStats.allTimeTrades > 0 ? ((tradingStats.losingTrades / tradingStats.allTimeTrades) * 100).toFixed(1) : 0}% losses</span>
-                    </div>
+                    <p className="text-sm text-muted">
+                      {bestDay && worstDay && worstDay.pnl < 0 ? (
+                        <><strong>{bestDay.day}s</strong> are your most profitable at {bestDay.winRate.toFixed(0)}% win rate. You tend to struggle on <strong>{worstDay.day}s</strong>—consider reducing size or sitting out.</>
+                      ) : bestDay ? (
+                        <><strong>{bestDay.day}s</strong> are your strongest. You're profitable across most trading days.</>
+                      ) : null}
+                      {dayTrades > 0 && swingTrades > 0 && (
+                        <> {dayPnl > swingPnl ? `Day trading is outperforming swings—you may have a better edge in shorter timeframes.` : swingPnl > dayPnl ? `Swing trades are more profitable for you. Patience is paying off.` : `Day and swing trades are performing similarly.`}</>
+                      )}
+                    </p>
                   </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-muted">Avg Win vs Avg Loss</span>
-                      <span className="text-sm font-medium">${tradingStats.avgWin.toFixed(0)} / ${tradingStats.avgLoss.toFixed(0)}</span>
+
+                  {/* Extremes */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-muted uppercase tracking-wide">Notable Trades</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {biggestWin && biggestWin.pnl > 0 && (
+                        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                          <div className="text-xs text-emerald-400 font-semibold mb-1">Largest Winner</div>
+                          <div className="text-2xl font-bold text-emerald-400">+${biggestWin.pnl.toLocaleString()}</div>
+                          <div className="text-sm text-muted">{biggestWin.ticker} on {new Date(biggestWin.date).toLocaleDateString()}</div>
+                        </div>
+                      )}
+                      {biggestLoss && biggestLoss.pnl < 0 && (
+                        <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+                          <div className="text-xs text-red-400 font-semibold mb-1">Largest Loss</div>
+                          <div className="text-2xl font-bold text-red-400">${biggestLoss.pnl.toLocaleString()}</div>
+                          <div className="text-sm text-muted">{biggestLoss.ticker} on {new Date(biggestLoss.date).toLocaleDateString()}</div>
+                        </div>
+                      )}
                     </div>
-                    <div className="h-3 bg-background rounded-full overflow-hidden flex">
+                    {biggestWin && biggestLoss && biggestWin.pnl > 0 && biggestLoss.pnl < 0 && (
+                      <p className="text-sm text-muted">
+                        {Math.abs(biggestLoss.pnl) > biggestWin.pnl ? (
+                          <>Your largest loss exceeds your largest win by <strong className="text-red-400">${(Math.abs(biggestLoss.pnl) - biggestWin.pnl).toLocaleString()}</strong>. This asymmetry suggests you may be holding losers too long or cutting winners too early.</>
+                        ) : (
+                          <>Your largest win exceeds your largest loss by <strong className="text-emerald-400">${(biggestWin.pnl - Math.abs(biggestLoss.pnl)).toLocaleString()}</strong>. Good risk management—you're letting winners run.</>
+                        )}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Final Assessment */}
+                  <div className="p-5 rounded-xl bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20">
+                    <div className="flex items-start justify-between mb-4">
+                      <h4 className="text-base font-bold">Final Assessment</h4>
+                      <div className="text-right">
+                        <div className={`text-3xl font-bold ${consistencyGrade.color}`}>{consistencyGrade.grade}</div>
+                        <div className="text-xs text-muted">{tradingStats.consistencyScore}/100</div>
+                      </div>
+                    </div>
+                    <p className="text-sm leading-relaxed">
+                      {tradingStats.consistencyScore >= 80 ? (
+                        <>Your trading shows <strong>professional-level consistency</strong>. You have a clear edge, manage risk well, and execute with discipline. Focus on maintaining these standards and consider gradually scaling position sizes.</>
+                      ) : tradingStats.consistencyScore >= 60 ? (
+                        <>You're <strong>on the right track</strong> but there's room for improvement. {!goodWinRate && "Your win rate could use work—be more selective with entries. "}{!goodRR && "Your risk/reward needs attention—consider wider targets or tighter stops. "}{!lowDrawdown && "Your drawdowns are concerning—reduce position sizes. "}Focus on consistency over home runs.</>
+                      ) : tradingStats.consistencyScore >= 40 ? (
+                        <>You're in a <strong>development phase</strong>. The data suggests you don't yet have a reliable edge. {tagBreakdown[0]?.pnl > 0 ? `Your "${tagBreakdown[0].name}" setup shows promise—consider focusing there. ` : ""}Review your losing trades for patterns. Consider paper trading while refining your approach.</>
+                      ) : (
+                        <>Your current approach <strong>needs significant work</strong>. This isn't about you—it's about your system. The numbers show consistent losses. I recommend stepping back, studying your trades, and possibly paper trading until you find a reliable edge.</>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Your Next Steps - Actionable Goals */}
+                  <div className="p-5 rounded-xl bg-card/50 border border-accent/30">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Target className="w-5 h-5 text-accent-light" />
+                      <h4 className="text-base font-bold">Your Next Steps</h4>
+                    </div>
+                    <div className="space-y-3">
                       {(() => {
-                        const total = tradingStats.avgWin + tradingStats.avgLoss;
-                        const winPct = total > 0 ? (tradingStats.avgWin / total) * 100 : 50;
-                        return (
-                          <>
-                            <div className="h-full bg-emerald-500" style={{ width: `${winPct}%` }} />
-                            <div className="h-full bg-red-500" style={{ width: `${100 - winPct}%` }} />
-                          </>
+                        const goals: { priority: number; icon: string; text: string; target?: string }[] = [];
+
+                        // Priority 1: Address biggest weakness
+                        if (!goodWinRate && tradingStats.winRate < 45) {
+                          goals.push({
+                            priority: 1,
+                            icon: "🎯",
+                            text: "Improve your win rate by being more selective with entries",
+                            target: `Current: ${tradingStats.winRate.toFixed(0)}% → Target: 50%+`
+                          });
+                        } else if (!goodRR && tradingStats.riskRewardRatio < 1) {
+                          goals.push({
+                            priority: 1,
+                            icon: "⚖️",
+                            text: "Fix your risk/reward ratio—your losses are larger than your wins",
+                            target: `Current: ${tradingStats.riskRewardRatio.toFixed(2)} → Target: 1.5+`
+                          });
+                        } else if (!lowDrawdown) {
+                          goals.push({
+                            priority: 1,
+                            icon: "🛡️",
+                            text: "Reduce position sizes to control drawdown",
+                            target: `Current: ${tradingStats.maxDrawdownPercent.toFixed(0)}% → Target: <20%`
+                          });
+                        }
+
+                        // Strategy-based goal
+                        if (tagBreakdown.length > 0) {
+                          const profitableTags = tagBreakdown.filter(t => t.pnl > 0);
+                          const losingTags = tagBreakdown.filter(t => t.pnl < 0);
+                          if (profitableTags.length > 0 && losingTags.length > 0) {
+                            goals.push({
+                              priority: 2,
+                              icon: "📋",
+                              text: `Focus on "${profitableTags[0].name}" and eliminate "${losingTags[0].name}" setups`,
+                              target: `${profitableTags[0].name}: +$${profitableTags[0].pnl.toLocaleString()} vs ${losingTags[0].name}: -$${Math.abs(losingTags[0].pnl).toLocaleString()}`
+                            });
+                          } else if (profitableTags.length > 0) {
+                            goals.push({
+                              priority: 2,
+                              icon: "📋",
+                              text: `Double down on your "${profitableTags[0].name}" strategy—it's working`,
+                              target: `${profitableTags[0].winRate.toFixed(0)}% win rate, +$${profitableTags[0].pnl.toLocaleString()}`
+                            });
+                          }
+                        }
+
+                        // Symbol-based goal
+                        if (bottomTickers.length > 0 && bottomTickers[0]?.pnl < -100) {
+                          goals.push({
+                            priority: 3,
+                            icon: "🚫",
+                            text: `Stop trading ${bottomTickers[0].name} until you have a clear edge`,
+                            target: `Lost $${Math.abs(bottomTickers[0].pnl).toLocaleString()} on ${bottomTickers[0].count} trades`
+                          });
+                        }
+
+                        // Day-based goal
+                        if (worstDay && worstDay.pnl < 0 && Math.abs(worstDay.pnl) > 200) {
+                          goals.push({
+                            priority: 3,
+                            icon: "📅",
+                            text: `Reduce size or sit out on ${worstDay.day}s`,
+                            target: `Lost $${Math.abs(worstDay.pnl).toLocaleString()} on ${worstDay.day}s`
+                          });
+                        }
+
+                        // Duration-based goal
+                        if (dayTrades > 5 && swingTrades > 5) {
+                          if (dayPnl > swingPnl * 1.5) {
+                            goals.push({
+                              priority: 4,
+                              icon: "⚡",
+                              text: "Focus on day trading—it's significantly outperforming your swings",
+                              target: `Day: +$${dayPnl.toLocaleString()} vs Swing: ${swingPnl >= 0 ? '+' : ''}$${swingPnl.toLocaleString()}`
+                            });
+                          } else if (swingPnl > dayPnl * 1.5) {
+                            goals.push({
+                              priority: 4,
+                              icon: "🕐",
+                              text: "Lean into swing trades—patience is your edge",
+                              target: `Swing: +$${swingPnl.toLocaleString()} vs Day: ${dayPnl >= 0 ? '+' : ''}$${dayPnl.toLocaleString()}`
+                            });
+                          }
+                        }
+
+                        // General improvement goals if not many specific ones
+                        if (goals.length < 2) {
+                          if (tradingStats.profitFactor < 1.5) {
+                            goals.push({
+                              priority: 5,
+                              icon: "📈",
+                              text: "Improve your profit factor by cutting losers faster",
+                              target: `Current: ${tradingStats.profitFactor.toFixed(2)} → Target: 2.0+`
+                            });
+                          }
+                          if (auditTrades.length < 50) {
+                            goals.push({
+                              priority: 5,
+                              icon: "📊",
+                              text: "Log more trades to get statistically significant insights",
+                              target: `Current: ${auditTrades.length} trades → Target: 50+ trades`
+                            });
+                          }
+                        }
+
+                        // If doing well, give scaling goals
+                        if (tradingStats.consistencyScore >= 70 && goals.length < 2) {
+                          goals.push({
+                            priority: 5,
+                            icon: "🚀",
+                            text: "Your system is working—consider gradually increasing position sizes",
+                            target: "Maintain consistency while scaling"
+                          });
+                        }
+
+                        // Sort by priority and take top 3
+                        const topGoals = goals.sort((a, b) => a.priority - b.priority).slice(0, 3);
+
+                        return topGoals.length > 0 ? topGoals.map((goal, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/40">
+                            <span className="text-lg">{goal.icon}</span>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{goal.text}</p>
+                              {goal.target && (
+                                <p className="text-xs text-muted mt-1">{goal.target}</p>
+                              )}
+                            </div>
+                          </div>
+                        )) : (
+                          <div className="p-3 rounded-lg bg-card/50 border border-border/40 text-center">
+                            <p className="text-sm text-muted">Continue logging trades to receive personalized goals</p>
+                          </div>
                         );
                       })()}
                     </div>
-                    <div className="flex justify-between text-[10px] text-muted mt-1">
-                      <span className="text-emerald-400">Avg win: ${tradingStats.avgWin.toFixed(0)}</span>
-                      <span className="text-red-400">Avg loss: ${tradingStats.avgLoss.toFixed(0)}</span>
-                    </div>
                   </div>
-                </div>
-                <div className="mt-4 p-3 rounded-lg bg-slate-800/30 border border-border/30">
-                  <div className="text-sm">
-                    <strong>Edge Analysis:</strong>{' '}
-                    {tradingStats.expectancy > 0
-                      ? <span className="text-emerald-400">You have a positive edge of ${tradingStats.expectancy.toFixed(2)} per trade. Over 100 trades, you'd expect to make ~${(tradingStats.expectancy * 100).toFixed(0)}.</span>
-                      : <span className="text-red-400">Your current expectancy is negative (${tradingStats.expectancy.toFixed(2)}/trade). Focus on either improving win rate or increasing R:R ratio.</span>
-                    }
-                  </div>
-                </div>
-              </div>
-
-              {/* Recommendations */}
-              <div className="p-5 rounded-xl bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-amber-500/20">
-                <h4 className="text-base font-bold mb-4 flex items-center gap-2 text-amber-400">
-                  <Lightbulb className="w-5 h-5" />
-                  Personalized Recommendations
-                </h4>
-                <div className="space-y-3">
-                  {/* Generate dynamic recommendations based on stats */}
-                  {tradingStats.winRate < 50 && tradingStats.riskRewardRatio < 1.5 && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-card/30">
-                      <div className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-red-400">1</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Critical: Fix Your Risk/Reward</div>
-                        <div className="text-xs text-muted mt-1">With a {tradingStats.winRate.toFixed(0)}% win rate and {tradingStats.riskRewardRatio.toFixed(2)} R:R, you need either higher win rate OR better R:R. Target minimum 1.5 R:R on entries.</div>
-                      </div>
-                    </div>
-                  )}
-                  {tradingStats.maxDrawdownPercent > 20 && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-card/30">
-                      <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-amber-400">2</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Reduce Position Sizes</div>
-                        <div className="text-xs text-muted mt-1">Your {tradingStats.maxDrawdownPercent.toFixed(1)}% max drawdown suggests oversized positions. Consider risking no more than 1-2% per trade.</div>
-                      </div>
-                    </div>
-                  )}
-                  {tradingStats.longestLossStreak >= 4 && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-card/30">
-                      <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-blue-400">3</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Implement a Circuit Breaker</div>
-                        <div className="text-xs text-muted mt-1">After {tradingStats.longestLossStreak} consecutive losses, take a mandatory break. This prevents emotional trading and bigger drawdowns.</div>
-                      </div>
-                    </div>
-                  )}
-                  {tradingStats.profitFactor >= 1.5 && tradingStats.winRate >= 50 && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-card/30">
-                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-emerald-400">✓</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Scale Up Carefully</div>
-                        <div className="text-xs text-muted mt-1">Your edge is proven. Consider gradually increasing position sizes while maintaining your discipline.</div>
-                      </div>
-                    </div>
-                  )}
-                  {tradingStats.allTimeTrades < 30 && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-card/30">
-                      <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-purple-400">!</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Build Your Sample Size</div>
-                        <div className="text-xs text-muted mt-1">With only {tradingStats.allTimeTrades} trades, statistical significance is limited. Keep trading your system and re-evaluate at 50+ trades.</div>
-                      </div>
-                    </div>
-                  )}
-                  {tradingStats.avgWin < tradingStats.avgLoss && tradingStats.winRate < 60 && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-card/30">
-                      <div className="w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-orange-400">!</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Let Winners Run</div>
-                        <div className="text-xs text-muted mt-1">Your avg win (${tradingStats.avgWin.toFixed(0)}) is smaller than avg loss (${tradingStats.avgLoss.toFixed(0)}). Hold winners longer or move stops to breakeven faster.</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Goal Progress (if set) */}
-              {(goals.yearlyPnlGoal > 0 || goals.monthlyPnlGoal > 0) && goalProgress && (
-                <div className="p-5 rounded-xl bg-card/30 border border-border/50">
-                  <h4 className="text-base font-bold mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-emerald-400" />
-                    Goal Progress Analysis
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-card/50 border border-border/30">
-                      <div className="text-sm text-muted mb-2">Yearly Goal</div>
-                      <div className="flex items-end gap-2">
-                        <span className={`text-2xl font-bold ${tradingStats.ytdPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          ${tradingStats.ytdPnl.toFixed(0)}
-                        </span>
-                        <span className="text-muted text-sm mb-1">/ ${goals.yearlyPnlGoal.toFixed(0)}</span>
-                      </div>
-                      <div className="h-2 bg-background rounded-full mt-2 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${goalProgress.onTrack ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                          style={{ width: `${Math.min(goalProgress.yearlyProgress, 100)}%` }}
-                        />
-                      </div>
-                      <div className="text-xs text-muted mt-2">
-                        {goalProgress.onTrack
-                          ? `✓ On track! ${goalProgress.yearlyProgress.toFixed(1)}% complete`
-                          : `⚠️ Behind pace. Need $${(goalProgress.dailyTarget).toFixed(0)}/day to catch up`
-                        }
-                      </div>
-                    </div>
-                    <div className="p-4 rounded-lg bg-card/50 border border-border/30">
-                      <div className="text-sm text-muted mb-2">Required Daily Average</div>
-                      <div className="text-2xl font-bold text-foreground">${goalProgress.dailyTarget.toFixed(0)}</div>
-                      <div className="text-xs text-muted mt-2">
-                        Based on {goalProgress.tradingDaysRemaining} trading days remaining this year
-                      </div>
-                      <div className="text-xs mt-2">
-                        {(tradingStats.allTimeTrades > 0 ? tradingStats.allTimePnl / tradingStats.allTimeTrades : 0) >= goalProgress.dailyTarget
-                          ? <span className="text-emerald-400">✓ Your avg trade exceeds daily target</span>
-                          : <span className="text-amber-400">⚠️ Avg trade below daily target</span>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                </>
               )}
-
-              {/* Final Score Card */}
-              <div className="p-6 rounded-xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-emerald-500/10 border border-purple-500/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-bold mb-1">Overall Trading Score</h4>
-                    <p className="text-sm text-muted">Based on all analyzed metrics</p>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-5xl font-bold ${consistencyGrade.color}`}>
-                      {tradingStats.consistencyScore}
-                    </div>
-                    <div className="text-sm text-muted">out of 100</div>
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <div className="text-sm text-muted">
-                    {tradingStats.consistencyScore >= 80
-                      ? "🏆 Elite Performance - You're trading at a professional level. Maintain discipline and continue refining your edge."
-                      : tradingStats.consistencyScore >= 60
-                      ? "📈 Good Progress - You have a solid foundation. Focus on the recommendations above to reach elite status."
-                      : tradingStats.consistencyScore >= 40
-                      ? "📊 Developing Trader - You're building experience. Prioritize risk management and consistency over profits."
-                      : "🎯 Learning Phase - Focus on process over results. Paper trade or use small sizes while developing your system."
-                    }
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-border flex-shrink-0 flex items-center justify-between bg-card/30">
+            <div className="p-4 border-t border-border/40 flex items-center justify-between bg-card/30">
               <div className="text-xs text-muted">
-                Analysis based on {tradingStats.allTimeTrades} trades • Last updated: {new Date().toLocaleDateString()}
+                Analysis as of {new Date().toLocaleDateString()}
               </div>
               <button
                 onClick={() => setShowTradingAudit(false)}
-                className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors text-sm"
+                className="px-5 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors"
               >
                 Close Audit
               </button>
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Metrics Settings Modal */}
       {showMetricsSettings && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowMetricsSettings(false)}>
-          <div className="w-full max-w-2xl glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-2xl glass rounded-2xl border border-border/40 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="p-4 border-b border-border flex items-center justify-between flex-shrink-0">
               <div>
                 <h3 className="text-lg font-bold flex items-center gap-2">
@@ -3614,8 +3648,8 @@ export default function TradingPage() {
                               isSelected
                                 ? "bg-accent/10 border-accent/30 text-foreground"
                                 : selectedMetrics.length >= 10
-                                  ? "bg-card/30 border-border/30 text-muted cursor-not-allowed opacity-50"
-                                  : "bg-card/50 border-border/50 text-foreground hover:bg-card-hover hover:border-border"
+                                  ? "bg-card/30 border-border/40 text-muted cursor-not-allowed opacity-50"
+                                  : "bg-card/50 border-border/40 text-foreground hover:bg-card-hover hover:border-border"
                             }`}
                           >
                             <div className="flex items-center justify-between">
@@ -3652,7 +3686,7 @@ export default function TradingPage() {
       {/* Day Trades Modal */}
       {selectedDayTrades && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setSelectedDayTrades(null)}>
-          <div className="w-full max-w-2xl glass rounded-2xl border border-border/50 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-2xl glass rounded-2xl border border-border/40 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="p-4 border-b border-border flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold flex items-center gap-2">
@@ -3692,7 +3726,7 @@ export default function TradingPage() {
                   {selectedDayTrades.trades.map((trade) => {
                     const isSwingTrade = trade.closeDate && trade.closeDate !== trade.date;
                     return (
-                    <tr key={trade.id} className="border-b border-border/50 hover:bg-card-hover/50">
+                    <tr key={trade.id} className="border-b border-border/40 hover:bg-card-hover/50">
                       <td className="py-3 px-4">
                         <span className="font-medium text-foreground">{trade.ticker}</span>
                         {isSwingTrade && (
