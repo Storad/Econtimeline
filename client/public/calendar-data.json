@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-24T11:18:32.924Z",
+  "lastUpdated": "2026-01-25T11:18:34.190Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,70 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-10-24",
-      "time": "08:30",
-      "title": "CPI m/m",
-      "impact": "high",
-      "category": "inflation",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=10",
-      "fredReleaseId": 10,
-      "description": "Consumer Price Index measures the monthly change in prices paid by consumers for goods and services.",
-      "whyItMatters": "Primary inflation gauge that central banks target. Higher inflation typically leads to rate hikes, lower inflation to rate cuts.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "Currency bullish (rate hike expectations), bonds bearish, gold mixed",
-        "lowerThanExpected": "Currency bearish (rate cut expectations), bonds bullish"
-      },
-      "relatedAssets": [
-        "Local currency",
-        "Government bonds",
-        "Gold"
-      ],
-      "historicalVolatility": "Very High",
-      "latestValue": "+0.3%",
-      "priorValue": "325.0%",
-      "latestDate": "2025-12-01",
-      "priorDate": "2025-11-01",
-      "fredSeriesId": "CPIAUCSL",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-10-24",
-      "time": "10:00",
-      "title": "UoM Consumer Sentiment",
-      "impact": "medium",
-      "category": "sentiment",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=91",
-      "fredReleaseId": 91,
-      "description": "University of Michigan survey measuring consumer attitudes about the economy and personal finances.",
-      "whyItMatters": "Consumer confidence affects spending. Includes closely-watched inflation expectations.",
-      "frequency": "Monthly (preliminary mid-month, final end of month)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, consumer stocks bullish",
-        "lowerThanExpected": "USD bearish, consumer stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Consumer stocks",
-        "Retail stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "52.9",
-      "priorValue": "51.0",
-      "latestDate": "2025-12-01",
-      "priorDate": "2025-11-01",
-      "fredSeriesId": "UMCSENT",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-10-28",
       "time": "09:00",
