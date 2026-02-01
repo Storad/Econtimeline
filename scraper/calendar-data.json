@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-31T11:20:41.369Z",
+  "lastUpdated": "2026-02-01T11:21:43.751Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,31 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-10-31",
-      "time": "09:45",
-      "title": "Chicago PMI",
-      "impact": "medium",
-      "category": "manufacturing",
-      "source": "ism-chicago",
-      "sourceUrl": "https://www.ismchicago.org/",
-      "description": "Monthly survey of Chicago-area purchasing managers measuring business conditions.",
-      "whyItMatters": "Released before national ISM PMI, can preview broader manufacturing trends.",
-      "frequency": "Monthly (last business day)",
-      "currency": "USD",
-      "country": "US",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, stocks bullish",
-        "lowerThanExpected": "USD bearish, stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-11-03",
       "time": "15:00",
@@ -12422,6 +12397,54 @@
       "previous": null
     },
     {
+      "date": "2026-06-01",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-01",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-06-02",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -12596,6 +12619,54 @@
       "previous": null
     },
     {
+      "date": "2026-06-08",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-08",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-06-09",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -12671,6 +12742,32 @@
       "previous": null
     },
     {
+      "date": "2026-06-10",
+      "time": "13:00",
+      "title": "10-Year Note Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 10-year government notes.",
+      "whyItMatters": "10-year yield is benchmark for mortgages and corporate bonds. Weak auctions can spike yields.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall, USD mildly bullish",
+        "lowerThanExpected": "Weak demand = yields rise, USD mildly bearish"
+      },
+      "relatedAssets": [
+        "US 10-year yield",
+        "USD",
+        "Mortgage rates"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-06-11",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -12693,6 +12790,104 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-11",
+      "time": "19:00",
+      "title": "Federal Budget Balance",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://fiscaldata.treasury.gov/",
+      "category": "fiscal",
+      "description": "Monthly US government budget surplus or deficit.",
+      "whyItMatters": "Large deficits can affect Treasury supply and long-term rates.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal direct impact",
+        "lowerThanExpected": "Minimal direct impact"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-15",
+      "time": "12:00",
+      "title": "30-Year Bond Auction",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 30-year government bonds.",
+      "whyItMatters": "Key indicator of demand for long-term US government debt.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 30-year yield",
+        "USD",
+        "TLT ETF"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-15",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-15",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
@@ -12892,6 +13087,54 @@
       "previous": null
     },
     {
+      "date": "2026-06-22",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-22",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-06-23",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
@@ -12941,6 +13184,31 @@
       "previous": null
     },
     {
+      "date": "2026-06-24",
+      "time": "18:00",
+      "title": "2-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 2-year government notes.",
+      "whyItMatters": "Short-end of curve most sensitive to Fed policy expectations.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 2-year yield",
+        "Fed funds futures"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-06-25",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -12967,6 +13235,55 @@
       "previous": null
     },
     {
+      "date": "2026-06-25",
+      "time": "18:00",
+      "title": "5-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 5-year government notes.",
+      "whyItMatters": "Middle of the curve. Key benchmark for corporate bonds.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US 5-year yield",
+        "Corporate bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-26",
+      "time": "18:00",
+      "title": "7-Year Note Auction",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 7-year government notes.",
+      "whyItMatters": "Part of the belly of the curve.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Strong demand = yields fall",
+        "lowerThanExpected": "Weak demand = yields rise"
+      },
+      "relatedAssets": [
+        "US Treasury yields"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-06-28",
       "time": "10:00",
       "title": "Pending Home Sales m/m",
@@ -12985,6 +13302,54 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-29",
+      "time": "16:30",
+      "title": "4-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 4-week bills.",
+      "whyItMatters": "Short-term funding rate. Reflects money market conditions.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-29",
+      "time": "16:30",
+      "title": "8-Week Bill Auction",
+      "impact": "low",
+      "currency": "USD",
+      "country": "US",
+      "source": "treasury",
+      "sourceUrl": "https://www.treasurydirect.gov/auctions/announcements-data-results/",
+      "category": "bonds",
+      "description": "US Treasury auction for 8-week bills.",
+      "whyItMatters": "Short-term funding rate.",
+      "frequency": "Weekly (Monday)",
+      "typicalReaction": {
+        "higherThanExpected": "Minimal market impact",
+        "lowerThanExpected": "Minimal market impact"
+      },
+      "relatedAssets": [
+        "T-bill rates"
+      ],
+      "historicalVolatility": "Low",
       "actual": null,
       "previous": null
     },
