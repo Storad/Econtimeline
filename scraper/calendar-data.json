@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-07T11:22:17.567Z",
+  "lastUpdated": "2026-02-08T11:23:10.955Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,33 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-11-07",
-      "time": "15:00",
-      "title": "Consumer Credit m/m",
-      "impact": "low",
-      "category": "consumer",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=14",
-      "fredReleaseId": 14,
-      "description": "Monthly change in total outstanding credit extended to individuals, excluding mortgages.",
-      "whyItMatters": "Shows consumer borrowing behavior. Rising credit can indicate confidence but also debt risks.",
-      "frequency": "Monthly (about 5 weeks lag)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish (stronger consumer)",
-        "lowerThanExpected": "USD mildly bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Consumer stocks",
-        "Bank stocks"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-11-11",
       "time": "16:30",
