@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-14T11:23:18.972Z",
+  "lastUpdated": "2026-02-15T11:23:22.694Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -12709,6 +12709,69 @@
         "US Treasury yields"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-15",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "7.7",
+      "priorValue": "-3.7",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-15",
+      "time": "09:15",
+      "title": "Industrial Production m/m",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=13",
+      "fredReleaseId": 13,
+      "description": "Monthly change in total output of US factories, mines, and utilities.",
+      "whyItMatters": "Direct measure of manufacturing sector health. Highly correlated with GDP.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Commodities"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "+0.4%",
+      "priorValue": "+0.4%",
+      "latestDate": "2025-12-01",
+      "priorDate": "2025-11-01",
+      "fredSeriesId": "INDPRO",
       "actual": null,
       "previous": null
     },
