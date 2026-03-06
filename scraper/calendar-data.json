@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-05T22:17:06.430Z",
+  "lastUpdated": "2026-03-06T11:29:22.376Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,472 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-12-01",
-      "time": "15:00",
-      "title": "ISM Manufacturing PMI",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "manufacturing",
-      "description": "Institute for Supply Management survey of purchasing managers at 400+ manufacturing firms. Above 50 = expansion.",
-      "whyItMatters": "Most watched US manufacturing indicator. Strong predictor of industrial production and GDP.",
-      "frequency": "Monthly (first business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, stocks bullish",
-        "lowerThanExpected": "USD bearish, stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "Industrial stocks"
-      ],
-      "historicalVolatility": "High",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-01",
-      "time": "15:00",
-      "title": "ISM Manufacturing Prices",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "manufacturing",
-      "description": "Input prices paid by manufacturers. Leading indicator of producer and consumer inflation.",
-      "whyItMatters": "Rising prices signal inflation pressures building in supply chain.",
-      "frequency": "Monthly (first business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish (inflation), bonds bearish",
-        "lowerThanExpected": "USD bearish, bonds bullish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US bonds"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-01",
-      "time": "15:00",
-      "title": "ISM Manufacturing Employment",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "employment",
-      "description": "Employment component of ISM Manufacturing survey.",
-      "whyItMatters": "Provides early read on manufacturing employment ahead of NFP.",
-      "frequency": "Monthly (first business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish",
-        "lowerThanExpected": "USD mildly bearish"
-      },
-      "relatedAssets": [
-        "USD"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-01",
-      "time": "15:00",
-      "title": "ISM Manufacturing New Orders",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "manufacturing",
-      "description": "New orders component - most forward-looking part of ISM survey.",
-      "whyItMatters": "New orders lead production by 1-2 months. Strong predictor of future activity.",
-      "frequency": "Monthly (first business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-02",
-      "time": "16:30",
-      "title": "API Weekly Crude Stock",
-      "impact": "medium",
-      "category": "energy",
-      "currency": "USD",
-      "country": "US",
-      "source": "eia",
-      "sourceUrl": "https://www.api.org/",
-      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
-      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
-      "frequency": "Variable",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-03",
-      "time": "08:30",
-      "title": "Import Price Index m/m",
-      "impact": "low",
-      "category": "inflation",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=188",
-      "fredReleaseId": 188,
-      "description": "Monthly change in the price of imported goods and services.",
-      "whyItMatters": "Shows imported inflation pressures. Affected by USD strength and commodity prices.",
-      "frequency": "Monthly",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish (inflation)",
-        "lowerThanExpected": "USD mildly bearish"
-      },
-      "relatedAssets": [
-        "USD"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-03",
-      "time": "09:15",
-      "title": "Industrial Production m/m",
-      "impact": "medium",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=13",
-      "fredReleaseId": 13,
-      "description": "Monthly change in total output of US factories, mines, and utilities.",
-      "whyItMatters": "Direct measure of manufacturing sector health. Highly correlated with GDP.",
-      "frequency": "Monthly (around 15th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks",
-        "Commodities"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "+0.7%",
-      "priorValue": "+0.2%",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
-    },
-    {
-      "date": "2025-12-03",
-      "time": "10:30",
-      "title": "Crude Oil Inventories",
-      "impact": "medium",
-      "category": "energy",
-      "currency": "USD",
-      "country": "US",
-      "source": "eia",
-      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
-      "description": "Weekly change in the number of barrels of crude oil held in inventory by commercial firms.",
-      "whyItMatters": "Inventory builds suggest weak demand or oversupply, pushing oil prices lower. Draws indicate strong demand, pushing prices higher.",
-      "frequency": "Weekly (Wednesday)",
-      "typicalReaction": {
-        "higherThanExpected": "Oil prices bearish (more supply)",
-        "lowerThanExpected": "Oil prices bullish (less supply)"
-      },
-      "relatedAssets": [
-        "Crude Oil",
-        "Energy stocks",
-        "CAD"
-      ],
-      "historicalVolatility": "High",
-      "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-03",
-      "time": "14:00",
-      "title": "Fed Beige Book",
-      "impact": "medium",
-      "category": "central_bank",
-      "description": "Summary of economic conditions across the 12 Federal Reserve districts based on anecdotal reports.",
-      "typicalReaction": {
-        "hawkish": "USD mildly bullish",
-        "dovish": "USD mildly bearish"
-      },
-      "frequency": "8 times per year (2 weeks before FOMC)",
-      "currency": "USD",
-      "country": "US",
-      "source": "fed",
-      "sourceUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
-      "whyItMatters": "Provides qualitative insights into regional economic trends. Released 2 weeks before FOMC meetings.",
-      "relatedAssets": [
-        "USD"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-03",
-      "time": "15:00",
-      "title": "ISM Services PMI",
-      "impact": "high",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "services",
-      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
-      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
-      "frequency": "Monthly (third business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, stocks bullish",
-        "lowerThanExpected": "USD bearish, stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "Service stocks"
-      ],
-      "historicalVolatility": "High",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-03",
-      "time": "15:00",
-      "title": "ISM Services Prices",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "services",
-      "description": "Prices paid component of ISM Services survey.",
-      "whyItMatters": "Services inflation is stickier than goods. Key Fed watch item.",
-      "frequency": "Monthly (third business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, bonds bearish",
-        "lowerThanExpected": "USD bearish, bonds bullish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US bonds"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-03",
-      "time": "15:00",
-      "title": "ISM Services Employment",
-      "impact": "medium",
-      "currency": "USD",
-      "country": "US",
-      "source": "ism",
-      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
-      "category": "employment",
-      "description": "Employment component of ISM Services survey.",
-      "whyItMatters": "Services employ most Americans. Key input for NFP expectations.",
-      "frequency": "Monthly (third business day)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish",
-        "lowerThanExpected": "USD mildly bearish"
-      },
-      "relatedAssets": [
-        "USD"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-04",
-      "time": "08:30",
-      "title": "Durable Goods Orders m/m",
-      "impact": "high",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
-      "fredReleaseId": 95,
-      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
-      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
-      "frequency": "Monthly (around 26th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks",
-        "Defense stocks"
-      ],
-      "historicalVolatility": "High",
-      "latestValue": "-1.4%",
-      "priorValue": "+5.4%",
-      "latestDate": "2025-12-01",
-      "priorDate": "2025-11-01",
-      "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
-    },
-    {
-      "date": "2025-12-04",
-      "time": "08:30",
-      "title": "Unemployment Claims",
-      "impact": "medium",
-      "category": "employment",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=180",
-      "fredReleaseId": 180,
-      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
-      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
-      "frequency": "Weekly (Thursday)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bearish, stocks bearish",
-        "lowerThanExpected": "USD bullish, stocks bullish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
-      "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
-    },
-    {
-      "date": "2025-12-04",
-      "time": "10:30",
-      "title": "Natural Gas Storage",
-      "impact": "low",
-      "category": "energy",
-      "currency": "USD",
-      "country": "US",
-      "source": "eia",
-      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
-      "description": "Weekly change in the number of cubic feet of natural gas held in underground storage.",
-      "whyItMatters": "Storage levels relative to seasonal norms affect natural gas prices significantly.",
-      "frequency": "Weekly (Thursday)",
-      "typicalReaction": {
-        "higherThanExpected": "Natural gas prices bearish",
-        "lowerThanExpected": "Natural gas prices bullish"
-      },
-      "relatedAssets": [
-        "Natural Gas",
-        "Utility stocks"
-      ],
-      "historicalVolatility": "High",
-      "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-05",
-      "time": "08:30",
-      "title": "Core PCE Price Index m/m",
-      "impact": "high",
-      "category": "inflation",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=54",
-      "fredReleaseId": 54,
-      "description": "Personal Consumption Expenditures Price Index excluding food and energy. Fed's preferred inflation measure.",
-      "whyItMatters": "THE inflation measure the Fed targets. More important than CPI for Fed policy.",
-      "frequency": "Monthly (last week)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, bonds bearish, stocks mixed",
-        "lowerThanExpected": "USD bearish, bonds bullish, stocks mixed"
-      },
-      "relatedAssets": [
-        "USD",
-        "US bonds",
-        "US stocks",
-        "Gold"
-      ],
-      "historicalVolatility": "Very High",
-      "latestValue": "+0.4%",
-      "priorValue": "+0.2%",
-      "latestDate": "2025-12-01",
-      "priorDate": "2025-11-01",
-      "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
-    },
-    {
-      "date": "2025-12-05",
-      "time": "15:00",
-      "title": "Consumer Credit m/m",
-      "impact": "low",
-      "category": "consumer",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=14",
-      "fredReleaseId": 14,
-      "description": "Monthly change in total outstanding credit extended to individuals, excluding mortgages.",
-      "whyItMatters": "Shows consumer borrowing behavior. Rising credit can indicate confidence but also debt risks.",
-      "frequency": "Monthly (about 5 weeks lag)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish (stronger consumer)",
-        "lowerThanExpected": "USD mildly bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Consumer stocks",
-        "Bank stocks"
-      ],
-      "historicalVolatility": "Low",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-12-09",
       "time": "10:00",
@@ -509,11 +43,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-09",
@@ -715,11 +246,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-11",
@@ -744,16 +272,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-11",
@@ -809,11 +334,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "7.1",
-      "previous": "7.7",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.319Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -845,11 +367,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+130K",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:01.212Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -880,11 +399,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.128Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-16",
@@ -987,11 +503,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.564Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-18",
@@ -1042,16 +555,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-18",
@@ -1108,11 +618,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.4",
-      "previous": "52.9",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.352Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-19",
@@ -1168,11 +675,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -1204,11 +708,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -1239,11 +740,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -1274,11 +772,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-23",
@@ -1373,16 +868,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-24",
@@ -1526,16 +1018,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-31",
@@ -1933,11 +1422,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -1967,11 +1453,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -2027,11 +1510,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -2108,16 +1588,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -2228,11 +1705,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+130K",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:01.212Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -2263,11 +1737,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HOUST",
-      "actual": "1404K",
-      "previous": "1322K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.617Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -2297,11 +1768,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1448K",
-      "previous": "1388K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -2430,11 +1898,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.564Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -2464,11 +1929,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HSN1F",
-      "actual": "745K",
-      "previous": "758K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.092Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -2521,11 +1983,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.128Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-14",
@@ -2555,11 +2014,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.461Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-14",
@@ -2740,11 +2196,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "7.1",
-      "previous": "7.7",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.319Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -2769,16 +2222,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -2860,11 +2310,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-19",
@@ -3013,11 +2460,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -3049,11 +2493,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -3078,16 +2519,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -3144,11 +2582,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.4",
-      "previous": "52.9",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.352Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-23",
@@ -3205,11 +2640,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-26",
@@ -3362,11 +2794,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HOUST",
-      "actual": "1404K",
-      "previous": "1322K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.617Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -3396,11 +2825,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1448K",
-      "previous": "1388K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -3600,11 +3026,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -3633,11 +3056,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -3688,16 +3108,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -3775,11 +3192,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.461Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-30",
@@ -4101,16 +3515,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -4140,11 +3551,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -4276,11 +3684,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.128Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-10",
@@ -4434,11 +3839,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+130K",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:01.212Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-11",
@@ -4592,16 +3994,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-12",
@@ -4658,11 +4057,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.564Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-13",
@@ -4788,11 +4184,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "7.1",
-      "previous": "7.7",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.319Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-17",
@@ -4845,11 +4238,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -4880,11 +4270,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HOUST",
-      "actual": "1404K",
-      "previous": "1322K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.617Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -4914,11 +4301,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1448K",
-      "previous": "1388K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -4949,11 +4333,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -5031,11 +4412,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-19",
@@ -5086,16 +4464,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-19",
@@ -5151,11 +4526,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -5187,11 +4559,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -5221,11 +4590,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HSN1F",
-      "actual": "745K",
-      "previous": "758K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.092Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -5256,11 +4622,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.4",
-      "previous": "52.9",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.352Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -5317,11 +4680,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-23",
@@ -5563,16 +4923,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -5674,11 +5031,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.461Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-27",
@@ -6050,16 +5404,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -6142,11 +5493,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+130K",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:01.212Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-06",
@@ -6177,11 +5525,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.128Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-06",
@@ -6332,11 +5677,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.564Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-11",
@@ -6470,11 +5812,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HOUST",
-      "actual": "1404K",
-      "previous": "1322K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.617Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -6504,11 +5843,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1448K",
-      "previous": "1388K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -6537,11 +5873,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -6566,16 +5899,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -6631,11 +5961,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -6667,11 +5994,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -6702,11 +6026,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -6736,11 +6057,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -6796,11 +6114,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "7.1",
-      "previous": "7.7",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.319Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -6831,11 +6146,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -6936,11 +6248,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-18",
@@ -6970,11 +6279,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.461Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-18",
@@ -7124,16 +6430,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-19",
@@ -7163,11 +6466,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HSN1F",
-      "actual": "745K",
-      "previous": "758K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.092Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-19",
@@ -7323,11 +6623,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HSN1F",
-      "actual": "745K",
-      "previous": "758K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.092Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-24",
@@ -7523,16 +6820,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-26",
@@ -7635,11 +6929,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.4",
-      "previous": "52.9",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.352Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-30",
@@ -7764,11 +7055,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-31",
@@ -7974,11 +7262,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -8007,11 +7292,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -8036,16 +7318,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -8103,11 +7382,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+130K",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:01.212Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-03",
@@ -8406,11 +7682,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -8442,11 +7715,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -8471,16 +7741,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -8563,11 +7830,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.564Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-10",
@@ -8695,11 +7959,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.461Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-14",
@@ -8751,11 +8012,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "7.1",
-      "previous": "7.7",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.319Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-15",
@@ -8838,11 +8096,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.128Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -8893,16 +8148,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -8933,11 +8185,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -9138,11 +8387,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HOUST",
-      "actual": "1404K",
-      "previous": "1322K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.617Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -9172,11 +8418,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1448K",
-      "previous": "1388K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -9201,16 +8444,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -9240,11 +8480,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HSN1F",
-      "actual": "745K",
-      "previous": "758K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.092Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -9327,11 +8564,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-24",
@@ -9362,11 +8596,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.4",
-      "previous": "52.9",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.352Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-24",
@@ -9709,11 +8940,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -9745,11 +8973,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -9800,16 +9025,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -9991,11 +9213,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-04",
@@ -10072,11 +9291,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-05",
@@ -10106,11 +9322,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-05",
@@ -10311,16 +9524,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-07",
@@ -10405,11 +9615,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+130K",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:01.212Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-11",
@@ -10538,11 +9745,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.564Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-12",
@@ -10594,11 +9798,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.461Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-13",
@@ -10682,11 +9883,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.128Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-14",
@@ -10711,16 +9909,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-14",
@@ -10824,11 +10019,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "7.1",
-      "previous": "7.7",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.319Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-15",
@@ -10859,11 +10051,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-18",
@@ -11059,16 +10248,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-21",
@@ -11125,11 +10311,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.4",
-      "previous": "52.9",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.352Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-25",
@@ -11396,11 +10579,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HOUST",
-      "actual": "1404K",
-      "previous": "1322K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.617Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-27",
@@ -11430,11 +10610,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1448K",
-      "previous": "1388K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-27",
@@ -11464,11 +10641,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HSN1F",
-      "actual": "745K",
-      "previous": "758K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.092Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-27",
@@ -11525,11 +10699,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -11561,11 +10732,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -11596,11 +10764,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -11625,16 +10790,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -11885,11 +11047,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-02",
@@ -11942,11 +11101,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-03",
@@ -12123,16 +11279,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-04",
@@ -12190,11 +11343,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "+130K",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:01.212Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-05",
@@ -12298,11 +11448,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-70.3B",
-      "previous": "-53.0B",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.329Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-09",
@@ -12355,11 +11502,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.564Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-10",
@@ -12468,11 +11612,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.461Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-11",
@@ -12497,16 +11638,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-11",
@@ -12586,11 +11724,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "7.1",
-      "previous": "7.7",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.319Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-15",
@@ -12621,11 +11756,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.7%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.841Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-15",
@@ -12777,11 +11909,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.128Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-17",
@@ -12954,16 +12083,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-18",
@@ -13138,11 +12264,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HOUST",
-      "actual": "1404K",
-      "previous": "1322K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.617Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-24",
@@ -13172,11 +12295,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1448K",
-      "previous": "1388K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.851Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-24",
@@ -13231,11 +12351,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "HSN1F",
-      "actual": "745K",
-      "previous": "758K",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:06.092Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-24",
@@ -13317,11 +12434,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "1.4%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.901Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -13353,11 +12467,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:03.678Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -13388,11 +12499,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-1.4%",
-      "previous": null,
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:05.075Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -13417,16 +12525,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "212000K",
-      "priorValue": "208000K",
-      "latestDate": "2026-02-21",
-      "priorDate": "2026-02-14",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
       "fredSeriesId": "ICSA",
-      "actual": "213000K",
-      "previous": "213000K",
-      "actualDate": "2026-02-28",
-      "previousDate": "2026-02-21",
-      "dataUpdatedAt": "2026-03-05T22:17:02.096Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -13508,11 +12613,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.4",
-      "previous": "52.9",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-05T22:17:04.352Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-26",
@@ -13683,11 +12785,8 @@
       "latestDate": "2025-12-01",
       "priorDate": "2025-11-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.5M",
-      "previous": "6.9M",
-      "actualDate": "2025-12-01",
-      "previousDate": "2025-11-01",
-      "dataUpdatedAt": "2026-03-05T22:17:02.339Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-30",
@@ -13883,6 +12982,102 @@
         "Industrial stocks"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-02",
+      "time": "08:30",
+      "title": "Non-Farm Payrolls",
+      "impact": "high",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=50",
+      "fredReleaseId": 50,
+      "description": "Measures the change in the number of employed people in the US, excluding farm workers, government employees, private household employees, and nonprofit organization employees.",
+      "whyItMatters": "The most important employment indicator. Strong job growth signals economic expansion and can lead to Fed rate hikes. Weak numbers suggest economic slowdown and potential rate cuts.",
+      "frequency": "Monthly (first Friday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks mixed (good economy but higher rates), bonds bearish",
+        "lowerThanExpected": "USD bearish, stocks mixed (weak economy but lower rates), bonds bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "US bonds",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "latestValue": "+130K",
+      "priorValue": "+48K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PAYEMS",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-02",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-1.4%",
+      "priorValue": "+5.4%",
+      "latestDate": "2025-12-01",
+      "priorDate": "2025-11-01",
+      "fredSeriesId": "DGORDER",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-02",
+      "time": "08:30",
+      "title": "Unemployment Claims",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=180",
+      "fredReleaseId": 180,
+      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
+      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bearish, stocks bearish",
+        "lowerThanExpected": "USD bullish, stocks bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "213000K",
+      "priorValue": "213000K",
+      "latestDate": "2026-02-28",
+      "priorDate": "2026-02-21",
+      "fredSeriesId": "ICSA",
       "actual": null,
       "previous": null
     },
@@ -15834,6 +15029,158 @@
       "previous": null
     },
     {
+      "date": "2026-09-02",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Weekly change in the number of barrels of crude oil held in inventory by commercial firms.",
+      "whyItMatters": "Inventory builds suggest weak demand or oversupply, pushing oil prices lower. Draws indicate strong demand, pushing prices higher.",
+      "frequency": "Weekly (Wednesday)",
+      "typicalReaction": {
+        "higherThanExpected": "Oil prices bearish (more supply)",
+        "lowerThanExpected": "Oil prices bullish (less supply)"
+      },
+      "relatedAssets": [
+        "Crude Oil",
+        "Energy stocks",
+        "CAD"
+      ],
+      "historicalVolatility": "High",
+      "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-02",
+      "time": "14:00",
+      "title": "Fed Beige Book",
+      "impact": "medium",
+      "category": "central_bank",
+      "description": "Summary of economic conditions across the 12 Federal Reserve districts based on anecdotal reports.",
+      "typicalReaction": {
+        "hawkish": "USD mildly bullish",
+        "dovish": "USD mildly bearish"
+      },
+      "frequency": "8 times per year (2 weeks before FOMC)",
+      "currency": "USD",
+      "country": "US",
+      "source": "fed",
+      "sourceUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
+      "whyItMatters": "Provides qualitative insights into regional economic trends. Released 2 weeks before FOMC meetings.",
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-03",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Weekly change in the number of cubic feet of natural gas held in underground storage.",
+      "whyItMatters": "Storage levels relative to seasonal norms affect natural gas prices significantly.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "Natural gas prices bearish",
+        "lowerThanExpected": "Natural gas prices bullish"
+      },
+      "relatedAssets": [
+        "Natural Gas",
+        "Utility stocks"
+      ],
+      "historicalVolatility": "High",
+      "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-03",
+      "time": "15:00",
+      "title": "ISM Services PMI",
+      "impact": "high",
+      "currency": "USD",
+      "country": "US",
+      "source": "ism",
+      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
+      "category": "services",
+      "description": "ISM survey of service sector purchasing managers. Services represent ~80% of US economy.",
+      "whyItMatters": "Services dominate the US economy. This is increasingly more important than manufacturing PMI.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, stocks bullish",
+        "lowerThanExpected": "USD bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Service stocks"
+      ],
+      "historicalVolatility": "High",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-03",
+      "time": "15:00",
+      "title": "ISM Services Prices",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "ism",
+      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
+      "category": "services",
+      "description": "Prices paid component of ISM Services survey.",
+      "whyItMatters": "Services inflation is stickier than goods. Key Fed watch item.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, bonds bearish",
+        "lowerThanExpected": "USD bearish, bonds bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-03",
+      "time": "15:00",
+      "title": "ISM Services Employment",
+      "impact": "medium",
+      "currency": "USD",
+      "country": "US",
+      "source": "ism",
+      "sourceUrl": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/",
+      "category": "employment",
+      "description": "Employment component of ISM Services survey.",
+      "whyItMatters": "Services employ most Americans. Key input for NFP expectations.",
+      "frequency": "Monthly (third business day)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-09-07",
       "time": "All Day",
       "title": "Labor Day (Market Closed)",
@@ -16215,6 +15562,5 @@
       "actual": null,
       "previous": null
     }
-  ],
-  "dataRefreshedAt": "2026-03-05T22:17:06.430Z"
+  ]
 }
