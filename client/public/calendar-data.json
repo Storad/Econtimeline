@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-07T11:20:40.505Z",
+  "lastUpdated": "2026-03-08T11:21:44.727Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -13404,6 +13404,33 @@
       "previous": null
     },
     {
+      "date": "2026-07-08",
+      "time": "15:00",
+      "title": "Consumer Credit m/m",
+      "impact": "low",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=14",
+      "fredReleaseId": 14,
+      "description": "Monthly change in total outstanding credit extended to individuals, excluding mortgages.",
+      "whyItMatters": "Shows consumer borrowing behavior. Rising credit can indicate confidence but also debt risks.",
+      "frequency": "Monthly (about 5 weeks lag)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish (stronger consumer)",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Consumer stocks",
+        "Bank stocks"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-07-09",
       "time": "10:30",
       "title": "Natural Gas Storage",
@@ -15223,6 +15250,28 @@
       "description": "US stock markets (NYSE, NASDAQ) are closed for Labor Day.",
       "frequency": "Annual",
       "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-08",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
       "typicalReaction": {
         "higherThanExpected": "Varies",
         "lowerThanExpected": "Varies"
