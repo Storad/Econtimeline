@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-14T11:24:24.453Z",
+  "lastUpdated": "2026-03-15T11:26:57.761Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -13402,6 +13402,68 @@
     },
     {
       "date": "2026-07-15",
+      "time": "08:30",
+      "title": "PPI m/m",
+      "impact": "medium",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=46",
+      "fredReleaseId": 46,
+      "description": "Producer Price Index measures prices received by domestic producers. Leading indicator of consumer inflation.",
+      "whyItMatters": "Rising producer prices often get passed to consumers. Can signal future CPI direction.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency mildly bullish",
+        "lowerThanExpected": "Currency mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "+0.3%",
+      "priorValue": "-0.3%",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PPIACO",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-15",
+      "time": "08:30",
+      "title": "Empire State Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
+      "fredReleaseId": 321,
+      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
+      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "7.1",
+      "priorValue": "7.7",
+      "latestDate": "2026-02-01",
+      "priorDate": "2026-01-01",
+      "fredSeriesId": "GACDISA066MSFRBNY",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-15",
       "time": "10:00",
       "title": "Fed Chair Powell Testifies (House)",
       "impact": "high",
@@ -15129,6 +15191,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-15",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
