@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-21T11:23:50.942Z",
+  "lastUpdated": "2026-03-22T11:24:15.596Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15192,6 +15192,28 @@
         "REITs"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-22",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
