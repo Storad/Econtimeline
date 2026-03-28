@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-27T22:37:48.537Z",
+  "lastUpdated": "2026-03-28T11:28:55.031Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,303 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2025-12-23",
-      "time": "08:30",
-      "title": "GDP q/q",
-      "impact": "high",
-      "category": "growth",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=53",
-      "fredReleaseId": 53,
-      "description": "Quarterly change in Gross Domestic Product - the broadest measure of economic activity.",
-      "whyItMatters": "Shows overall economic health. Two consecutive negative quarters typically defines recession.",
-      "frequency": "Quarterly",
-      "typicalReaction": {
-        "higherThanExpected": "Currency bullish, stocks bullish",
-        "lowerThanExpected": "Currency bearish, stocks bearish"
-      },
-      "relatedAssets": [
-        "Local currency",
-        "Local stocks"
-      ],
-      "historicalVolatility": "High",
-      "latestValue": "0.7%",
-      "priorValue": "4.4%",
-      "latestDate": "2025-10-01",
-      "priorDate": "2025-07-01",
-      "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
-    },
-    {
-      "date": "2025-12-23",
-      "time": "08:30",
-      "title": "Core PCE Price Index m/m",
-      "impact": "high",
-      "category": "inflation",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=54",
-      "fredReleaseId": 54,
-      "description": "Personal Consumption Expenditures Price Index excluding food and energy. Fed's preferred inflation measure.",
-      "whyItMatters": "THE inflation measure the Fed targets. More important than CPI for Fed policy.",
-      "frequency": "Monthly (last week)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, bonds bearish, stocks mixed",
-        "lowerThanExpected": "USD bearish, bonds bullish, stocks mixed"
-      },
-      "relatedAssets": [
-        "USD",
-        "US bonds",
-        "US stocks",
-        "Gold"
-      ],
-      "historicalVolatility": "Very High",
-      "latestValue": "+0.4%",
-      "priorValue": "+0.4%",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
-    },
-    {
-      "date": "2025-12-23",
-      "time": "08:30",
-      "title": "Durable Goods Orders m/m",
-      "impact": "high",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
-      "fredReleaseId": 95,
-      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
-      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
-      "frequency": "Monthly (around 26th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks",
-        "Defense stocks"
-      ],
-      "historicalVolatility": "High",
-      "latestValue": "-0.0%",
-      "priorValue": "-0.9%",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
-    },
-    {
-      "date": "2025-12-23",
-      "time": "09:15",
-      "title": "Industrial Production m/m",
-      "impact": "medium",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=13",
-      "fredReleaseId": 13,
-      "description": "Monthly change in total output of US factories, mines, and utilities.",
-      "whyItMatters": "Direct measure of manufacturing sector health. Highly correlated with GDP.",
-      "frequency": "Monthly (around 15th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks",
-        "Commodities"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "+0.2%",
-      "priorValue": "+0.7%",
-      "latestDate": "2026-02-01",
-      "priorDate": "2026-01-01",
-      "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
-    },
-    {
-      "date": "2025-12-23",
-      "time": "10:00",
-      "title": "CB Consumer Confidence",
-      "impact": "high",
-      "category": "sentiment",
-      "source": "conference-board",
-      "sourceUrl": "https://www.conference-board.org/topics/consumer-confidence",
-      "description": "Monthly survey measuring consumer attitudes about current and future economic conditions.",
-      "whyItMatters": "Leading indicator of consumer spending. Higher confidence = more likely to spend.",
-      "frequency": "Monthly (last Tuesday)",
-      "currency": "USD",
-      "country": "US",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, consumer stocks bullish",
-        "lowerThanExpected": "USD bearish, consumer stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Consumer stocks",
-        "Retail ETFs"
-      ],
-      "historicalVolatility": "Medium",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-23",
-      "time": "10:00",
-      "title": "Richmond Fed Manufacturing Index",
-      "impact": "medium",
-      "category": "manufacturing",
-      "source": "richmond-fed",
-      "sourceUrl": "https://www.richmondfed.org/research/regional_economy/surveys_of_business_conditions",
-      "description": "Monthly survey of manufacturing conditions in the Fifth Federal Reserve District.",
-      "whyItMatters": "Regional indicator that can signal broader manufacturing trends.",
-      "frequency": "Monthly (4th Tuesday)",
-      "currency": "USD",
-      "country": "US",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-23",
-      "time": "16:30",
-      "title": "API Weekly Crude Stock",
-      "impact": "medium",
-      "category": "energy",
-      "currency": "USD",
-      "country": "US",
-      "source": "eia",
-      "sourceUrl": "https://www.api.org/",
-      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
-      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
-      "frequency": "Variable",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-24",
-      "time": "08:30",
-      "title": "Unemployment Claims",
-      "impact": "medium",
-      "category": "employment",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=180",
-      "fredReleaseId": 180,
-      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
-      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
-      "frequency": "Weekly (Thursday)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bearish, stocks bearish",
-        "lowerThanExpected": "USD bullish, stocks bullish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
-      "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
-    },
-    {
-      "date": "2025-12-24",
-      "time": "10:30",
-      "title": "Crude Oil Inventories",
-      "impact": "medium",
-      "category": "energy",
-      "currency": "USD",
-      "country": "US",
-      "source": "eia",
-      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
-      "description": "Weekly change in the number of barrels of crude oil held in inventory by commercial firms.",
-      "whyItMatters": "Inventory builds suggest weak demand or oversupply, pushing oil prices lower. Draws indicate strong demand, pushing prices higher.",
-      "frequency": "Weekly (Wednesday)",
-      "typicalReaction": {
-        "higherThanExpected": "Oil prices bearish (more supply)",
-        "lowerThanExpected": "Oil prices bullish (less supply)"
-      },
-      "relatedAssets": [
-        "Crude Oil",
-        "Energy stocks",
-        "CAD"
-      ],
-      "historicalVolatility": "High",
-      "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2025-12-25",
-      "time": "10:30",
-      "title": "Natural Gas Storage",
-      "impact": "low",
-      "category": "energy",
-      "currency": "USD",
-      "country": "US",
-      "source": "eia",
-      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
-      "description": "Weekly change in the number of cubic feet of natural gas held in underground storage.",
-      "whyItMatters": "Storage levels relative to seasonal norms affect natural gas prices significantly.",
-      "frequency": "Weekly (Thursday)",
-      "typicalReaction": {
-        "higherThanExpected": "Natural gas prices bearish",
-        "lowerThanExpected": "Natural gas prices bullish"
-      },
-      "relatedAssets": [
-        "Natural Gas",
-        "Utility stocks"
-      ],
-      "historicalVolatility": "High",
-      "fredSeriesId": null,
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2025-12-29",
       "time": "10:00",
@@ -401,16 +104,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2025-12-31",
@@ -808,11 +508,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -842,11 +539,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.9M",
-      "previous": "6.5M",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.135Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-07",
@@ -902,11 +596,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -983,16 +674,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-08",
@@ -1103,11 +791,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "-92K",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:44.368Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -1138,11 +823,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HOUST",
-      "actual": "1487K",
-      "previous": "1387K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.846Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -1167,16 +849,13 @@
         "Homebuilder stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "1376K",
+      "latestValue": "1386K",
       "priorValue": "1455K",
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1386K",
-      "previous": "1455K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.069Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-09",
@@ -1305,11 +984,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.314Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -1339,11 +1015,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HSN1F",
-      "actual": "587K",
-      "previous": "712K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.263Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-13",
@@ -1396,11 +1069,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.315Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-14",
@@ -1430,11 +1100,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-14",
@@ -1615,11 +1282,8 @@
       "latestDate": "2026-03-01",
       "priorDate": "2026-02-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-0.2",
-      "previous": "7.1",
-      "actualDate": "2026-03-01",
-      "previousDate": "2026-02-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.553Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -1644,16 +1308,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-15",
@@ -1735,11 +1396,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-19",
@@ -1888,11 +1546,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -1924,11 +1579,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -1953,16 +1605,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-22",
@@ -2014,16 +1663,13 @@
         "Retail stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "56.4",
-      "priorValue": "52.9",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
+      "latestValue": "56.6",
+      "priorValue": "56.4",
+      "latestDate": "2026-02-01",
+      "priorDate": "2026-01-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.6",
-      "previous": "56.4",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.593Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-23",
@@ -2080,11 +1726,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-26",
@@ -2237,11 +1880,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HOUST",
-      "actual": "1487K",
-      "previous": "1387K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.846Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -2266,16 +1906,13 @@
         "Homebuilder stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "1376K",
+      "latestValue": "1386K",
       "priorValue": "1455K",
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1386K",
-      "previous": "1455K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.069Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-27",
@@ -2475,11 +2112,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -2508,11 +2142,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -2563,16 +2194,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-29",
@@ -2650,11 +2278,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-01-30",
@@ -2976,16 +2601,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -3015,11 +2637,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.9M",
-      "previous": "6.5M",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.135Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-05",
@@ -3151,11 +2770,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.315Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-10",
@@ -3309,11 +2925,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "-92K",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:44.368Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-11",
@@ -3467,16 +3080,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-12",
@@ -3533,11 +3143,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.314Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-13",
@@ -3663,11 +3270,8 @@
       "latestDate": "2026-03-01",
       "priorDate": "2026-02-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-0.2",
-      "previous": "7.1",
-      "actualDate": "2026-03-01",
-      "previousDate": "2026-02-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.553Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-17",
@@ -3720,11 +3324,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -3755,11 +3356,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HOUST",
-      "actual": "1487K",
-      "previous": "1387K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.846Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -3784,16 +3382,13 @@
         "Homebuilder stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "1376K",
+      "latestValue": "1386K",
       "priorValue": "1455K",
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1386K",
-      "previous": "1455K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.069Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -3824,11 +3419,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-18",
@@ -3906,11 +3498,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-19",
@@ -3961,16 +3550,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-19",
@@ -4026,11 +3612,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -4062,11 +3645,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -4096,11 +3676,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HSN1F",
-      "actual": "587K",
-      "previous": "712K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.263Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -4126,16 +3703,13 @@
         "Retail stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "56.4",
-      "priorValue": "52.9",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
+      "latestValue": "56.6",
+      "priorValue": "56.4",
+      "latestDate": "2026-02-01",
+      "priorDate": "2026-01-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.6",
-      "previous": "56.4",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.593Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-20",
@@ -4192,11 +3766,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-23",
@@ -4438,16 +4009,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-26",
@@ -4549,11 +4117,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-02-27",
@@ -4925,16 +4490,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-05",
@@ -5017,11 +4579,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "-92K",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:44.368Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-06",
@@ -5052,11 +4611,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.315Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-06",
@@ -5207,11 +4763,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.314Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-11",
@@ -5345,11 +4898,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HOUST",
-      "actual": "1487K",
-      "previous": "1387K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.846Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -5374,16 +4924,13 @@
         "Homebuilder stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "1376K",
+      "latestValue": "1386K",
       "priorValue": "1455K",
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1386K",
-      "previous": "1455K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.069Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -5412,11 +4959,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -5441,16 +4985,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-12",
@@ -5506,11 +5047,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -5542,11 +5080,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -5577,11 +5112,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -5611,11 +5143,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.9M",
-      "previous": "6.5M",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.135Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-13",
@@ -5671,11 +5200,8 @@
       "latestDate": "2026-03-01",
       "priorDate": "2026-02-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-0.2",
-      "previous": "7.1",
-      "actualDate": "2026-03-01",
-      "previousDate": "2026-02-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.553Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -5706,11 +5232,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-16",
@@ -5811,11 +5334,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-18",
@@ -5845,11 +5365,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-18",
@@ -5953,6 +5470,69 @@
     {
       "date": "2026-03-19",
       "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-19",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-03-19",
+      "time": "08:30",
       "title": "Philly Fed Manufacturing Index",
       "impact": "medium",
       "category": "manufacturing",
@@ -5999,16 +5579,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-19",
@@ -6038,11 +5615,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HSN1F",
-      "actual": "587K",
-      "previous": "712K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.263Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-19",
@@ -6169,40 +5743,6 @@
       "historicalVolatility": "Medium",
       "actual": null,
       "previous": null
-    },
-    {
-      "date": "2026-03-24",
-      "time": "10:00",
-      "title": "New Home Sales",
-      "impact": "medium",
-      "category": "housing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
-      "fredReleaseId": 97,
-      "description": "Number of newly constructed homes sold during the month.",
-      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
-      "frequency": "Monthly (around 25th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
-        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Homebuilder stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "587K",
-      "priorValue": "712K",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "HSN1F",
-      "actual": "587K",
-      "previous": "712K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.263Z"
     },
     {
       "date": "2026-03-24",
@@ -6398,16 +5938,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-26",
@@ -6505,16 +6042,13 @@
         "Retail stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "56.4",
-      "priorValue": "52.9",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
+      "latestValue": "56.6",
+      "priorValue": "56.4",
+      "latestDate": "2026-02-01",
+      "priorDate": "2026-01-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.6",
-      "previous": "56.4",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.593Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-30",
@@ -6639,11 +6173,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.9M",
-      "previous": "6.5M",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.135Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-03-31",
@@ -6683,6 +6214,61 @@
       "sourceUrl": "https://www.api.org/",
       "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
       "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-01",
+      "time": "08:30",
+      "title": "Retail Sales m/m",
+      "impact": "high",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=9",
+      "fredReleaseId": 9,
+      "description": "Monthly change in total value of sales at retail level.",
+      "whyItMatters": "Consumer spending drives 70% of GDP. First look at monthly consumer activity.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, retail stocks bullish",
+        "lowerThanExpected": "USD bearish, retail stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Retail ETFs"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-0.2%",
+      "priorValue": "-0.0%",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "RSAFS",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-01",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
       "frequency": "Variable",
       "typicalReaction": {
         "higherThanExpected": "Varies",
@@ -6823,41 +6409,6 @@
     {
       "date": "2026-04-02",
       "time": "08:30",
-      "title": "Durable Goods Orders m/m",
-      "impact": "high",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
-      "fredReleaseId": 95,
-      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
-      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
-      "frequency": "Monthly (around 26th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks",
-        "Defense stocks"
-      ],
-      "historicalVolatility": "High",
-      "latestValue": "-0.0%",
-      "priorValue": "-0.9%",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
-    },
-    {
-      "date": "2026-04-02",
-      "time": "08:30",
       "title": "Trade Balance",
       "impact": "medium",
       "category": "trade",
@@ -6882,11 +6433,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -6911,16 +6459,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-02",
@@ -6978,11 +6523,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "-92K",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:44.368Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-03",
@@ -7126,6 +6668,38 @@
         "T-bill rates"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-07",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-0.0%",
+      "priorValue": "-0.9%",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "DGORDER",
       "actual": null,
       "previous": null
     },
@@ -7281,11 +6855,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -7317,11 +6888,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -7346,16 +6914,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-09",
@@ -7438,11 +7003,40 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.314Z"
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-10",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-0.0%",
+      "priorValue": "-0.9%",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "DGORDER",
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-10",
@@ -7570,11 +7164,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-14",
@@ -7626,11 +7217,8 @@
       "latestDate": "2026-03-01",
       "priorDate": "2026-02-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-0.2",
-      "previous": "7.1",
-      "actualDate": "2026-03-01",
-      "previousDate": "2026-02-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.553Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-15",
@@ -7687,41 +7275,6 @@
     {
       "date": "2026-04-16",
       "time": "08:30",
-      "title": "Retail Sales m/m",
-      "impact": "high",
-      "category": "consumer",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=9",
-      "fredReleaseId": 9,
-      "description": "Monthly change in total value of sales at retail level.",
-      "whyItMatters": "Consumer spending drives 70% of GDP. First look at monthly consumer activity.",
-      "frequency": "Monthly (around 15th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, retail stocks bullish",
-        "lowerThanExpected": "USD bearish, retail stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "Retail ETFs"
-      ],
-      "historicalVolatility": "High",
-      "latestValue": "-0.2%",
-      "priorValue": "-0.0%",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "RSAFS",
-      "actual": "-0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.315Z"
-    },
-    {
-      "date": "2026-04-16",
-      "time": "08:30",
       "title": "Philly Fed Manufacturing Index",
       "impact": "medium",
       "category": "manufacturing",
@@ -7768,16 +7321,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-16",
@@ -7808,32 +7358,6 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
-    },
-    {
-      "date": "2026-04-16",
-      "time": "10:00",
-      "title": "Business Inventories m/m",
-      "impact": "low",
-      "category": "trade",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
-      "fredReleaseId": 25,
-      "description": "Economic indicator release.",
-      "whyItMatters": "May affect market sentiment and currency values.",
-      "frequency": "Variable",
-      "typicalReaction": {
-        "higherThanExpected": "Varies",
-        "lowerThanExpected": "Varies"
-      },
-      "relatedAssets": [],
-      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
@@ -7913,6 +7437,61 @@
     },
     {
       "date": "2026-04-21",
+      "time": "08:30",
+      "title": "Retail Sales m/m",
+      "impact": "high",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=9",
+      "fredReleaseId": 9,
+      "description": "Monthly change in total value of sales at retail level.",
+      "whyItMatters": "Consumer spending drives 70% of GDP. First look at monthly consumer activity.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, retail stocks bullish",
+        "lowerThanExpected": "USD bearish, retail stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Retail ETFs"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-0.2%",
+      "priorValue": "-0.0%",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "RSAFS",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-21",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-21",
       "time": "16:30",
       "title": "API Weekly Crude Stock",
       "impact": "medium",
@@ -7987,75 +7566,6 @@
     {
       "date": "2026-04-23",
       "time": "08:30",
-      "title": "Housing Starts",
-      "impact": "medium",
-      "category": "housing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
-      "fredReleaseId": 27,
-      "description": "Number of new residential construction projects begun during the month.",
-      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
-      "frequency": "Monthly (around 17th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
-        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Homebuilder stocks",
-        "Lumber"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "1487K",
-      "priorValue": "1387K",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "HOUST",
-      "actual": "1487K",
-      "previous": "1387K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.846Z"
-    },
-    {
-      "date": "2026-04-23",
-      "time": "08:30",
-      "title": "Building Permits",
-      "impact": "medium",
-      "category": "housing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
-      "fredReleaseId": 27,
-      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
-      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
-      "frequency": "Monthly (around 17th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
-        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Homebuilder stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "1376K",
-      "priorValue": "1455K",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "PERMIT",
-      "actual": "1386K",
-      "previous": "1455K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.069Z"
-    },
-    {
-      "date": "2026-04-23",
-      "time": "08:30",
       "title": "Unemployment Claims",
       "impact": "medium",
       "category": "employment",
@@ -8076,50 +7586,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
-    },
-    {
-      "date": "2026-04-23",
-      "time": "10:00",
-      "title": "New Home Sales",
-      "impact": "medium",
-      "category": "housing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
-      "fredReleaseId": 97,
-      "description": "Number of newly constructed homes sold during the month.",
-      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
-      "frequency": "Monthly (around 25th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
-        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Homebuilder stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "587K",
-      "priorValue": "712K",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "HSN1F",
-      "actual": "587K",
-      "previous": "712K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.263Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-23",
@@ -8175,41 +7648,6 @@
     },
     {
       "date": "2026-04-24",
-      "time": "08:30",
-      "title": "Durable Goods Orders m/m",
-      "impact": "high",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
-      "fredReleaseId": 95,
-      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
-      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
-      "frequency": "Monthly (around 26th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks",
-        "Defense stocks"
-      ],
-      "historicalVolatility": "High",
-      "latestValue": "-0.0%",
-      "priorValue": "-0.9%",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
-    },
-    {
-      "date": "2026-04-24",
       "time": "10:00",
       "title": "UoM Consumer Sentiment",
       "impact": "medium",
@@ -8232,16 +7670,13 @@
         "Retail stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "56.4",
-      "priorValue": "52.9",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
+      "latestValue": "56.6",
+      "priorValue": "56.4",
+      "latestDate": "2026-02-01",
+      "priorDate": "2026-01-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.6",
-      "previous": "56.4",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.593Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-24",
@@ -8459,6 +7894,101 @@
     },
     {
       "date": "2026-04-29",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-0.0%",
+      "priorValue": "-0.9%",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "DGORDER",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-29",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-29",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-29",
       "time": "10:00",
       "title": "Pending Home Sales m/m",
       "impact": "medium",
@@ -8584,11 +8114,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -8620,11 +8147,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -8675,16 +8199,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-04-30",
@@ -8866,11 +8387,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-04",
@@ -8923,6 +8441,69 @@
     {
       "date": "2026-05-05",
       "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-05",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-05",
+      "time": "08:30",
       "title": "Trade Balance",
       "impact": "medium",
       "category": "trade",
@@ -8947,11 +8528,39 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-05",
+      "time": "10:00",
+      "title": "New Home Sales",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
+      "fredReleaseId": 97,
+      "description": "Number of newly constructed homes sold during the month.",
+      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
+      "frequency": "Monthly (around 25th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "587K",
+      "priorValue": "712K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HSN1F",
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-05",
@@ -8981,11 +8590,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.9M",
-      "previous": "6.5M",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.135Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-05",
@@ -9186,16 +8792,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-07",
@@ -9280,11 +8883,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "-92K",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:44.368Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-11",
@@ -9413,11 +9013,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.314Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-12",
@@ -9469,11 +9066,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-13",
@@ -9557,11 +9151,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.315Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-14",
@@ -9586,16 +9177,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-14",
@@ -9699,11 +9287,8 @@
       "latestDate": "2026-03-01",
       "priorDate": "2026-02-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-0.2",
-      "previous": "7.1",
-      "actualDate": "2026-03-01",
-      "previousDate": "2026-02-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.553Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-15",
@@ -9734,11 +9319,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-18",
@@ -9888,6 +9470,69 @@
     {
       "date": "2026-05-21",
       "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-21",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-21",
+      "time": "08:30",
       "title": "Philly Fed Manufacturing Index",
       "impact": "medium",
       "category": "manufacturing",
@@ -9934,16 +9579,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-21",
@@ -9995,16 +9637,13 @@
         "Retail stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "56.4",
-      "priorValue": "52.9",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
+      "latestValue": "56.6",
+      "priorValue": "56.4",
+      "latestDate": "2026-02-01",
+      "priorDate": "2026-01-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.6",
-      "previous": "56.4",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.593Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-25",
@@ -10244,109 +9883,6 @@
     },
     {
       "date": "2026-05-27",
-      "time": "08:30",
-      "title": "Housing Starts",
-      "impact": "medium",
-      "category": "housing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
-      "fredReleaseId": 27,
-      "description": "Number of new residential construction projects begun during the month.",
-      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
-      "frequency": "Monthly (around 17th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
-        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Homebuilder stocks",
-        "Lumber"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "1487K",
-      "priorValue": "1387K",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "HOUST",
-      "actual": "1487K",
-      "previous": "1387K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.846Z"
-    },
-    {
-      "date": "2026-05-27",
-      "time": "08:30",
-      "title": "Building Permits",
-      "impact": "medium",
-      "category": "housing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
-      "fredReleaseId": 27,
-      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
-      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
-      "frequency": "Monthly (around 17th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
-        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Homebuilder stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "1376K",
-      "priorValue": "1455K",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "PERMIT",
-      "actual": "1386K",
-      "previous": "1455K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.069Z"
-    },
-    {
-      "date": "2026-05-27",
-      "time": "10:00",
-      "title": "New Home Sales",
-      "impact": "medium",
-      "category": "housing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
-      "fredReleaseId": 97,
-      "description": "Number of newly constructed homes sold during the month.",
-      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
-      "frequency": "Monthly (around 25th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
-        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Homebuilder stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "587K",
-      "priorValue": "712K",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
-      "fredSeriesId": "HSN1F",
-      "actual": "587K",
-      "previous": "712K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.263Z"
-    },
-    {
-      "date": "2026-05-27",
       "time": "10:30",
       "title": "Crude Oil Inventories",
       "impact": "medium",
@@ -10400,11 +9936,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -10436,11 +9969,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -10471,11 +10001,71 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-28",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-28",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -10500,16 +10090,44 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-05-28",
+      "time": "10:00",
+      "title": "New Home Sales",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
+      "fredReleaseId": 97,
+      "description": "Number of newly constructed homes sold during the month.",
+      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
+      "frequency": "Monthly (around 25th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "587K",
+      "priorValue": "712K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HSN1F",
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-05-28",
@@ -10760,11 +10378,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.9M",
-      "previous": "6.5M",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.135Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-02",
@@ -10817,11 +10432,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-03",
@@ -10998,16 +10610,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-04",
@@ -11065,11 +10674,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "-92K",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:44.368Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-05",
@@ -11173,11 +10779,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-09",
@@ -11230,11 +10833,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.314Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-10",
@@ -11343,11 +10943,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-11",
@@ -11372,16 +10969,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-11",
@@ -11461,11 +11055,8 @@
       "latestDate": "2026-03-01",
       "priorDate": "2026-02-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-0.2",
-      "previous": "7.1",
-      "actualDate": "2026-03-01",
-      "previousDate": "2026-02-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.553Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-15",
@@ -11496,11 +11087,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-15",
@@ -11573,6 +11161,69 @@
         "T-bill rates"
       ],
       "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-16",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-06-16",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
       "actual": null,
       "previous": null
     },
@@ -11652,11 +11303,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.315Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-17",
@@ -11829,16 +11477,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-18",
@@ -12013,11 +11658,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HOUST",
-      "actual": "1487K",
-      "previous": "1387K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.846Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-24",
@@ -12042,16 +11684,13 @@
         "Homebuilder stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "1376K",
+      "latestValue": "1386K",
       "priorValue": "1455K",
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PERMIT",
-      "actual": "1386K",
-      "previous": "1455K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.069Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-24",
@@ -12106,11 +11745,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "HSN1F",
-      "actual": "587K",
-      "previous": "712K",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.263Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-24",
@@ -12192,11 +11828,8 @@
       "latestDate": "2025-10-01",
       "priorDate": "2025-07-01",
       "fredSeriesId": "A191RL1Q225SBEA",
-      "actual": "0.7%",
-      "previous": "4.4%",
-      "actualDate": "2025-10-01",
-      "previousDate": "2025-07-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.091Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -12228,11 +11861,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "PCEPILFE",
-      "actual": "+0.4%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.899Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -12263,11 +11893,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -12292,16 +11919,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-25",
@@ -12378,16 +12002,13 @@
         "Retail stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "56.4",
-      "priorValue": "52.9",
-      "latestDate": "2026-01-01",
-      "priorDate": "2025-12-01",
+      "latestValue": "56.6",
+      "priorValue": "56.4",
+      "latestDate": "2026-02-01",
+      "priorDate": "2026-01-01",
       "fredSeriesId": "UMCSENT",
-      "actual": "56.6",
-      "previous": "56.4",
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.593Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-26",
@@ -12558,11 +12179,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "JTSJOL",
-      "actual": "6.9M",
-      "previous": "6.5M",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.135Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-06-30",
@@ -12791,11 +12409,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PAYEMS",
-      "actual": "-92K",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:44.368Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-02",
@@ -12826,11 +12441,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "DGORDER",
-      "actual": "-0.0%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.350Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-02",
@@ -12855,16 +12467,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-02",
@@ -13088,11 +12697,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "BOPGSTB",
-      "actual": "-54.5B",
-      "previous": "-72.9B",
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:48.436Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-07",
@@ -13241,16 +12847,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-09",
@@ -13431,11 +13034,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "CPIAUCSL",
-      "actual": "+0.3%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.314Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-14",
@@ -13513,11 +13113,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "PPIACO",
-      "actual": "+2.1%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:45.708Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-15",
@@ -13547,11 +13144,8 @@
       "latestDate": "2026-03-01",
       "priorDate": "2026-02-01",
       "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": "-0.2",
-      "previous": "7.1",
-      "actualDate": "2026-03-01",
-      "previousDate": "2026-02-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.553Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-15",
@@ -13659,11 +13253,8 @@
       "latestDate": "2026-01-01",
       "priorDate": "2025-12-01",
       "fredSeriesId": "RSAFS",
-      "actual": "-0.2%",
-      "previous": null,
-      "actualDate": "2026-01-01",
-      "previousDate": "2025-12-01",
-      "dataUpdatedAt": "2026-03-27T22:37:46.315Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-16",
@@ -13714,16 +13305,13 @@
         "US stocks"
       ],
       "historicalVolatility": "Medium",
-      "latestValue": "205000K",
-      "priorValue": "213000K",
-      "latestDate": "2026-03-14",
-      "priorDate": "2026-03-07",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
       "fredSeriesId": "ICSA",
-      "actual": "210000K",
-      "previous": "205000K",
-      "actualDate": "2026-03-21",
-      "previousDate": "2026-03-14",
-      "dataUpdatedAt": "2026-03-27T22:37:44.903Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-16",
@@ -13771,6 +13359,69 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-17",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-17",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
       "actual": null,
       "previous": null
     },
@@ -13828,11 +13479,8 @@
       "latestDate": "2026-02-01",
       "priorDate": "2026-01-01",
       "fredSeriesId": "INDPRO",
-      "actual": "+0.2%",
-      "previous": null,
-      "actualDate": "2026-02-01",
-      "previousDate": "2026-01-01",
-      "dataUpdatedAt": "2026-03-27T22:37:47.169Z"
+      "actual": null,
+      "previous": null
     },
     {
       "date": "2026-07-20",
@@ -13959,6 +13607,37 @@
     },
     {
       "date": "2026-07-23",
+      "time": "08:30",
+      "title": "Unemployment Claims",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=180",
+      "fredReleaseId": 180,
+      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
+      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bearish, stocks bearish",
+        "lowerThanExpected": "USD bullish, stocks bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "210000K",
+      "priorValue": "205000K",
+      "latestDate": "2026-03-21",
+      "priorDate": "2026-03-14",
+      "fredSeriesId": "ICSA",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-23",
       "time": "10:30",
       "title": "Natural Gas Storage",
       "impact": "low",
@@ -13985,6 +13664,100 @@
     },
     {
       "date": "2026-07-24",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1487K",
+      "priorValue": "1387K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-24",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1386K",
+      "priorValue": "1455K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-24",
+      "time": "10:00",
+      "title": "New Home Sales",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
+      "fredReleaseId": 97,
+      "description": "Number of newly constructed homes sold during the month.",
+      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
+      "frequency": "Monthly (around 25th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "587K",
+      "priorValue": "712K",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "HSN1F",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-24",
       "time": "18:00",
       "title": "2-Year Note Auction",
       "impact": "medium",
@@ -14005,6 +13778,38 @@
         "Fed funds futures"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-07-27",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-0.0%",
+      "priorValue": "-0.9%",
+      "latestDate": "2026-01-01",
+      "priorDate": "2025-12-01",
+      "fredSeriesId": "DGORDER",
       "actual": null,
       "previous": null
     },
@@ -15659,6 +15464,81 @@
       "previous": null
     },
     {
+      "date": "2026-09-23",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Weekly change in the number of barrels of crude oil held in inventory by commercial firms.",
+      "whyItMatters": "Inventory builds suggest weak demand or oversupply, pushing oil prices lower. Draws indicate strong demand, pushing prices higher.",
+      "frequency": "Weekly (Wednesday)",
+      "typicalReaction": {
+        "higherThanExpected": "Oil prices bearish (more supply)",
+        "lowerThanExpected": "Oil prices bullish (less supply)"
+      },
+      "relatedAssets": [
+        "Crude Oil",
+        "Energy stocks",
+        "CAD"
+      ],
+      "historicalVolatility": "High",
+      "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-24",
+      "time": "10:30",
+      "title": "Natural Gas Storage",
+      "impact": "low",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/naturalgas/storage/",
+      "description": "Weekly change in the number of cubic feet of natural gas held in underground storage.",
+      "whyItMatters": "Storage levels relative to seasonal norms affect natural gas prices significantly.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "Natural gas prices bearish",
+        "lowerThanExpected": "Natural gas prices bullish"
+      },
+      "relatedAssets": [
+        "Natural Gas",
+        "Utility stocks"
+      ],
+      "historicalVolatility": "High",
+      "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-28",
+      "time": "10:00",
+      "title": "Pending Home Sales m/m",
+      "impact": "medium",
+      "category": "housing",
+      "source": "nar",
+      "sourceUrl": "https://www.nar.realtor/research-and-statistics/housing-statistics/pending-home-sales",
+      "description": "Monthly index of home sales contracts signed but not yet closed.",
+      "whyItMatters": "Leading indicator for existing home sales (typically close 1-2 months later).",
+      "frequency": "Monthly (last week)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
       "date": "2026-11-26",
       "time": "All Day",
       "title": "Thanksgiving Day (Market Closed)",
@@ -16018,6 +15898,5 @@
       "actual": null,
       "previous": null
     }
-  ],
-  "dataRefreshedAt": "2026-03-27T22:37:48.537Z"
+  ]
 }
