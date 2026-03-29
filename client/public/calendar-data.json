@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-28T11:28:55.031Z",
+  "lastUpdated": "2026-03-29T11:29:37.521Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15529,6 +15529,98 @@
       "frequency": "Monthly (last week)",
       "currency": "USD",
       "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-29",
+      "time": "09:00",
+      "title": "S&P/Case-Shiller Home Price Index",
+      "impact": "medium",
+      "category": "housing",
+      "source": "sp-global",
+      "sourceUrl": "https://www.spglobal.com/spdji/en/index-family/indicators/sp-corelogic-case-shiller/",
+      "description": "Monthly measure of residential home prices in 20 major US metropolitan areas.",
+      "whyItMatters": "Key indicator of housing market health and household wealth.",
+      "frequency": "Monthly (last Tuesday)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-29",
+      "time": "10:00",
+      "title": "CB Consumer Confidence",
+      "impact": "high",
+      "category": "sentiment",
+      "source": "conference-board",
+      "sourceUrl": "https://www.conference-board.org/topics/consumer-confidence",
+      "description": "Monthly survey measuring consumer attitudes about current and future economic conditions.",
+      "whyItMatters": "Leading indicator of consumer spending. Higher confidence = more likely to spend.",
+      "frequency": "Monthly (last Tuesday)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, consumer stocks bullish",
+        "lowerThanExpected": "USD bearish, consumer stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Consumer stocks",
+        "Retail ETFs"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-29",
+      "time": "10:00",
+      "title": "Richmond Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "source": "richmond-fed",
+      "sourceUrl": "https://www.richmondfed.org/research/regional_economy/surveys_of_business_conditions",
+      "description": "Monthly survey of manufacturing conditions in the Fifth Federal Reserve District.",
+      "whyItMatters": "Regional indicator that can signal broader manufacturing trends.",
+      "frequency": "Monthly (4th Tuesday)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-09-29",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
       "typicalReaction": {
         "higherThanExpected": "Varies",
         "lowerThanExpected": "Varies"
