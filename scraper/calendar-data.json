@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-08T11:27:40.364Z",
+  "lastUpdated": "2026-08-09T11:28:26.253Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,39 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2026-05-08",
-      "time": "08:30",
-      "title": "Non-Farm Payrolls",
-      "impact": "high",
-      "category": "employment",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=50",
-      "fredReleaseId": 50,
-      "description": "Measures the change in the number of employed people in the US, excluding farm workers, government employees, private household employees, and nonprofit organization employees.",
-      "whyItMatters": "The most important employment indicator. Strong job growth signals economic expansion and can lead to Fed rate hikes. Weak numbers suggest economic slowdown and potential rate cuts.",
-      "frequency": "Monthly (first Friday)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, stocks mixed (good economy but higher rates), bonds bearish",
-        "lowerThanExpected": "USD bearish, stocks mixed (weak economy but lower rates), bonds bullish"
-      },
-      "relatedAssets": [
-        "USD",
-        "US stocks",
-        "US bonds",
-        "Gold"
-      ],
-      "historicalVolatility": "Very High",
-      "latestValue": "-23K",
-      "priorValue": "+20K",
-      "latestDate": "2026-07-01",
-      "priorDate": "2026-06-01",
-      "fredSeriesId": "PAYEMS",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2026-05-11",
       "time": "13:00",
@@ -15645,6 +15612,28 @@
       ],
       "historicalVolatility": "High",
       "fredSeriesId": null,
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-09",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
