@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-15T11:19:52.067Z",
+  "lastUpdated": "2026-08-16T11:19:36.240Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,69 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2026-05-15",
-      "time": "08:30",
-      "title": "Empire State Manufacturing Index",
-      "impact": "medium",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=321",
-      "fredReleaseId": 321,
-      "description": "Monthly survey of NY manufacturers on business conditions. Above 0 = expansion.",
-      "whyItMatters": "First regional manufacturing survey of the month. Early read on manufacturing trends.",
-      "frequency": "Monthly (around 15th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD mildly bullish",
-        "lowerThanExpected": "USD mildly bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "15.6",
-      "priorValue": "5.7",
-      "latestDate": "2026-07-01",
-      "priorDate": "2026-06-01",
-      "fredSeriesId": "GACDISA066MSFRBNY",
-      "actual": null,
-      "previous": null
-    },
-    {
-      "date": "2026-05-15",
-      "time": "09:15",
-      "title": "Industrial Production m/m",
-      "impact": "medium",
-      "category": "manufacturing",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=13",
-      "fredReleaseId": 13,
-      "description": "Monthly change in total output of US factories, mines, and utilities.",
-      "whyItMatters": "Direct measure of manufacturing sector health. Highly correlated with GDP.",
-      "frequency": "Monthly (around 15th)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, industrial stocks bullish",
-        "lowerThanExpected": "USD bearish, industrial stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Industrial stocks",
-        "Commodities"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "+0.1%",
-      "priorValue": "+0.1%",
-      "latestDate": "2026-06-01",
-      "priorDate": "2026-05-01",
-      "fredSeriesId": "INDPRO",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2026-05-18",
       "time": "16:30",
@@ -13847,6 +13784,93 @@
     },
     {
       "date": "2026-12-16",
+      "time": "08:30",
+      "title": "Retail Sales m/m",
+      "impact": "high",
+      "category": "consumer",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=9",
+      "fredReleaseId": 9,
+      "description": "Monthly change in total value of sales at retail level.",
+      "whyItMatters": "Consumer spending drives 70% of GDP. First look at monthly consumer activity.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, retail stocks bullish",
+        "lowerThanExpected": "USD bearish, retail stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks",
+        "Retail ETFs"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "-0.6%",
+      "priorValue": "+0.2%",
+      "latestDate": "2026-07-01",
+      "priorDate": "2026-06-01",
+      "fredSeriesId": "RSAFS",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-16",
+      "time": "09:15",
+      "title": "Industrial Production m/m",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=13",
+      "fredReleaseId": 13,
+      "description": "Monthly change in total output of US factories, mines, and utilities.",
+      "whyItMatters": "Direct measure of manufacturing sector health. Highly correlated with GDP.",
+      "frequency": "Monthly (around 15th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Commodities"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "+0.1%",
+      "priorValue": "+0.1%",
+      "latestDate": "2026-06-01",
+      "priorDate": "2026-05-01",
+      "fredSeriesId": "INDPRO",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-16",
+      "time": "10:00",
+      "title": "Business Inventories m/m",
+      "impact": "low",
+      "category": "trade",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=25",
+      "fredReleaseId": 25,
+      "description": "Economic indicator release.",
+      "whyItMatters": "May affect market sentiment and currency values.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-16",
       "time": "10:30",
       "title": "Crude Oil Inventories",
       "impact": "medium",
@@ -15481,6 +15505,28 @@
       "description": "US stock markets (NYSE, NASDAQ) are closed for Presidents' Day.",
       "frequency": "Annual",
       "whyItMatters": "May affect market sentiment and currency values.",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-16",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
       "typicalReaction": {
         "higherThanExpected": "Varies",
         "lowerThanExpected": "Varies"
