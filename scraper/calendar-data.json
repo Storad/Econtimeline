@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-16T11:19:36.240Z",
+  "lastUpdated": "2026-08-17T11:24:42.148Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -13898,6 +13898,151 @@
     },
     {
       "date": "2026-12-17",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1427K",
+      "priorValue": "1199K",
+      "latestDate": "2026-06-01",
+      "priorDate": "2026-05-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-17",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1374K",
+      "priorValue": "1410K",
+      "latestDate": "2026-06-01",
+      "priorDate": "2026-05-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-17",
+      "time": "08:30",
+      "title": "Philly Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=351",
+      "fredReleaseId": 351,
+      "description": "Monthly survey of Philadelphia-area manufacturers. Above 0 = expansion.",
+      "whyItMatters": "Key regional indicator. Often previews national manufacturing trends.",
+      "frequency": "Monthly (third Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-17",
+      "time": "08:30",
+      "title": "Unemployment Claims",
+      "impact": "medium",
+      "category": "employment",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=180",
+      "fredReleaseId": 180,
+      "description": "Weekly count of individuals filing for unemployment insurance for the first time. Also called Initial Jobless Claims.",
+      "whyItMatters": "High-frequency indicator of labor market conditions. Rising claims can be an early warning of economic weakness.",
+      "frequency": "Weekly (Thursday)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bearish, stocks bearish",
+        "lowerThanExpected": "USD bullish, stocks bullish"
+      },
+      "relatedAssets": [
+        "USD",
+        "US stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "209000K",
+      "priorValue": "200000K",
+      "latestDate": "2026-08-08",
+      "priorDate": "2026-08-01",
+      "fredSeriesId": "ICSA",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-17",
+      "time": "08:30",
+      "title": "Import Price Index m/m",
+      "impact": "low",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=188",
+      "fredReleaseId": 188,
+      "description": "Monthly change in the price of imported goods and services.",
+      "whyItMatters": "Shows imported inflation pressures. Affected by USD strength and commodity prices.",
+      "frequency": "Monthly",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish (inflation)",
+        "lowerThanExpected": "USD mildly bearish"
+      },
+      "relatedAssets": [
+        "USD"
+      ],
+      "historicalVolatility": "Low",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-17",
       "time": "10:30",
       "title": "Natural Gas Storage",
       "impact": "low",
@@ -15533,6 +15678,33 @@
       },
       "relatedAssets": [],
       "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-17",
+      "time": "10:30",
+      "title": "Crude Oil Inventories",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "description": "Weekly change in the number of barrels of crude oil held in inventory by commercial firms.",
+      "whyItMatters": "Inventory builds suggest weak demand or oversupply, pushing oil prices lower. Draws indicate strong demand, pushing prices higher.",
+      "frequency": "Weekly (Wednesday)",
+      "typicalReaction": {
+        "higherThanExpected": "Oil prices bearish (more supply)",
+        "lowerThanExpected": "Oil prices bullish (less supply)"
+      },
+      "relatedAssets": [
+        "Crude Oil",
+        "Energy stocks",
+        "CAD"
+      ],
+      "historicalVolatility": "High",
+      "fredSeriesId": null,
       "actual": null,
       "previous": null
     },
