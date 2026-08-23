@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-22T11:19:59.334Z",
+  "lastUpdated": "2026-08-23T11:19:52.539Z",
   "version": "2.0",
   "region": "US",
   "sources": [
@@ -15,38 +15,6 @@
   ],
   "dataIncluded": true,
   "events": [
-    {
-      "date": "2026-05-22",
-      "time": "10:00",
-      "title": "UoM Consumer Sentiment",
-      "impact": "medium",
-      "category": "sentiment",
-      "currency": "USD",
-      "country": "US",
-      "source": "fred",
-      "sourceUrl": "https://fred.stlouisfed.org/release?rid=91",
-      "fredReleaseId": 91,
-      "description": "University of Michigan survey measuring consumer attitudes about the economy and personal finances.",
-      "whyItMatters": "Consumer confidence affects spending. Includes closely-watched inflation expectations.",
-      "frequency": "Monthly (preliminary mid-month, final end of month)",
-      "typicalReaction": {
-        "higherThanExpected": "USD bullish, consumer stocks bullish",
-        "lowerThanExpected": "USD bearish, consumer stocks bearish"
-      },
-      "relatedAssets": [
-        "USD",
-        "Consumer stocks",
-        "Retail stocks"
-      ],
-      "historicalVolatility": "Medium",
-      "latestValue": "49.5",
-      "priorValue": "44.8",
-      "latestDate": "2026-06-01",
-      "priorDate": "2026-05-01",
-      "fredSeriesId": "UMCSENT",
-      "actual": null,
-      "previous": null
-    },
     {
       "date": "2026-05-25",
       "time": "16:30",
@@ -13931,6 +13899,196 @@
     },
     {
       "date": "2026-12-23",
+      "time": "08:30",
+      "title": "GDP q/q",
+      "impact": "high",
+      "category": "growth",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=53",
+      "fredReleaseId": 53,
+      "description": "Quarterly change in Gross Domestic Product - the broadest measure of economic activity.",
+      "whyItMatters": "Shows overall economic health. Two consecutive negative quarters typically defines recession.",
+      "frequency": "Quarterly",
+      "typicalReaction": {
+        "higherThanExpected": "Currency bullish, stocks bullish",
+        "lowerThanExpected": "Currency bearish, stocks bearish"
+      },
+      "relatedAssets": [
+        "Local currency",
+        "Local stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "1.5%",
+      "priorValue": "2.1%",
+      "latestDate": "2026-04-01",
+      "priorDate": "2026-01-01",
+      "fredSeriesId": "A191RL1Q225SBEA",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-23",
+      "time": "08:30",
+      "title": "Core PCE Price Index m/m",
+      "impact": "high",
+      "category": "inflation",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=54",
+      "fredReleaseId": 54,
+      "description": "Personal Consumption Expenditures Price Index excluding food and energy. Fed's preferred inflation measure.",
+      "whyItMatters": "THE inflation measure the Fed targets. More important than CPI for Fed policy.",
+      "frequency": "Monthly (last week)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, bonds bearish, stocks mixed",
+        "lowerThanExpected": "USD bearish, bonds bullish, stocks mixed"
+      },
+      "relatedAssets": [
+        "USD",
+        "US bonds",
+        "US stocks",
+        "Gold"
+      ],
+      "historicalVolatility": "Very High",
+      "latestValue": "+0.1%",
+      "priorValue": "+0.3%",
+      "latestDate": "2026-06-01",
+      "priorDate": "2026-05-01",
+      "fredSeriesId": "PCEPILFE",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-23",
+      "time": "08:30",
+      "title": "Durable Goods Orders m/m",
+      "impact": "high",
+      "category": "manufacturing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=95",
+      "fredReleaseId": 95,
+      "description": "New orders for long-lasting manufactured goods (3+ year lifespan).",
+      "whyItMatters": "Shows business investment intentions. Very volatile due to aircraft orders.",
+      "frequency": "Monthly (around 26th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, industrial stocks bullish",
+        "lowerThanExpected": "USD bearish, industrial stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Industrial stocks",
+        "Defense stocks"
+      ],
+      "historicalVolatility": "High",
+      "latestValue": "+0.5%",
+      "priorValue": "-4.0%",
+      "latestDate": "2026-06-01",
+      "priorDate": "2026-05-01",
+      "fredSeriesId": "DGORDER",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-23",
+      "time": "08:30",
+      "title": "Housing Starts",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of new residential construction projects begun during the month.",
+      "whyItMatters": "Leading indicator of housing market and construction activity. Affects employment.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks",
+        "Lumber"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1239K",
+      "priorValue": "1415K",
+      "latestDate": "2026-07-01",
+      "priorDate": "2026-06-01",
+      "fredSeriesId": "HOUST",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-23",
+      "time": "08:30",
+      "title": "Building Permits",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=27",
+      "fredReleaseId": 27,
+      "description": "Number of permits issued for new construction. Leading indicator of housing starts.",
+      "whyItMatters": "Permits lead starts by 1-2 months. Forward-looking housing indicator.",
+      "frequency": "Monthly (around 17th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "1443K",
+      "priorValue": "1374K",
+      "latestDate": "2026-07-01",
+      "priorDate": "2026-06-01",
+      "fredSeriesId": "PERMIT",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-23",
+      "time": "10:00",
+      "title": "New Home Sales",
+      "impact": "medium",
+      "category": "housing",
+      "currency": "USD",
+      "country": "US",
+      "source": "fred",
+      "sourceUrl": "https://fred.stlouisfed.org/release?rid=97",
+      "fredReleaseId": 97,
+      "description": "Number of newly constructed homes sold during the month.",
+      "whyItMatters": "More forward-looking than existing home sales. Shows demand for new construction.",
+      "frequency": "Monthly (around 25th)",
+      "typicalReaction": {
+        "higherThanExpected": "USD mildly bullish, homebuilders bullish",
+        "lowerThanExpected": "USD mildly bearish, homebuilders bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Homebuilder stocks"
+      ],
+      "historicalVolatility": "Medium",
+      "latestValue": "628K",
+      "priorValue": "618K",
+      "latestDate": "2026-06-01",
+      "priorDate": "2026-05-01",
+      "fredSeriesId": "HSN1F",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2026-12-23",
       "time": "10:30",
       "title": "Crude Oil Inventories",
       "impact": "medium",
@@ -15523,6 +15681,98 @@
         "REITs"
       ],
       "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-23",
+      "time": "09:00",
+      "title": "S&P/Case-Shiller Home Price Index",
+      "impact": "medium",
+      "category": "housing",
+      "source": "sp-global",
+      "sourceUrl": "https://www.spglobal.com/spdji/en/index-family/indicators/sp-corelogic-case-shiller/",
+      "description": "Monthly measure of residential home prices in 20 major US metropolitan areas.",
+      "whyItMatters": "Key indicator of housing market health and household wealth.",
+      "frequency": "Monthly (last Tuesday)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-23",
+      "time": "10:00",
+      "title": "CB Consumer Confidence",
+      "impact": "high",
+      "category": "sentiment",
+      "source": "conference-board",
+      "sourceUrl": "https://www.conference-board.org/topics/consumer-confidence",
+      "description": "Monthly survey measuring consumer attitudes about current and future economic conditions.",
+      "whyItMatters": "Leading indicator of consumer spending. Higher confidence = more likely to spend.",
+      "frequency": "Monthly (last Tuesday)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "USD bullish, consumer stocks bullish",
+        "lowerThanExpected": "USD bearish, consumer stocks bearish"
+      },
+      "relatedAssets": [
+        "USD",
+        "Consumer stocks",
+        "Retail ETFs"
+      ],
+      "historicalVolatility": "Medium",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-23",
+      "time": "10:00",
+      "title": "Richmond Fed Manufacturing Index",
+      "impact": "medium",
+      "category": "manufacturing",
+      "source": "richmond-fed",
+      "sourceUrl": "https://www.richmondfed.org/research/regional_economy/surveys_of_business_conditions",
+      "description": "Monthly survey of manufacturing conditions in the Fifth Federal Reserve District.",
+      "whyItMatters": "Regional indicator that can signal broader manufacturing trends.",
+      "frequency": "Monthly (4th Tuesday)",
+      "currency": "USD",
+      "country": "US",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
+      "actual": null,
+      "previous": null
+    },
+    {
+      "date": "2027-02-23",
+      "time": "16:30",
+      "title": "API Weekly Crude Stock",
+      "impact": "medium",
+      "category": "energy",
+      "currency": "USD",
+      "country": "US",
+      "source": "eia",
+      "sourceUrl": "https://www.api.org/",
+      "description": "American Petroleum Institute weekly crude oil inventory estimate. Released Tuesday evening as a preview of official EIA data.",
+      "whyItMatters": "Early indicator of official EIA data. Large deviations from expectations can move oil prices in after-hours trading.",
+      "frequency": "Variable",
+      "typicalReaction": {
+        "higherThanExpected": "Varies",
+        "lowerThanExpected": "Varies"
+      },
+      "relatedAssets": [],
+      "historicalVolatility": "Unknown",
       "actual": null,
       "previous": null
     },
